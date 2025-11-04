@@ -1,0 +1,26 @@
+[
+  {
+    "userId": "user-001",
+    "favoriteMenus": ["menu-001", "menu-003", "menu-008"],
+    "recentMenus": [],
+    "language": "en",
+    "theme": "light",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "userId": "user-002",
+    "favoriteMenus": ["menu-001", "menu-007"],
+    "recentMenus": [],
+    "language": "ko",
+    "theme": "light",
+    "updatedAt": "2024-01-15T00:00:00.000Z"
+  },
+  {
+    "userId": "user-003",
+    "favoriteMenus": ["menu-001", "menu-003"],
+    "recentMenus": [],
+    "language": "en",
+    "theme": "light",
+    "updatedAt": "2024-02-01T00:00:00.000Z"
+  }
+]
