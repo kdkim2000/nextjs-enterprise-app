@@ -22,12 +22,12 @@ router.get('/user-menus', authenticateToken, async (req, res) => {
     const userPermission = permissions.find(p => p.userId === userId);
 
     if (!userPermission) {
-      return res.json([]);
+      return res.json({ menus: [] });
     }
 
     // If user has * access, return all menus
     if (userPermission.menuAccess.includes('*')) {
-      return res.json(buildMenuTree(menus));
+      return res.json({ menus: buildMenuTree(menus) });
     }
 
     // Filter menus based on access
@@ -38,7 +38,7 @@ router.get('/user-menus', authenticateToken, async (req, res) => {
     // Include parent menus for accessible items
     const menusWithParents = includeParentMenus(accessibleMenus, menus);
 
-    res.json(buildMenuTree(menusWithParents));
+    res.json({ menus: buildMenuTree(menusWithParents) });
   } catch (error) {
     console.error('Get user menus error:', error);
     res.status(500).json({ error: 'Failed to fetch menus' });
@@ -85,7 +85,7 @@ router.get('/by-path', authenticateToken, async (req, res) => {
     // Update recent menus
     await updateRecentMenus(userId, menu.id);
 
-    res.json(menu);
+    res.json({ menu });
   } catch (error) {
     console.error('Get menu by path error:', error);
     res.status(500).json({ error: 'Failed to fetch menu' });

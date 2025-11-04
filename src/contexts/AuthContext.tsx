@@ -8,7 +8,7 @@ interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<any>;
   verifyMFA: (userId: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  refreshAccessToken: () => Promise<void>;
   ssoLogin: () => Promise<void>;
 }
 
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const refreshToken = useCallback(async () => {
+  const refreshAccessToken = useCallback(async () => {
     try {
       const currentRefreshToken = localStorage.getItem('refreshToken');
       if (!currentRefreshToken) {
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     verifyMFA,
     logout,
-    refreshToken,
+    refreshAccessToken,
     ssoLogin
   };
 

@@ -29,7 +29,7 @@ import {
   Code,
   Link as LinkIcon,
   Image as ImageIcon,
-  Table as TableIcon,
+  TableChart as TableIcon,
   Undo,
   Redo,
   FormatQuote

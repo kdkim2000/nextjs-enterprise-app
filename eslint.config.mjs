@@ -12,7 +12,33 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "node_modules/**",
+    "public/**",
+    "dist/**",
+    "backend/**", // Backend uses CommonJS, not ES modules
   ]),
+  // Custom rules
+  {
+    rules: {
+      // Console rules
+      "no-console": ["warn", { allow: ["warn", "error", "info"] }],
+
+      // TypeScript rules
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // General code quality
+      "prefer-const": "error",
+      "no-var": "error",
+      "eqeqeq": ["error", "always"],
+    },
+  },
 ]);
 
 export default eslintConfig;
