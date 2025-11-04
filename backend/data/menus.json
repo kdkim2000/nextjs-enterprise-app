@@ -132,7 +132,7 @@
       "en": "Settings",
       "ko": "설정"
     },
-    "path": "/settings",
+    "path": "/dashboard/settings",
     "icon": "Settings",
     "order": 4,
     "parentId": null,

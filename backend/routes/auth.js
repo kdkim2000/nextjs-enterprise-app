@@ -2,6 +2,9 @@ const express = require('express');
 const { generateToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { generateMFACode, sendMFACode } = require('../utils/email');
 const { readJSON, writeJSON } = require('../utils/fileUtils');
+const { comparePassword } = require('../utils/password');
+const { authLimiter, mfaLimiter } = require('../middleware/rateLimiter');
+const { addToBlacklist } = require('../utils/tokenBlacklist');
 const path = require('path');
 
 const router = express.Router();
@@ -12,7 +15,7 @@ const MFA_CODES_FILE = path.join(__dirname, '../data/mfaCodes.json');
 /**
  * Login endpoint
  */
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -21,9 +24,15 @@ router.post('/login', async (req, res) => {
     }
 
     const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.username === username && u.password === password);
+    const user = users.find(u => u.username === username);
 
     if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Compare password with hashed password
+    const isPasswordValid = await comparePassword(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -95,7 +104,7 @@ router.post('/login', async (req, res) => {
 /**
  * Verify MFA code
  */
-router.post('/verify-mfa', async (req, res) => {
+router.post('/verify-mfa', mfaLimiter, async (req, res) => {
   try {
     const { userId, code } = req.body;
 
@@ -166,7 +175,7 @@ router.post('/verify-mfa', async (req, res) => {
 /**
  * Resend MFA code
  */
-router.post('/resend-mfa', async (req, res) => {
+router.post('/resend-mfa', mfaLimiter, async (req, res) => {
   try {
     const { userId } = req.body;
 
@@ -287,8 +296,26 @@ router.post('/refresh', async (req, res) => {
  */
 router.post('/logout', async (req, res) => {
   try {
-    // In a real application, you might want to blacklist the token
-    // For this mock, we just return success
+    // Get token from Authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token) {
+      // Decode token to get expiration time
+      const jwt = require('jsonwebtoken');
+      try {
+        const decoded = jwt.decode(token);
+        if (decoded && decoded.exp) {
+          // Add token to blacklist with expiration time
+          const expiresAt = decoded.exp * 1000; // Convert to milliseconds
+          await addToBlacklist(token, expiresAt);
+          console.log('Token blacklisted on logout');
+        }
+      } catch (decodeError) {
+        console.error('Error decoding token for blacklist:', decodeError);
+        // Continue with logout even if blacklisting fails
+      }
+    }
 
     res.json({ message: 'Logout successful' });
   } catch (error) {

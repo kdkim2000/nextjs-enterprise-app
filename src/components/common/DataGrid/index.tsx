@@ -29,11 +29,12 @@ import {
 } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
 import { useI18n } from '@/lib/i18n/client';
+import { toast } from 'react-toastify';
 
 interface ExcelDataGridProps {
   rows: GridRowsProp;
   columns: GridColDef[];
-  onRowsChange?: (rows: GridRowsProp) => void;
+  onRowsChange?: (rows: any[]) => void;
   onAdd?: () => void;
   onEdit?: (id: string | number) => void;
   onDelete?: (ids: (string | number)[]) => void;
@@ -45,7 +46,7 @@ interface ExcelDataGridProps {
   height?: number | string;
 }
 
-function CustomToolbar(props: {
+interface CustomToolbarProps {
   onExport: () => void;
   onImport: () => void;
   onAdd?: () => void;
@@ -53,7 +54,9 @@ function CustomToolbar(props: {
   onRefresh?: () => void;
   hasSelection: boolean;
   editable?: boolean;
-}) {
+}
+
+function CustomToolbar(props: CustomToolbarProps) {
   const t = useI18n();
 
   return (
@@ -181,9 +184,10 @@ export default function ExcelDataGrid({
 
       // Save file
       XLSX.writeFile(wb, `${exportFileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success('Data exported successfully');
     } catch (error) {
       console.error('Export error:', error);
-      alert('Failed to export data');
+      toast.error('Failed to export data');
     }
   }, [rows, columns, exportFileName]);
 
@@ -228,17 +232,17 @@ export default function ExcelDataGrid({
               onRowsChange([...rows, ...importedRows]);
             }
 
-            alert(`Successfully imported ${importedRows.length} rows`);
+            toast.success(`Successfully imported ${importedRows.length} rows`);
           } catch (error) {
             console.error('Parse error:', error);
-            alert('Failed to parse Excel file');
+            toast.error('Failed to parse Excel file');
           }
         };
 
         reader.readAsArrayBuffer(file);
       } catch (error) {
         console.error('Import error:', error);
-        alert('Failed to import file');
+        toast.error('Failed to import file');
       }
     };
 
@@ -273,7 +277,7 @@ export default function ExcelDataGrid({
         rowSelectionModel={selectionModel}
         onCellDoubleClick={handleCellDoubleClick}
         slots={{
-          toolbar: CustomToolbar
+          toolbar: CustomToolbar as any
         }}
         slotProps={{
           toolbar: {
@@ -284,7 +288,7 @@ export default function ExcelDataGrid({
             onRefresh,
             hasSelection: selectionModel.length > 0,
             editable
-          }
+          } as any
         }}
         pageSizeOptions={[10, 25, 50, 100]}
         initialState={{

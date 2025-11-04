@@ -1,5 +1,6 @@
 const { verifyToken } = require('../utils/jwt');
 const { readJSON } = require('../utils/fileUtils');
+const { isBlacklisted } = require('../utils/tokenBlacklist');
 const path = require('path');
 
 /**
@@ -11,6 +12,11 @@ function authenticateToken(req, res, next) {
 
   if (!token) {
     return res.status(401).json({ error: 'Access token required' });
+  }
+
+  // Check if token is blacklisted
+  if (isBlacklisted(token)) {
+    return res.status(401).json({ error: 'Token has been revoked' });
   }
 
   try {

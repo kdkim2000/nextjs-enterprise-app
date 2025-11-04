@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -13,60 +13,62 @@ import {
   Button,
   TextField,
   MenuItem,
-  Stack
+  Stack,
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import { GridColDef } from '@mui/x-data-grid';
+import { api } from '@/lib/axios';
+import { useI18n } from '@/lib/i18n/client';
 
 interface User {
-  id: number;
+  id: string;
   username: string;
   name: string;
   email: string;
   role: string;
   department: string;
   status: string;
+  mfaEnabled?: boolean;
+  ssoEnabled?: boolean;
+  createdAt?: string;
+  lastLogin?: string | null;
 }
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      username: 'admin',
-      name: 'Admin User',
-      email: 'admin@example.com',
-      role: 'admin',
-      department: 'IT',
-      status: 'active'
-    },
-    {
-      id: 2,
-      username: 'john.doe',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      role: 'user',
-      department: 'Sales',
-      status: 'active'
-    },
-    {
-      id: 3,
-      username: 'jane.smith',
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      role: 'manager',
-      department: 'Marketing',
-      status: 'active'
-    }
-  ]);
-
+  const t = useI18n();
+  const [users, setUsers] = useState<User[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  // Fetch users from API
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get('/user');
+      setUsers(response.users || []);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to load users');
+      console.error('Failed to fetch users:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'username', headerName: 'Username', width: 130 },
+    { field: 'username', headerName: t('auth.username'), width: 130 },
     { field: 'name', headerName: 'Name', width: 150 },
-    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'email', headerName: t('auth.email'), width: 200 },
     {
       field: 'role',
       headerName: 'Role',
@@ -86,14 +88,15 @@ export default function UserManagementPage() {
 
   const handleAdd = () => {
     setEditingUser({
-      id: 0,
+      id: '',
       username: '',
       name: '',
       email: '',
       role: 'user',
       department: '',
-      status: 'active'
-    });
+      status: 'active',
+      password: ''
+    } as any);
     setDialogOpen(true);
   };
 
@@ -105,47 +108,84 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDelete = (ids: (string | number)[]) => {
-    setUsers(users.filter((user) => !ids.includes(user.id)));
+  const handleDelete = async (ids: (string | number)[]) => {
+    try {
+      setError(null);
+      // Delete users from API
+      for (const id of ids) {
+        await api.delete(`/user/${id}`);
+      }
+      // Remove from local state
+      setUsers(users.filter((user) => !ids.includes(user.id)));
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to delete users');
+      console.error('Failed to delete users:', err);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingUser) return;
 
-    if (editingUser.id === 0) {
-      // Add new user
-      const newId = Math.max(...users.map((u) => u.id)) + 1;
-      setUsers([...users, { ...editingUser, id: newId }]);
-    } else {
-      // Update existing user
-      setUsers(users.map((u) => (u.id === editingUser.id ? editingUser : u)));
-    }
+    try {
+      setSaveLoading(true);
+      setError(null);
 
-    setDialogOpen(false);
-    setEditingUser(null);
+      if (!editingUser.id) {
+        // Add new user
+        const response = await api.post('/user', editingUser);
+        setUsers([...users, response.user]);
+      } else {
+        // Update existing user
+        const response = await api.put(`/user/${editingUser.id}`, editingUser);
+        setUsers(users.map((u) => (u.id === editingUser.id ? response.user : u)));
+      }
+
+      setDialogOpen(false);
+      setEditingUser(null);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to save user');
+      console.error('Failed to save user:', err);
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const handleRefresh = () => {
-    // In real app, fetch from API
-    console.log('Refreshing user data...');
+    fetchUsers();
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth="xl">
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="xl">
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight={600}>
-          User Management
+          {t('menu.userManagement')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Manage system users and their permissions
         </Typography>
       </Box>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
       <Paper sx={{ p: 2 }}>
         <ExcelDataGrid
           rows={users}
           columns={columns}
-          onRowsChange={setUsers}
+          onRowsChange={(rows) => setUsers(rows as any)}
           onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -160,7 +200,7 @@ export default function UserManagementPage() {
       {/* Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingUser?.id === 0 ? 'Add New User' : 'Edit User'}
+          {!editingUser?.id ? 'Add New User' : 'Edit User'}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 2 }}>
@@ -174,7 +214,23 @@ export default function UserManagementPage() {
               }
               fullWidth
               required
+              disabled={!!editingUser?.id}
             />
+            {!editingUser?.id && (
+              <TextField
+                label="Password"
+                type="password"
+                value={(editingUser as any)?.password || ''}
+                onChange={(e) =>
+                  setEditingUser(
+                    editingUser ? { ...editingUser, password: e.target.value } as any : null
+                  )
+                }
+                fullWidth
+                required
+                helperText="Minimum 8 characters"
+              />
+            )}
             <TextField
               label="Name"
               value={editingUser?.name || ''}
@@ -240,9 +296,11 @@ export default function UserManagementPage() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained">
-            Save
+          <Button onClick={() => setDialogOpen(false)} disabled={saveLoading}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleSave} variant="contained" disabled={saveLoading}>
+            {saveLoading ? <CircularProgress size={24} /> : t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>

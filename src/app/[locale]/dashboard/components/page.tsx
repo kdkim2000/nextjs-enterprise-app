@@ -121,7 +121,7 @@ export default function ComponentsPage() {
             <ExcelDataGrid
               rows={gridRows}
               columns={gridColumns}
-              onRowsChange={setGridRows}
+              onRowsChange={(rows) => setGridRows(rows as any)}
               onAdd={handleAddRow}
               onDelete={handleDeleteRows}
               editable

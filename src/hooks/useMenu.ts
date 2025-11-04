@@ -16,8 +16,8 @@ export function useMenu() {
   const fetchMenus = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await api.get<MenuItem[]>('/menu/user-menus');
-      setMenus(data);
+      const response = await api.get('/menu/user-menus');
+      setMenus(response.menus || []);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch menus');
@@ -30,8 +30,8 @@ export function useMenu() {
   // Fetch favorite menus
   const fetchFavoriteMenus = useCallback(async () => {
     try {
-      const data = await api.get<MenuItem[]>('/user/favorite-menus');
-      setFavoriteMenus(data);
+      const response = await api.get('/user/favorite-menus');
+      setFavoriteMenus(response.menus || []);
     } catch (err: any) {
       console.error('Error fetching favorite menus:', err);
     }
@@ -40,8 +40,8 @@ export function useMenu() {
   // Fetch recent menus
   const fetchRecentMenus = useCallback(async () => {
     try {
-      const data = await api.get<MenuItem[]>('/user/recent-menus');
-      setRecentMenus(data);
+      const response = await api.get('/user/recent-menus');
+      setRecentMenus(response.menus || []);
     } catch (err: any) {
       console.error('Error fetching recent menus:', err);
     }
@@ -50,11 +50,11 @@ export function useMenu() {
   // Get menu by path
   const getMenuByPath = useCallback(async (path: string) => {
     try {
-      const data = await api.get<MenuItem>('/menu/by-path', {
+      const response = await api.get('/menu/by-path', {
         params: { path }
       });
-      setCurrentMenu(data);
-      return data;
+      setCurrentMenu(response.menu || null);
+      return response.menu;
     } catch (err: any) {
       console.error('Error fetching menu by path:', err);
       throw err;
