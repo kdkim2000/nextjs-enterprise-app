@@ -1,0 +1,164 @@
+[
+  {
+    "id": "menu-001",
+    "code": "dashboard",
+    "name": {
+      "en": "Dashboard",
+      "ko": "대시보드"
+    },
+    "path": "/dashboard",
+    "icon": "Dashboard",
+    "order": 1,
+    "parentId": null,
+    "level": 1,
+    "programId": "PROG-DASHBOARD",
+    "description": {
+      "en": "Main dashboard overview",
+      "ko": "메인 대시보드 개요"
+    }
+  },
+  {
+    "id": "menu-002",
+    "code": "user-management",
+    "name": {
+      "en": "User Management",
+      "ko": "사용자 관리"
+    },
+    "path": "/user-management",
+    "icon": "People",
+    "order": 2,
+    "parentId": null,
+    "level": 1,
+    "programId": null,
+    "description": {
+      "en": "User management module",
+      "ko": "사용자 관리 모듈"
+    }
+  },
+  {
+    "id": "menu-003",
+    "code": "user-list",
+    "name": {
+      "en": "User List",
+      "ko": "사용자 목록"
+    },
+    "path": "/dashboard/user-management",
+    "icon": "List",
+    "order": 1,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-USER-LIST",
+    "description": {
+      "en": "View and manage users",
+      "ko": "사용자 조회 및 관리"
+    }
+  },
+  {
+    "id": "menu-004",
+    "code": "role-management",
+    "name": {
+      "en": "Role Management",
+      "ko": "역할 관리"
+    },
+    "path": "/user-management/role-management",
+    "icon": "AdminPanelSettings",
+    "order": 2,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MGMT",
+    "description": {
+      "en": "Manage user roles and permissions",
+      "ko": "사용자 역할 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-005",
+    "code": "permission-matrix",
+    "name": {
+      "en": "Permission Matrix",
+      "ko": "권한 매트릭스"
+    },
+    "path": "/user-management/role-management/permission-matrix",
+    "icon": "GridOn",
+    "order": 1,
+    "parentId": "menu-004",
+    "level": 3,
+    "programId": "PROG-PERM-MATRIX",
+    "description": {
+      "en": "Permission matrix configuration",
+      "ko": "권한 매트릭스 설정"
+    }
+  },
+  {
+    "id": "menu-006",
+    "code": "reports",
+    "name": {
+      "en": "Reports",
+      "ko": "보고서"
+    },
+    "path": "/reports",
+    "icon": "Assessment",
+    "order": 3,
+    "parentId": null,
+    "level": 1,
+    "programId": null,
+    "description": {
+      "en": "Reporting module",
+      "ko": "보고서 모듈"
+    }
+  },
+  {
+    "id": "menu-007",
+    "code": "sales-report",
+    "name": {
+      "en": "Sales Report",
+      "ko": "판매 보고서"
+    },
+    "path": "/reports/sales-report",
+    "icon": "TrendingUp",
+    "order": 1,
+    "parentId": "menu-006",
+    "level": 2,
+    "programId": "PROG-SALES-RPT",
+    "description": {
+      "en": "Sales analysis and reporting",
+      "ko": "판매 분석 및 보고서"
+    }
+  },
+  {
+    "id": "menu-008",
+    "code": "settings",
+    "name": {
+      "en": "Settings",
+      "ko": "설정"
+    },
+    "path": "/settings",
+    "icon": "Settings",
+    "order": 4,
+    "parentId": null,
+    "level": 1,
+    "programId": "PROG-SETTINGS",
+    "description": {
+      "en": "Application settings",
+      "ko": "애플리케이션 설정"
+    }
+  },
+  {
+    "id": "menu-009",
+    "code": "components",
+    "name": {
+      "en": "Components",
+      "ko": "컴포넌트"
+    },
+    "path": "/dashboard/components",
+    "icon": "Widgets",
+    "order": 5,
+    "parentId": null,
+    "level": 1,
+    "programId": "PROG-COMPONENTS",
+    "description": {
+      "en": "Component showcase and demos",
+      "ko": "컴포넌트 쇼케이스 및 데모"
+    }
+  }
+]
