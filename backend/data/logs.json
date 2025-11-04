@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1950ae69-19fa-46ec-942a-a5ebcd8c9497",
+    "timestamp": "2025-11-04T15:10:11.922Z",
+    "method": "GET",
+    "path": "/favorite-menus",
+    "statusCode": 304,
+    "duration": "4ms",
+    "userId": "sso-user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "6cc97118-73a7-4b3e-8abf-b25b2279c292",
+    "timestamp": "2025-11-04T15:10:11.939Z",
+    "method": "GET",
+    "path": "/user-menus",
+    "statusCode": 304,
+    "duration": "4ms",
+    "userId": "sso-user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "6f2a8e83-a49b-4e20-9ba9-0fa41b8993ba",
+    "timestamp": "2025-11-04T15:10:11.947Z",
+    "method": "GET",
+    "path": "/favorite-menus",
+    "statusCode": 304,
+    "duration": "7ms",
+    "userId": "sso-user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+  }
+]
