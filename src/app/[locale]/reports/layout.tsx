@@ -8,9 +8,8 @@ import { useCurrentLocale } from '@/lib/i18n/client';
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import DashboardFooter from '@/components/layout/DashboardFooter';
 import Sidebar from '@/components/layout/Sidebar';
-import AutoLogoutWarning from '@/components/common/AutoLogoutWarning';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function ReportsLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useCurrentLocale();
   const { isAuthenticated, isLoading } = useAuth();
@@ -51,7 +50,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            minWidth: 0 // Prevent flex item from overflowing
+            minWidth: 0
           }}
         >
           <Box
@@ -68,8 +67,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <DashboardFooter />
         </Box>
       </Box>
-
-      <AutoLogoutWarning />
     </Box>
   );
 }

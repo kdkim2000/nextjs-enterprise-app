@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MenuItem, UserPreferences } from '@/types/menu';
+import { MenuItem } from '@/types/menu';
 import { api } from '@/lib/axios';
+import { useCurrentLocale } from '@/lib/i18n/client';
 
 export function useMenu() {
+  const locale = useCurrentLocale();
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [currentMenu, setCurrentMenu] = useState<MenuItem | null>(null);
   const [favoriteMenus, setFavoriteMenus] = useState<MenuItem[]>([]);
@@ -104,6 +106,7 @@ export function useMenu() {
     recentMenus,
     isLoading,
     error,
+    locale,
     fetchMenus,
     getMenuByPath,
     addToFavorites,

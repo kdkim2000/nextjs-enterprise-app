@@ -1,28 +1,37 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Box, Typography } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCurrentLocale } from '@/lib/i18n/client';
+import Sidebar from '@/components/layout/Sidebar';
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import DashboardFooter from '@/components/layout/DashboardFooter';
-import Sidebar from '@/components/layout/Sidebar';
-import AutoLogoutWarning from '@/components/common/AutoLogoutWarning';
+import { useCurrentLocale } from '@/lib/i18n/client';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const locale = useCurrentLocale();
-  const { isAuthenticated, isLoading } = useAuth();
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push(`/${locale}/login`);
+      return;
     }
-  }, [isAuthenticated, isLoading, router, locale]);
 
-  if (isLoading || !isAuthenticated) {
+    if (!isLoading && isAuthenticated && user?.role !== 'admin') {
+      router.push(`/${locale}/dashboard`);
+      return;
+    }
+  }, [isAuthenticated, isLoading, user, router, locale]);
+
+  if (isLoading || !isAuthenticated || user?.role !== 'admin') {
     return (
       <Box
         sx={{
@@ -51,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            minWidth: 0 // Prevent flex item from overflowing
+            minWidth: 0
           }}
         >
           <Box
@@ -68,8 +77,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <DashboardFooter />
         </Box>
       </Box>
-
-      <AutoLogoutWarning />
     </Box>
   );
 }

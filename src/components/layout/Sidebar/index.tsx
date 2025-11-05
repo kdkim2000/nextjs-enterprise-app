@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Drawer,
   List,
@@ -11,8 +11,6 @@ import {
   Collapse,
   IconButton,
   Box,
-  Typography,
-  Divider,
   Tooltip,
   Tabs,
   Tab
@@ -22,7 +20,6 @@ import {
   ExpandMore,
   Star,
   StarBorder,
-  Menu as MenuIcon,
   Dashboard,
   People,
   Assessment,
@@ -30,12 +27,13 @@ import {
   List as ListIcon,
   AdminPanelSettings,
   GridOn,
-  TrendingUp
+  TrendingUp,
+  Menu as MenuIcon
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { MenuItem } from '@/types/menu';
 import { useMenu } from '@/hooks/useMenu';
-import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 
 const DRAWER_WIDTH = 280;
 const DRAWER_WIDTH_COLLAPSED = 72;
@@ -50,21 +48,48 @@ const iconMap: Record<string, React.ReactElement> = {
   AdminPanelSettings: <AdminPanelSettings />,
   GridOn: <GridOn />,
   TrendingUp: <TrendingUp />,
-  Widgets: <GridOn />
+  Widgets: <GridOn />,
+  Menu: <MenuIcon />
 };
 
 interface SidebarProps {
   expanded: boolean;
-  onToggle: () => void;
 }
 
-export default function Sidebar({ expanded, onToggle }: SidebarProps) {
+export default function Sidebar({ expanded }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useCurrentLocale();
-  const { menus, favoriteMenus, isFavorite, addToFavorites, removeFromFavorites } = useMenu();
+  const t = useI18n();
+  const { menus, favoriteMenus, recentMenus, isFavorite, addToFavorites, removeFromFavorites } = useMenu();
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const [currentTab, setCurrentTab] = useState(0);
+
+  // Helper function to safely get menu name based on locale
+  const getMenuName = (menu: MenuItem): string => {
+    if (!menu?.name) return '';
+    const localeKey = locale as 'en' | 'ko';
+    return menu.name[localeKey] || menu.name.en || '';
+  };
+
+  // Optimize: Deduplicate and sort "My Work" menus (recent + favorites)
+  // Using useMemo to prevent unnecessary recalculations on every render
+  const myWorkMenus = useMemo(() => {
+    // Combine recent and favorite menus
+    const combined = [...recentMenus, ...favoriteMenus];
+
+    // Remove duplicates by menu ID (keep the first occurrence which is from recentMenus)
+    const seen = new Set<string>();
+    const deduplicated = combined.filter((menu) => {
+      if (seen.has(menu.id)) {
+        return false;
+      }
+      seen.add(menu.id);
+      return true;
+    });
+
+    return deduplicated;
+  }, [recentMenus, favoriteMenus]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -111,7 +136,7 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
 
     return (
       <React.Fragment key={menu.id}>
-        <Tooltip title={!expanded ? menu.name[locale as 'en' | 'ko'] : ''} placement="right">
+        <Tooltip title={!expanded ? getMenuName(menu) : ''} placement="right">
           <ListItem
             disablePadding
             sx={{ pl: expanded ? level * 2 : 0 }}
@@ -167,7 +192,7 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
               {expanded && (
                 <>
                   <ListItemText
-                    primary={menu.name[locale as 'en' | 'ko']}
+                    primary={getMenuName(menu)}
                     primaryTypographyProps={{
                       fontSize: level === 0 ? '0.95rem' : '0.9rem',
                       fontWeight: level === 0 ? 500 : 400
@@ -193,37 +218,6 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
 
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box
-        sx={{
-          p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: expanded ? 'space-between' : 'center',
-          minHeight: 64
-        }}
-      >
-        {expanded ? (
-          <>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <MenuIcon color="primary" />
-              <Typography variant="h6" fontWeight={600} color="primary">
-                Enterprise
-              </Typography>
-            </Box>
-            <IconButton size="small" onClick={onToggle} sx={{ mr: -1 }}>
-              <ExpandLess sx={{ transform: 'rotate(-90deg)' }} />
-            </IconButton>
-          </>
-        ) : (
-          <Tooltip title="Expand" placement="right">
-            <IconButton size="small" onClick={onToggle}>
-              <MenuIcon color="primary" />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Box>
-
-      <Divider />
 
       {/* Tabs - only show when expanded */}
       {expanded && (
@@ -237,14 +231,19 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
             '& .MuiTab-root': {
               minHeight: 48,
               textTransform: 'none',
-              fontWeight: 500
+              fontWeight: 500,
+              fontSize: '0.875rem'
             }
           }}
         >
-          <Tab label={locale === 'ko' ? '전체 메뉴' : 'All Menus'} />
+          <Tab label={t('menu.allMenus')} />
           <Tab
-            label={locale === 'ko' ? '즐겨찾기' : 'Favorites'}
+            label={t('menu.favorites')}
             disabled={favoriteMenus.length === 0}
+          />
+          <Tab
+            label={t('menu.myWork')}
+            disabled={myWorkMenus.length === 0}
           />
         </Tabs>
       )}
@@ -252,11 +251,12 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
       {/* Tab Content */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {expanded && currentTab === 1 ? (
+          // Favorites Tab
           <List dense>
             {favoriteMenus.map((menu) => (
               <Tooltip
                 key={`fav-${menu.id}`}
-                title={!expanded ? menu.name[locale as 'en' | 'ko'] : ''}
+                title={!expanded ? getMenuName(menu) : ''}
                 placement="right"
               >
                 <ListItem disablePadding>
@@ -295,7 +295,61 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText
-                        primary={menu.name[locale as 'en' | 'ko']}
+                        primary={getMenuName(menu)}
+                        primaryTypographyProps={{ fontSize: '0.9rem' }}
+                      />
+                    )}
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+            ))}
+          </List>
+        ) : expanded && currentTab === 2 ? (
+          // My Work Tab - Recent + Favorites (deduplicated)
+          <List dense>
+            {myWorkMenus.map((menu) => (
+              <Tooltip
+                key={`mywork-${menu.id}`}
+                title={!expanded ? getMenuName(menu) : ''}
+                placement="right"
+              >
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => router.push(`/${locale}${menu.path}`)}
+                    selected={pathname === `/${locale}${menu.path}`}
+                    sx={{
+                      borderRadius: 1.5,
+                      mx: 1,
+                      my: 0.25,
+                      minHeight: 44,
+                      justifyContent: expanded ? 'initial' : 'center',
+                      '&.Mui-selected': {
+                        backgroundColor: 'primary.main',
+                        color: 'primary.contrastText',
+                        '&:hover': {
+                          backgroundColor: 'primary.dark'
+                        },
+                        '& .MuiListItemIcon-root': {
+                          color: 'primary.contrastText'
+                        }
+                      },
+                      '&:hover': {
+                        backgroundColor: 'action.hover'
+                      }
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 40,
+                        justifyContent: 'center',
+                        color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
+                      }}
+                    >
+                      {iconMap[menu.icon] || <Dashboard />}
+                    </ListItemIcon>
+                    {expanded && (
+                      <ListItemText
+                        primary={getMenuName(menu)}
                         primaryTypographyProps={{ fontSize: '0.9rem' }}
                       />
                     )}
@@ -305,6 +359,7 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
             ))}
           </List>
         ) : (
+          // All Menus Tab
           <List>{menus.map((menu) => renderMenu(menu))}</List>
         )}
       </Box>
@@ -321,7 +376,9 @@ export default function Sidebar({ expanded, onToggle }: SidebarProps) {
           width: expanded ? DRAWER_WIDTH : DRAWER_WIDTH_COLLAPSED,
           boxSizing: 'border-box',
           overflowX: 'hidden',
-          position: 'relative',
+          overflowY: 'auto',
+          position: 'static',
+          height: '100%',
           border: 'none',
           borderRight: '1px solid',
           borderColor: 'divider',

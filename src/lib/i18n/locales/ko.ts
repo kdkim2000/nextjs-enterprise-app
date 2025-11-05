@@ -8,6 +8,7 @@ export default {
     edit: '수정',
     create: '생성',
     search: '검색',
+    searching: '검색 중...',
     filter: '필터',
     export: '내보내기',
     import: '가져오기',
@@ -24,7 +25,12 @@ export default {
     previous: '이전',
     refresh: '새로고침',
     download: '다운로드',
-    upload: '업로드'
+    upload: '업로드',
+    clear: '초기화',
+    apply: '적용',
+    advanced: '상세검색',
+    all: '전체',
+    settings: '설정'
   },
   auth: {
     login: '로그인',
@@ -47,13 +53,54 @@ export default {
   },
   menu: {
     dashboard: '대시보드',
+    admin: '관리자',
     userManagement: '사용자 관리',
+    menuManagement: '메뉴 관리',
     reports: '보고서',
     settings: '설정',
+    components: '컴포넌트',
     favorites: '즐겨찾기',
     recent: '최근 방문',
     addToFavorites: '즐겨찾기에 추가',
-    removeFromFavorites: '즐겨찾기에서 제거'
+    removeFromFavorites: '즐겨찾기에서 제거',
+    allMenus: '전체 메뉴',
+    myWork: '나의 업무'
+  },
+  menuManagement: {
+    title: '메뉴 관리',
+    description: '애플리케이션 메뉴 구조 및 권한 관리',
+    add: '메뉴 추가',
+    edit: '메뉴 수정',
+    delete: '메뉴 삭제',
+    deleteConfirm: '이 메뉴를 삭제하시겠습니까?',
+    menuCode: '메뉴 코드',
+    menuName: '메뉴 이름',
+    menuNameEn: '메뉴 이름 (영어)',
+    menuNameKo: '메뉴 이름 (한국어)',
+    path: '경로',
+    icon: '아이콘',
+    order: '순서',
+    level: '레벨',
+    parent: '부모 메뉴',
+    programId: '프로그램 ID',
+    description: '설명',
+    descriptionEn: '설명 (영어)',
+    descriptionKo: '설명 (한국어)',
+    rootMenu: '최상위 메뉴',
+    selectParent: '부모 메뉴 선택',
+    selectIcon: '아이콘 선택',
+    saveSuccess: '메뉴가 성공적으로 저장되었습니다',
+    deleteSuccess: '메뉴가 성공적으로 삭제되었습니다',
+    error: '오류가 발생했습니다',
+    searchPlaceholder: '코드, 이름, 경로, 프로그램 ID로 검색...'
+  },
+  header: {
+    toggleMenu: '메뉴 토글',
+    profile: '프로필',
+    settings: '설정',
+    logout: '로그아웃',
+    language: '언어',
+    privacyPolicy: '개인정보 처리방침'
   },
   footer: {
     currentProgram: '현재 프로그램',
@@ -65,7 +112,8 @@ export default {
     rowsPerPage: '페이지당 행 수',
     of: '/',
     exportExcel: '엑셀로 내보내기',
-    importExcel: '엑셀에서 가져오기'
+    importExcel: '엑셀에서 가져오기',
+    totalCount: '총 {count} 건'
   },
   file: {
     upload: '파일 업로드',

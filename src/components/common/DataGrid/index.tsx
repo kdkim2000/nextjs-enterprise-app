@@ -7,25 +7,24 @@ import {
   GridRowsProp,
   GridToolbarContainer,
   GridToolbarColumnsButton,
-  GridToolbarFilterButton,
   GridToolbarDensitySelector,
   GridRowSelectionModel,
   GridCellParams
 } from '@mui/x-data-grid';
 import {
   Box,
-  Button,
   Stack,
   IconButton,
-  Tooltip
+  Tooltip,
+  Menu
 } from '@mui/material';
 import {
   FileDownload,
   FileUpload,
   Add,
   Delete,
-  Edit,
-  Refresh
+  Refresh,
+  Settings
 } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
 import { useI18n } from '@/lib/i18n/client';
@@ -44,6 +43,10 @@ interface ExcelDataGridProps {
   checkboxSelection?: boolean;
   exportFileName?: string;
   height?: number | string;
+  paginationMode?: 'client' | 'server';
+  rowCount?: number;
+  paginationModel?: { page: number; pageSize: number };
+  onPaginationModelChange?: (model: { page: number; pageSize: number }) => void;
 }
 
 interface CustomToolbarProps {
@@ -54,76 +57,199 @@ interface CustomToolbarProps {
   onRefresh?: () => void;
   hasSelection: boolean;
   editable?: boolean;
+  rowCount?: number;
+  totalCount?: number;
 }
 
 function CustomToolbar(props: CustomToolbarProps) {
   const t = useI18n();
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+  const settingsOpen = Boolean(settingsAnchorEl);
+
+  const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setSettingsAnchorEl(event.currentTarget);
+  };
+
+  const handleSettingsClose = () => {
+    setSettingsAnchorEl(null);
+  };
 
   return (
     <GridToolbarContainer>
-      <Stack direction="row" spacing={1} sx={{ flex: 1, p: 1 }}>
-        <GridToolbarColumnsButton />
-        <GridToolbarFilterButton />
-        <GridToolbarDensitySelector />
+      <Stack
+        direction="row"
+        spacing={0.5}
+        sx={{
+          flex: 1,
+          py: 0.75,
+          px: 1.5,
+          alignItems: 'center',
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}
+      >
+        {/* Total Count Badge */}
+        {typeof props.totalCount === 'number' && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              px: 1,
+              py: 0.5,
+              bgcolor: 'primary.50',
+              borderRadius: 1,
+              color: 'primary.main',
+              fontWeight: 600,
+              fontSize: '0.8125rem'
+            }}
+          >
+            {t('grid.totalCount', { count: props.totalCount.toLocaleString() })}
+          </Box>
+        )}
 
         <Box sx={{ flex: 1 }} />
 
+        {/* Action Buttons - Icon Only */}
         {props.editable && props.onAdd && (
-          <Tooltip title={t('common.create')}>
-            <Button
+          <Tooltip title={t('common.create')} arrow>
+            <IconButton
               size="small"
-              startIcon={<Add />}
               onClick={props.onAdd}
-              variant="outlined"
+              sx={{
+                color: 'primary.main',
+                '&:hover': { bgcolor: 'primary.50' }
+              }}
             >
-              {t('common.create')}
-            </Button>
-          </Tooltip>
-        )}
-
-        {props.editable && props.onDelete && props.hasSelection && (
-          <Tooltip title={t('common.delete')}>
-            <Button
-              size="small"
-              startIcon={<Delete />}
-              onClick={props.onDelete}
-              variant="outlined"
-              color="error"
-            >
-              {t('common.delete')}
-            </Button>
-          </Tooltip>
-        )}
-
-        {props.onRefresh && (
-          <Tooltip title={t('common.refresh')}>
-            <IconButton size="small" onClick={props.onRefresh}>
-              <Refresh />
+              <Add fontSize="small" />
             </IconButton>
           </Tooltip>
         )}
 
-        <Tooltip title={t('grid.exportExcel')}>
-          <Button
+        {props.editable && props.onDelete && props.hasSelection && (
+          <Tooltip title={t('common.delete')} arrow>
+            <IconButton
+              size="small"
+              onClick={props.onDelete}
+              sx={{
+                color: 'error.main',
+                '&:hover': { bgcolor: 'error.50' }
+              }}
+            >
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        {props.onRefresh && (
+          <Tooltip title={t('common.refresh')} arrow>
+            <IconButton
+              size="small"
+              onClick={props.onRefresh}
+              sx={{
+                color: 'action.active',
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
+            >
+              <Refresh fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        <Tooltip title={t('grid.exportExcel')} arrow>
+          <IconButton
             size="small"
-            startIcon={<FileDownload />}
             onClick={props.onExport}
-            variant="outlined"
+            sx={{
+              color: 'success.main',
+              '&:hover': { bgcolor: 'success.50' }
+            }}
           >
-            {t('common.export')}
-          </Button>
+            <FileDownload fontSize="small" />
+          </IconButton>
         </Tooltip>
 
-        <Tooltip title={t('grid.importExcel')}>
-          <Button
+        <Tooltip title={t('grid.importExcel')} arrow>
+          <IconButton
             size="small"
-            startIcon={<FileUpload />}
             onClick={props.onImport}
-            variant="outlined"
+            sx={{
+              color: 'info.main',
+              '&:hover': { bgcolor: 'info.50' }
+            }}
           >
-            {t('common.import')}
-          </Button>
+            <FileUpload fontSize="small" />
+          </IconButton>
         </Tooltip>
+
+        {/* Settings Menu */}
+        <Box sx={{ ml: 0.5, pl: 0.5, borderLeft: '1px solid', borderColor: 'divider' }}>
+          <Tooltip title={t('common.settings')} arrow>
+            <IconButton
+              size="small"
+              onClick={handleSettingsClick}
+              sx={{
+                color: 'action.active',
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
+            >
+              <Settings fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        <Menu
+          anchorEl={settingsAnchorEl}
+          open={settingsOpen}
+          onClose={handleSettingsClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                minWidth: 200,
+                mt: 0.5
+              }
+            }
+          }}
+        >
+          <GridToolbarColumnsButton
+            slotProps={{
+              button: {
+                sx: {
+                  width: '100%',
+                  justifyContent: 'flex-start',
+                  px: 2,
+                  py: 1,
+                  '&:hover': {
+                    bgcolor: 'action.hover'
+                  }
+                }
+              }
+            }}
+          />
+          <GridToolbarDensitySelector
+            slotProps={{
+              button: {
+                sx: {
+                  width: '100%',
+                  justifyContent: 'flex-start',
+                  px: 2,
+                  py: 1,
+                  '&:hover': {
+                    bgcolor: 'action.hover'
+                  }
+                }
+              }
+            }}
+          />
+        </Menu>
       </Stack>
     </GridToolbarContainer>
   );
@@ -141,7 +267,11 @@ export default function ExcelDataGrid({
   editable = false,
   checkboxSelection = true,
   exportFileName = 'export',
-  height = 600
+  height,
+  paginationMode = 'client',
+  rowCount,
+  paginationModel,
+  onPaginationModelChange
 }: ExcelDataGridProps) {
   const t = useI18n();
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([]);
@@ -266,7 +396,7 @@ export default function ExcelDataGrid({
   );
 
   return (
-    <Box sx={{ height, width: '100%' }}>
+    <Box sx={{ height: height || '100%', width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -287,15 +417,25 @@ export default function ExcelDataGrid({
             onDelete: handleDelete,
             onRefresh,
             hasSelection: selectionModel.length > 0,
-            editable
+            editable,
+            rowCount: rows.length,
+            totalCount: paginationMode === 'server' && rowCount !== undefined ? rowCount : rows.length
           } as any
         }}
         pageSizeOptions={[10, 25, 50, 100]}
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 25 }
-          }
-        }}
+        paginationMode={paginationMode}
+        rowCount={rowCount}
+        paginationModel={paginationModel}
+        onPaginationModelChange={onPaginationModelChange}
+        initialState={
+          paginationMode === 'client'
+            ? {
+                pagination: {
+                  paginationModel: { pageSize: 25 }
+                }
+              }
+            : undefined
+        }
         sx={{
           '& .MuiDataGrid-cell:focus': {
             outline: '2px solid #1976d2'

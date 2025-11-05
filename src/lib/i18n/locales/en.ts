@@ -8,6 +8,7 @@ export default {
     edit: 'Edit',
     create: 'Create',
     search: 'Search',
+    searching: 'Searching...',
     filter: 'Filter',
     export: 'Export',
     import: 'Import',
@@ -24,7 +25,12 @@ export default {
     previous: 'Previous',
     refresh: 'Refresh',
     download: 'Download',
-    upload: 'Upload'
+    upload: 'Upload',
+    clear: 'Clear',
+    apply: 'Apply',
+    advanced: 'Advanced',
+    all: 'All',
+    settings: 'Settings'
   },
   auth: {
     login: 'Login',
@@ -47,13 +53,54 @@ export default {
   },
   menu: {
     dashboard: 'Dashboard',
+    admin: 'Administration',
     userManagement: 'User Management',
+    menuManagement: 'Menu Management',
     reports: 'Reports',
     settings: 'Settings',
+    components: 'Components',
     favorites: 'Favorites',
     recent: 'Recent',
     addToFavorites: 'Add to Favorites',
-    removeFromFavorites: 'Remove from Favorites'
+    removeFromFavorites: 'Remove from Favorites',
+    allMenus: 'All Menus',
+    myWork: 'My Work'
+  },
+  menuManagement: {
+    title: 'Menu Management',
+    description: 'Manage application menu structure and permissions',
+    add: 'Add Menu',
+    edit: 'Edit Menu',
+    delete: 'Delete Menu',
+    deleteConfirm: 'Are you sure you want to delete this menu?',
+    menuCode: 'Menu Code',
+    menuName: 'Menu Name',
+    menuNameEn: 'Menu Name (English)',
+    menuNameKo: 'Menu Name (Korean)',
+    path: 'Path',
+    icon: 'Icon',
+    order: 'Order',
+    level: 'Level',
+    parent: 'Parent Menu',
+    programId: 'Program ID',
+    description: 'Description',
+    descriptionEn: 'Description (English)',
+    descriptionKo: 'Description (Korean)',
+    rootMenu: 'Root Menu',
+    selectParent: 'Select Parent Menu',
+    selectIcon: 'Select Icon',
+    saveSuccess: 'Menu saved successfully',
+    deleteSuccess: 'Menu deleted successfully',
+    error: 'An error occurred',
+    searchPlaceholder: 'Search by code, name, path, or program ID...'
+  },
+  header: {
+    toggleMenu: 'Toggle Menu',
+    profile: 'Profile',
+    settings: 'Settings',
+    logout: 'Logout',
+    language: 'Language',
+    privacyPolicy: 'Privacy Policy'
   },
   footer: {
     currentProgram: 'Current Program',
@@ -65,7 +112,8 @@ export default {
     rowsPerPage: 'Rows per page',
     of: 'of',
     exportExcel: 'Export to Excel',
-    importExcel: 'Import from Excel'
+    importExcel: 'Import from Excel',
+    totalCount: 'Total {count}'
   },
   file: {
     upload: 'Upload File',
