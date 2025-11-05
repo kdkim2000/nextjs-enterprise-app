@@ -1,35 +1,36 @@
 [
   {
-    "id": "1950ae69-19fa-46ec-942a-a5ebcd8c9497",
-    "timestamp": "2025-11-04T15:10:11.922Z",
+    "id": "d4747fbc-3de8-4b3b-9b11-b7f8de86967a",
+    "timestamp": "2025-11-05T21:30:02.365Z",
     "method": "GET",
-    "path": "/favorite-menus",
+    "path": "/recent-menus",
     "statusCode": 304,
-    "duration": "4ms",
-    "userId": "sso-user-001",
+    "duration": "17ms",
+    "userId": "user-001",
     "ip": "::1",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
   },
   {
-    "id": "6cc97118-73a7-4b3e-8abf-b25b2279c292",
-    "timestamp": "2025-11-04T15:10:11.939Z",
+    "id": "0533650c-73ed-4aa1-b38e-4ae21e1742ff",
+    "timestamp": "2025-11-05T21:30:02.384Z",
     "method": "GET",
-    "path": "/user-menus",
+    "path": "/recent-menus",
     "statusCode": 304,
-    "duration": "4ms",
-    "userId": "sso-user-001",
+    "duration": "17ms",
+    "userId": "user-001",
     "ip": "::1",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
   },
   {
-    "id": "6f2a8e83-a49b-4e20-9ba9-0fa41b8993ba",
-    "timestamp": "2025-11-04T15:10:11.947Z",
+    "id": "132b2331-7311-41e5-9b98-2d947a90b43b",
+    "timestamp": "2025-11-05T21:30:02.391Z",
     "method": "GET",
-    "path": "/favorite-menus",
+    "path": "/recent-menus",
     "statusCode": 304,
-    "duration": "7ms",
-    "userId": "sso-user-001",
+    "duration": "6ms",
+    "userId": "user-001",
     "ip": "::1",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
   }
+]}
 ]

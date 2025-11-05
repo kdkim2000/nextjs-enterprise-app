@@ -102,7 +102,7 @@ router.get('/all', authenticateToken, async (req, res) => {
     }
 
     const menus = await readJSON(MENUS_FILE);
-    res.json(buildMenuTree(menus));
+    res.json({ menus: buildMenuTree(menus) });
   } catch (error) {
     console.error('Get all menus error:', error);
     res.status(500).json({ error: 'Failed to fetch menus' });

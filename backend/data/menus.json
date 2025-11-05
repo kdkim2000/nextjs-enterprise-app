@@ -19,31 +19,31 @@
   },
   {
     "id": "menu-002",
-    "code": "user-management",
+    "code": "admin",
     "name": {
-      "en": "User Management",
-      "ko": "사용자 관리"
+      "en": "Administration",
+      "ko": "관리자"
     },
-    "path": "/user-management",
-    "icon": "People",
+    "path": "/admin",
+    "icon": "AdminPanelSettings",
     "order": 2,
     "parentId": null,
     "level": 1,
     "programId": null,
     "description": {
-      "en": "User management module",
-      "ko": "사용자 관리 모듈"
+      "en": "Administration and system management",
+      "ko": "관리자 및 시스템 관리"
     }
   },
   {
     "id": "menu-003",
-    "code": "user-list",
+    "code": "user-management",
     "name": {
-      "en": "User List",
-      "ko": "사용자 목록"
+      "en": "User Management",
+      "ko": "사용자 관리"
     },
-    "path": "/dashboard/user-management",
-    "icon": "List",
+    "path": "/admin/users",
+    "icon": "People",
     "order": 1,
     "parentId": "menu-002",
     "level": 2,
@@ -55,42 +55,24 @@
   },
   {
     "id": "menu-004",
-    "code": "role-management",
+    "code": "menu-management",
     "name": {
-      "en": "Role Management",
-      "ko": "역할 관리"
+      "en": "Menu Management",
+      "ko": "메뉴 관리"
     },
-    "path": "/user-management/role-management",
-    "icon": "AdminPanelSettings",
+    "path": "/admin/menus",
+    "icon": "Menu",
     "order": 2,
     "parentId": "menu-002",
     "level": 2,
-    "programId": "PROG-ROLE-MGMT",
+    "programId": "PROG-MENU-MGMT",
     "description": {
-      "en": "Manage user roles and permissions",
-      "ko": "사용자 역할 및 권한 관리"
+      "en": "Manage application menu structure and permissions",
+      "ko": "애플리케이션 메뉴 구조 및 권한 관리"
     }
   },
   {
     "id": "menu-005",
-    "code": "permission-matrix",
-    "name": {
-      "en": "Permission Matrix",
-      "ko": "권한 매트릭스"
-    },
-    "path": "/user-management/role-management/permission-matrix",
-    "icon": "GridOn",
-    "order": 1,
-    "parentId": "menu-004",
-    "level": 3,
-    "programId": "PROG-PERM-MATRIX",
-    "description": {
-      "en": "Permission matrix configuration",
-      "ko": "권한 매트릭스 설정"
-    }
-  },
-  {
-    "id": "menu-006",
     "code": "reports",
     "name": {
       "en": "Reports",
@@ -108,7 +90,7 @@
     }
   },
   {
-    "id": "menu-007",
+    "id": "menu-006",
     "code": "sales-report",
     "name": {
       "en": "Sales Report",
@@ -117,7 +99,7 @@
     "path": "/reports/sales-report",
     "icon": "TrendingUp",
     "order": 1,
-    "parentId": "menu-006",
+    "parentId": "menu-005",
     "level": 2,
     "programId": "PROG-SALES-RPT",
     "description": {
@@ -126,7 +108,7 @@
     }
   },
   {
-    "id": "menu-008",
+    "id": "menu-007",
     "code": "settings",
     "name": {
       "en": "Settings",
@@ -144,13 +126,13 @@
     }
   },
   {
-    "id": "menu-009",
+    "id": "menu-008",
     "code": "components",
     "name": {
       "en": "Components",
       "ko": "컴포넌트"
     },
-    "path": "/dashboard/components",
+    "path": "/dev/components",
     "icon": "Widgets",
     "order": 5,
     "parentId": null,

@@ -33,6 +33,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { toast } from 'react-toastify';
+import PageHeader from '@/components/common/PageHeader';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -190,9 +191,7 @@ export default function SettingsPage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom fontWeight={600}>
-        {locale === 'ko' ? '설정' : 'Settings'}
-      </Typography>
+      <PageHeader useMenu showBreadcrumb />
 
       <Paper sx={{ mt: 3 }}>
         <Tabs
