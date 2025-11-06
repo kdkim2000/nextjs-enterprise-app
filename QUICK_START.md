@@ -159,6 +159,47 @@ npm run dev:express
 
 ## 문제 해결
 
+### ❌ ERR_CONNECTION_REFUSED - 포트 3001 연결 실패
+
+**증상:**
+```
+Network error: Network Error
+Failed to load resource: net::ERR_CONNECTION_REFUSED
+:3001/api/auth/login
+```
+
+**원인:** Express Backend 모드로 설정되어 있지만 Express 서버가 실행되지 않음
+
+**해결 방법 1: 환경 확인 스크립트 실행 (권장)**
+```bash
+# Windows
+check-env.bat
+
+# Linux/macOS
+chmod +x check-env.sh
+./check-env.sh
+```
+
+**해결 방법 2: Next.js API Routes 모드로 전환**
+```bash
+# Windows
+switch-mode.bat
+# 1번 선택 (Next.js API Routes)
+
+# Linux/macOS
+./switch-mode.sh
+# 1번 선택 (Next.js API Routes)
+
+# 서버 재시작
+npm run dev
+```
+
+**해결 방법 3: Express Backend 실행**
+```bash
+# Express Backend 모드 유지하고 서버 시작
+npm run dev:express
+```
+
 ### ❌ 포트 3000이 이미 사용 중
 
 **Windows:**
