@@ -334,7 +334,7 @@ export default function SettingsPage() {
               <Select
                 value={preferences.language}
                 label={locale === 'ko' ? '언어' : 'Language'}
-                onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
+                onChange={(e) => setPreferences({ ...preferences, language: e.target.value as 'en' | 'ko' })}
               >
                 <MenuItem value="ko">한국어 (Korean)</MenuItem>
                 <MenuItem value="en">English</MenuItem>
