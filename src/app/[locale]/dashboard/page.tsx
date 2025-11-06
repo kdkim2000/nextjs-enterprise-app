@@ -16,10 +16,9 @@ import {
   TrendingUp,
   Description
 } from '@mui/icons-material';
-import { useAuth } from '@/contexts/AuthContext';
+import PageHeader from '@/components/common/PageHeader';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
 
   const stats = [
     { title: 'Total Users', value: '1,234', icon: <People />, color: '#1976d2' },
@@ -29,15 +28,8 @@ export default function DashboardPage() {
   ];
 
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom fontWeight={600}>
-          Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Welcome back, {user?.name}!
-        </Typography>
-      </Box>
+    <Container maxWidth={false} sx={{ maxWidth: '100%', px: 0 }}>
+      <PageHeader useMenu />
 
       <Grid container spacing={3}>
         {stats.map((stat, index) => (

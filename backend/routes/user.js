@@ -11,7 +11,7 @@ const MENUS_FILE = path.join(__dirname, '../data/menus.json');
 const USERS_FILE = path.join(__dirname, '../data/users.json');
 
 /**
- * Get all users (admin only)
+ * Get all users with search and pagination (admin only)
  */
 router.get('/', authenticateToken, async (req, res) => {
   try {
@@ -21,10 +21,64 @@ router.get('/', authenticateToken, async (req, res) => {
 
     const users = await readJSON(USERS_FILE);
 
-    // Remove password field from response
-    const safeUsers = users.map(({ password, ...user }) => user);
+    // Extract query parameters
+    const {
+      username,
+      name,
+      email,
+      role,
+      department,
+      status,
+      page = 1,
+      limit = 50
+    } = req.query;
 
-    res.json({ users: safeUsers });
+    // Filter users based on search criteria
+    let filteredUsers = users.filter(user => {
+      if (username && !user.username.toLowerCase().includes(username.toLowerCase())) {
+        return false;
+      }
+      if (name && !user.name.toLowerCase().includes(name.toLowerCase())) {
+        return false;
+      }
+      if (email && !user.email.toLowerCase().includes(email.toLowerCase())) {
+        return false;
+      }
+      if (role && user.role !== role) {
+        return false;
+      }
+      if (department && user.department !== department) {
+        return false;
+      }
+      if (status && user.status !== status) {
+        return false;
+      }
+      return true;
+    });
+
+    const totalCount = filteredUsers.length;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const totalPages = Math.ceil(totalCount / limitNum);
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+
+    // Apply pagination
+    const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+    // Remove password field from response
+    const safeUsers = paginatedUsers.map(({ password, ...user }) => user);
+
+    res.json({
+      users: safeUsers,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalCount,
+        totalPages,
+        hasMore: pageNum < totalPages
+      }
+    });
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ error: 'Failed to fetch users' });

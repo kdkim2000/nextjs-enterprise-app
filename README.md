@@ -63,27 +63,28 @@ npm install
 
 ### 2. 개발 서버 실행
 
-프론트엔드와 백엔드를 동시에 실행:
-
+#### Option 1: Next.js API Routes (권장) ⭐
 ```bash
 npm run dev
 ```
+- Frontend: http://localhost:3000
+- Backend: http://localhost:3000/api/*
+- Vercel 배포 환경과 동일
 
-또는 개별 실행:
-
+#### Option 2: Express Backend (레거시)
 ```bash
-# 프론트엔드만
-npm run dev:frontend
-
-# 백엔드만
-npm run dev:backend
+npm run dev:express
 ```
+- Frontend: http://localhost:3000
+- Backend: http://localhost:3001/api/*
+- 기존 Express 서버 사용
+
+> 💡 **자세한 설정은 [LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md)를 참고하세요**
 
 ### 3. 애플리케이션 접속
 
 - **프론트엔드**: http://localhost:3000
-- **백엔드 API**: http://localhost:3001/api
-- **백엔드 Health Check**: http://localhost:3001/health
+- **로그인 페이지**: http://localhost:3000/en/login
 
 ## 데모 계정
 
@@ -120,14 +121,46 @@ npm run dev:backend
 
 ## 프로젝트 구조
 
-상세한 구조는 `ARCHITECTURE.md` 파일을 참고하세요.
+상세한 구조는 [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) 파일을 참고하세요.
 
-## 추가 문서
+## 📚 문서
 
-- `ARCHITECTURE.md` - 상세한 아키텍처 설계 문서
-- `FEATURES.md` - 모든 기능 상세 가이드 및 사용법
-- `backend/` - Mock 백엔드 구현
+### 개발 가이드
+- [`docs/LOCAL_DEVELOPMENT.md`](./docs/LOCAL_DEVELOPMENT.md) - 로컬 개발 환경 설정 가이드
+- [`docs/LOCAL_DEV_SUMMARY.md`](./docs/LOCAL_DEV_SUMMARY.md) - 로컬 개발 빠른 참조
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) - 상세한 아키텍처 설계 문서
+- [`docs/FEATURES.md`](./docs/FEATURES.md) - 모든 기능 상세 가이드 및 사용법
+
+### Backend 문서
+- [`docs/BACKEND_SOLUTION.md`](./docs/BACKEND_SOLUTION.md) - Backend 솔루션 설명
+- [`docs/BACKEND_API_ROUTES.md`](./docs/BACKEND_API_ROUTES.md) - API 엔드포인트 문서
+- `backend/` - Express 백엔드 구현 (레거시)
+- `src/app/api/` - Next.js API Routes 구현 (권장)
+
+### 배포 가이드
+- [`docs/VERCEL_DEPLOYMENT.md`](./docs/VERCEL_DEPLOYMENT.md) - Vercel 배포 가이드
+- [`docs/VERCEL_DATA_INITIALIZATION.md`](./docs/VERCEL_DATA_INITIALIZATION.md) - Vercel 데이터 초기화 가이드
+- [`docs/DEPLOY_SUMMARY.md`](./docs/DEPLOY_SUMMARY.md) - 배포 빠른 참조
+
+### 기타 문서
+- [`docs/PROJECT_STRUCTURE.md`](./docs/PROJECT_STRUCTURE.md) - 프로젝트 구조 상세
+- [`docs/IMPLEMENTATION_SUMMARY.md`](./docs/IMPLEMENTATION_SUMMARY.md) - 구현 요약
+- [`docs/PAGE_TEMPLATES.md`](./docs/PAGE_TEMPLATES.md) - 페이지 템플릿
 - `src/` - 프론트엔드 소스 코드
+
+## Vercel 배포
+
+이 프로젝트는 **완전히 Vercel에 배포 가능**합니다:
+
+- **Live Demo**: https://nextjs-enterprise-app-gamma.vercel.app
+- **배포 가이드**: [`docs/VERCEL_DEPLOYMENT.md`](./docs/VERCEL_DEPLOYMENT.md) 참고
+
+✅ **좋은 소식**: Backend가 Next.js API Routes로 구현되어 **별도 서버 배포가 필요 없습니다**!
+- Frontend와 Backend가 모두 Vercel Serverless Functions로 실행
+- 단일 배포로 완전한 애플리케이션 작동
+- 추가 비용 없음
+
+자세한 내용은 [`docs/BACKEND_SOLUTION.md`](./docs/BACKEND_SOLUTION.md)를 참고하세요.
 
 ## 구현된 모든 컴포넌트
 

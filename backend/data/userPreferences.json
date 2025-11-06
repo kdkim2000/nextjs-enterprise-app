@@ -1,15 +1,32 @@
 [
   {
     "userId": "user-001",
-    "favoriteMenus": ["menu-001", "menu-003", "menu-008"],
-    "recentMenus": [],
+    "favoriteMenus": [
+      "menu-001",
+      "menu-003",
+      "menu-009",
+      "menu-004",
+      "menu-007",
+      "menu-005",
+      "menu-008"
+    ],
+    "recentMenus": [
+      "menu-003",
+      "menu-004",
+      "menu-001",
+      "menu-002",
+      "menu-007"
+    ],
     "language": "en",
     "theme": "light",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
+    "updatedAt": "2025-11-05T21:30:02.368Z"
   },
   {
     "userId": "user-002",
-    "favoriteMenus": ["menu-001", "menu-007"],
+    "favoriteMenus": [
+      "menu-001",
+      "menu-007"
+    ],
     "recentMenus": [],
     "language": "ko",
     "theme": "light",
@@ -17,7 +34,10 @@
   },
   {
     "userId": "user-003",
-    "favoriteMenus": ["menu-001", "menu-003"],
+    "favoriteMenus": [
+      "menu-001",
+      "menu-003"
+    ],
     "recentMenus": [],
     "language": "en",
     "theme": "light",

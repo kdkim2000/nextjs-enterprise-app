@@ -1,23 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, AppBar, Toolbar, IconButton, Typography, Button } from '@mui/material';
-import { Menu as MenuIcon, Logout } from '@mui/icons-material';
+import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
+import { useCurrentLocale } from '@/lib/i18n/client';
+import DashboardHeader from '@/components/layout/DashboardHeader';
+import DashboardFooter from '@/components/layout/DashboardFooter';
 import Sidebar from '@/components/layout/Sidebar';
-import Footer from '@/components/common/Footer';
 import AutoLogoutWarning from '@/components/common/AutoLogoutWarning';
-
-const DRAWER_WIDTH = 280;
-const DRAWER_WIDTH_COLLAPSED = 72;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useCurrentLocale();
-  const changeLocale = useChangeLocale();
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
@@ -25,16 +21,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push(`/${locale}/login`);
     }
   }, [isAuthenticated, isLoading, router, locale]);
-
-  const handleLogout = async () => {
-    await logout();
-    router.push(`/${locale}/login`);
-  };
-
-  const toggleLanguage = () => {
-    const newLocale = locale === 'en' ? 'ko' : 'en';
-    changeLocale(newLocale);
-  };
 
   if (isLoading || !isAuthenticated) {
     return (
@@ -52,60 +38,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="sticky" elevation={1} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={() => setSidebarExpanded(!sidebarExpanded)}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <DashboardHeader onMenuClick={() => setSidebarExpanded(!sidebarExpanded)} />
 
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Enterprise App
-          </Typography>
-
-          <Button color="inherit" onClick={toggleLanguage} sx={{ mr: 2 }}>
-            {locale.toUpperCase()}
-          </Button>
-
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            {user?.name}
-          </Typography>
-
-          <IconButton color="inherit" onClick={handleLogout}>
-            <Logout />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
-      <Box sx={{ display: 'flex', flex: 1 }}>
-        <Sidebar
-          expanded={sidebarExpanded}
-          onToggle={() => setSidebarExpanded(!sidebarExpanded)}
-        />
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Sidebar expanded={sidebarExpanded} />
 
         <Box
           component="main"
           sx={{
             flex: 1,
-            p: 3,
-            transition: (theme) =>
-              theme.transitions.create('margin', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-              }),
-            ml: sidebarExpanded ? 0 : `-${DRAWER_WIDTH - DRAWER_WIDTH_COLLAPSED}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            minWidth: 0 // Prevent flex item from overflowing
           }}
         >
-          {children}
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              px: 2,
+              py: 2
+            }}
+          >
+            {children}
+          </Box>
+          <DashboardFooter />
         </Box>
       </Box>
 
-      <Footer />
       <AutoLogoutWarning />
     </Box>
   );
