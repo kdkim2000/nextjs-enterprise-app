@@ -55,15 +55,17 @@
 
 ## 시작하기
 
-### 1. 의존성 설치
+### 방법 1: 로컬 개발 환경
+
+#### 1. 의존성 설치
 
 ```bash
 npm install
 ```
 
-### 2. 개발 서버 실행
+#### 2. 개발 서버 실행
 
-#### Option 1: Next.js API Routes (권장) ⭐
+**Option 1: Next.js API Routes (권장) ⭐**
 ```bash
 npm run dev
 ```
@@ -71,7 +73,7 @@ npm run dev
 - Backend: http://localhost:3000/api/*
 - Vercel 배포 환경과 동일
 
-#### Option 2: Express Backend (레거시)
+**Option 2: Express Backend (레거시)**
 ```bash
 npm run dev:express
 ```
@@ -81,10 +83,49 @@ npm run dev:express
 
 > 💡 **자세한 설정은 [LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md)를 참고하세요**
 
-### 3. 애플리케이션 접속
+#### 3. 애플리케이션 접속
 
 - **프론트엔드**: http://localhost:3000
 - **로그인 페이지**: http://localhost:3000/en/login
+
+### 방법 2: Docker 배포 🐳
+
+#### 빠른 시작
+
+```bash
+# 1. 환경 변수 설정
+cp env.docker.template .env
+
+# 2. JWT Secret 생성 및 설정 (OpenSSL 사용)
+openssl rand -base64 32
+
+# 3. .env 파일 수정 (JWT_SECRET, JWT_REFRESH_SECRET)
+
+# 4. Docker Compose로 실행
+docker compose up -d
+
+# 5. 애플리케이션 접속
+# http://localhost:3000
+```
+
+#### Docker 명령어 직접 사용
+
+```bash
+# 이미지 빌드
+docker build -t nextjs-enterprise-app:latest .
+
+# 컨테이너 실행
+docker run -d \
+  --name nextjs-enterprise-app \
+  -p 3000:3000 \
+  -e NEXT_PUBLIC_API_URL=/api \
+  -e JWT_SECRET=your-secret-key \
+  -e JWT_REFRESH_SECRET=your-refresh-secret-key \
+  -v nextjs-data:/app/data \
+  nextjs-enterprise-app:latest
+```
+
+> 💡 **자세한 Docker 배포 가이드는 [DOCKER_DEPLOYMENT.md](./docs/DOCKER_DEPLOYMENT.md)를 참고하세요**
 
 ## 데모 계정
 
@@ -138,6 +179,7 @@ npm run dev:express
 - `src/app/api/` - Next.js API Routes 구현 (권장)
 
 ### 배포 가이드
+- [`docs/DOCKER_DEPLOYMENT.md`](./docs/DOCKER_DEPLOYMENT.md) - Docker 배포 가이드 🐳
 - [`docs/VERCEL_DEPLOYMENT.md`](./docs/VERCEL_DEPLOYMENT.md) - Vercel 배포 가이드
 - [`docs/VERCEL_DATA_INITIALIZATION.md`](./docs/VERCEL_DATA_INITIALIZATION.md) - Vercel 데이터 초기화 가이드
 - [`docs/DEPLOY_SUMMARY.md`](./docs/DEPLOY_SUMMARY.md) - 배포 빠른 참조
@@ -148,17 +190,43 @@ npm run dev:express
 - [`docs/PAGE_TEMPLATES.md`](./docs/PAGE_TEMPLATES.md) - 페이지 템플릿
 - `src/` - 프론트엔드 소스 코드
 
-## Vercel 배포
+## 배포 옵션
 
-이 프로젝트는 **완전히 Vercel에 배포 가능**합니다:
+이 프로젝트는 **3가지 방식으로 배포** 가능합니다:
+
+### 1. Vercel 배포 (권장)
 
 - **Live Demo**: https://nextjs-enterprise-app-gamma.vercel.app
-- **배포 가이드**: [`docs/VERCEL_DEPLOYMENT.md`](./docs/VERCEL_DEPLOYMENT.md) 참고
+- **배포 가이드**: [`docs/VERCEL_DEPLOYMENT.md`](./docs/VERCEL_DEPLOYMENT.md)
 
-✅ **좋은 소식**: Backend가 Next.js API Routes로 구현되어 **별도 서버 배포가 필요 없습니다**!
+✅ **장점**:
 - Frontend와 Backend가 모두 Vercel Serverless Functions로 실행
 - 단일 배포로 완전한 애플리케이션 작동
 - 추가 비용 없음
+- 자동 HTTPS, CDN, 무중단 배포
+
+### 2. Docker 배포 🐳
+
+- **배포 가이드**: [`docs/DOCKER_DEPLOYMENT.md`](./docs/DOCKER_DEPLOYMENT.md)
+
+✅ **장점**:
+- 모든 클라우드 및 온프레미스 환경 지원
+- 완전한 데이터 제어
+- 쉬운 확장 및 복제
+- Docker Hub를 통한 이미지 배포
+
+```bash
+# Docker Compose로 빠른 배포
+docker compose up -d
+
+# 또는 Docker Hub에서 Pull
+docker pull your-username/nextjs-enterprise-app:latest
+```
+
+### 3. 전통적 Node.js 배포
+
+- **방법**: `npm run build` → `npm start`
+- **적합**: VPS, EC2, Azure VM 등
 
 자세한 내용은 [`docs/BACKEND_SOLUTION.md`](./docs/BACKEND_SOLUTION.md)를 참고하세요.
 
