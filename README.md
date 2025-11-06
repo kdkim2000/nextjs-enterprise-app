@@ -126,8 +126,18 @@ npm run dev:backend
 
 - `ARCHITECTURE.md` - 상세한 아키텍처 설계 문서
 - `FEATURES.md` - 모든 기능 상세 가이드 및 사용법
+- `VERCEL_DEPLOYMENT.md` - Vercel 배포 가이드 ⭐ NEW
 - `backend/` - Mock 백엔드 구현
 - `src/` - 프론트엔드 소스 코드
+
+## Vercel 배포
+
+이 프로젝트는 Vercel에 배포할 수 있습니다:
+
+- **Live Demo**: https://nextjs-enterprise-app-gamma.vercel.app
+- **배포 가이드**: `VERCEL_DEPLOYMENT.md` 참고
+
+⚠️ **중요**: 이 애플리케이션은 프론트엔드(Next.js)와 백엔드(Express)로 구성되어 있습니다. Vercel에는 프론트엔드만 배포되므로, 완전한 기능을 위해서는 백엔드를 별도로 배포해야 합니다. 자세한 내용은 `VERCEL_DEPLOYMENT.md`를 참고하세요.
 
 ## 구현된 모든 컴포넌트
 

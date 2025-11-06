@@ -62,6 +62,7 @@ interface SearchCriteria {
   level: string;
   parentId: string;
   programId: string;
+  [key: string]: string;
 }
 
 export default function MenuManagementPage() {

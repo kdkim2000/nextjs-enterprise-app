@@ -48,6 +48,7 @@ interface SearchCriteria {
   role: string;
   department: string;
   status: string;
+  [key: string]: string;
 }
 
 const DEPARTMENTS = [

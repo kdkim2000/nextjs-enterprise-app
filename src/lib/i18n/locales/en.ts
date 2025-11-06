@@ -83,7 +83,6 @@ export default {
     level: 'Level',
     parent: 'Parent Menu',
     programId: 'Program ID',
-    description: 'Description',
     descriptionEn: 'Description (English)',
     descriptionKo: 'Description (Korean)',
     rootMenu: 'Root Menu',

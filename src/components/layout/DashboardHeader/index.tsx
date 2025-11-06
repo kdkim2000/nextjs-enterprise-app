@@ -71,7 +71,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   const handleLanguageChange = (newLocale: string) => {
     handleUserMenuClose();
-    changeLocale(newLocale);
+    changeLocale(newLocale as 'en' | 'ko');
   };
 
   // Available languages - easily expandable
