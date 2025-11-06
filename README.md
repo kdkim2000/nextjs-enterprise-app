@@ -55,6 +55,21 @@
 
 ## 시작하기
 
+### 🚀 빠른 시작
+
+```bash
+# 1. 의존성 설치
+npm install
+
+# 2. 개발 서버 시작
+npm run dev
+
+# 3. 브라우저에서 접속
+# http://localhost:3000
+```
+
+> 💡 **[QUICK_START.md](./QUICK_START.md)** - 빠른 시작 가이드 (문제 해결 포함)
+
 ### 방법 1: 로컬 개발 환경
 
 #### 1. 의존성 설치
@@ -75,6 +90,12 @@ npm run dev
 
 **Option 2: Express Backend (레거시)**
 ```bash
+# 자동 전환 스크립트 사용
+./switch-mode.sh  # Linux/macOS
+switch-mode.bat   # Windows
+
+# 또는 수동으로
+cp env.express.template .env.local
 npm run dev:express
 ```
 - Frontend: http://localhost:3000
@@ -83,7 +104,19 @@ npm run dev:express
 
 > 💡 **자세한 설정은 [LOCAL_DEVELOPMENT.md](./docs/LOCAL_DEVELOPMENT.md)를 참고하세요**
 
-#### 3. 애플리케이션 접속
+#### 3. 개발 모드 전환
+
+**간편한 모드 전환:**
+```bash
+# Windows
+switch-mode.bat
+
+# Linux/macOS
+chmod +x switch-mode.sh
+./switch-mode.sh
+```
+
+#### 4. 애플리케이션 접속
 
 - **프론트엔드**: http://localhost:3000
 - **로그인 페이지**: http://localhost:3000/en/login
