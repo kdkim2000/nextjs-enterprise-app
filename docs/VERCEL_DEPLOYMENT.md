@@ -2,31 +2,58 @@
 
 This guide explains how to deploy the Next.js Enterprise App to Vercel.
 
-## Important Note
+## ✅ 완전히 통합된 배포!
 
-This application consists of two parts:
-1. **Frontend (Next.js)** - Deployed to Vercel
-2. **Backend (Express API)** - Needs separate deployment
+**좋은 소식**: 백엔드가 이제 Next.js API Routes로 구현되어 **별도 서버 배포가 필요 없습니다**!
 
-## Deployment Options
+프론트엔드와 백엔드가 모두 Vercel에서 서버리스 함수로 실행됩니다.
 
-### Option 1: Frontend Only (Mock Data)
-Deploy the frontend to Vercel and use mock/local data. This is suitable for demo purposes.
+## 🚀 빠른 배포 (권장)
 
-**Steps:**
-1. Push your code to GitHub
-2. Import project in Vercel Dashboard
-3. Set environment variable:
-   - `NEXT_PUBLIC_API_URL` = `http://localhost:3001/api` (for local testing)
-4. Deploy
+### 단일 배포로 완전한 애플리케이션!
 
-**Limitations:**
-- API calls will fail in production
-- Only suitable for UI demonstration
+1. **GitHub에 푸시**
+   ```bash
+   git push origin main
+   ```
 
-### Option 2: Frontend + Separate Backend (Recommended)
+2. **Vercel에서 Import**
+   - https://vercel.com/new
+   - GitHub 저장소 선택
 
-Deploy the backend separately and connect the frontend to it.
+3. **환경 변수 설정** (Vercel Dashboard)
+   ```bash
+   # API 설정 (Next.js API Routes 사용)
+   NEXT_PUBLIC_API_URL=/api
+
+   # JWT Secrets (보안 키 생성)
+   JWT_SECRET=<생성된-보안-키>
+   JWT_REFRESH_SECRET=<생성된-보안-키>
+
+   # Session 설정
+   SESSION_TIMEOUT=1800000
+   SESSION_WARNING_TIME=120000
+   ```
+
+4. **배포!**
+   - Deploy 버튼 클릭
+   - 완료! 🎉
+
+## 🔑 환경 변수 생성
+
+보안 키 생성:
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+## 📋 이전 방식 (더 이상 필요 없음)
+
+<details>
+<summary>Option 2: Frontend + Separate Backend (레거시)</summary>
+
+이전에는 Express 백엔드를 별도로 배포해야 했지만, 이제는 **필요 없습니다**!
+
+모든 API 기능이 Next.js API Routes로 마이그레이션되었습니다.
 
 #### Backend Deployment Options:
 

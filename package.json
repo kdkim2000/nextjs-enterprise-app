@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --webpack\" \"node backend/server.js\"",
+    "dev": "next dev --webpack",
+    "dev:express": "concurrently \"next dev --webpack\" \"node backend/server.js\"",
     "dev:frontend": "next dev --webpack",
     "dev:backend": "node backend/server.js",
+    "dev:api-routes": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
@@ -51,6 +53,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.17",
     "@types/dompurify": "^3.0.5",
     "@types/express": "^5.0.0",
