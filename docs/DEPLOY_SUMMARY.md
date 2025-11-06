@@ -11,8 +11,8 @@
 - ✅ `vercel.json` 생성 - Vercel 배포 설정
 - ✅ `next.config.ts` 업데이트 - Standalone 출력, 이미지 최적화, 리다이렉트
 - ✅ `.env.production` 생성 - 프로덕션 환경 변수 템플릿
-- ✅ `VERCEL_DEPLOYMENT.md` 생성 - 상세 배포 가이드
-- ✅ `README.md` 업데이트 - 배포 정보 추가
+- ✅ [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md) 생성 - 상세 배포 가이드
+- ✅ [`../README.md`](../README.md) 업데이트 - 배포 정보 추가
 
 ### 3. 빌드 최적화
 - ✅ Images domains → remotePatterns 마이그레이션
@@ -44,7 +44,7 @@ git push origin main
 - Render.com
 - Heroku
 
-자세한 내용은 `VERCEL_DEPLOYMENT.md` 참고
+자세한 내용은 [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md) 참고
 
 ## 🎯 현재 상태
 
@@ -69,9 +69,9 @@ git push origin main
 
 ## 📚 참고 문서
 
-- `VERCEL_DEPLOYMENT.md` - 상세 배포 가이드
-- `README.md` - 프로젝트 개요 및 로컬 실행 방법
-- `ARCHITECTURE.md` - 아키텍처 상세 문서
+- [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md) - 상세 배포 가이드
+- [`../README.md`](../README.md) - 프로젝트 개요 및 로컬 실행 방법
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) - 아키텍처 상세 문서
 
 ## 🚀 배포 URL
 
