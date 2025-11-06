@@ -1,25 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install)",
+      "Bash(rm:*)",
       "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(git remote:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(taskkill /PID 4844 /F)",
       "Bash(taskkill:*)",
-      "Bash(cmd.exe //c \"taskkill /PID 4844 /F\")",
-      "Bash(cmd.exe //c \"taskkill /PID 1240 /F\")",
-      "Bash(if [ -d \".next/dev\" ])",
-      "Bash(then rm -rf .next/dev)",
-      "Bash(else echo \"No lock files found\")",
-      "Bash(fi)",
-      "Bash(cmd.exe //c \"taskkill /PID 2748 /F\")",
-      "Bash(cmd.exe //c \"taskkill /PID 26092 /F\")",
-      "Bash(cmd.exe //c \"taskkill /PID 8764 /F && taskkill /PID 3688 /F\")",
-      "Bash(rm:*)",
-      "Bash(cmd.exe //c \"taskkill /PID 14668 /F\")",
-      "Bash(npm install:*)",
-      "Bash(cmd.exe //c \"taskkill /PID 33240 /F && taskkill /PID 30732 /F && taskkill /PID 31860 /F\")"
+      "Bash(powershell -Command \"Stop-Process -Id 32280 -Force\")",
+      "Bash(npm run lint:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

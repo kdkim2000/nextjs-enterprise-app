@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, AuthState } from '@/types/auth';
+import { AuthState } from '@/types/auth';
 import { api } from '@/lib/axios';
 
 interface AuthContextType extends AuthState {
