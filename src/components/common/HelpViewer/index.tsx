@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   IconButton,
+  Button,
   Box,
   Typography,
   Accordion,
@@ -23,7 +24,8 @@ import {
   ExpandMore as ExpandMoreIcon,
   VideoLibrary as VideoIcon,
   Link as LinkIcon,
-  HelpOutline as HelpIcon
+  HelpOutline as HelpIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 import { api } from '@/lib/axios';
 import { HelpContent } from '@/types/help';
@@ -33,21 +35,16 @@ interface HelpViewerProps {
   onClose: () => void;
   pageId: string;
   language?: 'en' | 'ko';
+  isAdmin?: boolean;
 }
 
-export default function HelpViewer({ open, onClose, pageId, language = 'en' }: HelpViewerProps) {
+export default function HelpViewer({ open, onClose, pageId, language = 'en', isAdmin = false }: HelpViewerProps) {
   const [helpContent, setHelpContent] = useState<HelpContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (open && pageId) {
-      fetchHelpContent();
-    }
-  }, [open, pageId, language]);
-
-  const fetchHelpContent = async () => {
+  const fetchHelpContent = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -65,7 +62,13 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en' }: H
     } finally {
       setLoading(false);
     }
-  };
+  }, [pageId, language]);
+
+  useEffect(() => {
+    if (open && pageId) {
+      fetchHelpContent();
+    }
+  }, [open, pageId, fetchHelpContent]);
 
   const handleSectionToggle = (sectionId: string) => {
     setExpandedSections((prev) =>
@@ -73,6 +76,12 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en' }: H
         ? prev.filter((id) => id !== sectionId)
         : [...prev, sectionId]
     );
+  };
+
+  const handleEditHelp = () => {
+    // Navigate to help management page with filter for this pageId
+    const locale = language || 'en';
+    window.location.href = `/${locale}/admin/help?pageId=${pageId}`;
   };
 
   return (
@@ -104,9 +113,22 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en' }: H
             {helpContent?.title || 'Help'}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} size="small">
-          <CloseIcon />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {isAdmin && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<EditIcon />}
+              onClick={handleEditHelp}
+              sx={{ mr: 1 }}
+            >
+              Edit
+            </Button>
+          )}
+          <IconButton onClick={onClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ mt: 2 }}>
@@ -125,6 +147,18 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en' }: H
         {!loading && !error && !helpContent && (
           <Alert severity="info">
             No help content available for this page yet.
+            {isAdmin && (
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<EditIcon />}
+                  onClick={handleEditHelp}
+                >
+                  Create Help Content
+                </Button>
+              </Box>
+            )}
           </Alert>
         )}
 

@@ -68,6 +68,8 @@ export default function UserManagementPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [helpExists, setHelpExists] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     username: '',
     name: '',
@@ -102,9 +104,27 @@ export default function UserManagementPage() {
     }
   }, [error]);
 
-  // Don't auto-fetch on mount - wait for user to search
+  // Check user role and help content availability on mount
   useEffect(() => {
-    // Initial empty state
+    const checkHelpAndRole = async () => {
+      try {
+        // Check if user is admin
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setIsAdmin(user.role === 'admin');
+        }
+
+        // Check if help content exists for this page
+        const response = await api.get('/help?pageId=admin-users&language=en');
+        setHelpExists(!!response.help);
+      } catch (err) {
+        // If help doesn't exist or error occurs, set to false
+        setHelpExists(false);
+      }
+    };
+
+    checkHelpAndRole();
   }, []);
 
   const fetchUsers = async (page: number = 0, pageSize: number = 50, useQuickSearch: boolean = false) => {
@@ -437,15 +457,18 @@ export default function UserManagementPage() {
         useMenu
         showBreadcrumb
         actions={
-          <Tooltip title="Help">
-            <IconButton
-              onClick={() => setHelpOpen(true)}
-              color="primary"
-              sx={{ ml: 1 }}
-            >
-              <HelpOutline />
-            </IconButton>
-          </Tooltip>
+          // Show help button: always for admin, only when help exists for regular users
+          (isAdmin || helpExists) ? (
+            <Tooltip title={isAdmin ? "Help (Admin: Click to edit)" : "Help"}>
+              <IconButton
+                onClick={() => setHelpOpen(true)}
+                color="primary"
+                sx={{ ml: 1 }}
+              >
+                <HelpOutline />
+              </IconButton>
+            </Tooltip>
+          ) : null
         }
       />
 
@@ -567,6 +590,7 @@ export default function UserManagementPage() {
         onClose={() => setHelpOpen(false)}
         pageId="admin-users"
         language="en"
+        isAdmin={isAdmin}
       />
     </PageContainer>
   );
