@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
 
@@ -30,8 +32,8 @@ const departments = [
   'Engineering', 'Support', 'Legal', 'Admin', 'Product', 'Design'
 ];
 
-const roles = ['user', 'manager', 'admin'];
-const statuses = ['active', 'inactive'];
+// const roles = ['user', 'manager', 'admin'];
+// const statuses = ['active', 'inactive'];
 
 // Weighted random selection for roles
 function getRandomRole() {

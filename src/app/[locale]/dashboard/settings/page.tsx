@@ -16,18 +16,12 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Alert,
-  Grid,
-  Card,
-  CardContent,
   Stack
 } from '@mui/material';
 import {
   Person,
   Security,
-  Palette,
-  Notifications,
-  Language
+  Palette
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
@@ -91,6 +85,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     loadPreferences();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadPreferences = async () => {
@@ -121,8 +116,9 @@ export default function SettingsPage() {
     try {
       await api.put('/user/profile', profileData);
       toast.success(locale === 'ko' ? '프로필이 업데이트되었습니다' : 'Profile updated successfully');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to update profile');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -147,8 +143,9 @@ export default function SettingsPage() {
       });
       toast.success(locale === 'ko' ? '비밀번호가 변경되었습니다' : 'Password changed successfully');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to change password');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || 'Failed to change password');
     } finally {
       setLoading(false);
     }
@@ -164,8 +161,9 @@ export default function SettingsPage() {
           ? locale === 'ko' ? 'MFA가 활성화되었습니다' : 'MFA enabled'
           : locale === 'ko' ? 'MFA가 비활성화되었습니다' : 'MFA disabled'
       );
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to toggle MFA');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || 'Failed to toggle MFA');
     } finally {
       setLoading(false);
     }
@@ -182,8 +180,9 @@ export default function SettingsPage() {
       }
 
       toast.success(locale === 'ko' ? '설정이 저장되었습니다' : 'Preferences saved successfully');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to save preferences');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || 'Failed to save preferences');
     } finally {
       setLoading(false);
     }

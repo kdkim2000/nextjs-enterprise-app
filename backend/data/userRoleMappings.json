@@ -1,0 +1,22 @@
+{
+  "userRoleMappings": [
+    {
+      "id": "urm-001",
+      "userId": "user-001",
+      "roleId": "role-001",
+      "assignedBy": "system",
+      "assignedAt": "2024-01-01T00:00:00.000Z",
+      "expiresAt": null,
+      "isActive": true
+    },
+    {
+      "id": "urm-002",
+      "userId": "user-002",
+      "roleId": "role-003",
+      "assignedBy": "system",
+      "assignedAt": "2024-01-15T00:00:00.000Z",
+      "expiresAt": null,
+      "isActive": true
+    }
+  ]
+}

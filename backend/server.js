@@ -12,6 +12,9 @@ const menuRoutes = require('./routes/menu');
 const userRoutes = require('./routes/user');
 const fileRoutes = require('./routes/file');
 const logRoutes = require('./routes/log');
+const roleRoutes = require('./routes/role');
+const userRoleMappingRoutes = require('./routes/userRoleMapping');
+const roleMenuMappingRoutes = require('./routes/roleMenuMapping');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -49,6 +52,9 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/file', fileRoutes);
 app.use('/api/log', logRoutes);
+app.use('/api/role', roleRoutes);
+app.use('/api/user-role-mapping', userRoleMappingRoutes);
+app.use('/api/role-menu-mapping', roleMenuMappingRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -22,7 +22,6 @@ import {
 import {
   FormatBold,
   FormatItalic,
-  FormatUnderlined,
   FormatStrikethrough,
   FormatListBulleted,
   FormatListNumbered,

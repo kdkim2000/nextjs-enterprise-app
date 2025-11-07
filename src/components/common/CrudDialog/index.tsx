@@ -17,8 +17,11 @@ import {
   Grid2 as Grid,
   Box,
   Tooltip,
-  IconButton
+  IconButton,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
+import UserSelector from '@/components/common/UserSelector';
 
 export type FormFieldType =
   | 'text'
@@ -27,6 +30,8 @@ export type FormFieldType =
   | 'number'
   | 'select'
   | 'textarea'
+  | 'checkbox'
+  | 'userSelector'
   | 'custom';
 
 export interface SelectOption {
@@ -143,6 +148,34 @@ export default function CrudDialog<T extends Record<string, any>>({
             multiline
             rows={field.rows || 4}
             size={size}
+          />
+        );
+        break;
+
+      case 'checkbox':
+        fieldElement = (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={Boolean(fieldValue)}
+                onChange={(e) => handleChange(field.name, e.target.checked)}
+                disabled={field.disabled}
+              />
+            }
+            label={field.label}
+          />
+        );
+        break;
+
+      case 'userSelector':
+        fieldElement = (
+          <UserSelector
+            label={field.label}
+            value={fieldValue}
+            onChange={(userId) => handleChange(field.name, userId)}
+            helperText={field.helperText}
+            required={field.required}
+            disabled={field.disabled}
           />
         );
         break;

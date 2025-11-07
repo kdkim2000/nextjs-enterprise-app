@@ -3,11 +3,12 @@
 import React from 'react';
 import { TextField, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
+import UserSelector from '@/components/common/UserSelector';
 
 export interface FilterFieldConfig {
   name: string;
   label: string;
-  type?: 'text' | 'select' | 'number';
+  type?: 'text' | 'select' | 'number' | 'userSelector';
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   gridSize?: { xs?: number; sm?: number; md?: number };
@@ -79,6 +80,20 @@ export default function SearchFilterFields({
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+          );
+        }
+
+        if (field.type === 'userSelector') {
+          return (
+            <Grid key={field.name} size={gridSize}>
+              <UserSelector
+                label={field.label}
+                value={values[field.name] || ''}
+                onChange={(userId) => onChange(field.name, userId || '')}
+                helperText={field.placeholder}
+                disabled={disabled}
+              />
             </Grid>
           );
         }

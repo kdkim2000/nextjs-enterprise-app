@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -41,7 +42,9 @@ export interface LogEntry {
   userId: string;
   ip: string;
   userAgent: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestBody?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responsePreview?: any;
 }
 
