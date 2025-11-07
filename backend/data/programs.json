@@ -1,0 +1,326 @@
+[
+  {
+    "id": "prog-001",
+    "code": "PROG-USER-MGMT",
+    "name": {
+      "en": "User Management",
+      "ko": "사용자 관리"
+    },
+    "description": {
+      "en": "Manage system users, roles, and permissions",
+      "ko": "시스템 사용자, 역할 및 권한 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View user data", "ko": "사용자 데이터 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Create and update users", "ko": "사용자 생성 및 수정" },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": { "en": "Delete", "ko": "삭제" },
+        "description": { "en": "Delete users", "ko": "사용자 삭제" },
+        "isDefault": false
+      },
+      {
+        "code": "EXPORT",
+        "name": { "en": "Export", "ko": "내보내기" },
+        "description": { "en": "Export user data", "ko": "사용자 데이터 내보내기" },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "user", "security"]
+    }
+  },
+  {
+    "id": "prog-002",
+    "code": "PROG-MENU-MGMT",
+    "name": {
+      "en": "Menu Management",
+      "ko": "메뉴 관리"
+    },
+    "description": {
+      "en": "Manage application menu structure and permissions",
+      "ko": "애플리케이션 메뉴 구조 및 권한 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View menu data", "ko": "메뉴 데이터 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Create and update menus", "ko": "메뉴 생성 및 수정" },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": { "en": "Delete", "ko": "삭제" },
+        "description": { "en": "Delete menus", "ko": "메뉴 삭제" },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "menu", "navigation"]
+    }
+  },
+  {
+    "id": "prog-003",
+    "code": "PROG-ROLE-MGMT",
+    "name": {
+      "en": "Role Management",
+      "ko": "역할 관리"
+    },
+    "description": {
+      "en": "Manage user roles and permissions",
+      "ko": "사용자 역할 및 권한 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View role data", "ko": "역할 데이터 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Create and update roles", "ko": "역할 생성 및 수정" },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": { "en": "Delete", "ko": "삭제" },
+        "description": { "en": "Delete roles", "ko": "역할 삭제" },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "role", "security"]
+    }
+  },
+  {
+    "id": "prog-004",
+    "code": "PROG-HELP-MGMT",
+    "name": {
+      "en": "Help Management",
+      "ko": "도움말 관리"
+    },
+    "description": {
+      "en": "Manage help content for all pages",
+      "ko": "모든 페이지의 도움말 컨텐츠 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View help content", "ko": "도움말 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Create and update help content", "ko": "도움말 생성 및 수정" },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": { "en": "Delete", "ko": "삭제" },
+        "description": { "en": "Delete help content", "ko": "도움말 삭제" },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "help", "documentation"]
+    }
+  },
+  {
+    "id": "prog-005",
+    "code": "PROG-USER-ROLE-MAP",
+    "name": {
+      "en": "User-Role Mapping",
+      "ko": "사용자-역할 매핑"
+    },
+    "description": {
+      "en": "Manage user-role assignments",
+      "ko": "사용자-역할 할당 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View mappings", "ko": "매핑 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Create and update mappings", "ko": "매핑 생성 및 수정" },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": { "en": "Delete", "ko": "삭제" },
+        "description": { "en": "Delete mappings", "ko": "매핑 삭제" },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "mapping", "role"]
+    }
+  },
+  {
+    "id": "prog-006",
+    "code": "PROG-ROLE-MENU-MAP",
+    "name": {
+      "en": "Role-Menu Mapping",
+      "ko": "역할-메뉴 매핑"
+    },
+    "description": {
+      "en": "Manage role-menu permissions",
+      "ko": "역할-메뉴 권한 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View mappings", "ko": "매핑 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Create and update mappings", "ko": "매핑 생성 및 수정" },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": { "en": "Delete", "ko": "삭제" },
+        "description": { "en": "Delete mappings", "ko": "매핑 삭제" },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "mapping", "menu"]
+    }
+  },
+  {
+    "id": "prog-007",
+    "code": "PROG-DASHBOARD",
+    "name": {
+      "en": "Dashboard",
+      "ko": "대시보드"
+    },
+    "description": {
+      "en": "Main dashboard with key metrics and insights",
+      "ko": "주요 지표 및 인사이트가 포함된 메인 대시보드"
+    },
+    "category": "dashboard",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View dashboard", "ko": "대시보드 조회" },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["dashboard", "analytics", "overview"]
+    }
+  },
+  {
+    "id": "prog-008",
+    "code": "PROG-SETTINGS",
+    "name": {
+      "en": "User Settings",
+      "ko": "사용자 설정"
+    },
+    "description": {
+      "en": "User profile and preference settings",
+      "ko": "사용자 프로필 및 환경 설정"
+    },
+    "category": "user",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": { "en": "Read", "ko": "읽기" },
+        "description": { "en": "View settings", "ko": "설정 조회" },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": { "en": "Write", "ko": "쓰기" },
+        "description": { "en": "Update settings", "ko": "설정 수정" },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["user", "settings", "profile"]
+    }
+  }
+]
