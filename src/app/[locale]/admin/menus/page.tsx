@@ -2,14 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Container,
   Box,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Select,
   MenuItem,
   FormControl,
@@ -18,7 +11,13 @@ import {
   Snackbar,
   Tooltip,
   IconButton,
-  Paper
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { HelpOutline as HelpIcon } from '@mui/icons-material';
@@ -27,6 +26,8 @@ import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
+import PageContainer from '@/components/common/PageContainer';
+import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
@@ -470,17 +471,7 @@ export default function MenuManagementPage() {
   ], [t, allMenus, locale]);
 
   return (
-    <Container
-      maxWidth={false}
-      sx={{
-        maxWidth: '100%',
-        px: 0,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}
-    >
+    <PageContainer>
       {/* Header */}
       <PageHeader useMenu showBreadcrumb />
 
@@ -727,6 +718,6 @@ export default function MenuManagementPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </PageContainer>
   );
 }

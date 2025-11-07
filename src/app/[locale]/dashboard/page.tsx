@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {
-  Container,
   Typography,
   Grid,
   Card,
@@ -17,6 +16,7 @@ import {
   Description
 } from '@mui/icons-material';
 import PageHeader from '@/components/common/PageHeader';
+import PageContainer from '@/components/common/PageContainer';
 
 export default function DashboardPage() {
 
@@ -28,7 +28,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <Container maxWidth={false} sx={{ maxWidth: '100%', px: 0 }}>
+    <PageContainer fullHeight={false}>
       <PageHeader useMenu />
 
       <Grid container spacing={3}>
@@ -94,6 +94,6 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
       </Grid>
-    </Container>
+    </PageContainer>
   );
 }

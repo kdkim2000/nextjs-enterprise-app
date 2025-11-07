@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -13,6 +12,7 @@ import ExcelDataGrid from '@/components/common/DataGrid';
 import { GridColDef } from '@mui/x-data-grid';
 import { exportDataGridToPDF } from '@/lib/pdf';
 import PageHeader from '@/components/common/PageHeader';
+import PageContainer from '@/components/common/PageContainer';
 
 export default function DataGridPage() {
   // Sample data for DataGrid
@@ -55,7 +55,7 @@ export default function DataGridPage() {
   };
 
   return (
-    <Container maxWidth={false} sx={{ maxWidth: '100%', px: 0 }}>
+    <PageContainer fullHeight={false}>
       <PageHeader useMenu showBreadcrumb />
 
       <Paper sx={{ p: 3 }}>
@@ -75,7 +75,7 @@ export default function DataGridPage() {
           <ExcelDataGrid
             rows={gridRows}
             columns={gridColumns}
-            onRowsChange={(rows) => setGridRows(rows as any)}
+            onRowsChange={(rows) => setGridRows(rows as typeof gridRows)}
             onAdd={handleAddRow}
             onDelete={handleDeleteRows}
             editable
@@ -85,6 +85,6 @@ export default function DataGridPage() {
           />
         </Stack>
       </Paper>
-    </Container>
+    </PageContainer>
   );
 }
