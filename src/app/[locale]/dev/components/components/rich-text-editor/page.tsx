@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -11,13 +10,14 @@ import {
 } from '@mui/material';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import PageHeader from '@/components/common/PageHeader';
+import PageContainer from '@/components/common/PageContainer';
 
 export default function RichTextEditorPage() {
   const [editorContent, setEditorContent] = useState('<p>Hello World!</p>');
   const [editorMode, setEditorMode] = useState<'editor' | 'viewer'>('editor');
 
   return (
-    <Container maxWidth={false} sx={{ maxWidth: '100%', px: 0 }}>
+    <PageContainer fullHeight={false}>
       <PageHeader useMenu showBreadcrumb />
 
       <Paper sx={{ p: 3 }}>
@@ -65,6 +65,6 @@ export default function RichTextEditorPage() {
           </Paper>
         </Stack>
       </Paper>
-    </Container>
+    </PageContainer>
   );
 }

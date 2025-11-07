@@ -2,18 +2,17 @@
 
 import React from 'react';
 import {
-  Container,
   Typography,
-  Box,
   Paper,
   Stack
 } from '@mui/material';
 import FileUpload from '@/components/common/FileUpload';
 import PageHeader from '@/components/common/PageHeader';
+import PageContainer from '@/components/common/PageContainer';
 
 export default function FileUploadPage() {
   return (
-    <Container maxWidth={false} sx={{ maxWidth: '100%', px: 0 }}>
+    <PageContainer fullHeight={false}>
       <PageHeader useMenu showBreadcrumb />
 
       <Paper sx={{ p: 3 }}>
@@ -29,12 +28,12 @@ export default function FileUploadPage() {
             maxSize={10}
             acceptedTypes={['.pdf', '.doc', '.docx', '.xlsx', '.jpg', '.png']}
             onUploadComplete={(files) => {
-              console.log('Uploaded files:', files);
+              console.info('Uploaded files:', files);
             }}
             autoUpload
           />
         </Stack>
       </Paper>
-    </Container>
+    </PageContainer>
   );
 }

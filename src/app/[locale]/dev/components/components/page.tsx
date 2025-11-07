@@ -2,10 +2,8 @@
 
 import React from 'react';
 import {
-  Container,
   Typography,
   Box,
-  Paper,
   Grid,
   Card,
   CardContent,
@@ -17,6 +15,7 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import PageHeader from '@/components/common/PageHeader';
+import PageContainer from '@/components/common/PageContainer';
 
 export default function ComponentsPage() {
   const router = useRouter();
@@ -46,7 +45,7 @@ export default function ComponentsPage() {
   ];
 
   return (
-    <Container maxWidth={false} sx={{ maxWidth: '100%', px: 0 }}>
+    <PageContainer fullHeight={false}>
       <PageHeader useMenu showBreadcrumb />
 
       <Grid container spacing={3}>
@@ -96,6 +95,6 @@ export default function ComponentsPage() {
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </PageContainer>
   );
 }

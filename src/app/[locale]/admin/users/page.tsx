@@ -2,27 +2,24 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Container,
   Box,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Stack,
   Alert,
-  CircularProgress
+  MenuItem,
+  IconButton,
+  Tooltip
 } from '@mui/material';
-import { Search } from '@mui/icons-material';
+import { Search, HelpOutline } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
+import PageContainer from '@/components/common/PageContainer';
+import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
+import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
+import HelpViewer from '@/components/common/HelpViewer';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
@@ -66,6 +63,11 @@ export default function UserManagementPage() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [quickSearch, setQuickSearch] = useState('');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     username: '',
     name: '',
@@ -79,6 +81,26 @@ export default function UserManagementPage() {
     pageSize: 50
   });
   const [rowCount, setRowCount] = useState(0);
+
+  // Auto-hide success message after 10 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Auto-hide error message after 10 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   // Don't auto-fetch on mount - wait for user to search
   useEffect(() => {
@@ -163,7 +185,7 @@ export default function UserManagementPage() {
       department: '',
       status: 'active',
       password: ''
-    } as any);
+    } as User);
     setDialogOpen(true);
   };
 
@@ -175,20 +197,44 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDelete = async (ids: (string | number)[]) => {
+  const handleDeleteClick = (ids: (string | number)[]) => {
+    setSelectedForDelete(ids);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
+      setDeleteLoading(true);
       setError(null);
+      setSuccessMessage(null);
+
       // Delete users from API
-      for (const id of ids) {
+      for (const id of selectedForDelete) {
         await api.delete(`/user/${id}`);
       }
+
       // Remove from local state
-      setUsers(users.filter((user) => !ids.includes(user.id)));
+      setUsers(users.filter((user) => !selectedForDelete.includes(user.id)));
+
+      // Show success message
+      const count = selectedForDelete.length;
+      setSuccessMessage(`Successfully deleted ${count} user${count > 1 ? 's' : ''}`);
+
+      // Close dialog
+      setDeleteConfirmOpen(false);
+      setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
       setError(error.response?.data?.error || 'Failed to delete users');
       console.error('Failed to delete users:', err);
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setSelectedForDelete([]);
   };
 
   const handleSave = async () => {
@@ -329,27 +375,89 @@ export default function UserManagementPage() {
     }
   ], [t]);
 
+  // Form field configuration for CRUD dialog
+  const formFields: FormFieldConfig[] = useMemo(() => [
+    {
+      name: 'username',
+      label: 'Username',
+      type: 'text',
+      required: true,
+      disabled: !!editingUser?.id
+    },
+    {
+      name: 'password',
+      label: 'Password',
+      type: 'password',
+      required: true,
+      helperText: 'Minimum 8 characters',
+      showOnlyForNew: true
+    },
+    {
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+      required: true
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'email',
+      required: true
+    },
+    {
+      name: 'role',
+      label: 'Role',
+      type: 'select',
+      options: [
+        { value: 'admin', label: 'Admin' },
+        { value: 'manager', label: 'Manager' },
+        { value: 'user', label: 'User' }
+      ]
+    },
+    {
+      name: 'department',
+      label: 'Department',
+      type: 'text'
+    },
+    {
+      name: 'status',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'active', label: 'Active' },
+        { value: 'inactive', label: 'Inactive' }
+      ]
+    }
+  ], [editingUser?.id]);
+
   return (
-    <Container
-      maxWidth={false}
-      sx={{
-        maxWidth: '100%',
-        px: 0,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}
-    >
+    <PageContainer>
       {/* Header - Auto mode: fetches menu info based on current path */}
       <PageHeader
         useMenu
         showBreadcrumb
+        actions={
+          <Tooltip title="Help">
+            <IconButton
+              onClick={() => setHelpOpen(true)}
+              color="primary"
+              sx={{ ml: 1 }}
+            >
+              <HelpOutline />
+            </IconButton>
+          </Tooltip>
+        }
       />
 
       {error && (
         <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
           {error}
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setSuccessMessage(null)}>
+          {successMessage}
         </Alert>
       )}
 
@@ -403,7 +511,7 @@ export default function UserManagementPage() {
               onRowsChange={(rows) => setUsers(rows as User[])}
               onAdd={handleAdd}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
               editable
               checkboxSelection
@@ -419,112 +527,47 @@ export default function UserManagementPage() {
       </Paper>
 
       {/* Edit Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {!editingUser?.id ? 'Add New User' : 'Edit User'}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <TextField
-              label="Username"
-              value={editingUser?.username || ''}
-              onChange={(e) =>
-                setEditingUser(
-                  editingUser ? ({ ...editingUser, username: e.target.value } as User) : null
-                )
+      <CrudDialog
+        open={dialogOpen}
+        title={!editingUser?.id ? 'Add New User' : 'Edit User'}
+        data={editingUser}
+        fields={formFields}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditingUser(null);
+        }}
+        onSave={handleSave}
+        loading={saveLoading}
+        cancelText={t('common.cancel')}
+        saveText={t('common.save')}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteConfirmOpen}
+        itemCount={selectedForDelete.length}
+        itemName="user"
+        itemsList={selectedForDelete.map((id) => {
+          const user = users.find((u) => u.id === id);
+          return user
+            ? {
+                id: user.id,
+                displayName: `${user.username} (${user.name || user.email})`
               }
-              fullWidth
-              required
-              disabled={!!editingUser?.id}
-            />
-            {!editingUser?.id && (
-              <TextField
-                label="Password"
-                type="password"
-                value={(editingUser as User & { password?: string })?.password || ''}
-                onChange={(e) =>
-                  setEditingUser(
-                    editingUser ? { ...editingUser, password: e.target.value } as User & { password?: string } : null
-                  )
-                }
-                fullWidth
-                required
-                helperText="Minimum 8 characters"
-              />
-            )}
-            <TextField
-              label="Name"
-              value={editingUser?.name || ''}
-              onChange={(e) =>
-                setEditingUser(
-                  editingUser ? { ...editingUser, name: e.target.value } : null
-                )
-              }
-              fullWidth
-              required
-            />
-            <TextField
-              label="Email"
-              type="email"
-              value={editingUser?.email || ''}
-              onChange={(e) =>
-                setEditingUser(
-                  editingUser ? { ...editingUser, email: e.target.value } : null
-                )
-              }
-              fullWidth
-              required
-            />
-            <TextField
-              label="Role"
-              select
-              value={editingUser?.role || 'user'}
-              onChange={(e) =>
-                setEditingUser(
-                  editingUser ? { ...editingUser, role: e.target.value } : null
-                )
-              }
-              fullWidth
-            >
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="manager">Manager</MenuItem>
-              <MenuItem value="user">User</MenuItem>
-            </TextField>
-            <TextField
-              label="Department"
-              value={editingUser?.department || ''}
-              onChange={(e) =>
-                setEditingUser(
-                  editingUser ? { ...editingUser, department: e.target.value } : null
-                )
-              }
-              fullWidth
-            />
-            <TextField
-              label="Status"
-              select
-              value={editingUser?.status || 'active'}
-              onChange={(e) =>
-                setEditingUser(
-                  editingUser ? { ...editingUser, status: e.target.value } : null
-                )
-              }
-              fullWidth
-            >
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-            </TextField>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} disabled={saveLoading}>
-            {t('common.cancel')}
-          </Button>
-          <Button onClick={handleSave} variant="contained" disabled={saveLoading}>
-            {saveLoading ? <CircularProgress size={24} /> : t('common.save')}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+            : { id, displayName: String(id) };
+        })}
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
+      />
+
+      {/* Help Viewer */}
+      <HelpViewer
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        pageId="admin-users"
+        language="en"
+      />
+    </PageContainer>
   );
 }
