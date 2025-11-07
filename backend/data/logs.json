@@ -1,36 +1,24 @@
 [
   {
-    "id": "d4747fbc-3de8-4b3b-9b11-b7f8de86967a",
-    "timestamp": "2025-11-05T21:30:02.365Z",
+    "id": "a2a3db6c-e67e-4575-b62a-8b9ec5b3eadf",
+    "timestamp": "2025-11-07T19:00:09.557Z",
     "method": "GET",
     "path": "/recent-menus",
     "statusCode": 304,
-    "duration": "17ms",
+    "duration": "9ms",
     "userId": "user-001",
     "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+    "userAgent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
   },
   {
-    "id": "0533650c-73ed-4aa1-b38e-4ae21e1742ff",
-    "timestamp": "2025-11-05T21:30:02.384Z",
+    "id": "adc8942c-b8e1-4e03-a0dd-a1b0d3d9f066",
+    "timestamp": "2025-11-07T19:00:11.985Z",
     "method": "GET",
-    "path": "/recent-menus",
-    "statusCode": 304,
-    "duration": "17ms",
+    "path": "/",
+    "statusCode": 200,
+    "duration": "148ms",
     "userId": "user-001",
     "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
-  },
-  {
-    "id": "132b2331-7311-41e5-9b98-2d947a90b43b",
-    "timestamp": "2025-11-05T21:30:02.391Z",
-    "method": "GET",
-    "path": "/recent-menus",
-    "statusCode": 304,
-    "duration": "6ms",
-    "userId": "user-001",
-    "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+    "userAgent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
   }
-]}
 ]

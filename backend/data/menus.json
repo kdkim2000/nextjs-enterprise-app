@@ -72,6 +72,78 @@
     }
   },
   {
+    "id": "menu-009",
+    "code": "role-management",
+    "name": {
+      "en": "Role Management",
+      "ko": "역할 관리"
+    },
+    "path": "/admin/roles",
+    "icon": "Security",
+    "order": 3,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MGMT",
+    "description": {
+      "en": "Manage user roles and permissions",
+      "ko": "사용자 역할 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-010",
+    "code": "help-management",
+    "name": {
+      "en": "Help Management",
+      "ko": "도움말 관리"
+    },
+    "path": "/admin/help",
+    "icon": "Help",
+    "order": 4,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-HELP-MGMT",
+    "description": {
+      "en": "Manage help content for all pages",
+      "ko": "모든 페이지의 도움말 컨텐츠 관리"
+    }
+  },
+  {
+    "id": "menu-011",
+    "code": "user-role-mapping",
+    "name": {
+      "en": "User-Role Mapping",
+      "ko": "사용자-역할 매핑"
+    },
+    "path": "/admin/user-role-mapping",
+    "icon": "Link",
+    "order": 5,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-USER-ROLE-MAP",
+    "description": {
+      "en": "Manage user-role assignments",
+      "ko": "사용자-역할 할당 관리"
+    }
+  },
+  {
+    "id": "menu-012",
+    "code": "role-menu-mapping",
+    "name": {
+      "en": "Role-Menu Mapping",
+      "ko": "역할-메뉴 매핑"
+    },
+    "path": "/admin/role-menu-mapping",
+    "icon": "AccountTree",
+    "order": 6,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MENU-MAP",
+    "description": {
+      "en": "Manage role-menu permissions",
+      "ko": "역할-메뉴 권한 관리"
+    }
+  },
+  {
     "id": "menu-005",
     "code": "reports",
     "name": {

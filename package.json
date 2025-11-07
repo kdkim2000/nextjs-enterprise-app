@@ -3,11 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "dev:express": "concurrently \"next dev --webpack\" \"node backend/server.js\"",
+    "dev": "concurrently \"next dev --webpack\" \"node backend/server.js\"",
     "dev:frontend": "next dev --webpack",
     "dev:backend": "node backend/server.js",
-    "dev:api-routes": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",

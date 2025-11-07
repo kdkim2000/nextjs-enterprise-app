@@ -21,8 +21,9 @@ export function useMenu() {
       const response = await api.get('/menu/user-menus');
       setMenus(response.menus || []);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch menus');
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || 'Failed to fetch menus');
       console.error('Error fetching menus:', err);
     } finally {
       setIsLoading(false);
@@ -34,7 +35,7 @@ export function useMenu() {
     try {
       const response = await api.get('/user/favorite-menus');
       setFavoriteMenus(response.menus || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching favorite menus:', err);
     }
   }, []);
@@ -44,7 +45,7 @@ export function useMenu() {
     try {
       const response = await api.get('/user/recent-menus');
       setRecentMenus(response.menus || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching recent menus:', err);
     }
   }, []);
@@ -57,7 +58,7 @@ export function useMenu() {
       });
       setCurrentMenu(response.menu || null);
       return response.menu;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching menu by path:', err);
       throw err;
     }
@@ -68,7 +69,7 @@ export function useMenu() {
     try {
       await api.post('/user/favorite-menus', { menuId });
       await fetchFavoriteMenus();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding to favorites:', err);
       throw err;
     }
@@ -79,7 +80,7 @@ export function useMenu() {
     try {
       await api.delete(`/user/favorite-menus/${menuId}`);
       await fetchFavoriteMenus();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error removing from favorites:', err);
       throw err;
     }

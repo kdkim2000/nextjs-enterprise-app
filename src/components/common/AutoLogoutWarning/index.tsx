@@ -35,7 +35,7 @@ export default function AutoLogoutWarning() {
           inactivity.
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          Click "Stay Logged In" to continue your session, or "Logout Now" to logout
+          Click &quot;Stay Logged In&quot; to continue your session, or &quot;Logout Now&quot; to logout
           immediately.
         </Typography>
       </DialogContent>

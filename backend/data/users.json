@@ -11,7 +11,7 @@
     "ssoEnabled": true,
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "lastLogin": "2025-11-05T21:14:21.358Z"
+    "lastLogin": "2025-11-07T18:59:48.803Z"
   },
   {
     "id": "user-002",
@@ -28,34 +28,6 @@
     "lastLogin": "2025-11-05T17:40:32.172Z"
   },
   {
-    "id": "user-003",
-    "username": "jane.smith",
-    "password": "$2b$10$mEv9ocbcBAyaO28Y3C885uR2gialpZrmXAD3w7jVRm44WzWkkmPN.",
-    "email": "jane.smith@example.com",
-    "name": "Jane Smith",
-    "role": "manager",
-    "department": "Marketing",
-    "mfaEnabled": true,
-    "ssoEnabled": false,
-    "status": "active",
-    "createdAt": "2024-02-01T00:00:00.000Z",
-    "lastLogin": null
-  },
-  {
-    "id": "user-004",
-    "username": "joseph.white",
-    "password": "$2b$10$fgfsM0IoX778lfwSuOWbH.GsOTic.s0IkL7w7cZOhR87Y8Hqcphj6",
-    "email": "joseph.white@example.com",
-    "name": "Joseph White",
-    "role": "user",
-    "department": "Support",
-    "mfaEnabled": false,
-    "ssoEnabled": true,
-    "status": "active",
-    "createdAt": "2024-04-16T15:23:58.424Z",
-    "lastLogin": "2025-10-19T11:10:43.403Z"
-  },
-  {
     "id": "user-005",
     "username": "gary.campbell",
     "password": "$2b$10$fgfsM0IoX778lfwSuOWbH.GsOTic.s0IkL7w7cZOhR87Y8Hqcphj6",
@@ -68,20 +40,6 @@
     "status": "active",
     "createdAt": "2024-04-13T05:28:06.645Z",
     "lastLogin": "2025-10-17T23:39:02.005Z"
-  },
-  {
-    "id": "user-006",
-    "username": "brian.green",
-    "password": "$2b$10$fgfsM0IoX778lfwSuOWbH.GsOTic.s0IkL7w7cZOhR87Y8Hqcphj6",
-    "email": "brian.green@example.com",
-    "name": "Brian Green",
-    "role": "user",
-    "department": "HR",
-    "mfaEnabled": true,
-    "ssoEnabled": false,
-    "status": "active",
-    "createdAt": "2024-11-07T21:12:19.195Z",
-    "lastLogin": "2025-10-08T21:52:35.731Z"
   },
   {
     "id": "user-007",

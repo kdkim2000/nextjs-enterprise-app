@@ -214,6 +214,8 @@ export const defaultUserPreferences = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const defaultMfaCodes: any[] = [];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const defaultLogs: any[] = [];
