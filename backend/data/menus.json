@@ -144,6 +144,24 @@
     }
   },
   {
+    "id": "menu-013",
+    "code": "program-management",
+    "name": {
+      "en": "Program Management",
+      "ko": "프로그램 관리"
+    },
+    "path": "/admin/programs",
+    "icon": "Code",
+    "order": 7,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-PROGRAM-MGMT",
+    "description": {
+      "en": "Manage application programs and permissions",
+      "ko": "애플리케이션 프로그램 및 권한 관리"
+    }
+  },
+  {
     "id": "menu-005",
     "code": "reports",
     "name": {
