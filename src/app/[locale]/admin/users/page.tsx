@@ -7,20 +7,9 @@ import {
   Alert,
   IconButton,
   Tooltip,
-  Avatar,
-  Drawer,
-  Typography,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Stack,
-  Divider,
-  CircularProgress
+  Avatar
 } from '@mui/material';
-import { Search, HelpOutline, Edit, Close } from '@mui/icons-material';
+import { Search, HelpOutline, Edit } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
@@ -30,6 +19,8 @@ import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
+import EditDrawer from '@/components/common/EditDrawer';
+import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
@@ -114,7 +105,6 @@ export default function UserManagementPage() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpExists, setHelpExists] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
     savedState?.searchCriteria || {
       username: '',
@@ -360,26 +350,6 @@ export default function UserManagementPage() {
     setSelectedForDelete([]);
   };
 
-  const handleAvatarUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    setUploadingAvatar(true);
-    try {
-      const response = await api.post('/file/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.file.path; // Returns /uploads/filename
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      throw new Error(error.response?.data?.error || 'Failed to upload avatar');
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
-
   const handleSave = async () => {
     if (!editingUser) return;
 
@@ -620,197 +590,27 @@ export default function UserManagementPage() {
       </Paper>
 
       {/* Edit Drawer */}
-      <Drawer
-        anchor="right"
+      <EditDrawer
         open={dialogOpen}
         onClose={() => {
           setDialogOpen(false);
           setEditingUser(null);
         }}
-        PaperProps={{
-          sx: { width: { xs: '100%', sm: 500 } }
-        }}
+        title={!editingUser?.id ? 'Add New User' : 'Edit User'}
+        onSave={handleSave}
+        saveLoading={saveLoading}
+        saveLabel={t('common.save')}
+        cancelLabel={t('common.cancel')}
       >
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          {/* Header */}
-          <Box sx={{
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: 1,
-            borderColor: 'divider'
-          }}>
-            <Typography variant="h6">
-              {!editingUser?.id ? 'Add New User' : 'Edit User'}
-            </Typography>
-            <IconButton onClick={() => {
-              setDialogOpen(false);
-              setEditingUser(null);
-            }}>
-              <Close />
-            </IconButton>
-          </Box>
-
-          {/* Form Content */}
-          <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-            <Stack spacing={3}>
-              {/* Avatar Upload */}
-              {editingUser && (
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Avatar
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                    <Avatar
-                      src={editingUser.avatarUrl ? getAvatarUrl(editingUser.avatarUrl) : undefined}
-                      alt={editingUser.name}
-                      sx={{ width: 80, height: 80 }}
-                    >
-                      {!editingUser.avatarUrl && editingUser.name?.substring(0, 2).toUpperCase()}
-                    </Avatar>
-                    <Button
-                      component="label"
-                      variant="outlined"
-                      size="small"
-                      disabled={uploadingAvatar}
-                    >
-                      {uploadingAvatar ? <CircularProgress size={20} /> : 'Upload'}
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            try {
-                              const avatarUrl = await handleAvatarUpload(file);
-                              setEditingUser({ ...editingUser, avatarUrl });
-                            } catch {
-                              setError('Failed to upload avatar');
-                            }
-                          }
-                        }}
-                      />
-                    </Button>
-                  </Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    JPG, PNG, GIF, WEBP (Max 10MB)
-                  </Typography>
-                </Box>
-              )}
-
-              <Divider />
-
-              {/* Username */}
-              <TextField
-                label="Username"
-                fullWidth
-                required
-                value={editingUser?.username || ''}
-                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, username: e.target.value } : null)}
-                disabled={!!editingUser?.id}
-                helperText={editingUser?.id ? 'Username cannot be changed' : ''}
-              />
-
-              {/* Password - Only for new users */}
-              {!editingUser?.id && (
-                <TextField
-                  label="Password"
-                  type="password"
-                  fullWidth
-                  required
-                  value={editingUser?.password || ''}
-                  onChange={(e) => setEditingUser(editingUser ? { ...editingUser, password: e.target.value } : null)}
-                  helperText="Minimum 8 characters"
-                />
-              )}
-
-              {/* Name */}
-              <TextField
-                label="Name"
-                fullWidth
-                required
-                value={editingUser?.name || ''}
-                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, name: e.target.value } : null)}
-              />
-
-              {/* Email */}
-              <TextField
-                label="Email"
-                type="email"
-                fullWidth
-                required
-                value={editingUser?.email || ''}
-                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, email: e.target.value } : null)}
-              />
-
-              {/* Role */}
-              <FormControl fullWidth>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  value={editingUser?.role || 'user'}
-                  label="Role"
-                  onChange={(e) => setEditingUser(editingUser ? { ...editingUser, role: e.target.value } : null)}
-                >
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="manager">Manager</MenuItem>
-                  <MenuItem value="user">User</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Department */}
-              <TextField
-                label="Department"
-                fullWidth
-                value={editingUser?.department || ''}
-                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, department: e.target.value } : null)}
-              />
-
-              {/* Status */}
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={editingUser?.status || 'active'}
-                  label="Status"
-                  onChange={(e) => setEditingUser(editingUser ? { ...editingUser, status: e.target.value } : null)}
-                >
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-          </Box>
-
-          {/* Footer Actions */}
-          <Box sx={{
-            p: 2,
-            display: 'flex',
-            gap: 2,
-            justifyContent: 'flex-end',
-            borderTop: 1,
-            borderColor: 'divider'
-          }}>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setDialogOpen(false);
-                setEditingUser(null);
-              }}
-              disabled={saveLoading}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={saveLoading}
-            >
-              {saveLoading ? <CircularProgress size={20} /> : t('common.save')}
-            </Button>
-          </Box>
-        </Box>
-      </Drawer>
+        <UserFormFields
+          user={editingUser as UserFormData}
+          onChange={(user) => setEditingUser(user as User)}
+          onError={(err) => setError(err)}
+          usernameLabel={t('auth.username')}
+          emailLabel={t('auth.email')}
+          departments={DEPARTMENTS}
+        />
+      </EditDrawer>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog

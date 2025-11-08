@@ -1,24 +1,51 @@
 [
   {
-    "id": "a2a3db6c-e67e-4575-b62a-8b9ec5b3eadf",
-    "timestamp": "2025-11-07T19:00:09.557Z",
+    "id": "73caee6e-7151-481b-bea9-e870591f1d0e",
+    "timestamp": "2025-11-08T22:03:47.851Z",
     "method": "GET",
-    "path": "/recent-menus",
-    "statusCode": 304,
-    "duration": "9ms",
-    "userId": "user-001",
+    "path": "/api/help",
+    "statusCode": 404,
+    "duration": "0ms",
+    "userId": "anonymous",
     "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36",
+    "responsePreview": {
+      "error": "Not Found",
+      "path": "/api/help",
+      "timestamp": "2025-11-08T22:03:47.851Z"
+    }
   },
   {
-    "id": "adc8942c-b8e1-4e03-a0dd-a1b0d3d9f066",
-    "timestamp": "2025-11-07T19:00:11.985Z",
+    "id": "5d104260-6db2-4883-b116-e0aa22ad1909",
+    "timestamp": "2025-11-08T22:03:47.858Z",
     "method": "GET",
-    "path": "/",
-    "statusCode": 200,
-    "duration": "148ms",
+    "path": "/favorite-menus",
+    "statusCode": 304,
+    "duration": "12ms",
     "userId": "user-001",
     "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36"
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "c3bb2fef-e6a1-4c8e-afad-e80bc4efc227",
+    "timestamp": "2025-11-08T22:03:47.869Z",
+    "method": "GET",
+    "path": "/by-path",
+    "statusCode": 304,
+    "duration": "19ms",
+    "userId": "user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "2133f742-84b7-47a9-a36f-2eac0b1aa665",
+    "timestamp": "2025-11-08T22:03:49.993Z",
+    "method": "GET",
+    "path": "/",
+    "statusCode": 304,
+    "duration": "197ms",
+    "userId": "user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
   }
 ]

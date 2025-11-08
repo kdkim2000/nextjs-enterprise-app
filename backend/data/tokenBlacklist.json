@@ -1,12 +1,1 @@
-[
-  {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTAwMSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjI1NDA0OTYsImV4cCI6MTc2MjU0NDA5Nn0.9aHQ2WoYOFfoC_HzB8KLimrum8FMnMSLVYuW_y3oB7M",
-    "expiresAt": 1762544096000,
-    "blacklistedAt": 1762540686369
-  },
-  {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTAwMSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjI1NDA2OTUsImV4cCI6MTc2MjU0NDI5NX0.esCzDjDaDVoMsXbUwzxffhd4SccJkhrxf63Mh1Ywb7Q",
-    "expiresAt": 1762544295000,
-    "blacklistedAt": 1762540952576
-  }
-]
+[]

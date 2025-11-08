@@ -38,7 +38,11 @@
       "Bash(git config:*)",
       "Bash(npm run dev:frontend:*)",
       "Bash(timeout /t 10)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(npm run dev:backend:*)",
+      "Bash(tasklist:*)",
+      "Bash(timeout /t 2)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []
