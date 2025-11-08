@@ -97,7 +97,7 @@ export default function RoleManagementPage() {
         // Check if help content exists for this page
         const response = await api.get('/help?pageId=admin-roles&language=en');
         setHelpExists(!!response.help);
-      } catch (err) {
+      } catch {
         // If help doesn't exist or error occurs, set to false
         setHelpExists(false);
       }
@@ -113,12 +113,6 @@ export default function RoleManagementPage() {
 
       const response = await api.get('/role');
       const allRoles = response.roles || [];
-
-      // Debug log
-      console.log('Fetched roles:', allRoles.length);
-      if (allRoles.length > 0) {
-        console.log('Sample role:', allRoles[0]);
-      }
 
       let filtered = [];
 
@@ -149,12 +143,11 @@ export default function RoleManagementPage() {
         filtered = allRoles;
       }
 
-      console.log('Filtered roles:', filtered.length);
       setRoles(filtered);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to load roles');
-      console.error('Failed to fetch roles:', err);
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: string } } };
+      setError(err.response?.data?.error || 'Failed to load roles');
+      console.error('Failed to fetch roles:', error);
       setRoles([]);
     } finally {
       setSearching(false);

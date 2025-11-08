@@ -23,7 +23,7 @@ export interface SearchBarProps {
   advancedFilterCount?: number;
   size?: 'small' | 'medium';
   fullWidth?: boolean;
-  sx?: any;
+  sx?: Record<string, unknown>;
 }
 
 export default function SearchBar({

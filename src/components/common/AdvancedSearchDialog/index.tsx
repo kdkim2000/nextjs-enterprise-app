@@ -12,8 +12,7 @@ import {
   Select,
   MenuItem,
   TextField,
-  Grid2 as Grid,
-  Box
+  Grid2 as Grid
 } from '@mui/material';
 import UserSelector from '@/components/common/UserSelector';
 
@@ -36,7 +35,7 @@ export interface FilterFieldConfig {
   helperText?: string;
   options?: SelectOption[]; // For select type
   gridSize?: { xs?: number; sm?: number; md?: number; lg?: number };
-  render?: (value: any, onChange: (value: any) => void) => React.ReactNode; // For custom type
+  render?: (value: string, onChange: (value: string) => void) => React.ReactNode; // For custom type
   size?: 'small' | 'medium';
 }
 
@@ -45,8 +44,8 @@ export interface AdvancedSearchDialogProps {
   onClose: () => void;
   title?: string;
   fields: FilterFieldConfig[];
-  filters: Record<string, any>;
-  onFilterChange: (field: string, value: any) => void;
+  filters: Record<string, string>;
+  onFilterChange: (field: string, value: string) => void;
   onClear: () => void;
   onApply: () => void;
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';

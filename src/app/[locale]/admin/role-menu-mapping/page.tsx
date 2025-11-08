@@ -18,10 +18,13 @@ import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { RoleMenuMapping } from '@/types/mapping';
 
+interface SimpleRole { id: string; name: string; displayName: string }
+interface SimpleMenu { id: string; code: string; name: { en: string; ko: string } }
+
 export default function RoleMenuMappingPage() {
   const [mappings, setMappings] = useState<RoleMenuMapping[]>([]);
-  const [roles, setRoles] = useState<any[]>([]);
-  const [menus, setMenus] = useState<any[]>([]);
+  const [roles, setRoles] = useState<SimpleRole[]>([]);
+  const [menus, setMenus] = useState<SimpleMenu[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMapping, setEditingMapping] = useState<RoleMenuMapping | null>(null);
   const [loading, setLoading] = useState(false);
@@ -384,7 +387,7 @@ export default function RoleMenuMappingPage() {
           const { permissions, ...rest } = data;
           const saveData = {
             ...rest,
-            ...(permissions as any || {})
+            ...(permissions as Record<string, unknown> || {})
           };
           return handleSave(saveData);
         }}
