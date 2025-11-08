@@ -42,7 +42,8 @@
       "Bash(npm run dev:backend:*)",
       "Bash(tasklist:*)",
       "Bash(timeout /t 2)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

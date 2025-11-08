@@ -264,6 +264,56 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 /**
+ * Update user preferences
+ */
+router.put('/preferences', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const {
+      language,
+      theme,
+      rowsPerPage,
+      emailNotifications,
+      systemNotifications,
+      sessionTimeout
+    } = req.body;
+
+    const preferences = await readJSON(PREFERENCES_FILE) || [];
+    let userPref = preferences.find(p => p.userId === userId);
+
+    if (!userPref) {
+      userPref = {
+        userId,
+        favoriteMenus: [],
+        recentMenus: [],
+        language: 'en',
+        theme: 'light',
+        rowsPerPage: 10,
+        emailNotifications: true,
+        systemNotifications: true,
+        sessionTimeout: 30
+      };
+      preferences.push(userPref);
+    }
+
+    if (language !== undefined) userPref.language = language;
+    if (theme !== undefined) userPref.theme = theme;
+    if (rowsPerPage !== undefined) userPref.rowsPerPage = rowsPerPage;
+    if (emailNotifications !== undefined) userPref.emailNotifications = emailNotifications;
+    if (systemNotifications !== undefined) userPref.systemNotifications = systemNotifications;
+    if (sessionTimeout !== undefined) userPref.sessionTimeout = sessionTimeout;
+    userPref.updatedAt = new Date().toISOString();
+
+    await writeJSON(PREFERENCES_FILE, preferences);
+
+    res.json(userPref);
+  } catch (error) {
+    console.error('Update preferences error:', error);
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
+/**
  * Update user (admin only, or user updating their own profile)
  */
 router.put('/:id', authenticateToken, async (req, res) => {
@@ -346,56 +396,6 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Delete user error:', error);
     res.status(500).json({ error: 'Failed to delete user' });
-  }
-});
-
-/**
- * Update user preferences
- */
-router.put('/preferences', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const {
-      language,
-      theme,
-      rowsPerPage,
-      emailNotifications,
-      systemNotifications,
-      sessionTimeout
-    } = req.body;
-
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    let userPref = preferences.find(p => p.userId === userId);
-
-    if (!userPref) {
-      userPref = {
-        userId,
-        favoriteMenus: [],
-        recentMenus: [],
-        language: 'en',
-        theme: 'light',
-        rowsPerPage: 10,
-        emailNotifications: true,
-        systemNotifications: true,
-        sessionTimeout: 30
-      };
-      preferences.push(userPref);
-    }
-
-    if (language !== undefined) userPref.language = language;
-    if (theme !== undefined) userPref.theme = theme;
-    if (rowsPerPage !== undefined) userPref.rowsPerPage = rowsPerPage;
-    if (emailNotifications !== undefined) userPref.emailNotifications = emailNotifications;
-    if (systemNotifications !== undefined) userPref.systemNotifications = systemNotifications;
-    if (sessionTimeout !== undefined) userPref.sessionTimeout = sessionTimeout;
-    userPref.updatedAt = new Date().toISOString();
-
-    await writeJSON(PREFERENCES_FILE, preferences);
-
-    res.json(userPref);
-  } catch (error) {
-    console.error('Update preferences error:', error);
-    res.status(500).json({ error: 'Failed to update preferences' });
   }
 });
 
