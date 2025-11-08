@@ -7,9 +7,20 @@ import {
   Alert,
   Chip,
   IconButton,
-  Tooltip
+  Tooltip,
+  Drawer,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Stack,
+  Divider,
+  CircularProgress
 } from '@mui/material';
-import { Search, HelpOutline } from '@mui/icons-material';
+import { Search, HelpOutline, Edit, Close } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
@@ -17,9 +28,9 @@ import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
-import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
+import UserSelector from '@/components/common/UserSelector';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
@@ -36,15 +47,45 @@ interface SearchCriteria {
   [key: string]: string;
 }
 
+// Session storage key for state persistence
+const STORAGE_KEY = 'admin-roles-page-state';
+
+// Helper functions for state persistence
+const savePageState = (state: {
+  searchCriteria: SearchCriteria;
+  quickSearch: string;
+  roles: Role[];
+}) => {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Failed to save page state:', error);
+  }
+};
+
+const loadPageState = () => {
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.error('Failed to load page state:', error);
+    return null;
+  }
+};
+
 export default function RoleManagementPage() {
   const t = useI18n();
-  const [roles, setRoles] = useState<Role[]>([]);
+
+  // Load saved state on mount
+  const savedState = loadPageState();
+
+  const [roles, setRoles] = useState<Role[]>(savedState?.roles || []);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [quickSearch, setQuickSearch] = useState('');
+  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
@@ -53,15 +94,17 @@ export default function RoleManagementPage() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpExists, setHelpExists] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
-    name: '',
-    displayName: '',
-    roleType: '',
-    isActive: '',
-    isSystem: '',
-    manager: '',
-    representative: ''
-  });
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
+    savedState?.searchCriteria || {
+      name: '',
+      displayName: '',
+      roleType: '',
+      isActive: '',
+      isSystem: '',
+      manager: '',
+      representative: ''
+    }
+  );
 
   // Auto-hide success message after 10 seconds
   useEffect(() => {
@@ -82,6 +125,15 @@ export default function RoleManagementPage() {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Save page state whenever it changes
+  useEffect(() => {
+    savePageState({
+      searchCriteria,
+      quickSearch,
+      roles
+    });
+  }, [searchCriteria, quickSearch, roles]);
 
   // Check user role and help content availability on mount
   useEffect(() => {
@@ -104,6 +156,14 @@ export default function RoleManagementPage() {
     };
 
     checkHelpAndRole();
+
+    // If there's saved state with search criteria or data, restore it
+    if (savedState && (savedState.roles?.length > 0 || savedState.quickSearch ||
+        Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
+      // Data already loaded from savedState, no need to fetch again
+      // User can click refresh if they want fresh data
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchRoles = async (useQuickSearch: boolean = false) => {
@@ -204,6 +264,22 @@ export default function RoleManagementPage() {
           color={params.value ? 'success' : 'default'}
         />
       )
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          onClick={() => handleEdit(params.row.id)}
+          color="primary"
+        >
+          <Edit fontSize="small" />
+        </IconButton>
+      )
     }
   ];
 
@@ -253,20 +329,22 @@ export default function RoleManagementPage() {
     }
   };
 
-  const handleSave = async (formData: Record<string, unknown>) => {
+  const handleSave = async () => {
+    if (!editingRole) return;
+
     try {
       setSaveLoading(true);
       setError(null);
 
-      if (!editingRole) {
+      if (!editingRole.id) {
         // Add new role
-        const response = await api.post('/role', formData);
+        const response = await api.post('/role', editingRole);
         setRoles([...roles, response.role]);
         setSuccessMessage('Role created successfully');
       } else {
         // Update existing role
         const response = await api.put('/role', {
-          ...formData,
+          ...editingRole,
           id: editingRole.id
         });
         setRoles(roles.map((r) => (r.id === editingRole.id ? response.role : r)));
@@ -301,6 +379,8 @@ export default function RoleManagementPage() {
   const handleQuickSearchClear = () => {
     setQuickSearch('');
     setRoles([]);
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
   // Advanced search handlers
@@ -318,6 +398,8 @@ export default function RoleManagementPage() {
       manager: '',
       representative: ''
     });
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
   const handleAdvancedFilterApply = () => {
@@ -332,58 +414,6 @@ export default function RoleManagementPage() {
   const activeFilterCount = useMemo(() => {
     return Object.values(searchCriteria).filter(v => v !== '').length;
   }, [searchCriteria]);
-
-  const formFields: FormFieldConfig[] = useMemo(() => [
-    {
-      name: 'name',
-      label: 'Role Name',
-      type: 'text',
-      required: true,
-      disabled: editingRole?.isSystem || false,
-      helperText: 'Unique identifier for the role (lowercase, no spaces)'
-    },
-    {
-      name: 'displayName',
-      label: 'Display Name',
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'description',
-      label: 'Description',
-      type: 'text',
-      multiline: true,
-      rows: 3
-    },
-    {
-      name: 'roleType',
-      label: 'Role Type',
-      type: 'select',
-      required: true,
-      options: [
-        { value: 'general', label: 'General (일반 역할 - 사용자 신청 가능)' },
-        { value: 'management', label: 'Management (관리용 역할 - 관리자 전용)' }
-      ],
-      helperText: 'Management roles cannot be requested by general users'
-    },
-    {
-      name: 'manager',
-      label: 'Manager (관리자)',
-      type: 'userSelector',
-      helperText: 'Select the user who will manage this role'
-    },
-    {
-      name: 'representative',
-      label: 'Representative (담당자)',
-      type: 'userSelector',
-      helperText: 'Select the user who will be responsible for this role'
-    },
-    {
-      name: 'isActive',
-      label: 'Active',
-      type: 'checkbox'
-    }
-  ], [editingRole]);
 
   // Filter field configuration
   const filterFields: FilterFieldConfig[] = useMemo(() => [
@@ -526,10 +556,8 @@ export default function RoleManagementPage() {
               columns={columns}
               onRowsChange={(rows) => setRoles(rows as Role[])}
               onAdd={handleAdd}
-              onEdit={handleEdit}
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
-              editable
               checkboxSelection
               exportFileName="roles"
               loading={searching}
@@ -538,21 +566,152 @@ export default function RoleManagementPage() {
         )}
       </Paper>
 
-      {/* Edit Dialog */}
-      <CrudDialog
+      {/* Edit Drawer */}
+      <Drawer
+        anchor="right"
         open={dialogOpen}
-        title={!editingRole?.id ? 'Add New Role' : 'Edit Role'}
-        data={editingRole}
-        fields={formFields}
         onClose={() => {
           setDialogOpen(false);
           setEditingRole(null);
         }}
-        onSave={handleSave}
-        loading={saveLoading}
-        cancelText={t('common.cancel')}
-        saveText={t('common.save')}
-      />
+        PaperProps={{
+          sx: { width: { xs: '100%', sm: 500 } }
+        }}
+      >
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{
+            p: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: 1,
+            borderColor: 'divider'
+          }}>
+            <Typography variant="h6">
+              {!editingRole?.id ? 'Add New Role' : 'Edit Role'}
+            </Typography>
+            <IconButton onClick={() => {
+              setDialogOpen(false);
+              setEditingRole(null);
+            }}>
+              <Close />
+            </IconButton>
+          </Box>
+
+          {/* Form Content */}
+          <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+            <Stack spacing={3}>
+              {/* Role Name */}
+              <TextField
+                label="Role Name"
+                fullWidth
+                required
+                value={editingRole?.name || ''}
+                onChange={(e) => setEditingRole(editingRole ? { ...editingRole, name: e.target.value } : null)}
+                disabled={editingRole?.isSystem || false}
+                helperText={editingRole?.isSystem ? 'System role name cannot be changed' : 'Unique identifier for the role (lowercase, no spaces)'}
+              />
+
+              {/* Display Name */}
+              <TextField
+                label="Display Name"
+                fullWidth
+                required
+                value={editingRole?.displayName || ''}
+                onChange={(e) => setEditingRole(editingRole ? { ...editingRole, displayName: e.target.value } : null)}
+              />
+
+              {/* Description */}
+              <TextField
+                label="Description"
+                fullWidth
+                multiline
+                rows={3}
+                value={editingRole?.description || ''}
+                onChange={(e) => setEditingRole(editingRole ? { ...editingRole, description: e.target.value } : null)}
+              />
+
+              {/* Role Type */}
+              <FormControl fullWidth required>
+                <InputLabel>Role Type</InputLabel>
+                <Select
+                  value={editingRole?.roleType || 'general'}
+                  label="Role Type"
+                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, roleType: e.target.value } : null)}
+                >
+                  <MenuItem value="general">General (일반 역할 - 사용자 신청 가능)</MenuItem>
+                  <MenuItem value="management">Management (관리용 역할 - 관리자 전용)</MenuItem>
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
+                  Management roles cannot be requested by general users
+                </Typography>
+              </FormControl>
+
+              <Divider />
+
+              {/* Manager */}
+              <UserSelector
+                label="Manager (관리자)"
+                value={editingRole?.manager || null}
+                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, manager: userId || '' } : null)}
+                helperText="Select the user who will manage this role"
+              />
+
+              {/* Representative */}
+              <UserSelector
+                label="Representative (담당자)"
+                value={editingRole?.representative || null}
+                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, representative: userId || '' } : null)}
+                helperText="Select the user who will be responsible for this role"
+              />
+
+              <Divider />
+
+              {/* Active Status */}
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={editingRole?.isActive ? 'true' : 'false'}
+                  label="Status"
+                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, isActive: e.target.value === 'true' } : null)}
+                >
+                  <MenuItem value="true">Active</MenuItem>
+                  <MenuItem value="false">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Box>
+
+          {/* Footer Actions */}
+          <Box sx={{
+            p: 2,
+            display: 'flex',
+            gap: 2,
+            justifyContent: 'flex-end',
+            borderTop: 1,
+            borderColor: 'divider'
+          }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setDialogOpen(false);
+                setEditingRole(null);
+              }}
+              disabled={saveLoading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={saveLoading}
+            >
+              {saveLoading ? <CircularProgress size={20} /> : t('common.save')}
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog

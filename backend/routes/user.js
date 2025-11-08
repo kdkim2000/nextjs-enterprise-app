@@ -213,7 +213,7 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const { username, password, name, email, role, department, status } = req.body;
+    const { username, password, name, email, role, department, status, avatarUrl } = req.body;
 
     if (!username || !password || !name || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -247,7 +247,8 @@ router.post('/', authenticateToken, async (req, res) => {
       ssoEnabled: false,
       status: status || 'active',
       createdAt: new Date().toISOString(),
-      lastLogin: null
+      lastLogin: null,
+      ...(avatarUrl && { avatarUrl })
     };
 
     users.push(newUser);
@@ -277,7 +278,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const { name, email, role, department, status } = req.body;
+    const { name, email, role, department, status, avatarUrl } = req.body;
     const users = await readJSON(USERS_FILE);
     const userIndex = users.findIndex(u => u.id === id);
 
@@ -296,6 +297,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (name) users[userIndex].name = name;
     if (email) users[userIndex].email = email;
     if (department !== undefined) users[userIndex].department = department;
+    if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
 
     // Only admins can change role and status
     if (isAdmin) {
@@ -469,7 +471,7 @@ router.delete('/favorite-menus/:menuId', authenticateToken, async (req, res) => 
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { name, email, department } = req.body;
+    const { name, email, department, avatarUrl } = req.body;
 
     const users = await readJSON(USERS_FILE);
     const userIndex = users.findIndex(u => u.id === userId);
@@ -489,6 +491,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     if (name) users[userIndex].name = name;
     if (email) users[userIndex].email = email;
     if (department) users[userIndex].department = department;
+    if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
 
     await writeJSON(USERS_FILE, users);
 
@@ -500,7 +503,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
         name: users[userIndex].name,
         email: users[userIndex].email,
         role: users[userIndex].role,
-        department: users[userIndex].department
+        department: users[userIndex].department,
+        avatarUrl: users[userIndex].avatarUrl
       }
     });
   } catch (error) {
