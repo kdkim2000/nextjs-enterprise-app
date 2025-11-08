@@ -10,6 +10,7 @@ export interface LogEntry {
   statusCode: number;
   duration: string;
   userId: string;
+  programId: string;
   ip: string;
   userAgent: string;
   requestBody?: any;

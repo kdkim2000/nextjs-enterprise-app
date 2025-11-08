@@ -1,9 +1,9 @@
 [
   {
-    "id": "7fa797af-53e9-40d9-a836-c05a1d33bb55",
-    "timestamp": "2025-11-08T22:37:51.626Z",
+    "id": "b2d987b1-bd85-422b-96af-86104d2701a1",
+    "timestamp": "2025-11-08T22:56:18.971Z",
     "method": "GET",
-    "path": "/favorite-menus",
+    "path": "/recent-menus",
     "statusCode": 304,
     "duration": "7ms",
     "userId": "user-001",
@@ -11,15 +11,36 @@
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
   },
   {
-    "id": "699eef11-256b-4880-abf3-e1d1337e00bd",
-    "timestamp": "2025-11-08T22:37:51.645Z",
+    "id": "4ee4cc47-b963-49c7-b3e6-d0a1b4abc8bc",
+    "timestamp": "2025-11-08T22:56:18.983Z",
     "method": "GET",
     "path": "/user-menus",
     "statusCode": 304,
-    "duration": "7ms",
+    "duration": "6ms",
+    "userId": "user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "a91738ab-cefd-4bcf-a197-244f9c2d20ec",
+    "timestamp": "2025-11-08T22:56:18.986Z",
+    "method": "GET",
+    "path": "/recent-menus",
+    "statusCode": 304,
+    "duration": "11ms",
+    "userId": "user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "e2f67298-2a7f-4533-89e2-4dfa60f474ba",
+    "timestamp": "2025-11-08T22:56:18.998Z",
+    "method": "GET",
+    "path": "/favorite-menus",
+    "statusCode": 304,
+    "duration": "5ms",
     "userId": "user-001",
     "ip": "::1",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
   }
-]
 ]
