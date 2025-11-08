@@ -4,12 +4,13 @@
     "favoriteMenus": [
       "menu-001",
       "menu-009",
-      "menu-005"
+      "menu-005",
+      "menu-003"
     ],
     "recentMenus": [
+      "menu-003",
       "menu-001",
       "menu-007",
-      "menu-003",
       "menu-004",
       "menu-009",
       "menu-013",
@@ -21,7 +22,7 @@
     "emailNotifications": true,
     "systemNotifications": true,
     "sessionTimeout": 30,
-    "updatedAt": "2025-11-08T22:28:13.566Z"
+    "updatedAt": "2025-11-08T22:32:23.847Z"
   },
   {
     "userId": "user-002",
