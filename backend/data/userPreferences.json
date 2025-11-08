@@ -8,8 +8,9 @@
       "menu-003"
     ],
     "recentMenus": [
-      "menu-003",
+      "menu-014",
       "menu-001",
+      "menu-003",
       "menu-007",
       "menu-004",
       "menu-009",
@@ -22,7 +23,7 @@
     "emailNotifications": true,
     "systemNotifications": true,
     "sessionTimeout": 30,
-    "updatedAt": "2025-11-08T22:37:51.605Z"
+    "updatedAt": "2025-11-08T22:56:18.973Z"
   },
   {
     "userId": "user-002",
