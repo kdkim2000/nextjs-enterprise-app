@@ -6,9 +6,21 @@ import {
   Paper,
   Alert,
   IconButton,
-  Tooltip
+  Tooltip,
+  Avatar,
+  Drawer,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Stack,
+  Divider,
+  CircularProgress
 } from '@mui/material';
-import { Search, HelpOutline } from '@mui/icons-material';
+import { Search, HelpOutline, Edit, Close } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
@@ -16,12 +28,12 @@ import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
-import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
+import { getAvatarUrl } from '@/lib/config';
 
 interface User {
   id: string;
@@ -35,6 +47,7 @@ interface User {
   ssoEnabled?: boolean;
   createdAt?: string;
   lastLogin?: string | null;
+  avatarUrl?: string;
 }
 
 interface SearchCriteria {
@@ -52,15 +65,47 @@ const DEPARTMENTS = [
   'Legal', 'Marketing', 'Operations', 'Product', 'Sales', 'Support'
 ];
 
+// Session storage key for state persistence
+const STORAGE_KEY = 'admin-users-page-state';
+
+// Helper functions for state persistence
+const savePageState = (state: {
+  searchCriteria: SearchCriteria;
+  paginationModel: { page: number; pageSize: number };
+  quickSearch: string;
+  users: User[];
+  rowCount: number;
+}) => {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Failed to save page state:', error);
+  }
+};
+
+const loadPageState = () => {
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.error('Failed to load page state:', error);
+    return null;
+  }
+};
+
 export default function UserManagementPage() {
   const t = useI18n();
-  const [users, setUsers] = useState<User[]>([]);
+
+  // Load saved state on mount
+  const savedState = loadPageState();
+
+  const [users, setUsers] = useState<User[]>(savedState?.users || []);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [quickSearch, setQuickSearch] = useState('');
+  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
@@ -69,19 +114,24 @@ export default function UserManagementPage() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpExists, setHelpExists] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
-    username: '',
-    name: '',
-    email: '',
-    role: '',
-    department: '',
-    status: ''
-  });
-  const [paginationModel, setPaginationModel] = useState({
-    page: 0, // DataGrid uses 0-indexed pages
-    pageSize: 50
-  });
-  const [rowCount, setRowCount] = useState(0);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
+    savedState?.searchCriteria || {
+      username: '',
+      name: '',
+      email: '',
+      role: '',
+      department: '',
+      status: ''
+    }
+  );
+  const [paginationModel, setPaginationModel] = useState(
+    savedState?.paginationModel || {
+      page: 0, // DataGrid uses 0-indexed pages
+      pageSize: 50
+    }
+  );
+  const [rowCount, setRowCount] = useState(savedState?.rowCount || 0);
 
   // Auto-hide success message after 10 seconds
   useEffect(() => {
@@ -102,6 +152,17 @@ export default function UserManagementPage() {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Save page state whenever it changes
+  useEffect(() => {
+    savePageState({
+      searchCriteria,
+      paginationModel,
+      quickSearch,
+      users,
+      rowCount
+    });
+  }, [searchCriteria, paginationModel, quickSearch, users, rowCount]);
 
   // Check user role and help content availability on mount
   useEffect(() => {
@@ -124,6 +185,14 @@ export default function UserManagementPage() {
     };
 
     checkHelpAndRole();
+
+    // If there's saved state with search criteria or data, restore it
+    if (savedState && (savedState.users?.length > 0 || savedState.quickSearch ||
+        Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
+      // Data already loaded from savedState, no need to fetch again
+      // User can click refresh if they want fresh data
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUsers = async (page: number = 0, pageSize: number = 50, useQuickSearch: boolean = false) => {
@@ -174,6 +243,25 @@ export default function UserManagementPage() {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
+    {
+      field: 'avatarUrl',
+      headerName: 'Avatar',
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const user = params.row as User;
+        return (
+          <Avatar
+            src={getAvatarUrl(user.avatarUrl)}
+            alt={user.name}
+            sx={{ width: 32, height: 32 }}
+          >
+            {!user.avatarUrl && user.name?.substring(0, 2).toUpperCase()}
+          </Avatar>
+        );
+      }
+    },
     { field: 'username', headerName: t('auth.username'), width: 130 },
     { field: 'name', headerName: 'Name', width: 150 },
     { field: 'email', headerName: t('auth.email'), width: 200 },
@@ -191,6 +279,22 @@ export default function UserManagementPage() {
       width: 100,
       type: 'singleSelect',
       valueOptions: ['active', 'inactive']
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          onClick={() => handleEdit(params.row.id)}
+          color="primary"
+        >
+          <Edit fontSize="small" />
+        </IconButton>
+      )
     }
   ];
 
@@ -256,6 +360,26 @@ export default function UserManagementPage() {
     setSelectedForDelete([]);
   };
 
+  const handleAvatarUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploadingAvatar(true);
+    try {
+      const response = await api.post('/file/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.file.path; // Returns /uploads/filename
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!editingUser) return;
 
@@ -304,6 +428,8 @@ export default function UserManagementPage() {
     setUsers([]);
     setRowCount(0);
     setPaginationModel({ page: 0, pageSize: 50 });
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
   // Advanced search handlers
@@ -321,6 +447,8 @@ export default function UserManagementPage() {
       department: '',
       status: ''
     });
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
   const handleAdvancedFilterApply = () => {
@@ -393,61 +521,6 @@ export default function UserManagementPage() {
       ]
     }
   ], [t]);
-
-  // Form field configuration for CRUD dialog
-  const formFields: FormFieldConfig[] = useMemo(() => [
-    {
-      name: 'username',
-      label: 'Username',
-      type: 'text',
-      required: true,
-      disabled: !!editingUser?.id
-    },
-    {
-      name: 'password',
-      label: 'Password',
-      type: 'password',
-      required: true,
-      helperText: 'Minimum 8 characters',
-      showOnlyForNew: true
-    },
-    {
-      name: 'name',
-      label: 'Name',
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'email',
-      label: 'Email',
-      type: 'email',
-      required: true
-    },
-    {
-      name: 'role',
-      label: 'Role',
-      type: 'select',
-      options: [
-        { value: 'admin', label: 'Admin' },
-        { value: 'manager', label: 'Manager' },
-        { value: 'user', label: 'User' }
-      ]
-    },
-    {
-      name: 'department',
-      label: 'Department',
-      type: 'text'
-    },
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      options: [
-        { value: 'active', label: 'Active' },
-        { value: 'inactive', label: 'Inactive' }
-      ]
-    }
-  ], [editingUser?.id]);
 
   return (
     <PageContainer>
@@ -532,10 +605,8 @@ export default function UserManagementPage() {
               columns={columns}
               onRowsChange={(rows) => setUsers(rows as User[])}
               onAdd={handleAdd}
-              onEdit={handleEdit}
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
-              editable
               checkboxSelection
               exportFileName="users"
               loading={searching}
@@ -548,21 +619,198 @@ export default function UserManagementPage() {
         )}
       </Paper>
 
-      {/* Edit Dialog */}
-      <CrudDialog
+      {/* Edit Drawer */}
+      <Drawer
+        anchor="right"
         open={dialogOpen}
-        title={!editingUser?.id ? 'Add New User' : 'Edit User'}
-        data={editingUser}
-        fields={formFields}
         onClose={() => {
           setDialogOpen(false);
           setEditingUser(null);
         }}
-        onSave={handleSave}
-        loading={saveLoading}
-        cancelText={t('common.cancel')}
-        saveText={t('common.save')}
-      />
+        PaperProps={{
+          sx: { width: { xs: '100%', sm: 500 } }
+        }}
+      >
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{
+            p: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: 1,
+            borderColor: 'divider'
+          }}>
+            <Typography variant="h6">
+              {!editingUser?.id ? 'Add New User' : 'Edit User'}
+            </Typography>
+            <IconButton onClick={() => {
+              setDialogOpen(false);
+              setEditingUser(null);
+            }}>
+              <Close />
+            </IconButton>
+          </Box>
+
+          {/* Form Content */}
+          <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+            <Stack spacing={3}>
+              {/* Avatar Upload */}
+              {editingUser && (
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Avatar
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                    <Avatar
+                      src={editingUser.avatarUrl ? getAvatarUrl(editingUser.avatarUrl) : undefined}
+                      alt={editingUser.name}
+                      sx={{ width: 80, height: 80 }}
+                    >
+                      {!editingUser.avatarUrl && editingUser.name?.substring(0, 2).toUpperCase()}
+                    </Avatar>
+                    <Button
+                      component="label"
+                      variant="outlined"
+                      size="small"
+                      disabled={uploadingAvatar}
+                    >
+                      {uploadingAvatar ? <CircularProgress size={20} /> : 'Upload'}
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            try {
+                              const avatarUrl = await handleAvatarUpload(file);
+                              setEditingUser({ ...editingUser, avatarUrl });
+                            } catch {
+                              setError('Failed to upload avatar');
+                            }
+                          }
+                        }}
+                      />
+                    </Button>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    JPG, PNG, GIF, WEBP (Max 10MB)
+                  </Typography>
+                </Box>
+              )}
+
+              <Divider />
+
+              {/* Username */}
+              <TextField
+                label="Username"
+                fullWidth
+                required
+                value={editingUser?.username || ''}
+                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, username: e.target.value } : null)}
+                disabled={!!editingUser?.id}
+                helperText={editingUser?.id ? 'Username cannot be changed' : ''}
+              />
+
+              {/* Password - Only for new users */}
+              {!editingUser?.id && (
+                <TextField
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  required
+                  value={editingUser?.password || ''}
+                  onChange={(e) => setEditingUser(editingUser ? { ...editingUser, password: e.target.value } : null)}
+                  helperText="Minimum 8 characters"
+                />
+              )}
+
+              {/* Name */}
+              <TextField
+                label="Name"
+                fullWidth
+                required
+                value={editingUser?.name || ''}
+                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, name: e.target.value } : null)}
+              />
+
+              {/* Email */}
+              <TextField
+                label="Email"
+                type="email"
+                fullWidth
+                required
+                value={editingUser?.email || ''}
+                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, email: e.target.value } : null)}
+              />
+
+              {/* Role */}
+              <FormControl fullWidth>
+                <InputLabel>Role</InputLabel>
+                <Select
+                  value={editingUser?.role || 'user'}
+                  label="Role"
+                  onChange={(e) => setEditingUser(editingUser ? { ...editingUser, role: e.target.value } : null)}
+                >
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="manager">Manager</MenuItem>
+                  <MenuItem value="user">User</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Department */}
+              <TextField
+                label="Department"
+                fullWidth
+                value={editingUser?.department || ''}
+                onChange={(e) => setEditingUser(editingUser ? { ...editingUser, department: e.target.value } : null)}
+              />
+
+              {/* Status */}
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={editingUser?.status || 'active'}
+                  label="Status"
+                  onChange={(e) => setEditingUser(editingUser ? { ...editingUser, status: e.target.value } : null)}
+                >
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="inactive">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Box>
+
+          {/* Footer Actions */}
+          <Box sx={{
+            p: 2,
+            display: 'flex',
+            gap: 2,
+            justifyContent: 'flex-end',
+            borderTop: 1,
+            borderColor: 'divider'
+          }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setDialogOpen(false);
+                setEditingUser(null);
+              }}
+              disabled={saveLoading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={saveLoading}
+            >
+              {saveLoading ? <CircularProgress size={20} /> : t('common.save')}
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog

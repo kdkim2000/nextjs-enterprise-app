@@ -6,9 +6,20 @@ import {
   Alert,
   Tooltip,
   IconButton,
-  Paper
+  Paper,
+  Drawer,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Stack,
+  Divider,
+  CircularProgress
 } from '@mui/material';
-import { Search, HelpOutline } from '@mui/icons-material';
+import { Search, HelpOutline, Edit, Close } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
@@ -16,7 +27,6 @@ import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
-import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
@@ -58,10 +68,40 @@ interface SearchCriteria {
   [key: string]: string;
 }
 
+// Session storage key for state persistence
+const STORAGE_KEY = 'admin-menus-page-state';
+
+// Helper functions for state persistence
+const savePageState = (state: {
+  searchCriteria: SearchCriteria;
+  quickSearch: string;
+  menus: GridRowsProp;
+}) => {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Failed to save page state:', error);
+  }
+};
+
+const loadPageState = () => {
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.error('Failed to load page state:', error);
+    return null;
+  }
+};
+
 export default function MenuManagementPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
-  const [menus, setMenus] = useState<GridRowsProp>([]);
+
+  // Load saved state on mount
+  const savedState = loadPageState();
+
+  const [menus, setMenus] = useState<GridRowsProp>(savedState?.menus || []);
   const [allMenus, setAllMenus] = useState<MenuItemType[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<MenuFormData | null>(null);
@@ -69,7 +109,7 @@ export default function MenuManagementPage() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [quickSearch, setQuickSearch] = useState('');
+  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
@@ -77,15 +117,17 @@ export default function MenuManagementPage() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpExists, setHelpExists] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
-    code: '',
-    name: '',
-    path: '',
-    icon: '',
-    level: '',
-    parentId: '',
-    programId: ''
-  });
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
+    savedState?.searchCriteria || {
+      code: '',
+      name: '',
+      path: '',
+      icon: '',
+      level: '',
+      parentId: '',
+      programId: ''
+    }
+  );
 
   // Auto-hide success message after 10 seconds
   useEffect(() => {
@@ -106,6 +148,15 @@ export default function MenuManagementPage() {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Save page state whenever it changes
+  useEffect(() => {
+    savePageState({
+      searchCriteria,
+      quickSearch,
+      menus
+    });
+  }, [searchCriteria, quickSearch, menus]);
 
   // Check user role and help content availability on mount
   useEffect(() => {
@@ -154,7 +205,23 @@ export default function MenuManagementPage() {
         return parent ? (locale === 'ko' ? parent.name.ko : parent.name.en) : '-';
       }
     },
-    { field: 'programId', headerName: t('menuManagement.programId'), width: 140 }
+    { field: 'programId', headerName: t('menuManagement.programId'), width: 140 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <IconButton
+          size="small"
+          onClick={() => handleEdit(params.row.id)}
+          color="primary"
+        >
+          <Edit fontSize="small" />
+        </IconButton>
+      )
+    }
   ];
 
   const fetchMenus = useCallback(async () => {
@@ -376,6 +443,8 @@ export default function MenuManagementPage() {
       parentId: '',
       programId: ''
     });
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
   const handleAdvancedFilterApply = () => {
@@ -530,85 +599,6 @@ export default function MenuManagementPage() {
     }
   ], [t, allMenus, locale]);
 
-  // Form field configuration for CRUD dialog
-  const formFields: FormFieldConfig[] = useMemo(() => [
-    {
-      name: 'code',
-      label: t('menuManagement.menuCode'),
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'nameEn',
-      label: t('menuManagement.menuNameEn'),
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'nameKo',
-      label: t('menuManagement.menuNameKo'),
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'path',
-      label: t('menuManagement.path'),
-      type: 'text',
-      required: true,
-      helperText: 'e.g., /dashboard/settings'
-    },
-    {
-      name: 'icon',
-      label: t('menuManagement.icon'),
-      type: 'select',
-      options: AVAILABLE_ICONS.map(icon => ({ value: icon, label: icon }))
-    },
-    {
-      name: 'order',
-      label: t('menuManagement.order'),
-      type: 'number'
-    },
-    {
-      name: 'level',
-      label: t('menuManagement.level'),
-      type: 'number'
-    },
-    {
-      name: 'parentId',
-      label: t('menuManagement.parent'),
-      type: 'select',
-      options: [
-        { value: '', label: t('menuManagement.rootMenu') },
-        ...allMenus
-          .filter(m => !editingMenu?.id || m.id !== editingMenu.id)
-          .map(menu => ({
-            value: menu.id,
-            label: locale === 'ko' ? menu.name.ko : menu.name.en
-          }))
-      ]
-    },
-    {
-      name: 'programId',
-      label: t('menuManagement.programId'),
-      type: 'text',
-      helperText: 'Program identifier (optional)'
-    },
-    {
-      name: 'descriptionEn',
-      label: t('menuManagement.descriptionEn'),
-      type: 'text',
-      multiline: true,
-      rows: 2
-    },
-    {
-      name: 'descriptionKo',
-      label: t('menuManagement.descriptionKo'),
-      type: 'text',
-      multiline: true,
-      rows: 2
-    }
-  ], [t, allMenus, locale, editingMenu?.id]);
-
   return (
     <PageContainer>
       {/* Header - Auto mode: fetches menu info based on current path */}
@@ -692,10 +682,8 @@ export default function MenuManagementPage() {
               columns={columns}
               onRowsChange={(rows) => setMenus(rows)}
               onAdd={handleAdd}
-              onEdit={handleEdit}
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
-              editable
               checkboxSelection
               exportFileName="menus"
               loading={loading}
@@ -704,21 +692,195 @@ export default function MenuManagementPage() {
         )}
       </Paper>
 
-      {/* Edit Dialog */}
-      <CrudDialog
+      {/* Edit Drawer */}
+      <Drawer
+        anchor="right"
         open={dialogOpen}
-        title={!editingMenu?.id ? 'Add New Menu' : 'Edit Menu'}
-        data={editingMenu}
-        fields={formFields}
         onClose={() => {
           setDialogOpen(false);
           setEditingMenu(null);
         }}
-        onSave={handleSave}
-        loading={saveLoading}
-        cancelText={t('common.cancel')}
-        saveText={t('common.save')}
-      />
+        PaperProps={{
+          sx: { width: { xs: '100%', sm: 500 } }
+        }}
+      >
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{
+            p: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: 1,
+            borderColor: 'divider'
+          }}>
+            <Typography variant="h6">
+              {!editingMenu?.id ? 'Add New Menu' : 'Edit Menu'}
+            </Typography>
+            <IconButton onClick={() => {
+              setDialogOpen(false);
+              setEditingMenu(null);
+            }}>
+              <Close />
+            </IconButton>
+          </Box>
+
+          {/* Form Content */}
+          <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+            <Stack spacing={3}>
+              {/* Menu Code */}
+              <TextField
+                label={t('menuManagement.menuCode')}
+                fullWidth
+                required
+                value={editingMenu?.code || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, code: e.target.value } : null)}
+              />
+
+              {/* Menu Name (English) */}
+              <TextField
+                label={t('menuManagement.menuNameEn')}
+                fullWidth
+                required
+                value={editingMenu?.nameEn || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, nameEn: e.target.value } : null)}
+              />
+
+              {/* Menu Name (Korean) */}
+              <TextField
+                label={t('menuManagement.menuNameKo')}
+                fullWidth
+                required
+                value={editingMenu?.nameKo || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, nameKo: e.target.value } : null)}
+              />
+
+              {/* Path */}
+              <TextField
+                label={t('menuManagement.path')}
+                fullWidth
+                required
+                value={editingMenu?.path || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, path: e.target.value } : null)}
+                helperText="e.g., /dashboard/settings"
+              />
+
+              {/* Icon */}
+              <FormControl fullWidth>
+                <InputLabel>{t('menuManagement.icon')}</InputLabel>
+                <Select
+                  value={editingMenu?.icon || 'Dashboard'}
+                  label={t('menuManagement.icon')}
+                  onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, icon: e.target.value } : null)}
+                >
+                  {AVAILABLE_ICONS.map(icon => (
+                    <MenuItem key={icon} value={icon}>{icon}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Divider />
+
+              {/* Order */}
+              <TextField
+                label={t('menuManagement.order')}
+                type="number"
+                fullWidth
+                value={editingMenu?.order || 0}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, order: parseInt(e.target.value) || 0 } : null)}
+              />
+
+              {/* Level */}
+              <TextField
+                label={t('menuManagement.level')}
+                type="number"
+                fullWidth
+                value={editingMenu?.level || 0}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, level: parseInt(e.target.value) || 0 } : null)}
+              />
+
+              {/* Parent Menu */}
+              <FormControl fullWidth>
+                <InputLabel>{t('menuManagement.parent')}</InputLabel>
+                <Select
+                  value={editingMenu?.parentId || ''}
+                  label={t('menuManagement.parent')}
+                  onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, parentId: e.target.value || null } : null)}
+                >
+                  <MenuItem value="">{t('menuManagement.rootMenu')}</MenuItem>
+                  {allMenus
+                    .filter(m => !editingMenu?.id || m.id !== editingMenu.id)
+                    .map(menu => (
+                      <MenuItem key={menu.id} value={menu.id}>
+                        {locale === 'ko' ? menu.name.ko : menu.name.en}
+                      </MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+
+              {/* Program ID */}
+              <TextField
+                label={t('menuManagement.programId')}
+                fullWidth
+                value={editingMenu?.programId || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, programId: e.target.value } : null)}
+                helperText="Program identifier (optional)"
+              />
+
+              <Divider />
+
+              {/* Description (English) */}
+              <TextField
+                label={t('menuManagement.descriptionEn')}
+                fullWidth
+                multiline
+                rows={2}
+                value={editingMenu?.descriptionEn || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, descriptionEn: e.target.value } : null)}
+              />
+
+              {/* Description (Korean) */}
+              <TextField
+                label={t('menuManagement.descriptionKo')}
+                fullWidth
+                multiline
+                rows={2}
+                value={editingMenu?.descriptionKo || ''}
+                onChange={(e) => setEditingMenu(editingMenu ? { ...editingMenu, descriptionKo: e.target.value } : null)}
+              />
+            </Stack>
+          </Box>
+
+          {/* Footer Actions */}
+          <Box sx={{
+            p: 2,
+            display: 'flex',
+            gap: 2,
+            justifyContent: 'flex-end',
+            borderTop: 1,
+            borderColor: 'divider'
+          }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setDialogOpen(false);
+                setEditingMenu(null);
+              }}
+              disabled={saveLoading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={saveLoading}
+            >
+              {saveLoading ? <CircularProgress size={20} /> : t('common.save')}
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog

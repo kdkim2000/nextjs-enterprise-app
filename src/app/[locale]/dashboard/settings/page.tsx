@@ -16,18 +16,24 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Stack
+  Stack,
+  Avatar,
+  IconButton,
+  CircularProgress
 } from '@mui/material';
 import {
   Person,
   Security,
-  Palette
+  Palette,
+  PhotoCamera,
+  Delete
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { toast } from 'react-toastify';
 import PageHeader from '@/components/common/PageHeader';
+import { getAvatarUrl } from '@/lib/config';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,17 +58,19 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const locale = useCurrentLocale();
   const changeLocale = useChangeLocale();
   const [currentTab, setCurrentTab] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Profile Settings
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    department: user?.department || ''
+    department: user?.department || '',
+    avatarUrl: user?.avatarUrl || ''
   });
 
   // Security Settings
@@ -111,10 +119,56 @@ export default function SettingsPage() {
     setCurrentTab(newValue);
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error(locale === 'ko' ? '지원하지 않는 파일 형식입니다' : 'Unsupported file type');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(locale === 'ko' ? '파일 크기는 10MB를 초과할 수 없습니다' : 'File size cannot exceed 10MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploadingAvatar(true);
+    try {
+      const response = await api.post('/file/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const avatarUrl = response.file.path; // Returns /uploads/filename
+      setProfileData({ ...profileData, avatarUrl });
+      toast.success(locale === 'ko' ? '아바타가 업로드되었습니다' : 'Avatar uploaded successfully');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      toast.error(err.response?.data?.error || 'Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarDelete = () => {
+    setProfileData({ ...profileData, avatarUrl: '' });
+  };
+
   const handleProfileUpdate = async () => {
     setLoading(true);
     try {
-      await api.put('/user/profile', profileData);
+      const response = await api.put('/user/profile', profileData);
+      // Update user in AuthContext
+      if (response.user && updateUser) {
+        updateUser(response.user);
+      }
       toast.success(locale === 'ko' ? '프로필이 업데이트되었습니다' : 'Profile updated successfully');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
@@ -208,6 +262,54 @@ export default function SettingsPage() {
         <TabPanel value={currentTab} index={0}>
           <Stack spacing={3}>
             <Typography variant="h6">{locale === 'ko' ? '프로필 정보' : 'Profile Information'}</Typography>
+
+            {/* Avatar Upload Section */}
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                {locale === 'ko' ? '프로필 사진' : 'Profile Picture'}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                <Avatar
+                  src={getAvatarUrl(profileData.avatarUrl)}
+                  alt={profileData.name}
+                  sx={{ width: 80, height: 80 }}
+                >
+                  {!profileData.avatarUrl && profileData.name?.substring(0, 2).toUpperCase()}
+                </Avatar>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    startIcon={uploadingAvatar ? <CircularProgress size={20} /> : <PhotoCamera />}
+                    disabled={uploadingAvatar}
+                  >
+                    {locale === 'ko' ? '업로드' : 'Upload'}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                      onChange={handleAvatarUpload}
+                    />
+                  </Button>
+                  {profileData.avatarUrl && (
+                    <IconButton
+                      onClick={handleAvatarDelete}
+                      color="error"
+                      disabled={uploadingAvatar}
+                    >
+                      <Delete />
+                    </IconButton>
+                  )}
+                </Box>
+              </Box>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                {locale === 'ko'
+                  ? 'JPG, PNG, GIF, WEBP 형식 지원 (최대 10MB)'
+                  : 'Supports JPG, PNG, GIF, WEBP (Max 10MB)'}
+              </Typography>
+            </Box>
+
+            <Divider />
 
             <TextField
               label={locale === 'ko' ? '이름' : 'Name'}
