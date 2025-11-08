@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --webpack\" \"node backend/server.js\"",
-    "dev:frontend": "next dev --webpack",
+    "dev": "concurrently \"next dev --turbo\" \"node backend/server.js\"",
+    "dev:frontend": "next dev --turbo",
     "dev:backend": "node backend/server.js",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit"
