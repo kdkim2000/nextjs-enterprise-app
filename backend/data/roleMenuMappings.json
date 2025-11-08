@@ -76,6 +76,17 @@
       "canDelete": false,
       "createdBy": "system",
       "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-014",
+      "roleId": "role-001",
+      "menuId": "menu-014",
+      "canView": true,
+      "canCreate": false,
+      "canUpdate": false,
+      "canDelete": false,
+      "createdBy": "system",
+      "createdAt": "2025-11-08T22:40:30.161Z"
     }
   ]
 }
