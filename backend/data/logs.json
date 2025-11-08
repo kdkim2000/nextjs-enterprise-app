@@ -1,13 +1,25 @@
 [
   {
-    "id": "405c1aa8-37f8-445f-8477-701e7dd3bccb",
-    "timestamp": "2025-11-08T22:32:23.907Z",
+    "id": "7fa797af-53e9-40d9-a836-c05a1d33bb55",
+    "timestamp": "2025-11-08T22:37:51.626Z",
     "method": "GET",
-    "path": "/recent-menus",
+    "path": "/favorite-menus",
     "statusCode": 304,
-    "duration": "24ms",
+    "duration": "7ms",
     "userId": "user-001",
     "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Mobile Safari/537.36"
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "699eef11-256b-4880-abf3-e1d1337e00bd",
+    "timestamp": "2025-11-08T22:37:51.645Z",
+    "method": "GET",
+    "path": "/user-menus",
+    "statusCode": 304,
+    "duration": "7ms",
+    "userId": "user-001",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
   }
+]
 ]

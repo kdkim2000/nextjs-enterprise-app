@@ -232,5 +232,23 @@
       "en": "Component showcase and demos",
       "ko": "컴포넌트 쇼케이스 및 데모"
     }
+  },
+  {
+    "id": "menu-014",
+    "code": "logs",
+    "name": {
+      "en": "System Logs",
+      "ko": "시스템 로그"
+    },
+    "path": "/admin/logs",
+    "icon": "Description",
+    "order": 7,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-LOGS",
+    "description": {
+      "en": "View and analyze system logs",
+      "ko": "시스템 로그 조회 및 분석"
+    }
   }
 ]

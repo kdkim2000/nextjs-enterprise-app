@@ -16,26 +16,50 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View user data", "ko": "사용자 데이터 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View user data",
+          "ko": "사용자 데이터 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Create and update users", "ko": "사용자 생성 및 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update users",
+          "ko": "사용자 생성 및 수정"
+        },
         "isDefault": false
       },
       {
         "code": "DELETE",
-        "name": { "en": "Delete", "ko": "삭제" },
-        "description": { "en": "Delete users", "ko": "사용자 삭제" },
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete users",
+          "ko": "사용자 삭제"
+        },
         "isDefault": false
       },
       {
         "code": "EXPORT",
-        "name": { "en": "Export", "ko": "내보내기" },
-        "description": { "en": "Export user data", "ko": "사용자 데이터 내보내기" },
+        "name": {
+          "en": "Export",
+          "ko": "내보내기"
+        },
+        "description": {
+          "en": "Export user data",
+          "ko": "사용자 데이터 내보내기"
+        },
         "isDefault": false
       }
     ],
@@ -44,7 +68,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["admin", "user", "security"]
+      "tags": [
+        "admin",
+        "user",
+        "security"
+      ]
     }
   },
   {
@@ -64,20 +92,38 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View menu data", "ko": "메뉴 데이터 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View menu data",
+          "ko": "메뉴 데이터 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Create and update menus", "ko": "메뉴 생성 및 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update menus",
+          "ko": "메뉴 생성 및 수정"
+        },
         "isDefault": false
       },
       {
         "code": "DELETE",
-        "name": { "en": "Delete", "ko": "삭제" },
-        "description": { "en": "Delete menus", "ko": "메뉴 삭제" },
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete menus",
+          "ko": "메뉴 삭제"
+        },
         "isDefault": false
       }
     ],
@@ -86,7 +132,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["admin", "menu", "navigation"]
+      "tags": [
+        "admin",
+        "menu",
+        "navigation"
+      ]
     }
   },
   {
@@ -106,20 +156,38 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View role data", "ko": "역할 데이터 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View role data",
+          "ko": "역할 데이터 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Create and update roles", "ko": "역할 생성 및 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update roles",
+          "ko": "역할 생성 및 수정"
+        },
         "isDefault": false
       },
       {
         "code": "DELETE",
-        "name": { "en": "Delete", "ko": "삭제" },
-        "description": { "en": "Delete roles", "ko": "역할 삭제" },
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete roles",
+          "ko": "역할 삭제"
+        },
         "isDefault": false
       }
     ],
@@ -128,7 +196,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["admin", "role", "security"]
+      "tags": [
+        "admin",
+        "role",
+        "security"
+      ]
     }
   },
   {
@@ -148,20 +220,38 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View help content", "ko": "도움말 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View help content",
+          "ko": "도움말 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Create and update help content", "ko": "도움말 생성 및 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update help content",
+          "ko": "도움말 생성 및 수정"
+        },
         "isDefault": false
       },
       {
         "code": "DELETE",
-        "name": { "en": "Delete", "ko": "삭제" },
-        "description": { "en": "Delete help content", "ko": "도움말 삭제" },
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete help content",
+          "ko": "도움말 삭제"
+        },
         "isDefault": false
       }
     ],
@@ -170,7 +260,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["admin", "help", "documentation"]
+      "tags": [
+        "admin",
+        "help",
+        "documentation"
+      ]
     }
   },
   {
@@ -190,20 +284,38 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View mappings", "ko": "매핑 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View mappings",
+          "ko": "매핑 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Create and update mappings", "ko": "매핑 생성 및 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update mappings",
+          "ko": "매핑 생성 및 수정"
+        },
         "isDefault": false
       },
       {
         "code": "DELETE",
-        "name": { "en": "Delete", "ko": "삭제" },
-        "description": { "en": "Delete mappings", "ko": "매핑 삭제" },
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete mappings",
+          "ko": "매핑 삭제"
+        },
         "isDefault": false
       }
     ],
@@ -212,7 +324,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["admin", "mapping", "role"]
+      "tags": [
+        "admin",
+        "mapping",
+        "role"
+      ]
     }
   },
   {
@@ -232,20 +348,38 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View mappings", "ko": "매핑 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View mappings",
+          "ko": "매핑 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Create and update mappings", "ko": "매핑 생성 및 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update mappings",
+          "ko": "매핑 생성 및 수정"
+        },
         "isDefault": false
       },
       {
         "code": "DELETE",
-        "name": { "en": "Delete", "ko": "삭제" },
-        "description": { "en": "Delete mappings", "ko": "매핑 삭제" },
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete mappings",
+          "ko": "매핑 삭제"
+        },
         "isDefault": false
       }
     ],
@@ -254,7 +388,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["admin", "mapping", "menu"]
+      "tags": [
+        "admin",
+        "mapping",
+        "menu"
+      ]
     }
   },
   {
@@ -274,8 +412,14 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View dashboard", "ko": "대시보드 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View dashboard",
+          "ko": "대시보드 조회"
+        },
         "isDefault": true
       }
     ],
@@ -284,7 +428,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["dashboard", "analytics", "overview"]
+      "tags": [
+        "dashboard",
+        "analytics",
+        "overview"
+      ]
     }
   },
   {
@@ -304,14 +452,26 @@
     "permissions": [
       {
         "code": "READ",
-        "name": { "en": "Read", "ko": "읽기" },
-        "description": { "en": "View settings", "ko": "설정 조회" },
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View settings",
+          "ko": "설정 조회"
+        },
         "isDefault": true
       },
       {
         "code": "WRITE",
-        "name": { "en": "Write", "ko": "쓰기" },
-        "description": { "en": "Update settings", "ko": "설정 수정" },
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Update settings",
+          "ko": "설정 수정"
+        },
         "isDefault": true
       }
     ],
@@ -320,7 +480,27 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": ["user", "settings", "profile"]
+      "tags": [
+        "user",
+        "settings",
+        "profile"
+      ]
     }
+  },
+  {
+    "id": "prog-014",
+    "code": "PROG-LOGS",
+    "type": "page",
+    "nameEn": "System Logs",
+    "nameKo": "시스템 로그",
+    "descriptionEn": "View and analyze system logs and API requests",
+    "descriptionKo": "시스템 로그 및 API 요청 조회 및 분석",
+    "category": "Admin",
+    "status": "active",
+    "version": "1.0.0",
+    "author": "System",
+    "tags": "logs,analytics,monitoring,admin",
+    "createdAt": "2025-11-08T22:39:37.733Z",
+    "updatedAt": "2025-11-08T22:39:37.735Z"
   }
 ]
