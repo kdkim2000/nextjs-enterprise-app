@@ -53,7 +53,7 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en', isA
 
       // Expand all sections by default
       if (response.help?.sections) {
-        setExpandedSections(response.help.sections.map((s: any) => s.id));
+        setExpandedSections(response.help.sections.map((s: { id: string }) => s.id));
       }
     } catch (err) {
       console.error('Failed to fetch help content:', err);

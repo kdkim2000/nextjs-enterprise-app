@@ -121,7 +121,7 @@ export default function MenuManagementPage() {
         // Check if help content exists for this page
         const response = await api.get('/help?pageId=admin-menus&language=en');
         setHelpExists(!!response.help);
-      } catch (err) {
+      } catch {
         // If help doesn't exist or error occurs, set to false
         setHelpExists(false);
       }
@@ -209,7 +209,7 @@ export default function MenuManagementPage() {
       setMenus(flatMenus);
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      console.error('Error fetching menus:', error);
+      console.error('Error fetching menus:', err);
       setError(err.response?.data?.error || 'Failed to load menus');
     } finally {
       setLoading(false);

@@ -5,7 +5,6 @@ import {
   Box,
   Paper,
   Alert,
-  MenuItem,
   IconButton,
   Tooltip
 } from '@mui/material';
@@ -118,7 +117,7 @@ export default function UserManagementPage() {
         // Check if help content exists for this page
         const response = await api.get('/help?pageId=admin-users&language=en');
         setHelpExists(!!response.help);
-      } catch (err) {
+      } catch {
         // If help doesn't exist or error occurs, set to false
         setHelpExists(false);
       }
@@ -162,10 +161,10 @@ export default function UserManagementPage() {
       } else {
         setRowCount(response.users?.length || 0);
       }
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to load users');
-      console.error('Failed to fetch users:', err);
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: string } } };
+      setError(err.response?.data?.error || 'Failed to load users');
+      console.error('Failed to fetch users:', error);
       setUsers([]);
       setRowCount(0);
     } finally {

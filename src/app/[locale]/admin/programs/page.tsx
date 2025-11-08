@@ -87,7 +87,7 @@ export default function ProgramManagementPage() {
 
         const response = await api.get('/help?pageId=admin-programs&language=en');
         setHelpExists(!!response.help);
-      } catch (err) {
+      } catch {
         setHelpExists(false);
       }
     };
@@ -153,10 +153,10 @@ export default function ProgramManagementPage() {
       } else {
         setRowCount(transformedPrograms.length);
       }
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to load programs');
-      console.error('Failed to fetch programs:', err);
+    } catch (error) {
+      const err = error as { response?: { data?: { error?: string } } };
+      setError(err.response?.data?.error || 'Failed to load programs');
+      console.error('Failed to fetch programs:', error);
       setPrograms([]);
       setRowCount(0);
     } finally {

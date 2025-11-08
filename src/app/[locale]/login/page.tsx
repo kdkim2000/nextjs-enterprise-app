@@ -250,17 +250,6 @@ export default function LoginPage() {
               </Button>
             </Box>
 
-            <Box sx={{ mt: 3 }}>
-              <Alert severity="info">
-                <Typography variant="caption">
-                  <strong>Demo Accounts:</strong>
-                  <br />
-                  Admin: admin / admin123 (MFA enabled)
-                  <br />
-                  User: john.doe / password123
-                </Typography>
-              </Alert>
-            </Box>
           </CardContent>
         </Card>
       </Box>

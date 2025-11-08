@@ -23,7 +23,6 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon
 } from '@mui/icons-material';
@@ -194,7 +193,7 @@ export default function HelpManagementPage() {
     }
   };
 
-  const handleChange = (field: keyof HelpContent, value: any) => {
+  const handleChange = (field: keyof HelpContent, value: string | HelpSection[] | HelpFAQ[] | { url: string; text: string }[]) => {
     setEditingHelp((prev) => prev ? ({ ...prev, [field]: value }) : null);
   };
 
@@ -212,7 +211,7 @@ export default function HelpManagementPage() {
     });
   };
 
-  const updateSection = (index: number, field: keyof HelpSection, value: any) => {
+  const updateSection = (index: number, field: keyof HelpSection, value: string | number) => {
     if (!editingHelp || !editingHelp.sections) return;
     const updatedSections = [...editingHelp.sections];
     updatedSections[index] = { ...updatedSections[index], [field]: value };
@@ -241,7 +240,7 @@ export default function HelpManagementPage() {
     });
   };
 
-  const updateFAQ = (index: number, field: keyof HelpFAQ, value: any) => {
+  const updateFAQ = (index: number, field: keyof HelpFAQ, value: string | number) => {
     if (!editingHelp || !editingHelp.faqs) return;
     const updatedFAQs = [...editingHelp.faqs];
     updatedFAQs[index] = { ...updatedFAQs[index], [field]: value };

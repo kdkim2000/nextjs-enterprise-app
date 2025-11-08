@@ -49,7 +49,7 @@ export interface FormFieldConfig {
   helperText?: string;
   options?: SelectOption[]; // For select type
   gridSize?: { xs?: number; sm?: number; md?: number; lg?: number }; // Grid column span
-  render?: (value: any, onChange: (value: any) => void) => React.ReactNode; // For custom type
+  render?: (value: string | null, onChange: (value: string | null) => void) => React.ReactNode; // For custom type
   tooltip?: string;
   multiline?: boolean;
   rows?: number;
@@ -58,7 +58,7 @@ export interface FormFieldConfig {
   size?: 'small' | 'medium';
 }
 
-export interface CrudDialogProps<T = Record<string, any>> {
+export interface CrudDialogProps<T = Record<string, unknown>> {
   open: boolean;
   title?: string;
   data: T | null;
@@ -72,7 +72,7 @@ export interface CrudDialogProps<T = Record<string, any>> {
   useGrid?: boolean; // Use Grid layout instead of Stack
 }
 
-export default function CrudDialog<T extends Record<string, any>>({
+export default function CrudDialog<T extends Record<string, unknown>>({
   open,
   title,
   data,
@@ -92,7 +92,7 @@ export default function CrudDialog<T extends Record<string, any>>({
     setFormData(data);
   }, [data]);
 
-  const handleChange = (fieldName: string, value: any) => {
+  const handleChange = (fieldName: string, value: string | number | boolean | null) => {
     setFormData((prev) => (prev ? { ...prev, [fieldName]: value } : null));
   };
 

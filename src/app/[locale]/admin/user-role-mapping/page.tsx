@@ -15,10 +15,13 @@ import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { UserRoleMapping } from '@/types/mapping';
 
+interface SimpleUser { id: string; username: string; name: string; email: string }
+interface SimpleRole { id: string; name: string; displayName: string }
+
 export default function UserRoleMappingPage() {
   const [mappings, setMappings] = useState<UserRoleMapping[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [roles, setRoles] = useState<any[]>([]);
+  const [users, setUsers] = useState<SimpleUser[]>([]);
+  const [roles, setRoles] = useState<SimpleRole[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMapping, setEditingMapping] = useState<UserRoleMapping | null>(null);
   const [loading, setLoading] = useState(false);
