@@ -7,17 +7,21 @@
       "menu-005"
     ],
     "recentMenus": [
+      "menu-001",
+      "menu-007",
+      "menu-003",
+      "menu-004",
       "menu-009",
       "menu-013",
-      "menu-003",
-      "menu-001",
-      "menu-004",
-      "menu-002",
-      "menu-007"
+      "menu-002"
     ],
     "language": "en",
-    "theme": "light",
-    "updatedAt": "2025-11-08T22:03:47.867Z"
+    "theme": "dark",
+    "rowsPerPage": 50,
+    "emailNotifications": true,
+    "systemNotifications": true,
+    "sessionTimeout": 30,
+    "updatedAt": "2025-11-08T22:28:13.566Z"
   },
   {
     "userId": "user-002",
@@ -28,6 +32,10 @@
     "recentMenus": [],
     "language": "ko",
     "theme": "light",
+    "rowsPerPage": 10,
+    "emailNotifications": true,
+    "systemNotifications": true,
+    "sessionTimeout": 30,
     "updatedAt": "2024-01-15T00:00:00.000Z"
   },
   {
@@ -39,6 +47,10 @@
     "recentMenus": [],
     "language": "en",
     "theme": "light",
+    "rowsPerPage": 10,
+    "emailNotifications": true,
+    "systemNotifications": true,
+    "sessionTimeout": 30,
     "updatedAt": "2024-02-01T00:00:00.000Z"
   }
 ]

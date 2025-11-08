@@ -1,0 +1,125 @@
+[
+  {
+    "userId": "user-001",
+    "general": {
+      "language": "ko",
+      "timezone": "Asia/Seoul",
+      "dateFormat": "YYYY-MM-DD",
+      "timeFormat": "24h"
+    },
+    "appearance": {
+      "theme": "dark",
+      "fontSize": "large",
+      "compactMode": false,
+      "sidebarCollapsed": false
+    },
+    "notifications": {
+      "email": true,
+      "push": true,
+      "desktop": false,
+      "sound": true
+    },
+    "dataGrid": {
+      "defaultPageSize": 100,
+      "showDensitySelector": true,
+      "showColumnSelector": true,
+      "showFilterPanel": true,
+      "autoRefresh": false,
+      "autoRefreshInterval": 30
+    },
+    "privacy": {
+      "showOnlineStatus": true,
+      "showActivity": true,
+      "allowAnalytics": true
+    },
+    "advanced": {
+      "enableDebugMode": false,
+      "enableBetaFeatures": false,
+      "enableKeyboardShortcuts": true
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2025-11-08T22:16:07.536Z"
+  },
+  {
+    "userId": "user-002",
+    "general": {
+      "language": "ko",
+      "timezone": "Asia/Seoul",
+      "dateFormat": "YYYY-MM-DD",
+      "timeFormat": "24h"
+    },
+    "appearance": {
+      "theme": "light",
+      "fontSize": "medium",
+      "compactMode": false,
+      "sidebarCollapsed": false
+    },
+    "notifications": {
+      "email": true,
+      "push": false,
+      "desktop": false,
+      "sound": false
+    },
+    "dataGrid": {
+      "defaultPageSize": 50,
+      "showDensitySelector": true,
+      "showColumnSelector": true,
+      "showFilterPanel": true,
+      "autoRefresh": false,
+      "autoRefreshInterval": 30
+    },
+    "privacy": {
+      "showOnlineStatus": true,
+      "showActivity": true,
+      "allowAnalytics": true
+    },
+    "advanced": {
+      "enableDebugMode": false,
+      "enableBetaFeatures": false,
+      "enableKeyboardShortcuts": true
+    },
+    "createdAt": "2024-01-15T00:00:00.000Z",
+    "updatedAt": "2024-01-15T00:00:00.000Z"
+  },
+  {
+    "userId": "user-003",
+    "general": {
+      "language": "en",
+      "timezone": "America/New_York",
+      "dateFormat": "MM/DD/YYYY",
+      "timeFormat": "12h"
+    },
+    "appearance": {
+      "theme": "dark",
+      "fontSize": "large",
+      "compactMode": true,
+      "sidebarCollapsed": true
+    },
+    "notifications": {
+      "email": true,
+      "push": true,
+      "desktop": true,
+      "sound": true
+    },
+    "dataGrid": {
+      "defaultPageSize": 100,
+      "showDensitySelector": true,
+      "showColumnSelector": true,
+      "showFilterPanel": false,
+      "autoRefresh": true,
+      "autoRefreshInterval": 60
+    },
+    "privacy": {
+      "showOnlineStatus": false,
+      "showActivity": false,
+      "allowAnalytics": false
+    },
+    "advanced": {
+      "enableDebugMode": true,
+      "enableBetaFeatures": true,
+      "enableKeyboardShortcuts": true
+    },
+    "createdAt": "2024-02-01T00:00:00.000Z",
+    "updatedAt": "2024-02-01T00:00:00.000Z"
+  }
+]
