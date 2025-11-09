@@ -87,23 +87,23 @@ export default axiosInstance;
 
 // Helper functions for common HTTP methods
 export const api = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   get: <T = any>(url: string, config?: AxiosRequestConfig) =>
     axiosInstance.get<T>(url, config).then((res) => res.data),
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     axiosInstance.post<T>(url, data, config).then((res) => res.data),
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     axiosInstance.put<T>(url, data, config).then((res) => res.data),
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     axiosInstance.patch<T>(url, data, config).then((res) => res.data),
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   delete: <T = any>(url: string, config?: AxiosRequestConfig) =>
     axiosInstance.delete<T>(url, config).then((res) => res.data)
 };

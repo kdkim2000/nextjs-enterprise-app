@@ -33,12 +33,12 @@ import { HelpContent } from '@/types/help';
 interface HelpViewerProps {
   open: boolean;
   onClose: () => void;
-  pageId: string;
+  programId: string;
   language?: 'en' | 'ko';
   isAdmin?: boolean;
 }
 
-export default function HelpViewer({ open, onClose, pageId, language = 'en', isAdmin = false }: HelpViewerProps) {
+export default function HelpViewer({ open, onClose, programId, language = 'en', isAdmin = false }: HelpViewerProps) {
   const [helpContent, setHelpContent] = useState<HelpContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,27 +48,30 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en', isA
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get(`/help?pageId=${pageId}&language=${language}`);
+      const response = await api.get(`/help?programId=${programId}&language=${language}`);
       setHelpContent(response.help || null);
 
       // Expand all sections by default
       if (response.help?.sections) {
         setExpandedSections(response.help.sections.map((s: { id: string }) => s.id));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch help content:', err);
-      setError('Failed to load help content');
+      // Only show error if it's not a 404 (not found) or network error
+      if (err?.response?.status && err.response.status !== 404) {
+        setError('Failed to load help content');
+      }
       setHelpContent(null);
     } finally {
       setLoading(false);
     }
-  }, [pageId, language]);
+  }, [programId, language]);
 
   useEffect(() => {
-    if (open && pageId) {
+    if (open && programId) {
       fetchHelpContent();
     }
-  }, [open, pageId, fetchHelpContent]);
+  }, [open, programId, fetchHelpContent]);
 
   const handleSectionToggle = (sectionId: string) => {
     setExpandedSections((prev) =>
@@ -79,9 +82,9 @@ export default function HelpViewer({ open, onClose, pageId, language = 'en', isA
   };
 
   const handleEditHelp = () => {
-    // Navigate to help management page with filter for this pageId
+    // Navigate to help management page with filter for this programId
     const locale = language || 'en';
-    window.location.href = `/${locale}/admin/help?pageId=${pageId}`;
+    window.location.href = `/${locale}/admin/help?programId=${programId}`;
   };
 
   return (

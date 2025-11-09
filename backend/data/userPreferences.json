@@ -13,6 +13,7 @@
       "menu-001",
       "menu-014",
       "menu-013",
+      "menu-010",
       "menu-009",
       "menu-007",
       "menu-002"
@@ -23,7 +24,7 @@
     "emailNotifications": true,
     "systemNotifications": true,
     "sessionTimeout": 30,
-    "updatedAt": "2025-11-09T00:36:46.438Z"
+    "updatedAt": "2025-11-09T11:52:09.466Z"
   },
   {
     "userId": "user-002",

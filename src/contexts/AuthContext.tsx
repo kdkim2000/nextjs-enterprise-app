@@ -1,6 +1,6 @@
 'use client';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AuthState } from '@/types/auth';
 import { api } from '@/lib/axios';

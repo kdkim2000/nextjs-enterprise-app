@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import DashboardHeader from '@/components/layout/DashboardHeader';
-import DashboardFooter from '@/components/layout/DashboardFooter';
 import Sidebar from '@/components/layout/Sidebar';
 import AutoLogoutWarning from '@/components/common/AutoLogoutWarning';
 
@@ -92,7 +91,6 @@ export default function AuthenticatedLayout({
           >
             {children}
           </Box>
-          <DashboardFooter />
         </Box>
       </Box>
 

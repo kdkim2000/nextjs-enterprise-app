@@ -58,7 +58,7 @@ export default function MultiSelect({
   value,
   onChange,
   options,
-  placeholder = 'Select...',
+  placeholder: _placeholder = 'Select...',
   disabled = false,
   helperText,
   fullWidth = true,
@@ -83,12 +83,13 @@ export default function MultiSelect({
   };
 
   // Display text: show "All" if nothing selected, otherwise show count
-  const getDisplayText = () => {
-    if (value.length === 0) {
-      return allLabel;
-    }
-    return `${value.length} selected`;
-  };
+  // Reserved for future use
+  // const _getDisplayText = () => {
+  //   if (value.length === 0) {
+  //     return allLabel;
+  //   }
+  //   return `${value.length} selected`;
+  // };
 
   return (
     <FormControl fullWidth={fullWidth} size={size} disabled={disabled}>

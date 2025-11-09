@@ -11,7 +11,7 @@
     "ssoEnabled": true,
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "lastLogin": "2025-11-09T00:30:39.144Z"
+    "lastLogin": "2025-11-09T11:38:45.887Z"
   },
   {
     "id": "user-002",
@@ -61,7 +61,7 @@
     "password": "$2b$10$fgfsM0IoX778lfwSuOWbH.GsOTic.s0IkL7w7cZOhR87Y8Hqcphj6",
     "email": "ryan.clark@example.com",
     "name": "Ryan Clark",
-    "role": "admin",
+    "role": "user",
     "department": "Engineering",
     "mfaEnabled": true,
     "ssoEnabled": false,

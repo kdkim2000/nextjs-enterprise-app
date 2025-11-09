@@ -5,7 +5,7 @@ import ExcelJS from 'exceljs';
  * Generate Excel file from JSON data
  */
 export async function generateExcelFile(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   data: any[],
   filename: string,
   options?: {
@@ -103,7 +103,7 @@ export function downloadExcelFile(blob: Blob, filename: string) {
 /**
  * Parse Excel file to JSON
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export async function parseExcelFile(file: File): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -133,7 +133,7 @@ export async function parseExcelFile(file: File): Promise<any[]> {
  * Export DataGrid data to Excel
  */
 export async function exportDataGridToExcel(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   rows: any[],
   columns: { field: string; headerName?: string; width?: number }[],
   filename: string,
@@ -148,7 +148,7 @@ export async function exportDataGridToExcel(
     }));
 
   const data = rows.map((row) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const rowData: any = {};
     excelColumns.forEach((col) => {
       rowData[col.key] = row[col.key];
@@ -195,7 +195,7 @@ export async function generateExcelTemplate(
 
   // Add example row
   if (columns.some((col) => col.example)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const exampleRow: any = {};
     columns.forEach((col) => {
       if (col.example) {

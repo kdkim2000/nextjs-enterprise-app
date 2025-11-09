@@ -1,6 +1,6 @@
 export interface HelpContent {
   id: string;
-  pageId: string; // Unique identifier for the page (e.g., 'admin-users', 'dashboard')
+  programId: string; // Unique program identifier (e.g., 'PROG-USER-LIST', 'PROG-DASHBOARD')
   title: string;
   content: string; // Rich HTML content
   sections?: HelpSection[];
@@ -48,7 +48,7 @@ export interface RelatedLink {
 
 export interface HelpSearchResult {
   id: string;
-  pageId: string;
+  programId: string;
   title: string;
   excerpt: string;
   relevance: number;
