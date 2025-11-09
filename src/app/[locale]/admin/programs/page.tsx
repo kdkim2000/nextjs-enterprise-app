@@ -374,7 +374,7 @@ export default function ProgramManagementPage() {
     fetchPrograms(paginationModel.page, paginationModel.pageSize, useQuickSearch);
   };
 
-  const handleSearchChange = (field: keyof ProgramSearchCriteria, value: string) => {
+  const handleSearchChange = (field: keyof ProgramSearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
   };
 
@@ -648,7 +648,7 @@ export default function ProgramManagementPage() {
                 <Select
                   value={editingProgram?.type || 'page'}
                   label="Type"
-                  onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, type: e.target.value } : null)}
+                  onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, type: e.target.value as 'page' | 'function' | 'api' | 'report' } : null)}
                 >
                   {PROGRAM_TYPES.map(type => (
                     <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -662,7 +662,7 @@ export default function ProgramManagementPage() {
                 <Select
                   value={editingProgram?.status || 'development'}
                   label="Status"
-                  onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, status: e.target.value } : null)}
+                  onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, status: e.target.value as 'active' | 'inactive' | 'development' } : null)}
                 >
                   {PROGRAM_STATUS.map(status => (
                     <MenuItem key={status} value={status}>{status}</MenuItem>
@@ -772,7 +772,7 @@ export default function ProgramManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        pageId="admin-programs"
+        programId="PROG-PROGRAM-LIST"
         language="en"
         isAdmin={isAdmin}
       />

@@ -101,7 +101,7 @@ export interface ProgramSearchCriteria {
   category: string;
   type: string;
   status: string;
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 // Program Categories

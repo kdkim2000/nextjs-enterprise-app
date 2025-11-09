@@ -65,7 +65,7 @@ interface SearchCriteria {
   level: string;
   parentId: string;
   programId: string;
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 // Session storage key for state persistence
@@ -415,7 +415,7 @@ export default function MenuManagementPage() {
     fetchMenus();
   };
 
-  const handleSearchChange = (field: keyof SearchCriteria, value: string) => {
+  const handleSearchChange = (field: keyof SearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
   };
 
@@ -906,7 +906,7 @@ export default function MenuManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        pageId="admin-menus"
+        programId="PROG-MENU-LIST"
         language="en"
         isAdmin={isAdmin}
       />

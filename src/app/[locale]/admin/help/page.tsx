@@ -248,9 +248,9 @@ export default function HelpManagementPage() {
 
   const handleStatusChange = async (item: HelpContent, newStatus: string) => {
     try {
-      const updatedHelp = {
+      const updatedHelp: HelpContent = {
         ...item,
-        status: newStatus
+        status: newStatus as 'draft' | 'published'
       };
 
       await api.put('/help', updatedHelp);
@@ -347,7 +347,7 @@ export default function HelpManagementPage() {
     setHelps([]);
     setRowCount(0);
     setPaginationModel({ page: 0, pageSize: 50 });
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('admin-help-page-state');
   };
 
   // Advanced search handlers
@@ -363,7 +363,7 @@ export default function HelpManagementPage() {
       language: '',
       status: ''
     });
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('admin-help-page-state');
   };
 
   const handleAdvancedFilterApply = () => {
