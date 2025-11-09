@@ -43,7 +43,8 @@
       "Bash(tasklist:*)",
       "Bash(timeout /t 2)",
       "Bash(lsof:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

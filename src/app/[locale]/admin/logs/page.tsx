@@ -33,7 +33,7 @@ interface SearchCriteria {
 }
 
 // Session storage key for state persistence
-const STORAGE_KEY = 'admin-logs-page-state';
+const STORAGE_KEY = 'admin-logs-page-state-v2'; // Changed key to clear old invalid data
 
 // Helper functions for state persistence
 const savePageState = (state: {
@@ -167,19 +167,37 @@ export default function LogsPage() {
     }
   };
 
+  const handleRefresh = () => {
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchLogs(paginationModel.page, paginationModel.pageSize, useQuickSearch);
+  };
+
+  const handleSearchChange = (field: keyof SearchCriteria, value: string) => {
+    setSearchCriteria(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Quick search handlers
   const handleQuickSearch = () => {
     setPaginationModel({ ...paginationModel, page: 0 });
     fetchLogs(0, paginationModel.pageSize, true);
   };
 
+  const handleQuickSearchClear = () => {
+    setQuickSearch('');
+    setLogs([]);
+    setRowCount(0);
+    setPaginationModel({ page: 0, pageSize: 50 });
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
+  };
+
+  // Advanced search handlers
   const handleAdvancedSearch = () => {
     setPaginationModel({ ...paginationModel, page: 0 });
-    setAdvancedFilterOpen(false);
     fetchLogs(0, paginationModel.pageSize, false);
   };
 
-  const handleClearFilters = () => {
-    setQuickSearch('');
+  const handleAdvancedSearchClear = () => {
     setSearchCriteria({
       method: '',
       path: '',
@@ -189,19 +207,28 @@ export default function LogsPage() {
       startDate: '',
       endDate: ''
     });
-    setPaginationModel({ ...paginationModel, page: 0 });
-    setLogs([]);
-    setRowCount(0);
+    // Clear saved state
+    sessionStorage.removeItem(STORAGE_KEY);
   };
 
-  const handleRefresh = () => {
-    fetchLogs(paginationModel.page, paginationModel.pageSize, !!quickSearch);
+  const handleAdvancedFilterApply = () => {
+    setAdvancedFilterOpen(false);
+    handleAdvancedSearch();
+  };
+
+  const handleAdvancedFilterClose = () => {
+    setAdvancedFilterOpen(false);
   };
 
   const handlePaginationModelChange = (newModel: { page: number; pageSize: number }) => {
     setPaginationModel(newModel);
-    fetchLogs(newModel.page, newModel.pageSize, !!quickSearch);
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchLogs(newModel.page, newModel.pageSize, useQuickSearch);
   };
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(searchCriteria).filter(v => v !== '').length;
+  }, [searchCriteria]);
 
   const getStatusColor = (statusCode: number): 'success' | 'info' | 'warning' | 'error' | 'default' => {
     if (statusCode >= 200 && statusCode < 300) return 'success';
@@ -211,8 +238,9 @@ export default function LogsPage() {
     return 'default';
   };
 
-  const getMethodColor = (method: string): 'primary' | 'success' | 'warning' | 'error' | 'default' => {
+  const getMethodColor = (method: string): 'primary' | 'success' | 'warning' | 'error' | 'default' | 'info' => {
     switch (method) {
+      case 'MENU': return 'info';
       case 'GET': return 'primary';
       case 'POST': return 'success';
       case 'PUT': return 'warning';
@@ -233,62 +261,61 @@ export default function LogsPage() {
     return Array.from(ids).sort();
   }, [logs]);
 
-  const filterFieldsConfig: FilterFieldConfig[] = [
+  // Filter field configuration
+  const filterFields: FilterFieldConfig[] = useMemo(() => [
     {
       name: 'method',
       label: 'Method',
       type: 'select',
       options: [
-        { value: '', label: 'All' },
+        { value: '', label: 'All Methods' },
+        { value: 'MENU', label: 'MENU (Menu Access)' },
         { value: 'GET', label: 'GET' },
         { value: 'POST', label: 'POST' },
         { value: 'PUT', label: 'PUT' },
         { value: 'PATCH', label: 'PATCH' },
         { value: 'DELETE', label: 'DELETE' }
-      ],
-      gridSize: { xs: 12, sm: 6, md: 4 }
+      ]
     },
     {
       name: 'path',
       label: 'Path',
       type: 'text',
-      gridSize: { xs: 12, sm: 6, md: 4 }
+      placeholder: 'Search by path...'
     },
     {
       name: 'userId',
       label: 'User ID',
       type: 'text',
-      gridSize: { xs: 12, sm: 6, md: 4 }
+      placeholder: 'Search by user ID...'
     },
     {
       name: 'programId',
       label: 'Program ID',
       type: 'select',
       options: [
-        { value: '', label: 'All' },
+        { value: '', label: 'All Programs' },
         ...programIds.map(id => ({ value: id, label: id }))
-      ],
-      gridSize: { xs: 12, sm: 6, md: 4 }
+      ]
     },
     {
       name: 'statusCode',
       label: 'Status Code',
       type: 'text',
-      gridSize: { xs: 12, sm: 6, md: 4 }
+      placeholder: 'e.g., 200, 404, 500...'
     },
     {
-      name: 'startDate',
-      label: 'Start Date',
-      type: 'datetime-local',
-      gridSize: { xs: 12, sm: 6, md: 4 }
-    },
-    {
-      name: 'endDate',
-      label: 'End Date',
-      type: 'datetime-local',
-      gridSize: { xs: 12, sm: 6, md: 4 }
+      name: 'dateRange',
+      label: 'Search Period',
+      type: 'date-range',
+      startDateField: 'startDate',
+      endDateField: 'endDate',
+      startLabel: 'Start Date',
+      endLabel: 'End Date',
+      gridSize: { xs: 12, sm: 6, md: 6 },
+      dateOnly: true // Date only, time auto-filled (00:00:00 ~ 23:59:59)
     }
-  ];
+  ], [programIds]);
 
   const columns: GridColDef[] = [
     {
@@ -363,48 +390,54 @@ export default function LogsPage() {
       <PageHeader useMenu showBreadcrumb />
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
       {/* Quick Search Bar */}
       <QuickSearchBar
-        value={quickSearch}
-        onChange={setQuickSearch}
+        searchValue={quickSearch}
+        onSearchChange={setQuickSearch}
         onSearch={handleQuickSearch}
-        onAdvancedFilter={() => setAdvancedFilterOpen(true)}
-        onClear={handleClearFilters}
+        onClear={handleQuickSearchClear}
+        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
         placeholder="Search by path, user ID, or program ID..."
-        disabled={loading}
+        searching={loading}
+        activeFilterCount={activeFilterCount}
+        showAdvancedButton={true}
       />
 
-      {/* Advanced Filter Panel */}
-      <SearchFilterPanel
-        open={advancedFilterOpen}
-        onClose={() => setAdvancedFilterOpen(false)}
-        onSearch={handleAdvancedSearch}
-        onClear={handleClearFilters}
-      >
-        <SearchFilterFields
-          fields={filterFieldsConfig}
-          values={searchCriteria}
-          onChange={setSearchCriteria}
-        />
-      </SearchFilterPanel>
-
-      {/* Empty State */}
-      {logs.length === 0 && !loading && (
-        <EmptyState
-          icon={Search}
-          message="No logs loaded"
-          description="Click the refresh button or use search filters to load log data"
-        />
+      {/* Advanced Filter Panel - Only show when open */}
+      {advancedFilterOpen && (
+        <SearchFilterPanel
+          title={`${t('common.search')} / ${t('common.filter')}`}
+          activeFilterCount={activeFilterCount}
+          onApply={handleAdvancedFilterApply}
+          onClear={handleAdvancedSearchClear}
+          onClose={handleAdvancedFilterClose}
+          mode="advanced"
+          expanded={true}
+          showHeader={false}
+        >
+          <SearchFilterFields
+            fields={filterFields}
+            values={searchCriteria}
+            onChange={handleSearchChange}
+            onEnter={handleAdvancedFilterApply}
+          />
+        </SearchFilterPanel>
       )}
 
-      {/* DataGrid */}
-      {logs.length > 0 && (
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+      {/* DataGrid Area - Flexible */}
+      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+        {logs.length === 0 && !loading ? (
+          <EmptyState
+            icon={Search}
+            title="No logs loaded"
+            description="Use the search filters above to load log data"
+          />
+        ) : (
           <Box sx={{ flex: 1, minHeight: 0 }}>
             <ExcelDataGrid
               rows={logs}
@@ -418,8 +451,8 @@ export default function LogsPage() {
               onPaginationModelChange={handlePaginationModelChange}
             />
           </Box>
-        </Paper>
-      )}
+        )}
+      </Paper>
     </PageContainer>
   );
 }
