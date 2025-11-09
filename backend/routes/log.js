@@ -85,4 +85,4 @@ router.get('/my-logs', authenticateToken, async (req, res) => {
   }
 });
 
-undefined
+module.exports = router;

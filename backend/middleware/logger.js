@@ -5,9 +5,6 @@ const { v4: uuidv4 } = require('uuid');
 const LOG_FILE = path.join(__dirname, '../data/logs.json');
 const MAX_LOGS = 10000; // Keep last 10000 entries
 let writeQueue = Promise.resolve();
-let cachedLogs = null;
-let cacheTimestamp = 0;
-const CACHE_TTL = 5000; // 5 seconds cache
 
 /**
  * Get program ID from request path
@@ -53,13 +50,6 @@ function getProgramIdFromPath(reqPath) {
 function loggerMiddleware(req, res, next) {
   const startTime = Date.now();
 
-  // Capture response
-  const oldJson = res.json;
-  res.json = function(data) {
-    res.locals.responseData = data;
-    return oldJson.call(this, data);
-  };
-
   res.on('finish', async () => {
     const duration = Date.now() - startTime;
 
@@ -73,10 +63,7 @@ function loggerMiddleware(req, res, next) {
       userId: req.user?.userId || 'anonymous',
       programId: getProgramIdFromPath(req.path),
       ip: req.ip || req.connection.remoteAddress,
-      userAgent: req.headers['user-agent'],
-      requestBody: req.method !== 'GET' ? req.body : undefined,
-      // Don't log response body for large responses
-      responsePreview: res.statusCode >= 400 ? res.locals.responseData : undefined
+      userAgent: req.headers['user-agent']
     };
 
     try {
@@ -93,7 +80,6 @@ function loggerMiddleware(req, res, next) {
  * Append log entry to file with queue to prevent race conditions
  */
 async function appendLog(logEntry) {
-  // Add to write queue to prevent concurrent writes
   writeQueue = writeQueue.then(async () => {
     try {
       let logs = [];
@@ -106,7 +92,6 @@ async function appendLog(logEntry) {
         }
       } catch (error) {
         // File doesn't exist or is empty
-        console.log('Creating new log file');
         logs = [];
       }
 
@@ -118,10 +103,6 @@ async function appendLog(logEntry) {
       }
 
       await fs.writeFile(LOG_FILE, JSON.stringify(logs, null, 2));
-
-      // Update cache
-      cachedLogs = logs;
-      cacheTimestamp = Date.now();
     } catch (error) {
       console.error('Error writing log file:', error);
       throw error;
@@ -138,12 +119,6 @@ async function appendLog(logEntry) {
  */
 async function getLogs(filters = {}) {
   try {
-    // Use cache if available and recent
-    if (cachedLogs && (Date.now() - cacheTimestamp) < CACHE_TTL) {
-      let logs = [...cachedLogs];
-      return applyFilters(logs, filters);
-    }
-
     const data = await fs.readFile(LOG_FILE, 'utf8');
     let logs = JSON.parse(data);
 
@@ -152,46 +127,34 @@ async function getLogs(filters = {}) {
       return [];
     }
 
-    // Update cache
-    cachedLogs = logs;
-    cacheTimestamp = Date.now();
+    // Apply filters
+    if (filters.userId) {
+      logs = logs.filter(log => log.userId === filters.userId);
+    }
+    if (filters.path) {
+      logs = logs.filter(log => log.path && log.path.includes(filters.path));
+    }
+    if (filters.method) {
+      logs = logs.filter(log => log.method === filters.method);
+    }
+    if (filters.programId) {
+      logs = logs.filter(log => log.programId === filters.programId);
+    }
+    if (filters.statusCode) {
+      logs = logs.filter(log => log.statusCode === parseInt(filters.statusCode));
+    }
+    if (filters.startDate) {
+      logs = logs.filter(log => new Date(log.timestamp) >= new Date(filters.startDate));
+    }
+    if (filters.endDate) {
+      logs = logs.filter(log => new Date(log.timestamp) <= new Date(filters.endDate));
+    }
 
-    return applyFilters(logs, filters);
+    return logs;
   } catch (error) {
     console.error('Error reading logs:', error);
     return [];
   }
-}
-
-/**
- * Apply filters to logs array
- */
-function applyFilters(logs, filters) {
-  let filtered = [...logs];
-
-  if (filters.userId) {
-    filtered = filtered.filter(log => log.userId === filters.userId);
-  }
-  if (filters.path) {
-    filtered = filtered.filter(log => log.path && log.path.includes(filters.path));
-  }
-  if (filters.method) {
-    filtered = filtered.filter(log => log.method === filters.method);
-  }
-  if (filters.programId) {
-    filtered = filtered.filter(log => log.programId === filters.programId);
-  }
-  if (filters.statusCode) {
-    filtered = filtered.filter(log => log.statusCode === parseInt(filters.statusCode));
-  }
-  if (filters.startDate) {
-    filtered = filtered.filter(log => new Date(log.timestamp) >= new Date(filters.startDate));
-  }
-  if (filters.endDate) {
-    filtered = filtered.filter(log => new Date(log.timestamp) <= new Date(filters.endDate));
-  }
-
-  return filtered;
 }
 
 module.exports = {

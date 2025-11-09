@@ -1,6 +1,7 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
 const { readJSON, writeJSON } = require('../utils/fileUtils');
+const { appendLog } = require('../middleware/logger');
 const path = require('path');
 
 const router = express.Router();
@@ -178,23 +179,28 @@ function includeParentMenus(accessibleMenus, allMenus) {
  * Helper: Log menu access
  */
 async function logMenuAccess(userId, menuId, menuPath) {
-  const logsPath = path.join(__dirname, '../data/logs.json');
-  const logs = await readJSON(logsPath) || [];
+  const { v4: uuidv4 } = require('uuid');
 
-  logs.push({
-    type: 'menu_access',
-    userId,
-    menuId,
-    menuPath,
-    timestamp: new Date().toISOString()
-  });
+  // Get program ID from menuId
+  const menus = await readJSON(MENUS_FILE);
+  const menu = menus.find(m => m.id === menuId);
+  const programId = menu?.programId || 'PROG-SYSTEM';
 
-  // Keep last 10000 entries
-  if (logs.length > 10000) {
-    logs.splice(0, logs.length - 10000);
-  }
+  // Create unified log entry
+  const logEntry = {
+    id: uuidv4(),
+    timestamp: new Date().toISOString(),
+    method: 'MENU',
+    path: menuPath,
+    statusCode: 200,
+    duration: '0ms',
+    userId: userId,
+    programId: programId,
+    ip: '',
+    userAgent: ''
+  };
 
-  await writeJSON(logsPath, logs);
+  await appendLog(logEntry);
 }
 
 /**
