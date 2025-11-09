@@ -46,9 +46,9 @@ interface SearchCriteria {
   name: string;
   email: string;
   role: string;
-  department: string;
+  department: string[];
   status: string;
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 const DEPARTMENTS = [
@@ -111,7 +111,7 @@ export default function UserManagementPage() {
       name: '',
       email: '',
       role: '',
-      department: '',
+      department: [],
       status: ''
     }
   );
@@ -204,7 +204,10 @@ export default function UserManagementPage() {
         if (searchCriteria.name) params.append('name', searchCriteria.name);
         if (searchCriteria.email) params.append('email', searchCriteria.email);
         if (searchCriteria.role) params.append('role', searchCriteria.role);
-        if (searchCriteria.department) params.append('department', searchCriteria.department);
+        // Handle department as array
+        if (Array.isArray(searchCriteria.department) && searchCriteria.department.length > 0) {
+          searchCriteria.department.forEach(dept => params.append('department', dept));
+        }
         if (searchCriteria.status) params.append('status', searchCriteria.status);
       }
 
@@ -242,13 +245,21 @@ export default function UserManagementPage() {
       renderCell: (params) => {
         const user = params.row as User;
         return (
-          <Avatar
-            src={getAvatarUrl(user.avatarUrl)}
-            alt={user.name}
-            sx={{ width: 32, height: 32 }}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              height: '100%'
+            }}
           >
-            {!user.avatarUrl && user.name?.substring(0, 2).toUpperCase()}
-          </Avatar>
+            <Avatar
+              src={getAvatarUrl(user.avatarUrl)}
+              alt={user.name}
+              sx={{ width: 32, height: 32 }}
+            >
+              {!user.avatarUrl && user.name?.substring(0, 2).toUpperCase()}
+            </Avatar>
+          </Box>
         );
       }
     },
@@ -383,7 +394,7 @@ export default function UserManagementPage() {
     fetchUsers(paginationModel.page, paginationModel.pageSize, useQuickSearch);
   };
 
-  const handleSearchChange = (field: keyof SearchCriteria, value: string) => {
+  const handleSearchChange = (field: keyof SearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
   };
 
@@ -414,7 +425,7 @@ export default function UserManagementPage() {
       name: '',
       email: '',
       role: '',
-      department: '',
+      department: [],
       status: ''
     });
     // Clear saved state
@@ -437,7 +448,12 @@ export default function UserManagementPage() {
   };
 
   const activeFilterCount = useMemo(() => {
-    return Object.values(searchCriteria).filter(v => v !== '').length;
+    return Object.entries(searchCriteria).filter(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value !== '';
+    }).length;
   }, [searchCriteria]);
 
   // Filter field configuration
@@ -474,11 +490,9 @@ export default function UserManagementPage() {
     {
       name: 'department',
       label: 'Department',
-      type: 'select',
-      options: [
-        { value: '', label: 'All Departments' },
-        ...DEPARTMENTS.map(dept => ({ value: dept, label: dept }))
-      ]
+      type: 'multi-select',
+      options: DEPARTMENTS.map(dept => ({ value: dept, label: dept })),
+      allLabel: 'All Departments'
     },
     {
       name: 'status',

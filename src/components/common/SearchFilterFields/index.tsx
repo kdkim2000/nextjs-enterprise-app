@@ -5,11 +5,12 @@ import { TextField, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import UserSelector from '@/components/common/UserSelector';
 import DateRangePicker from '@/components/common/DateRangePicker';
+import MultiSelect from '@/components/common/MultiSelect';
 
 export interface FilterFieldConfig {
   name: string;
   label: string;
-  type?: 'text' | 'select' | 'number' | 'userSelector' | 'date-range' | 'datetime-local';
+  type?: 'text' | 'select' | 'multi-select' | 'number' | 'userSelector' | 'date-range' | 'datetime-local';
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   gridSize?: { xs?: number; sm?: number; md?: number };
@@ -29,12 +30,17 @@ export interface FilterFieldConfig {
    * Default: 'en'
    */
   lang?: string;
+  /**
+   * For multi-select type: label for "All" option
+   * Default: 'All'
+   */
+  allLabel?: string;
 }
 
 interface SearchFilterFieldsProps {
   fields: FilterFieldConfig[];
-  values: Record<string, string>;
-  onChange: (name: string, value: string) => void;
+  values: Record<string, string | string[]>;
+  onChange: (name: string, value: string | string[]) => void;
   onEnter?: () => void;
   disabled?: boolean;
 }
@@ -97,6 +103,26 @@ export default function SearchFilterFields({
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+          );
+        }
+
+        if (field.type === 'multi-select') {
+          const currentValue = values[field.name];
+          const arrayValue = Array.isArray(currentValue) ? currentValue : [];
+
+          return (
+            <Grid key={field.name} size={gridSize}>
+              <MultiSelect
+                label={field.label}
+                value={arrayValue}
+                onChange={(newValue) => onChange(field.name, newValue)}
+                options={field.options || []}
+                placeholder={field.placeholder}
+                disabled={disabled}
+                helperText={field.placeholder}
+                allLabel={field.allLabel || 'All'}
+              />
             </Grid>
           );
         }

@@ -22,14 +22,14 @@ import { useI18n } from '@/lib/i18n/client';
 import type { LogEntry } from '@/types/log';
 
 interface SearchCriteria {
-  method: string;
+  method: string[];
   path: string;
   userId: string;
   programId: string;
   statusCode: string;
   startDate: string;
   endDate: string;
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 // Session storage key for state persistence
@@ -73,7 +73,7 @@ export default function LogsPage() {
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
     savedState?.searchCriteria || {
-      method: '',
+      method: [],
       path: '',
       userId: '',
       programId: '',
@@ -135,7 +135,10 @@ export default function LogsPage() {
         params.append('programId', quickSearch);
       } else {
         // Advanced search: use specific criteria
-        if (searchCriteria.method) params.append('method', searchCriteria.method);
+        // Handle method as array
+        if (Array.isArray(searchCriteria.method) && searchCriteria.method.length > 0) {
+          searchCriteria.method.forEach(method => params.append('method', method));
+        }
         if (searchCriteria.path) params.append('path', searchCriteria.path);
         if (searchCriteria.userId) params.append('userId', searchCriteria.userId);
         if (searchCriteria.programId) params.append('programId', searchCriteria.programId);
@@ -172,7 +175,7 @@ export default function LogsPage() {
     fetchLogs(paginationModel.page, paginationModel.pageSize, useQuickSearch);
   };
 
-  const handleSearchChange = (field: keyof SearchCriteria, value: string) => {
+  const handleSearchChange = (field: keyof SearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
   };
 
@@ -199,7 +202,7 @@ export default function LogsPage() {
 
   const handleAdvancedSearchClear = () => {
     setSearchCriteria({
-      method: '',
+      method: [],
       path: '',
       userId: '',
       programId: '',
@@ -227,7 +230,12 @@ export default function LogsPage() {
   };
 
   const activeFilterCount = useMemo(() => {
-    return Object.values(searchCriteria).filter(v => v !== '').length;
+    return Object.entries(searchCriteria).filter(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return value !== '';
+    }).length;
   }, [searchCriteria]);
 
   const getStatusColor = (statusCode: number): 'success' | 'info' | 'warning' | 'error' | 'default' => {
@@ -266,16 +274,16 @@ export default function LogsPage() {
     {
       name: 'method',
       label: 'Method',
-      type: 'select',
+      type: 'multi-select',
       options: [
-        { value: '', label: 'All Methods' },
         { value: 'MENU', label: 'MENU (Menu Access)' },
         { value: 'GET', label: 'GET' },
         { value: 'POST', label: 'POST' },
         { value: 'PUT', label: 'PUT' },
         { value: 'PATCH', label: 'PATCH' },
         { value: 'DELETE', label: 'DELETE' }
-      ]
+      ],
+      allLabel: 'All Methods'
     },
     {
       name: 'path',
