@@ -44,7 +44,7 @@ interface SearchCriteria {
   isSystem: string;
   manager: string;
   representative: string;
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
 // Session storage key for state persistence
@@ -367,7 +367,7 @@ export default function RoleManagementPage() {
     fetchRoles(useQuickSearch);
   };
 
-  const handleSearchChange = (field: keyof SearchCriteria, value: string) => {
+  const handleSearchChange = (field: keyof SearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
   };
 
@@ -639,7 +639,7 @@ export default function RoleManagementPage() {
                 <Select
                   value={editingRole?.roleType || 'general'}
                   label="Role Type"
-                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, roleType: e.target.value } : null)}
+                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, roleType: e.target.value as 'management' | 'general' } : null)}
                 >
                   <MenuItem value="general">General (일반 역할 - 사용자 신청 가능)</MenuItem>
                   <MenuItem value="management">Management (관리용 역할 - 관리자 전용)</MenuItem>
@@ -737,7 +737,7 @@ export default function RoleManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        pageId="admin-roles"
+        programId="PROG-ROLE-LIST"
         language="en"
         isAdmin={isAdmin}
       />

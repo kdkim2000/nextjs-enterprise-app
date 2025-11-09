@@ -19,7 +19,7 @@ import { api } from '@/lib/axios';
 import { RoleMenuMapping } from '@/types/mapping';
 
 interface SimpleRole { id: string; name: string; displayName: string }
-interface SimpleMenu { id: string; code: string; name: { en: string; ko: string } }
+interface SimpleMenu { id: string; code: string; name: { en: string; ko: string }; path?: string }
 
 export default function RoleMenuMappingPage() {
   const [mappings, setMappings] = useState<RoleMenuMapping[]>([]);
@@ -285,46 +285,49 @@ export default function RoleMenuMappingPage() {
       name: 'permissions',
       label: 'Permissions',
       type: 'custom',
-      render: (value, onChange) => (
-        <Box sx={{ mt: 2 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value?.canView ?? true}
-                onChange={(e) => onChange({ ...value, canView: e.target.checked })}
-              />
-            }
-            label="Can View"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value?.canCreate ?? false}
-                onChange={(e) => onChange({ ...value, canCreate: e.target.checked })}
-              />
-            }
-            label="Can Create"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value?.canUpdate ?? false}
-                onChange={(e) => onChange({ ...value, canUpdate: e.target.checked })}
-              />
-            }
-            label="Can Update"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value?.canDelete ?? false}
-                onChange={(e) => onChange({ ...value, canDelete: e.target.checked })}
-              />
-            }
-            label="Can Delete"
-          />
-        </Box>
-      )
+      render: (value, onChange) => {
+        const permissions = typeof value === 'string' ? JSON.parse(value || '{}') : (value || {});
+        return (
+          <Box sx={{ mt: 2 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={permissions?.canView ?? true}
+                  onChange={(e) => onChange({ ...permissions, canView: e.target.checked })}
+                />
+              }
+              label="Can View"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={permissions?.canCreate ?? false}
+                  onChange={(e) => onChange({ ...permissions, canCreate: e.target.checked })}
+                />
+              }
+              label="Can Create"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={permissions?.canUpdate ?? false}
+                  onChange={(e) => onChange({ ...permissions, canUpdate: e.target.checked })}
+                />
+              }
+              label="Can Update"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={permissions?.canDelete ?? false}
+                  onChange={(e) => onChange({ ...permissions, canDelete: e.target.checked })}
+                />
+              }
+              label="Can Delete"
+            />
+          </Box>
+        );
+      }
     }
   ], [roleOptions, menuOptions, editingMapping]);
 
@@ -407,7 +410,7 @@ export default function RoleMenuMappingPage() {
         itemsList={selectedForDelete.map((id) => {
           const mapping = mappings.find((m) => m.id === id);
           const menuName = mapping?.menuName && typeof mapping.menuName === 'object'
-            ? mapping.menuName.en || mapping.menuName.ko
+            ? (mapping.menuName as { en?: string; ko?: string }).en || (mapping.menuName as { en?: string; ko?: string }).ko
             : mapping?.menuName;
           return mapping
             ? { id, displayName: `${mapping.roleDisplayName} - ${menuName}` }

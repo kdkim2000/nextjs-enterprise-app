@@ -109,7 +109,8 @@ export default function CrudDialog<T extends Record<string, unknown>>({
     if (field.showOnlyForNew && isEditing) return null;
     if (field.showOnlyForEdit && !isEditing) return null;
 
-    const fieldValue = formData[field.name] ?? '';
+    const rawValue = formData[field.name] ?? '';
+    const fieldValue = typeof rawValue === 'object' ? '' : (rawValue as string | number | boolean | null);
     const size = field.size || 'medium';
 
     let fieldElement: React.ReactNode;
@@ -171,7 +172,7 @@ export default function CrudDialog<T extends Record<string, unknown>>({
         fieldElement = (
           <UserSelector
             label={field.label}
-            value={fieldValue}
+            value={typeof fieldValue === 'string' ? fieldValue : null}
             onChange={(userId) => handleChange(field.name, userId)}
             helperText={field.helperText}
             required={field.required}
@@ -182,7 +183,7 @@ export default function CrudDialog<T extends Record<string, unknown>>({
 
       case 'custom':
         if (field.render) {
-          fieldElement = field.render(fieldValue, (value) => handleChange(field.name, value));
+          fieldElement = field.render(rawValue as string, (value) => handleChange(field.name, value));
         } else {
           fieldElement = null;
         }
