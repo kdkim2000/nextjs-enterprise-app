@@ -44,7 +44,10 @@
       "Bash(timeout /t 2)",
       "Bash(lsof:*)",
       "Bash(timeout:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(jq:*)",
+      "Bash(dir \"e:\\apps\\nextjs-enterprise-app\\src\\components\\common\" /B)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []

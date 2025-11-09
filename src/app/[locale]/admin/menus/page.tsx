@@ -685,6 +685,7 @@ export default function MenuManagementPage() {
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
               checkboxSelection
+              editable
               exportFileName="menus"
               loading={loading}
             />

@@ -40,9 +40,11 @@ interface HelpViewerProps {
 
 export default function HelpViewer({ open, onClose, programId, language = 'en', isAdmin = false }: HelpViewerProps) {
   const [helpContent, setHelpContent] = useState<HelpContent | null>(null);
+  const [defaultTemplate, setDefaultTemplate] = useState<HelpContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [creating, setCreating] = useState(false);
 
   const fetchHelpContent = useCallback(async () => {
     try {
@@ -50,6 +52,16 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
       setError(null);
       const response = await api.get(`/help?programId=${programId}&language=${language}`);
       setHelpContent(response.help || null);
+
+      // If no help content found, fetch default template (help-001) for reference
+      if (!response.help) {
+        try {
+          const templateResponse = await api.get('/help?programId=PROG-USER-LIST&language=en&includeAll=true');
+          setDefaultTemplate(templateResponse.help || null);
+        } catch (templateErr) {
+          console.error('Failed to fetch default template:', templateErr);
+        }
+      }
 
       // Expand all sections by default
       if (response.help?.sections) {
@@ -85,6 +97,39 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
     // Navigate to help management page with filter for this programId
     const locale = language || 'en';
     window.location.href = `/${locale}/admin/help?programId=${programId}`;
+  };
+
+  const handleCreateFromTemplate = async () => {
+    if (!defaultTemplate) return;
+
+    try {
+      setCreating(true);
+      setError(null);
+
+      // Create new help content based on default template
+      const newHelp = {
+        programId,
+        language,
+        title: defaultTemplate.title,
+        content: defaultTemplate.content,
+        sections: defaultTemplate.sections || [],
+        videos: defaultTemplate.videos || [],
+        faqs: defaultTemplate.faqs || [],
+        relatedLinks: defaultTemplate.relatedLinks || [],
+        status: 'draft'
+      };
+
+      await api.post('/help', newHelp);
+
+      // Navigate to help management page to edit the newly created help
+      const locale = language || 'en';
+      window.location.href = `/${locale}/admin/help?programId=${programId}`;
+    } catch (err: any) {
+      console.error('Failed to create help from template:', err);
+      setError('Failed to create help content from template');
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -151,7 +196,7 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
           <Alert severity="info">
             No help content available for this page yet.
             {isAdmin && (
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
                 <Button
                   variant="contained"
                   size="small"
@@ -160,6 +205,16 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
                 >
                   Create Help Content
                 </Button>
+                {defaultTemplate && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleCreateFromTemplate}
+                    disabled={creating}
+                  >
+                    {creating ? 'Creating...' : 'Create from Default Template'}
+                  </Button>
+                )}
               </Box>
             )}
           </Alert>

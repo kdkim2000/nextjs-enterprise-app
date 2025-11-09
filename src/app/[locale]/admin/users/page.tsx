@@ -24,7 +24,7 @@ import ActionsCell from '@/components/common/ActionsCell';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
-import { useI18n } from '@/lib/i18n/client';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getAvatarUrl } from '@/lib/config';
 import { usePageState } from '@/hooks/usePageState';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
@@ -61,6 +61,7 @@ const DEPARTMENTS = [
 
 export default function UserManagementPage() {
   const t = useI18n();
+  const currentLocale = useCurrentLocale();
 
   // Use page state hook
   const {
@@ -353,7 +354,7 @@ export default function UserManagementPage() {
     setRowCount(0);
     setPaginationModel({ page: 0, pageSize: 50 });
     // Clear saved state
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('admin-users-page-state');
   };
 
   // Advanced search handlers
@@ -372,7 +373,7 @@ export default function UserManagementPage() {
       status: ''
     });
     // Clear saved state
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('admin-users-page-state');
   };
 
   const handleAdvancedFilterApply = () => {
@@ -535,6 +536,7 @@ export default function UserManagementPage() {
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
               checkboxSelection
+              editable
               exportFileName="users"
               loading={searching}
               paginationMode="server"
@@ -593,7 +595,7 @@ export default function UserManagementPage() {
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
         programId="PROG-USER-LIST"
-        language="en"
+        language={currentLocale}
         isAdmin={isAdmin}
       />
     </PageContainer>
