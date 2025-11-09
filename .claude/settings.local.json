@@ -48,7 +48,9 @@
       "Bash(jq:*)",
       "Bash(dir \"e:\\apps\\nextjs-enterprise-app\\src\\components\\common\" /B)",
       "Bash(npm uninstall:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

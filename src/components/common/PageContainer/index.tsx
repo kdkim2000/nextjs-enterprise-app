@@ -24,8 +24,7 @@ export default function PageContainer({
     ...(fullHeight && {
       height: '100%',
       display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
+      flexDirection: 'column'
     })
   };
 

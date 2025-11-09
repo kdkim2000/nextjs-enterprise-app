@@ -93,6 +93,7 @@ export interface ProgramFormData {
   version?: string;
   author?: string;
   tags?: string;
+  permissions?: ProgramPermission[];
 }
 
 export interface ProgramSearchCriteria {
