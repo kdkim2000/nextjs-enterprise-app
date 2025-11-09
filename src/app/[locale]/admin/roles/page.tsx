@@ -559,6 +559,7 @@ export default function RoleManagementPage() {
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
               checkboxSelection
+              editable
               exportFileName="roles"
               loading={searching}
             />

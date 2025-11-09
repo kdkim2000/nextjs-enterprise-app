@@ -1,9 +1,9 @@
 [
   {
-    "id": "help-001",
+    "id": "help-1762650973934",
     "programId": "PROG-USER-LIST",
     "title": "User Management Help",
-    "content": "<p>This page allows you to manage all users in the system. You can search, add, edit, and delete users.</p>",
+    "content": "<h4>This page allows you to manage all users in the system. You can search, add, edit, and delete users.</h4><hr><p></p>",
     "sections": [
       {
         "id": "section-001",
@@ -71,52 +71,103 @@
       }
     ],
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2025-11-09T13:15:08.023Z",
     "createdBy": "admin",
-    "version": 1,
-    "status": "published",
-    "language": "en"
-  },
-  {
-    "id": "help-1762650973934",
-    "programId": "PROG-USER-LIST",
-    "title": "테스트ㄴㅇㄻ",
-    "content": "<p>ㅇㄻㄴㄴ</p><table style=\"min-width: 75px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p></p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td></tr></tbody></table>",
-    "sections": [],
-    "faqs": [],
-    "relatedLinks": [],
-    "status": "draft",
-    "language": "en",
-    "version": 1,
-    "createdAt": "2025-11-09T01:16:13.934Z",
-    "updatedAt": "2025-11-09T01:16:13.934Z"
-  },
-  {
-    "id": "help-1762651879784",
-    "programId": "PROG-USER-LIST",
-    "title": "ㅋㅊㅋㅇㄹㄴㅇㄴㅇㅎㄴㅇㅇㄴㅇㄹㄴㅇㅇㄴㅇㄹㄴㅇ",
-    "content": "<table style=\"min-width: 75px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p></p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td></tr></tbody></table>",
-    "sections": [],
-    "faqs": [],
-    "relatedLinks": [],
-    "status": "published",
-    "language": "en",
     "version": 3,
-    "createdAt": "2025-11-09T01:31:19.784Z",
-    "updatedAt": "2025-11-09T11:16:36.944Z"
+    "status": "published",
+    "language": "ko"
   },
   {
-    "id": "help-1762652088932",
+    "id": "help-1762691172641",
     "programId": "PROG-USER-LIST",
+    "language": "en",
+    "title": "User Management Help",
+    "content": "<p>This page allows you to manage all users in the system. You can search, add, edit, and delete users.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "Searching for Users",
+        "content": "<p><strong>Quick Search:</strong> Use the search bar at the top to quickly find users by username, name, or email.</p><p><strong>Advanced Search:</strong> Click the filter icon to access advanced search options where you can filter by role, department, and status.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "Adding a New User",
+        "content": "<p>1. Click the <strong>Add</strong> button in the toolbar</p><p>2. Fill in the required fields (username, password, name, email)</p><p>3. Select the appropriate role and department</p><p>4. Click <strong>Save</strong> to create the user</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "Editing User Information",
+        "content": "<p>1. Find the user in the list</p><p>2. Click the <strong>Edit</strong> icon in the actions column</p><p>3. Update the necessary information</p><p>4. Click <strong>Save</strong> to apply changes</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "Deleting Users",
+        "content": "<p>1. Select one or more users using the checkboxes</p><p>2. Click the <strong>Delete</strong> button in the toolbar</p><p>3. Confirm the deletion in the dialog that appears</p><p><strong>Note:</strong> You cannot delete your own account.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "Exporting Data",
+        "content": "<p>You can export user data to Excel or PDF format using the export buttons in the toolbar.</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "How do I reset a user's password?",
+        "answer": "Edit the user and enter a new password in the password field. Leave it blank if you don't want to change the password.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "What are the different user roles?",
+        "answer": "There are three roles: Admin (full access), Manager (can manage users in their department), and User (limited access).",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "How many users can I select and delete at once?",
+        "answer": "You can select and delete multiple users at once using the checkboxes. There is no limit to the number of users you can delete simultaneously.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "User Roles and Permissions",
+        "url": "/admin/roles",
+        "description": "Learn more about user roles and permissions"
+      },
+      {
+        "id": "link-002",
+        "title": "Security Settings",
+        "url": "/admin/security",
+        "description": "Configure security settings for user accounts"
+      }
+    ],
+    "status": "published",
+    "version": 3,
+    "createdAt": "2025-11-09T12:26:12.641Z",
+    "updatedAt": "2025-11-09T13:12:34.108Z"
+  },
+  {
+    "id": "help-1762693301341",
+    "programId": "PROG-USER-LIST",
+    "language": "en",
     "title": "tsdfsds",
     "content": "<p>sdfsdfs</p><table style=\"min-width: 75px;\"><colgroup><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"><col style=\"min-width: 25px;\"></colgroup><tbody><tr><th colspan=\"1\" rowspan=\"1\"><p></p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th><th colspan=\"1\" rowspan=\"1\"><p></p></th></tr><tr><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td></tr><tr><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td><td colspan=\"1\" rowspan=\"1\"><p></p></td></tr></tbody></table>",
     "sections": [],
+    "videos": [],
     "faqs": [],
     "relatedLinks": [],
     "status": "draft",
-    "language": "en",
     "version": 1,
-    "createdAt": "2025-11-09T01:34:48.932Z",
-    "updatedAt": "2025-11-09T01:34:48.932Z"
+    "createdAt": "2025-11-09T13:01:41.341Z",
+    "updatedAt": "2025-11-09T13:01:41.341Z"
   }
 ]

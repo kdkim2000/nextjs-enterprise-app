@@ -550,6 +550,7 @@ export default function HelpManagementPage() {
             onDelete={handleDeleteClick}
             onRefresh={handleRefresh}
             checkboxSelection
+            editable
             exportFileName="help-content"
             loading={searching}
             paginationMode="server"

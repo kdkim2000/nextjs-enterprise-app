@@ -8,14 +8,23 @@ const HELP_FILE = path.join(__dirname, '../data/help.json');
 // GET /api/help - Get help content(s)
 router.get('/', async (req, res) => {
   try {
-    const { programId, language, page = 1, limit = 50 } = req.query;
+    const { programId, language, page = 1, limit = 50, includeAll } = req.query;
 
     let helps = await readJSON(HELP_FILE);
 
     // If programId is provided, return single help content
     if (programId) {
-      const help = helps.find(h => h.programId === programId && h.language === (language || 'en'));
-      return res.json({ help: help || null });
+      // For single help query, only return published content unless includeAll is true (for admin)
+      let filteredHelps = helps.filter(h => h.programId === programId && h.language === (language || 'en'));
+
+      // Filter by published status unless includeAll is explicitly true
+      if (includeAll !== 'true') {
+        filteredHelps = filteredHelps.filter(h => h.status === 'published');
+      }
+
+      // Return the first match (should be only one for a given programId + language)
+      const help = filteredHelps.length > 0 ? filteredHelps[0] : null;
+      return res.json({ help });
     }
 
     // Otherwise, return list of helps with filtering

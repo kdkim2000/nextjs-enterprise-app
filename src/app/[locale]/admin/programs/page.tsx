@@ -551,6 +551,7 @@ export default function ProgramManagementPage() {
               onDelete={handleDeleteClick}
               onRefresh={handleRefresh}
               checkboxSelection
+              editable
               exportFileName="programs"
               loading={searching}
               paginationMode="server"
