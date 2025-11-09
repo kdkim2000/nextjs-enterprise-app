@@ -27,11 +27,15 @@ router.get('/', authenticateToken, async (req, res) => {
       name,
       email,
       role,
-      department,
       status,
       page = 1,
       limit = 50
     } = req.query;
+
+    // Handle department as array (can have multiple values)
+    const departments = req.query.department
+      ? (Array.isArray(req.query.department) ? req.query.department : [req.query.department])
+      : [];
 
     // Filter users based on search criteria
     let filteredUsers = users.filter(user => {
@@ -47,7 +51,8 @@ router.get('/', authenticateToken, async (req, res) => {
       if (role && user.role !== role) {
         return false;
       }
-      if (department && user.department !== department) {
+      // Check if user's department is in the selected departments array
+      if (departments.length > 0 && !departments.includes(user.department)) {
         return false;
       }
       if (status && user.status !== status) {

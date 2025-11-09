@@ -4,14 +4,14 @@
     "username": "admin",
     "password": "$2b$10$fgfsM0IoX778lfwSuOWbH.GsOTic.s0IkL7w7cZOhR87Y8Hqcphj6",
     "email": "admin@example.com",
-    "name": "Admin User",
+    "name": "Admin",
     "role": "admin",
     "department": "IT",
     "mfaEnabled": false,
     "ssoEnabled": true,
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "lastLogin": "2025-11-09T00:03:04.181Z"
+    "lastLogin": "2025-11-09T00:30:39.144Z"
   },
   {
     "id": "user-002",
