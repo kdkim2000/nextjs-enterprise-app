@@ -225,7 +225,7 @@
     "path": "/dev/components",
     "icon": "Widgets",
     "order": 5,
-    "parentId": null,
+    "parentId": "menu-016",
     "level": 1,
     "programId": "PROG-COMPONENTS",
     "description": {
@@ -242,13 +242,31 @@
     },
     "path": "/admin/logs",
     "icon": "Description",
-    "order": 7,
+    "order": 8,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-LOGS",
     "description": {
       "en": "View and analyze system logs",
       "ko": "시스템 로그 조회 및 분석"
+    }
+  },
+  {
+    "id": "menu-016",
+    "code": "dev-support",
+    "name": {
+      "en": "Dev Support",
+      "ko": "개발지원"
+    },
+    "path": "/dev",
+    "icon": "Code",
+    "order": 3,
+    "parentId": null,
+    "level": 1,
+    "programId": null,
+    "description": {
+      "en": "Development support and tools",
+      "ko": "개발 지원 및 도구"
     }
   }
 ]

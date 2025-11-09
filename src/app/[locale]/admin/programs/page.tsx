@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Box,
   Alert,
@@ -17,458 +17,191 @@ import {
   InputLabel,
   Stack,
   Divider,
-  CircularProgress
+  CircularProgress,
+  Card,
+  CardContent,
+  CardActions,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
-import { Search, HelpOutline, Edit, Close } from '@mui/icons-material';
+import { Search, HelpOutline, Close, Add, Delete, Edit as EditIcon } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
-import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
+import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
-import { GridColDef } from '@mui/x-data-grid';
-import { api } from '@/lib/axios';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
-import { ProgramFormData, ProgramSearchCriteria, PROGRAM_CATEGORIES, PROGRAM_TYPES, PROGRAM_STATUS } from '@/types/program';
-
-// Session storage key for state persistence
-const STORAGE_KEY = 'admin-programs-page-state';
-
-// Helper functions for state persistence
-const savePageState = (state: {
-  searchCriteria: ProgramSearchCriteria;
-  paginationModel: { page: number; pageSize: number };
-  quickSearch: string;
-  programs: ProgramFormData[];
-  rowCount: number;
-}) => {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
-    console.error('Failed to save page state:', error);
-  }
-};
-
-const loadPageState = () => {
-  try {
-    const saved = sessionStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
-  } catch (error) {
-    console.error('Failed to load page state:', error);
-    return null;
-  }
-};
+import { PROGRAM_CATEGORIES, PROGRAM_TYPES, PROGRAM_STATUS, DEFAULT_PERMISSIONS } from '@/types/program';
+import { useProgramManagement } from './hooks/useProgramManagement';
+import { createColumns } from './constants';
+import { createFilterFields, calculateActiveFilterCount } from './utils';
+import { ProgramFormData, ProgramPermission } from './types';
 
 export default function ProgramManagementPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
 
-  // Load saved state on mount
-  const savedState = loadPageState();
+  // Local state for permission editing
+  const [editingPermission, setEditingPermission] = useState<ProgramPermission & { originalCode?: string } | null>(null);
+  const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
 
-  const [programs, setPrograms] = useState<ProgramFormData[]>(savedState?.programs || []);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProgram, setEditingProgram] = useState<ProgramFormData | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
-  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [searchCriteria, setSearchCriteria] = useState<ProgramSearchCriteria>(
-    savedState?.searchCriteria || {
-      code: '',
-      name: '',
-      category: '',
-      type: '',
-      status: ''
-    }
+  // Use custom hook for all business logic
+  const {
+    // State
+    programs,
+    setPrograms,
+    searchCriteria,
+    quickSearch,
+    setQuickSearch,
+    paginationModel,
+    rowCount,
+    searching,
+    saveLoading,
+    dialogOpen,
+    setDialogOpen,
+    editingProgram,
+    setEditingProgram,
+    advancedFilterOpen,
+    setAdvancedFilterOpen,
+    deleteConfirmOpen,
+    selectedForDelete,
+    deleteLoading,
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    successMessage,
+    error,
+    // Handlers
+    handleAdd,
+    handleEdit,
+    handleSave,
+    handleDeleteClick,
+    handleDeleteConfirm,
+    handleDeleteCancel,
+    handleRefresh,
+    handleSearchChange,
+    handleQuickSearch,
+    handleQuickSearchClear,
+    handleAdvancedFilterApply,
+    handleAdvancedFilterClose,
+    handlePaginationModelChange
+  } = useProgramManagement();
+
+  // Memoized computed values
+  const columns = useMemo(() => createColumns(locale, handleEdit), [locale, handleEdit]);
+  const filterFields = useMemo(() => createFilterFields(), []);
+  const activeFilterCount = useMemo(
+    () => calculateActiveFilterCount(searchCriteria),
+    [searchCriteria]
   );
-  const [paginationModel, setPaginationModel] = useState(
-    savedState?.paginationModel || {
-      page: 0,
-      pageSize: 50
-    }
-  );
-  const [rowCount, setRowCount] = useState(savedState?.rowCount || 0);
 
-  // Auto-hide success message after 10 seconds
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
+  // Collect unique permissions from all programs
+  const existingPermissions = useMemo(() => {
+    const permMap = new Map<string, ProgramPermission>();
 
-  // Auto-hide error message after 10 seconds
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  // Save page state whenever it changes
-  useEffect(() => {
-    savePageState({
-      searchCriteria,
-      paginationModel,
-      quickSearch,
-      programs,
-      rowCount
+    // Add default permissions
+    DEFAULT_PERMISSIONS.forEach(p => {
+      permMap.set(p.code, {
+        code: p.code,
+        name: { en: p.nameEn, ko: p.nameKo },
+        description: { en: p.descriptionEn, ko: p.descriptionKo },
+        isDefault: false
+      });
     });
-  }, [searchCriteria, paginationModel, quickSearch, programs, rowCount]);
 
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
+    // Add permissions from all programs
+    programs.forEach(program => {
+      program.permissions?.forEach(perm => {
+        if (!permMap.has(perm.code)) {
+          permMap.set(perm.code, perm);
         }
-
-        const response = await api.get('/help?pageId=admin-programs&language=en');
-        setHelpExists(!!response.help);
-      } catch {
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-
-    // If there's saved state with search criteria or data, restore it
-    if (savedState && (savedState.programs?.length > 0 || savedState.quickSearch ||
-        Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
-      // Data already loaded from savedState, no need to fetch again
-      // User can click refresh if they want fresh data
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchPrograms = async (page: number = 0, pageSize: number = 50, useQuickSearch: boolean = false) => {
-    try {
-      setSearching(true);
-      setError(null);
-
-      const params = new URLSearchParams();
-
-      if (useQuickSearch && quickSearch) {
-        params.append('name', quickSearch);
-        params.append('code', quickSearch);
-      } else {
-        if (searchCriteria.code) params.append('code', searchCriteria.code);
-        if (searchCriteria.name) params.append('name', searchCriteria.name);
-        if (searchCriteria.category) params.append('category', searchCriteria.category);
-        if (searchCriteria.type) params.append('type', searchCriteria.type);
-        if (searchCriteria.status) params.append('status', searchCriteria.status);
-      }
-
-      params.append('page', (page + 1).toString());
-      params.append('limit', pageSize.toString());
-
-      const response = await api.get(`/program?${params.toString()}`);
-
-      // Transform data for grid
-      const transformedPrograms = (response.programs || []).map((prog: {
-        id: string;
-        code: string;
-        name: { en: string; ko: string };
-        description: { en: string; ko: string };
-        category: string;
-        type: string;
-        status: string;
-        metadata?: { version?: string; author?: string; tags?: string[] };
-      }) => ({
-        id: prog.id,
-        code: prog.code,
-        nameEn: prog.name.en,
-        nameKo: prog.name.ko,
-        descriptionEn: prog.description.en,
-        descriptionKo: prog.description.ko,
-        category: prog.category,
-        type: prog.type,
-        status: prog.status,
-        version: prog.metadata?.version || '',
-        author: prog.metadata?.author || '',
-        tags: prog.metadata?.tags?.join(', ') || ''
-      }));
-
-      setPrograms(transformedPrograms);
-
-      if (response.pagination) {
-        setRowCount(response.pagination.totalCount || 0);
-      } else {
-        setRowCount(transformedPrograms.length);
-      }
-    } catch (error) {
-      const err = error as { response?: { data?: { error?: string } } };
-      setError(err.response?.data?.error || 'Failed to load programs');
-      console.error('Failed to fetch programs:', error);
-      setPrograms([]);
-      setRowCount(0);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const columns: GridColDef[] = [
-    { field: 'code', headerName: 'Program Code', width: 150 },
-    {
-      field: 'name',
-      headerName: 'Program Name',
-      width: 180,
-      valueGetter: (_value, row) => locale === 'ko' ? row.nameKo : row.nameEn
-    },
-    { field: 'category', headerName: 'Category', width: 120 },
-    { field: 'type', headerName: 'Type', width: 100 },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 100,
-      type: 'singleSelect',
-      valueOptions: PROGRAM_STATUS as unknown as string[]
-    },
-    { field: 'version', headerName: 'Version', width: 100 },
-    { field: 'author', headerName: 'Author', width: 120 },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 80,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-        >
-          <Edit fontSize="small" />
-        </IconButton>
-      )
-    }
-  ];
-
-  const handleAdd = () => {
-    setEditingProgram({
-      code: '',
-      nameEn: '',
-      nameKo: '',
-      descriptionEn: '',
-      descriptionKo: '',
-      category: 'admin',
-      type: 'page',
-      status: 'development',
-      version: '1.0.0',
-      author: '',
-      tags: ''
+      });
     });
-    setDialogOpen(true);
+
+    return Array.from(permMap.values()).sort((a, b) => a.code.localeCompare(b.code));
+  }, [programs]);
+
+  const deleteItemsList = useMemo(
+    () =>
+      selectedForDelete.map((id) => {
+        const program = programs.find((p) => p.id === id);
+        return program
+          ? {
+              id: program.id!,
+              displayName: `${program.code} (${locale === 'ko' ? program.nameKo : program.nameEn})`
+            }
+          : { id, displayName: String(id) };
+      }),
+    [selectedForDelete, programs, locale]
+  );
+
+  // Permission management helpers
+  const handleAddPermission = () => {
+    setEditingPermission({
+      code: '',
+      name: { en: '', ko: '' },
+      description: { en: '', ko: '' },
+      isDefault: false
+    });
+    setPermissionDialogOpen(true);
   };
 
-  const handleEdit = (id: string | number) => {
-    const program = programs.find((p) => p.id === id);
-    if (program) {
-      setEditingProgram(program);
-      setDialogOpen(true);
-    }
+  const handleEditPermission = (permission: ProgramPermission) => {
+    setEditingPermission({ ...permission, originalCode: permission.code });
+    setPermissionDialogOpen(true);
   };
 
-  const handleDeleteClick = (ids: (string | number)[]) => {
-    setSelectedForDelete(ids);
-    setDeleteConfirmOpen(true);
-  };
+  const handleSavePermission = () => {
+    if (!editingPermission || !editingProgram) return;
 
-  const handleDeleteConfirm = async () => {
-    try {
-      setDeleteLoading(true);
-      setError(null);
-      setSuccessMessage(null);
+    const { originalCode, ...permissionData } = editingPermission;
 
-      for (const id of selectedForDelete) {
-        await api.delete(`/program/${id}`);
+    if (originalCode) {
+      // Update existing permission
+      const existingIndex = editingProgram.permissions?.findIndex(p => p.code === originalCode);
+      if (existingIndex !== undefined && existingIndex >= 0) {
+        const updatedPermissions = [...(editingProgram.permissions || [])];
+        updatedPermissions[existingIndex] = permissionData;
+        setEditingProgram({ ...editingProgram, permissions: updatedPermissions });
       }
-
-      setPrograms(programs.filter((program) => !selectedForDelete.includes(program.id as string)));
-
-      const count = selectedForDelete.length;
-      setSuccessMessage(`Successfully deleted ${count} program${count > 1 ? 's' : ''}`);
-
-      setDeleteConfirmOpen(false);
-      setSelectedForDelete([]);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to delete programs');
-      console.error('Failed to delete programs:', err);
-    } finally {
-      setDeleteLoading(false);
+    } else {
+      // Add new permission - check for duplicates
+      const isDuplicate = editingProgram.permissions?.some(p => p.code === permissionData.code);
+      if (isDuplicate) {
+        alert(`Permission with code "${permissionData.code}" already exists!`);
+        return;
+      }
+      setEditingProgram({
+        ...editingProgram,
+        permissions: [...(editingProgram.permissions || []), permissionData]
+      });
     }
+
+    setPermissionDialogOpen(false);
+    setEditingPermission(null);
   };
 
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false);
-    setSelectedForDelete([]);
-  };
-
-  const handleSave = async () => {
+  const handleDeletePermission = (code: string) => {
     if (!editingProgram) return;
-
-    try {
-      setSaveLoading(true);
-      setError(null);
-
-      const programData = {
-        code: editingProgram.code,
-        name: {
-          en: editingProgram.nameEn,
-          ko: editingProgram.nameKo
-        },
-        description: {
-          en: editingProgram.descriptionEn,
-          ko: editingProgram.descriptionKo
-        },
-        category: editingProgram.category,
-        type: editingProgram.type,
-        status: editingProgram.status,
-        metadata: {
-          version: editingProgram.version,
-          author: editingProgram.author,
-          tags: editingProgram.tags ? editingProgram.tags.split(',').map(t => t.trim()) : []
-        }
-      };
-
-      if (editingProgram.id) {
-        await api.put(`/program/${editingProgram.id}`, programData);
-      } else {
-        await api.post('/program', programData);
-      }
-
-      setDialogOpen(false);
-      setEditingProgram(null);
-      fetchPrograms(paginationModel.page, paginationModel.pageSize, quickSearch.trim() !== '');
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to save program');
-      console.error('Failed to save program:', err);
-    } finally {
-      setSaveLoading(false);
-    }
-  };
-
-  const handleRefresh = () => {
-    const useQuickSearch = quickSearch.trim() !== '';
-    fetchPrograms(paginationModel.page, paginationModel.pageSize, useQuickSearch);
-  };
-
-  const handleSearchChange = (field: keyof ProgramSearchCriteria, value: string | string[]) => {
-    setSearchCriteria(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleQuickSearch = () => {
-    setPaginationModel({ ...paginationModel, page: 0 });
-    fetchPrograms(0, paginationModel.pageSize, true);
-  };
-
-  const handleQuickSearchClear = () => {
-    setQuickSearch('');
-    setPrograms([]);
-    setRowCount(0);
-    setPaginationModel({ page: 0, pageSize: 50 });
-    // Clear saved state
-    sessionStorage.removeItem(STORAGE_KEY);
-  };
-
-  const handleAdvancedSearch = () => {
-    setPaginationModel({ ...paginationModel, page: 0 });
-    fetchPrograms(0, paginationModel.pageSize, false);
-  };
-
-  const handleAdvancedSearchClear = () => {
-    setSearchCriteria({
-      code: '',
-      name: '',
-      category: '',
-      type: '',
-      status: ''
+    setEditingProgram({
+      ...editingProgram,
+      permissions: editingProgram.permissions?.filter(p => p.code !== code) || []
     });
-    // Clear saved state
-    sessionStorage.removeItem(STORAGE_KEY);
   };
 
-  const handleAdvancedFilterApply = () => {
-    setAdvancedFilterOpen(false);
-    handleAdvancedSearch();
+  const handleSelectDefaultPermission = (template: ProgramPermission) => {
+    setEditingPermission({
+      code: template.code,
+      name: template.name,
+      description: template.description,
+      isDefault: template.isDefault || false
+    });
   };
-
-  const handleAdvancedFilterClose = () => {
-    setAdvancedFilterOpen(false);
-  };
-
-  const handlePaginationModelChange = (newModel: { page: number; pageSize: number }) => {
-    setPaginationModel(newModel);
-    const useQuickSearch = quickSearch.trim() !== '';
-    fetchPrograms(newModel.page, newModel.pageSize, useQuickSearch);
-  };
-
-  const activeFilterCount = useMemo(() => {
-    return Object.values(searchCriteria).filter(v => v !== '').length;
-  }, [searchCriteria]);
-
-  const filterFields: FilterFieldConfig[] = useMemo(() => [
-    {
-      name: 'code',
-      label: 'Program Code',
-      type: 'text',
-      placeholder: 'Search by program code...'
-    },
-    {
-      name: 'name',
-      label: 'Program Name',
-      type: 'text',
-      placeholder: 'Search by program name...'
-    },
-    {
-      name: 'category',
-      label: 'Category',
-      type: 'select',
-      options: [
-        { value: '', label: 'All Categories' },
-        ...PROGRAM_CATEGORIES.map(cat => ({ value: cat, label: cat }))
-      ]
-    },
-    {
-      name: 'type',
-      label: 'Type',
-      type: 'select',
-      options: [
-        { value: '', label: 'All Types' },
-        ...PROGRAM_TYPES.map(type => ({ value: type, label: type }))
-      ]
-    },
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      options: [
-        { value: '', label: 'All Status' },
-        ...PROGRAM_STATUS.map(status => ({ value: status, label: status }))
-      ]
-    }
-  ], []);
 
   return (
     <PageContainer>
@@ -490,36 +223,39 @@ export default function ProgramManagementPage() {
         }
       />
 
+      {/* Error and Success Messages */}
       {error && (
-        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }}>
           {error}
         </Alert>
       )}
 
       {successMessage && (
-        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setSuccessMessage(null)}>
+        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }}>
           {successMessage}
         </Alert>
       )}
 
+      {/* Quick Search Bar */}
       <QuickSearchBar
         searchValue={quickSearch}
         onSearchChange={setQuickSearch}
         onSearch={handleQuickSearch}
         onClear={handleQuickSearchClear}
         onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        placeholder="Search by program code or name..."
+        placeholder="Search by code or name..."
         searching={searching}
         activeFilterCount={activeFilterCount}
         showAdvancedButton={true}
       />
 
+      {/* Advanced Filter Panel */}
       {advancedFilterOpen && (
         <SearchFilterPanel
           title={`${t('common.search')} / ${t('common.filter')}`}
           activeFilterCount={activeFilterCount}
           onApply={handleAdvancedFilterApply}
-          onClear={handleAdvancedSearchClear}
+          onClear={handleQuickSearchClear}
           onClose={handleAdvancedFilterClose}
           mode="advanced"
           expanded={true}
@@ -534,6 +270,7 @@ export default function ProgramManagementPage() {
         </SearchFilterPanel>
       )}
 
+      {/* DataGrid Area */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         {programs.length === 0 && !searching ? (
           <EmptyState
@@ -572,78 +309,103 @@ export default function ProgramManagementPage() {
           setEditingProgram(null);
         }}
         PaperProps={{
-          sx: { width: { xs: '100%', sm: 500 } }
+          sx: { width: { xs: '100%', sm: 700, md: 800 } }
         }}
       >
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
-          <Box sx={{
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: 1,
-            borderColor: 'divider'
-          }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h6">
               {!editingProgram?.id ? 'Add New Program' : 'Edit Program'}
             </Typography>
-            <IconButton onClick={() => {
-              setDialogOpen(false);
-              setEditingProgram(null);
-            }}>
+            <IconButton
+              onClick={() => {
+                setDialogOpen(false);
+                setEditingProgram(null);
+              }}
+            >
               <Close />
             </IconButton>
           </Box>
 
-          {/* Form Content */}
-          <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-            <Stack spacing={3}>
+          {/* Form */}
+          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+            <Stack spacing={2.5}>
               {/* Program Code */}
               <TextField
-                label="Program Code"
-                fullWidth
-                required
+                label="Program Code *"
                 value={editingProgram?.code || ''}
                 onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, code: e.target.value } : null)}
-                disabled={!!editingProgram?.id}
-                helperText={editingProgram?.id ? 'Program code cannot be changed' : 'Unique identifier (e.g., PROG-USER-MGMT)'}
-              />
-
-              {/* Name (English) */}
-              <TextField
-                label="Name (English)"
                 fullWidth
                 required
+                size="small"
+                helperText="Unique identifier (e.g., PROG-USER-MGMT)"
+              />
+
+              <Divider>Names</Divider>
+
+              {/* Program Name (English) */}
+              <TextField
+                label="Program Name (English) *"
                 value={editingProgram?.nameEn || ''}
                 onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, nameEn: e.target.value } : null)}
-              />
-
-              {/* Name (Korean) */}
-              <TextField
-                label="Name (Korean)"
                 fullWidth
                 required
-                value={editingProgram?.nameKo || ''}
-                onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, nameKo: e.target.value } : null)}
+                size="small"
               />
 
+              {/* Program Name (Korean) */}
+              <TextField
+                label="Program Name (Korean) *"
+                value={editingProgram?.nameKo || ''}
+                onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, nameKo: e.target.value } : null)}
+                fullWidth
+                required
+                size="small"
+              />
+
+              <Divider>Descriptions</Divider>
+
+              {/* Description (English) */}
+              <TextField
+                label="Description (English)"
+                value={editingProgram?.descriptionEn || ''}
+                onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, descriptionEn: e.target.value } : null)}
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+              />
+
+              {/* Description (Korean) */}
+              <TextField
+                label="Description (Korean)"
+                value={editingProgram?.descriptionKo || ''}
+                onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, descriptionKo: e.target.value } : null)}
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+              />
+
+              <Divider>Properties</Divider>
+
               {/* Category */}
-              <FormControl fullWidth>
+              <FormControl fullWidth required>
                 <InputLabel>Category</InputLabel>
                 <Select
                   value={editingProgram?.category || 'admin'}
                   label="Category"
                   onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, category: e.target.value } : null)}
                 >
-                  {PROGRAM_CATEGORIES.map(cat => (
-                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                  {PROGRAM_CATEGORIES.map(category => (
+                    <MenuItem key={category} value={category}>{category}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
               {/* Type */}
-              <FormControl fullWidth>
+              <FormControl fullWidth required>
                 <InputLabel>Type</InputLabel>
                 <Select
                   value={editingProgram?.type || 'page'}
@@ -657,7 +419,7 @@ export default function ProgramManagementPage() {
               </FormControl>
 
               {/* Status */}
-              <FormControl fullWidth>
+              <FormControl fullWidth required>
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={editingProgram?.status || 'development'}
@@ -670,65 +432,110 @@ export default function ProgramManagementPage() {
                 </Select>
               </FormControl>
 
+              <Divider>Metadata</Divider>
+
               {/* Version */}
               <TextField
                 label="Version"
-                fullWidth
                 value={editingProgram?.version || ''}
                 onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, version: e.target.value } : null)}
-                helperText="e.g., 1.0.0"
+                fullWidth
+                size="small"
+                placeholder="e.g., 1.0.0"
               />
 
               {/* Author */}
               <TextField
                 label="Author"
-                fullWidth
                 value={editingProgram?.author || ''}
                 onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, author: e.target.value } : null)}
-              />
-
-              <Divider />
-
-              {/* Description (English) */}
-              <TextField
-                label="Description (English)"
                 fullWidth
-                multiline
-                rows={2}
-                value={editingProgram?.descriptionEn || ''}
-                onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, descriptionEn: e.target.value } : null)}
-              />
-
-              {/* Description (Korean) */}
-              <TextField
-                label="Description (Korean)"
-                fullWidth
-                multiline
-                rows={2}
-                value={editingProgram?.descriptionKo || ''}
-                onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, descriptionKo: e.target.value } : null)}
+                size="small"
               />
 
               {/* Tags */}
               <TextField
                 label="Tags"
-                fullWidth
                 value={editingProgram?.tags || ''}
                 onChange={(e) => setEditingProgram(editingProgram ? { ...editingProgram, tags: e.target.value } : null)}
-                helperText="Comma-separated tags (e.g., admin, security, user)"
+                fullWidth
+                size="small"
+                placeholder="Comma-separated (e.g., admin, user, core)"
               />
+
+              <Divider>Permissions</Divider>
+
+              {/* Permissions */}
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Manage permissions for this program
+                    {editingProgram?.permissions && ` (${editingProgram.permissions.length})`}
+                  </Typography>
+                  <Button
+                    size="small"
+                    startIcon={<Add />}
+                    onClick={handleAddPermission}
+                    variant="outlined"
+                  >
+                    Add Permission
+                  </Button>
+                </Box>
+
+                {editingProgram?.permissions && editingProgram.permissions.length > 0 ? (
+                  <Stack spacing={1}>
+                    {editingProgram.permissions.map((permission, index) => (
+                      <Card key={index} variant="outlined" sx={{ bgcolor: 'grey.50' }}>
+                        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                {permission.code}
+                                {permission.isDefault && (
+                                  <Typography component="span" variant="caption" sx={{ ml: 1, color: 'primary.main' }}>
+                                    (Default)
+                                  </Typography>
+                                )}
+                              </Typography>
+                              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                {locale === 'ko' ? permission.name.ko : permission.name.en}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {locale === 'ko' ? permission.description.ko : permission.description.en}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleEditPermission(permission)}
+                                color="primary"
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeletePermission(permission.code)}
+                                color="error"
+                              >
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Stack>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                    No permissions defined. Click &quot;Add Permission&quot; to add one.
+                  </Typography>
+                )}
+              </Box>
             </Stack>
           </Box>
 
-          {/* Footer Actions */}
-          <Box sx={{
-            p: 2,
-            display: 'flex',
-            gap: 2,
-            justifyContent: 'flex-end',
-            borderTop: 1,
-            borderColor: 'divider'
-          }}>
+          {/* Actions */}
+          <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
             <Button
               variant="outlined"
               onClick={() => {
@@ -741,10 +548,11 @@ export default function ProgramManagementPage() {
             </Button>
             <Button
               variant="contained"
-              onClick={handleSave}
-              disabled={saveLoading}
+              onClick={() => editingProgram && handleSave(editingProgram)}
+              disabled={saveLoading || !editingProgram?.code || !editingProgram?.nameEn || !editingProgram?.nameKo}
+              startIcon={saveLoading && <CircularProgress size={16} />}
             >
-              {saveLoading ? <CircularProgress size={20} /> : t('common.save')}
+              {t('common.save')}
             </Button>
           </Box>
         </Box>
@@ -755,20 +563,13 @@ export default function ProgramManagementPage() {
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
         itemName="program"
-        itemsList={selectedForDelete.map((id) => {
-          const program = programs.find((p) => p.id === id);
-          return program
-            ? {
-                id: program.id as string,
-                displayName: `${program.code} - ${locale === 'ko' ? program.nameKo : program.nameEn}`
-              }
-            : { id: String(id), displayName: String(id) };
-        })}
+        itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
 
+      {/* Help Viewer */}
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
@@ -776,6 +577,170 @@ export default function ProgramManagementPage() {
         language="en"
         isAdmin={isAdmin}
       />
+
+      {/* Permission Edit Dialog */}
+      <Drawer
+        anchor="right"
+        open={permissionDialogOpen}
+        onClose={() => {
+          setPermissionDialogOpen(false);
+          setEditingPermission(null);
+        }}
+        PaperProps={{
+          sx: { width: { xs: '100%', sm: 550, md: 600 } }
+        }}
+      >
+        <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6">
+              {editingPermission?.code ? 'Edit Permission' : 'Add New Permission'}
+            </Typography>
+            <IconButton
+              onClick={() => {
+                setPermissionDialogOpen(false);
+                setEditingPermission(null);
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Box>
+
+          {/* Form */}
+          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+            <Stack spacing={2.5}>
+              {/* Default Permission Templates */}
+              {!editingPermission?.originalCode && (
+                <>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Quick Add from Existing Permissions:
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                      These are permissions from all programs in the system
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, maxHeight: 200, overflowY: 'auto', p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                      {existingPermissions.map((template) => (
+                        <Tooltip
+                          key={template.code}
+                          title={`${locale === 'ko' ? template.name.ko : template.name.en} - ${locale === 'ko' ? template.description.ko : template.description.en}`}
+                          arrow
+                        >
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleSelectDefaultPermission(template)}
+                            sx={{ minWidth: 'auto' }}
+                          >
+                            {template.code}
+                          </Button>
+                        </Tooltip>
+                      ))}
+                    </Box>
+                  </Box>
+                  <Divider>Or Create Custom</Divider>
+                </>
+              )}
+
+              {/* Permission Code */}
+              <TextField
+                label="Permission Code *"
+                value={editingPermission?.code || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, code: e.target.value.toUpperCase() } : null)}
+                fullWidth
+                required
+                size="small"
+                placeholder="e.g., READ, WRITE, DELETE"
+                disabled={!!editingPermission?.originalCode}
+                helperText={editingPermission?.originalCode ? "Code cannot be changed after creation" : "Use uppercase letters (e.g., READ, WRITE)"}
+              />
+
+              <Divider>Names</Divider>
+
+              {/* Name (English) */}
+              <TextField
+                label="Name (English) *"
+                value={editingPermission?.name.en || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, name: { ...editingPermission.name, en: e.target.value } } : null)}
+                fullWidth
+                required
+                size="small"
+              />
+
+              {/* Name (Korean) */}
+              <TextField
+                label="Name (Korean) *"
+                value={editingPermission?.name.ko || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, name: { ...editingPermission.name, ko: e.target.value } } : null)}
+                fullWidth
+                required
+                size="small"
+              />
+
+              <Divider>Descriptions</Divider>
+
+              {/* Description (English) */}
+              <TextField
+                label="Description (English)"
+                value={editingPermission?.description.en || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, description: { ...editingPermission.description, en: e.target.value } } : null)}
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+              />
+
+              {/* Description (Korean) */}
+              <TextField
+                label="Description (Korean)"
+                value={editingPermission?.description.ko || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, description: { ...editingPermission.description, ko: e.target.value } } : null)}
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+              />
+
+              <Divider>Options</Divider>
+
+              {/* Is Default */}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={editingPermission?.isDefault || false}
+                    onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, isDefault: e.target.checked } : null)}
+                  />
+                }
+                label="Default Permission (granted by default)"
+              />
+            </Stack>
+          </Box>
+
+          {/* Actions */}
+          <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setPermissionDialogOpen(false);
+                setEditingPermission(null);
+              }}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSavePermission}
+              disabled={
+                !editingPermission?.code ||
+                !editingPermission?.name.en ||
+                !editingPermission?.name.ko
+              }
+            >
+              {t('common.save')}
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </PageContainer>
   );
 }

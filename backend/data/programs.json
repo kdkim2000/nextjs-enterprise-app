@@ -67,7 +67,7 @@
       "version": "1.0.0",
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-09T15:37:59.633Z",
       "tags": [
         "admin",
         "user",
@@ -490,17 +490,123 @@
   {
     "id": "prog-014",
     "code": "PROG-LOGS",
+    "name": {
+      "en": "System Logs",
+      "ko": "시스템 로그"
+    },
+    "description": {
+      "en": "View and analyze system logs and API requests",
+      "ko": "시스템 로그 및 API 요청 조회 및 분석"
+    },
+    "category": "admin",
     "type": "page",
-    "nameEn": "System Logs",
-    "nameKo": "시스템 로그",
-    "descriptionEn": "View and analyze system logs and API requests",
-    "descriptionKo": "시스템 로그 및 API 요청 조회 및 분석",
-    "category": "Admin",
     "status": "active",
-    "version": "1.0.0",
-    "author": "System",
-    "tags": "logs,analytics,monitoring,admin",
-    "createdAt": "2025-11-08T22:39:37.733Z",
-    "updatedAt": "2025-11-08T22:39:37.735Z"
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View system logs",
+          "ko": "시스템 로그 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2025-11-08T22:39:37.733Z",
+      "updatedAt": "2025-11-08T22:39:37.735Z",
+      "tags": [
+        "logs",
+        "analytics",
+        "monitoring",
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": "prog-009",
+    "code": "PROG-COMPONENTS",
+    "name": {
+      "en": "Components",
+      "ko": "컴포넌트"
+    },
+    "description": {
+      "en": "Component library showcase and demos",
+      "ko": "컴포넌트 라이브러리 쇼케이스 및 데모"
+    },
+    "category": "dashboard",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View component showcase",
+          "ko": "컴포넌트 쇼케이스 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "tags": [
+        "components",
+        "library",
+        "showcase",
+        "demo"
+      ]
+    }
+  },
+  {
+    "id": "prog-016",
+    "code": "PROG-DEV-SUPPORT",
+    "name": {
+      "en": "Dev Support",
+      "ko": "개발지원"
+    },
+    "description": {
+      "en": "Development support tools and resources",
+      "ko": "개발 지원 도구 및 리소스"
+    },
+    "category": "dev",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "Access development tools",
+          "ko": "개발 도구 접근"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2025-11-10T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "tags": [
+        "development",
+        "tools",
+        "support"
+      ]
+    }
   }
 ]

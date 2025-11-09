@@ -8,23 +8,24 @@
       "menu-003"
     ],
     "recentMenus": [
-      "menu-010",
-      "menu-013",
-      "menu-009",
-      "menu-003",
+      "menu-008",
       "menu-001",
+      "menu-016",
       "menu-007",
       "menu-004",
-      "menu-014",
-      "menu-002"
+      "menu-002",
+      "menu-013",
+      "menu-015",
+      "menu-010",
+      "menu-014"
     ],
-    "language": "en",
-    "theme": "dark",
-    "rowsPerPage": 50,
+    "language": "ko",
+    "theme": "light",
+    "rowsPerPage": 10,
     "emailNotifications": true,
     "systemNotifications": true,
     "sessionTimeout": 30,
-    "updatedAt": "2025-11-09T14:43:24.249Z"
+    "updatedAt": "2025-11-09T18:29:33.786Z"
   },
   {
     "userId": "user-002",
