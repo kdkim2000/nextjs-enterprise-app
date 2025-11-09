@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Paper,
   Alert,
-  Chip,
   IconButton,
   Tooltip,
   Drawer,
@@ -20,458 +19,87 @@ import {
   Divider,
   CircularProgress
 } from '@mui/material';
-import { Search, HelpOutline, Edit, Close } from '@mui/icons-material';
+import { Search, HelpOutline, Close } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
-import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
+import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import UserSelector from '@/components/common/UserSelector';
-import { GridColDef } from '@mui/x-data-grid';
-import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
 import { Role } from '@/types/role';
-
-interface SearchCriteria {
-  name: string;
-  displayName: string;
-  roleType: string;
-  isActive: string;
-  isSystem: string;
-  manager: string;
-  representative: string;
-  [key: string]: string | string[];
-}
-
-// Session storage key for state persistence
-const STORAGE_KEY = 'admin-roles-page-state';
-
-// Helper functions for state persistence
-const savePageState = (state: {
-  searchCriteria: SearchCriteria;
-  quickSearch: string;
-  roles: Role[];
-}) => {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
-    console.error('Failed to save page state:', error);
-  }
-};
-
-const loadPageState = () => {
-  try {
-    const saved = sessionStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
-  } catch (error) {
-    console.error('Failed to load page state:', error);
-    return null;
-  }
-};
+import { useRoleManagement } from './hooks/useRoleManagement';
+import { createColumns } from './constants';
+import { createFilterFields, calculateActiveFilterCount } from './utils';
 
 export default function RoleManagementPage() {
   const t = useI18n();
 
-  // Load saved state on mount
-  const savedState = loadPageState();
+  // Use custom hook for all business logic
+  const {
+    // State
+    roles,
+    setRoles,
+    searchCriteria,
+    quickSearch,
+    setQuickSearch,
+    searching,
+    saveLoading,
+    dialogOpen,
+    setDialogOpen,
+    editingRole,
+    setEditingRole,
+    advancedFilterOpen,
+    setAdvancedFilterOpen,
+    deleteConfirmOpen,
+    selectedForDelete,
+    deleteLoading,
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    successMessage,
+    error,
+    // Handlers
+    handleAdd,
+    handleEdit,
+    handleSave,
+    handleDeleteClick,
+    handleDeleteConfirm,
+    handleDeleteCancel,
+    handleRefresh,
+    handleSearchChange,
+    handleQuickSearch,
+    handleQuickSearchClear,
+    handleAdvancedFilterApply,
+    handleAdvancedFilterClose
+  } = useRoleManagement();
 
-  const [roles, setRoles] = useState<Role[]>(savedState?.roles || []);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
-  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
-    savedState?.searchCriteria || {
-      name: '',
-      displayName: '',
-      roleType: '',
-      isActive: '',
-      isSystem: '',
-      manager: '',
-      representative: ''
-    }
+  // Memoized computed values
+  const columns = useMemo(() => createColumns(handleEdit), [handleEdit]);
+  const filterFields = useMemo(() => createFilterFields(), []);
+  const activeFilterCount = useMemo(
+    () => calculateActiveFilterCount(searchCriteria),
+    [searchCriteria]
   );
 
-  // Auto-hide success message after 10 seconds
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
-
-  // Auto-hide error message after 10 seconds
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  // Save page state whenever it changes
-  useEffect(() => {
-    savePageState({
-      searchCriteria,
-      quickSearch,
-      roles
-    });
-  }, [searchCriteria, quickSearch, roles]);
-
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        const response = await api.get('/help?pageId=admin-roles&language=en');
-        setHelpExists(!!response.help);
-      } catch {
-        // If help doesn't exist or error occurs, set to false
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-
-    // If there's saved state with search criteria or data, restore it
-    if (savedState && (savedState.roles?.length > 0 || savedState.quickSearch ||
-        Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
-      // Data already loaded from savedState, no need to fetch again
-      // User can click refresh if they want fresh data
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchRoles = async (useQuickSearch: boolean = false) => {
-    try {
-      setSearching(true);
-      setError(null);
-
-      const response = await api.get('/role');
-      const allRoles = response.roles || [];
-
-      let filtered = [];
-
-      if (useQuickSearch && quickSearch) {
-        // Quick search: search in name, displayName, and description
-        const term = quickSearch.toLowerCase();
-        filtered = allRoles.filter(
-          (role: Role) =>
-            role.id.toLowerCase().includes(term) ||
-            role.name.toLowerCase().includes(term) ||
-            role.displayName.toLowerCase().includes(term) ||
-            role.description.toLowerCase().includes(term)
-        );
-      } else if (Object.values(searchCriteria).some(v => v !== '')) {
-        // Advanced search: only filter if there are search criteria
-        filtered = allRoles.filter((role: Role) => {
-          if (searchCriteria.name && !role.name.toLowerCase().includes(searchCriteria.name.toLowerCase())) return false;
-          if (searchCriteria.displayName && !role.displayName.toLowerCase().includes(searchCriteria.displayName.toLowerCase())) return false;
-          if (searchCriteria.roleType && role.roleType !== searchCriteria.roleType) return false;
-          if (searchCriteria.isActive && String(role.isActive) !== searchCriteria.isActive) return false;
-          if (searchCriteria.isSystem && String(role.isSystem) !== searchCriteria.isSystem) return false;
-          if (searchCriteria.manager && role.manager !== searchCriteria.manager) return false;
-          if (searchCriteria.representative && role.representative !== searchCriteria.representative) return false;
-          return true;
-        });
-      } else {
-        // No search criteria - show all roles
-        filtered = allRoles;
-      }
-
-      setRoles(filtered);
-    } catch (error) {
-      const err = error as { response?: { data?: { error?: string } } };
-      setError(err.response?.data?.error || 'Failed to load roles');
-      console.error('Failed to fetch roles:', error);
-      setRoles([]);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 100 },
-    { field: 'name', headerName: 'Name', width: 130 },
-    { field: 'displayName', headerName: 'Display Name', width: 160 },
-    { field: 'description', headerName: 'Description', width: 180, flex: 1 },
-    {
-      field: 'roleType',
-      headerName: 'Type',
-      width: 110,
-      renderCell: (params) => (
-        <Chip
-          label={params.value === 'management' ? 'Management' : 'General'}
-          size="small"
-          color={params.value === 'management' ? 'warning' : 'info'}
-          variant="outlined"
-        />
-      )
-    },
-    {
-      field: 'managerName',
-      headerName: 'Manager',
-      width: 150,
-      renderCell: (params) => params.value || '-',
-      valueGetter: (value, row) => row.managerName || '-'
-    },
-    {
-      field: 'representativeName',
-      headerName: 'Representative',
-      width: 150,
-      renderCell: (params) => params.value || '-',
-      valueGetter: (value, row) => row.representativeName || '-'
-    },
-    {
-      field: 'isSystem',
-      headerName: 'System',
-      width: 90,
-      renderCell: (params) =>
-        params.value ? <Chip label="System" size="small" color="secondary" /> : null
-    },
-    {
-      field: 'isActive',
-      headerName: 'Status',
-      width: 90,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? 'Active' : 'Inactive'}
-          size="small"
-          color={params.value ? 'success' : 'default'}
-        />
-      )
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 80,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-        >
-          <Edit fontSize="small" />
-        </IconButton>
-      )
-    }
-  ];
-
-  const handleAdd = () => {
-    setEditingRole(null);
-    setDialogOpen(true);
-  };
-
-  const handleEdit = (id: string | number) => {
-    const role = roles.find((r) => r.id === id);
-    if (role) {
-      setEditingRole(role);
-      setDialogOpen(true);
-    }
-  };
-
-  const handleDeleteClick = (ids: (string | number)[]) => {
-    setSelectedForDelete(ids);
-    setDeleteConfirmOpen(true);
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false);
-    setSelectedForDelete([]);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      setDeleteLoading(true);
-      setError(null);
-
-      for (const id of selectedForDelete) {
-        await api.delete(`/role?id=${id}`);
-      }
-
-      setRoles(roles.filter((r) => !selectedForDelete.includes(r.id)));
-      const count = selectedForDelete.length;
-      setSuccessMessage(`Successfully deleted ${count} role${count > 1 ? 's' : ''}`);
-      setDeleteConfirmOpen(false);
-      setSelectedForDelete([]);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to delete role(s)');
-      console.error('Failed to delete roles:', err);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!editingRole) return;
-
-    try {
-      setSaveLoading(true);
-      setError(null);
-
-      if (!editingRole.id) {
-        // Add new role
-        const response = await api.post('/role', editingRole);
-        setRoles([...roles, response.role]);
-        setSuccessMessage('Role created successfully');
-      } else {
-        // Update existing role
-        const response = await api.put('/role', {
-          ...editingRole,
-          id: editingRole.id
-        });
-        setRoles(roles.map((r) => (r.id === editingRole.id ? response.role : r)));
-        setSuccessMessage('Role updated successfully');
-      }
-
-      setDialogOpen(false);
-      setEditingRole(null);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to save role');
-      console.error('Failed to save role:', err);
-    } finally {
-      setSaveLoading(false);
-    }
-  };
-
-  const handleRefresh = () => {
-    const useQuickSearch = quickSearch.trim() !== '';
-    fetchRoles(useQuickSearch);
-  };
-
-  const handleSearchChange = (field: keyof SearchCriteria, value: string | string[]) => {
-    setSearchCriteria(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Quick search handlers
-  const handleQuickSearch = () => {
-    fetchRoles(true);
-  };
-
-  const handleQuickSearchClear = () => {
-    setQuickSearch('');
-    setRoles([]);
-    // Clear saved state
-    sessionStorage.removeItem(STORAGE_KEY);
-  };
-
-  // Advanced search handlers
-  const handleAdvancedSearch = () => {
-    fetchRoles(false);
-  };
-
-  const handleAdvancedSearchClear = () => {
-    setSearchCriteria({
-      name: '',
-      displayName: '',
-      roleType: '',
-      isActive: '',
-      isSystem: '',
-      manager: '',
-      representative: ''
-    });
-    // Clear saved state
-    sessionStorage.removeItem(STORAGE_KEY);
-  };
-
-  const handleAdvancedFilterApply = () => {
-    setAdvancedFilterOpen(false);
-    handleAdvancedSearch();
-  };
-
-  const handleAdvancedFilterClose = () => {
-    setAdvancedFilterOpen(false);
-  };
-
-  const activeFilterCount = useMemo(() => {
-    return Object.values(searchCriteria).filter(v => v !== '').length;
-  }, [searchCriteria]);
-
-  // Filter field configuration
-  const filterFields: FilterFieldConfig[] = useMemo(() => [
-    {
-      name: 'name',
-      label: 'Role Name',
-      type: 'text',
-      placeholder: 'Search by role name...'
-    },
-    {
-      name: 'displayName',
-      label: 'Display Name',
-      type: 'text',
-      placeholder: 'Search by display name...'
-    },
-    {
-      name: 'roleType',
-      label: 'Role Type',
-      type: 'select',
-      options: [
-        { value: '', label: 'All Types' },
-        { value: 'general', label: 'General' },
-        { value: 'management', label: 'Management' }
-      ]
-    },
-    {
-      name: 'isActive',
-      label: 'Status',
-      type: 'select',
-      options: [
-        { value: '', label: 'All Status' },
-        { value: 'true', label: 'Active' },
-        { value: 'false', label: 'Inactive' }
-      ]
-    },
-    {
-      name: 'isSystem',
-      label: 'System Role',
-      type: 'select',
-      options: [
-        { value: '', label: 'All' },
-        { value: 'true', label: 'System' },
-        { value: 'false', label: 'Custom' }
-      ]
-    },
-    {
-      name: 'manager',
-      label: 'Manager',
-      type: 'userSelector',
-      placeholder: 'Filter by manager...'
-    },
-    {
-      name: 'representative',
-      label: 'Representative',
-      type: 'userSelector',
-      placeholder: 'Filter by representative...'
-    }
-  ], []);
+  const deleteItemsList = useMemo(
+    () =>
+      selectedForDelete.map((id) => {
+        const role = roles.find((r) => r.id === id);
+        return role
+          ? {
+              id: role.id,
+              displayName: `${role.name} (${role.displayName})`
+            }
+          : { id, displayName: String(id) };
+      }),
+    [selectedForDelete, roles]
+  );
 
   return (
     <PageContainer>
@@ -495,14 +123,15 @@ export default function RoleManagementPage() {
         }
       />
 
+      {/* Error and Success Messages */}
       {error && (
-        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }}>
           {error}
         </Alert>
       )}
 
       {successMessage && (
-        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setSuccessMessage(null)}>
+        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }}>
           {successMessage}
         </Alert>
       )}
@@ -526,7 +155,7 @@ export default function RoleManagementPage() {
           title={`${t('common.search')} / ${t('common.filter')}`}
           activeFilterCount={activeFilterCount}
           onApply={handleAdvancedFilterApply}
-          onClear={handleAdvancedSearchClear}
+          onClear={handleQuickSearchClear}
           onClose={handleAdvancedFilterClose}
           mode="advanced"
           expanded={true}
@@ -579,59 +208,70 @@ export default function RoleManagementPage() {
           sx: { width: { xs: '100%', sm: 500 } }
         }}
       >
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
-          <Box sx={{
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: 1,
-            borderColor: 'divider'
-          }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h6">
               {!editingRole?.id ? 'Add New Role' : 'Edit Role'}
             </Typography>
-            <IconButton onClick={() => {
-              setDialogOpen(false);
-              setEditingRole(null);
-            }}>
+            <IconButton
+              onClick={() => {
+                setDialogOpen(false);
+                setEditingRole(null);
+              }}
+            >
               <Close />
             </IconButton>
           </Box>
 
-          {/* Form Content */}
-          <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-            <Stack spacing={3}>
+          {/* Form */}
+          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+            <Stack spacing={2.5}>
+              {/* ID (read-only for edit) */}
+              {editingRole?.id && (
+                <TextField
+                  label="ID"
+                  value={editingRole.id}
+                  disabled
+                  fullWidth
+                  size="small"
+                />
+              )}
+
               {/* Role Name */}
               <TextField
-                label="Role Name"
-                fullWidth
-                required
+                label="Role Name *"
                 value={editingRole?.name || ''}
                 onChange={(e) => setEditingRole(editingRole ? { ...editingRole, name: e.target.value } : null)}
-                disabled={editingRole?.isSystem || false}
-                helperText={editingRole?.isSystem ? 'System role name cannot be changed' : 'Unique identifier for the role (lowercase, no spaces)'}
+                fullWidth
+                required
+                size="small"
+                helperText="Unique identifier (e.g., ROLE_ADMIN)"
               />
 
               {/* Display Name */}
               <TextField
-                label="Display Name"
-                fullWidth
-                required
+                label="Display Name *"
                 value={editingRole?.displayName || ''}
                 onChange={(e) => setEditingRole(editingRole ? { ...editingRole, displayName: e.target.value } : null)}
+                fullWidth
+                required
+                size="small"
+                helperText="User-friendly name"
               />
 
               {/* Description */}
               <TextField
                 label="Description"
+                value={editingRole?.description || ''}
+                onChange={(e) => setEditingRole(editingRole ? { ...editingRole, description: e.target.value } : null)}
                 fullWidth
                 multiline
                 rows={3}
-                value={editingRole?.description || ''}
-                onChange={(e) => setEditingRole(editingRole ? { ...editingRole, description: e.target.value } : null)}
+                size="small"
               />
+
+              <Divider />
 
               {/* Role Type */}
               <FormControl fullWidth required>
@@ -645,29 +285,43 @@ export default function RoleManagementPage() {
                   <MenuItem value="management">Management (관리용 역할 - 관리자 전용)</MenuItem>
                 </Select>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
-                  Management roles cannot be requested by general users
+                  General: Users can request | Management: Admin-only
                 </Typography>
               </FormControl>
 
-              <Divider />
-
               {/* Manager */}
               <UserSelector
-                label="Manager (관리자)"
+                label="Manager"
                 value={editingRole?.manager || null}
-                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, manager: userId || '' } : null)}
-                helperText="Select the user who will manage this role"
+                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, manager: userId } : null)}
+                helperText="User who manages this role"
               />
 
               {/* Representative */}
               <UserSelector
-                label="Representative (담당자)"
+                label="Representative"
                 value={editingRole?.representative || null}
-                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, representative: userId || '' } : null)}
-                helperText="Select the user who will be responsible for this role"
+                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, representative: userId } : null)}
+                helperText="Main contact person for this role"
               />
 
               <Divider />
+
+              {/* System Role */}
+              <FormControl fullWidth>
+                <InputLabel>System Role</InputLabel>
+                <Select
+                  value={editingRole?.isSystem ? 'true' : 'false'}
+                  label="System Role"
+                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, isSystem: e.target.value === 'true' } : null)}
+                >
+                  <MenuItem value="false">Custom</MenuItem>
+                  <MenuItem value="true">System</MenuItem>
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
+                  System roles cannot be deleted
+                </Typography>
+              </FormControl>
 
               {/* Active Status */}
               <FormControl fullWidth>
@@ -684,15 +338,8 @@ export default function RoleManagementPage() {
             </Stack>
           </Box>
 
-          {/* Footer Actions */}
-          <Box sx={{
-            p: 2,
-            display: 'flex',
-            gap: 2,
-            justifyContent: 'flex-end',
-            borderTop: 1,
-            borderColor: 'divider'
-          }}>
+          {/* Actions */}
+          <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
             <Button
               variant="outlined"
               onClick={() => {
@@ -705,10 +352,11 @@ export default function RoleManagementPage() {
             </Button>
             <Button
               variant="contained"
-              onClick={handleSave}
-              disabled={saveLoading}
+              onClick={() => editingRole && handleSave(editingRole)}
+              disabled={saveLoading || !editingRole?.name || !editingRole?.displayName}
+              startIcon={saveLoading && <CircularProgress size={16} />}
             >
-              {saveLoading ? <CircularProgress size={20} /> : t('common.save')}
+              {t('common.save')}
             </Button>
           </Box>
         </Box>
@@ -719,15 +367,7 @@ export default function RoleManagementPage() {
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
         itemName="role"
-        itemsList={selectedForDelete.map((id) => {
-          const role = roles.find((r) => r.id === id);
-          return role
-            ? {
-                id: role.id,
-                displayName: `${role.displayName} (${role.name})`
-              }
-            : { id, displayName: String(id) };
-        })}
+        itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}

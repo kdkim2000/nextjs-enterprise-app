@@ -8,14 +8,14 @@
       "menu-003"
     ],
     "recentMenus": [
-      "menu-003",
       "menu-010",
+      "menu-013",
+      "menu-009",
+      "menu-003",
       "menu-001",
       "menu-007",
       "menu-004",
       "menu-014",
-      "menu-013",
-      "menu-009",
       "menu-002"
     ],
     "language": "en",
@@ -24,7 +24,7 @@
     "emailNotifications": true,
     "systemNotifications": true,
     "sessionTimeout": 30,
-    "updatedAt": "2025-11-09T13:15:55.467Z"
+    "updatedAt": "2025-11-09T14:43:24.249Z"
   },
   {
     "userId": "user-002",
