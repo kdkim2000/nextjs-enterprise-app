@@ -24,7 +24,7 @@ export function getDataDir(): string {
 /**
  * Get default data for a file
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function getDefaultData(fileName: string): any {
   switch (fileName) {
     case 'users.json':
@@ -57,7 +57,7 @@ async function initializeDataFile(fileName: string): Promise<void> {
  * Read JSON file
  * Automatically initializes with default data if file doesn't exist
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export async function readJSON<T = any>(fileName: string): Promise<T | null> {
   try {
     const filePath = path.join(getDataDir(), fileName);
@@ -91,7 +91,7 @@ export async function readJSON<T = any>(fileName: string): Promise<T | null> {
 /**
  * Write JSON file
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export async function writeJSON(fileName: string, data: any): Promise<boolean> {
   try {
     const dataDir = getDataDir();

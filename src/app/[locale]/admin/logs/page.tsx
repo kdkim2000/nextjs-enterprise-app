@@ -230,7 +230,7 @@ export default function LogsPage() {
   };
 
   const activeFilterCount = useMemo(() => {
-    return Object.entries(searchCriteria).filter(([key, value]) => {
+    return Object.entries(searchCriteria).filter(([_key, value]) => {
       if (Array.isArray(value)) {
         return value.length > 0;
       }

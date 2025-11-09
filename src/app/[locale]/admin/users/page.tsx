@@ -9,7 +9,7 @@ import {
   Tooltip,
   Avatar
 } from '@mui/material';
-import { Search, HelpOutline, Edit } from '@mui/icons-material';
+import { Search, HelpOutline } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
@@ -20,11 +20,14 @@ import PageContainer from '@/components/common/PageContainer';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import EditDrawer from '@/components/common/EditDrawer';
+import ActionsCell from '@/components/common/ActionsCell';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
 import { getAvatarUrl } from '@/lib/config';
+import { usePageState } from '@/hooks/usePageState';
+import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 
 interface User {
   id: string;
@@ -56,103 +59,51 @@ const DEPARTMENTS = [
   'Legal', 'Marketing', 'Operations', 'Product', 'Sales', 'Support'
 ];
 
-// Session storage key for state persistence
-const STORAGE_KEY = 'admin-users-page-state';
-
-// Helper functions for state persistence
-const savePageState = (state: {
-  searchCriteria: SearchCriteria;
-  paginationModel: { page: number; pageSize: number };
-  quickSearch: string;
-  users: User[];
-  rowCount: number;
-}) => {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
-    console.error('Failed to save page state:', error);
-  }
-};
-
-const loadPageState = () => {
-  try {
-    const saved = sessionStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
-  } catch (error) {
-    console.error('Failed to load page state:', error);
-    return null;
-  }
-};
-
 export default function UserManagementPage() {
   const t = useI18n();
 
-  // Load saved state on mount
-  const savedState = loadPageState();
-
-  const [users, setUsers] = useState<User[]>(savedState?.users || []);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
-  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
-    savedState?.searchCriteria || {
+  // Use page state hook
+  const {
+    searchCriteria,
+    setSearchCriteria,
+    paginationModel,
+    setPaginationModel,
+    quickSearch,
+    setQuickSearch,
+    data: users,
+    setData: setUsers,
+    rowCount,
+    setRowCount
+  } = usePageState<SearchCriteria, User>({
+    storageKey: 'admin-users-page-state',
+    initialCriteria: {
       username: '',
       name: '',
       email: '',
       role: '',
       department: [],
       status: ''
-    }
-  );
-  const [paginationModel, setPaginationModel] = useState(
-    savedState?.paginationModel || {
-      page: 0, // DataGrid uses 0-indexed pages
+    },
+    initialPaginationModel: {
+      page: 0,
       pageSize: 50
     }
-  );
-  const [rowCount, setRowCount] = useState(savedState?.rowCount || 0);
+  });
 
-  // Auto-hide success message after 10 seconds
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
+  // Use auto-hide message hook
+  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
 
-  // Auto-hide error message after 10 seconds
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  // Save page state whenever it changes
-  useEffect(() => {
-    savePageState({
-      searchCriteria,
-      paginationModel,
-      quickSearch,
-      users,
-      rowCount
-    });
-  }, [searchCriteria, paginationModel, quickSearch, users, rowCount]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpExists, setHelpExists] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Check user role and help content availability on mount
   useEffect(() => {
@@ -166,29 +117,25 @@ export default function UserManagementPage() {
         }
 
         // Check if help content exists for this page
-        const response = await api.get('/help?pageId=admin-users&language=en');
-        setHelpExists(!!response.help);
-      } catch {
-        // If help doesn't exist or error occurs, set to false
+        try {
+          const response = await api.get('/help?programId=PROG-USER-LIST&language=en');
+          setHelpExists(!!response.help);
+        } catch {
+          // If help API doesn't exist or help content doesn't exist, set to false
+          setHelpExists(false);
+        }
+      } catch (error) {
+        console.error('Error checking help and role:', error);
         setHelpExists(false);
       }
     };
 
     checkHelpAndRole();
-
-    // If there's saved state with search criteria or data, restore it
-    if (savedState && (savedState.users?.length > 0 || savedState.quickSearch ||
-        Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
-      // Data already loaded from savedState, no need to fetch again
-      // User can click refresh if they want fresh data
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUsers = async (page: number = 0, pageSize: number = 50, useQuickSearch: boolean = false) => {
     try {
       setSearching(true);
-      setError(null);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -225,7 +172,7 @@ export default function UserManagementPage() {
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      setError(err.response?.data?.error || 'Failed to load users');
+      showError(err.response?.data?.error || 'Failed to load users');
       console.error('Failed to fetch users:', error);
       setUsers([]);
       setRowCount(0);
@@ -288,13 +235,10 @@ export default function UserManagementPage() {
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-        >
-          <Edit fontSize="small" />
-        </IconButton>
+        <ActionsCell
+          onEdit={() => handleEdit(params.row.id)}
+          showMore={false}
+        />
       )
     }
   ];
@@ -329,8 +273,6 @@ export default function UserManagementPage() {
   const handleDeleteConfirm = async () => {
     try {
       setDeleteLoading(true);
-      setError(null);
-      setSuccessMessage(null);
 
       // Delete users from API
       for (const id of selectedForDelete) {
@@ -342,14 +284,14 @@ export default function UserManagementPage() {
 
       // Show success message
       const count = selectedForDelete.length;
-      setSuccessMessage(`Successfully deleted ${count} user${count > 1 ? 's' : ''}`);
+      showSuccess(`Successfully deleted ${count} user${count > 1 ? 's' : ''}`);
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to delete users');
+      showError(error.response?.data?.error || 'Failed to delete users');
       console.error('Failed to delete users:', err);
     } finally {
       setDeleteLoading(false);
@@ -366,23 +308,24 @@ export default function UserManagementPage() {
 
     try {
       setSaveLoading(true);
-      setError(null);
 
       if (!editingUser.id) {
         // Add new user
         const response = await api.post('/user', editingUser);
         setUsers([...users, response.user]);
+        showSuccess('User created successfully');
       } else {
         // Update existing user
         const response = await api.put(`/user/${editingUser.id}`, editingUser);
         setUsers(users.map((u) => (u.id === editingUser.id ? response.user : u)));
+        showSuccess('User updated successfully');
       }
 
       setDialogOpen(false);
       setEditingUser(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to save user');
+      showError(error.response?.data?.error || 'Failed to save user');
       console.error('Failed to save user:', err);
     } finally {
       setSaveLoading(false);
@@ -448,7 +391,7 @@ export default function UserManagementPage() {
   };
 
   const activeFilterCount = useMemo(() => {
-    return Object.entries(searchCriteria).filter(([key, value]) => {
+    return Object.entries(searchCriteria).filter(([_key, value]) => {
       if (Array.isArray(value)) {
         return value.length > 0;
       }
@@ -528,14 +471,14 @@ export default function UserManagementPage() {
         }
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
-          {error}
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }}>
+          {errorMessage}
         </Alert>
       )}
 
       {successMessage && (
-        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setSuccessMessage(null)}>
+        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }}>
           {successMessage}
         </Alert>
       )}
@@ -619,7 +562,7 @@ export default function UserManagementPage() {
         <UserFormFields
           user={editingUser as UserFormData}
           onChange={(user) => setEditingUser(user as User)}
-          onError={(err) => setError(err)}
+          onError={(err) => showError(err)}
           usernameLabel={t('auth.username')}
           emailLabel={t('auth.email')}
           departments={DEPARTMENTS}
@@ -649,7 +592,7 @@ export default function UserManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        pageId="admin-users"
+        programId="PROG-USER-LIST"
         language="en"
         isAdmin={isAdmin}
       />
