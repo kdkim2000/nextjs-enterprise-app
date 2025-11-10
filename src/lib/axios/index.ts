@@ -22,6 +22,14 @@ axiosInstance.interceptors.request.use(
       }
     }
 
+    // Debug logging
+    console.log('[Axios Request]', {
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      params: config.params
+    });
+
     return config;
   },
   (error: AxiosError) => {

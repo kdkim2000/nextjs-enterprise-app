@@ -58,6 +58,8 @@ function loggerMiddleware(req, res, next) {
       timestamp: new Date().toISOString(),
       method: req.method,
       path: req.path,
+      url: req.url,
+      originalUrl: req.originalUrl,
       statusCode: res.statusCode,
       duration: `${duration}ms`,
       userId: req.user?.userId || 'anonymous',

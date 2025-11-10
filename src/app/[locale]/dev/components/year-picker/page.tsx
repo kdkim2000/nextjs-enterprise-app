@@ -4,15 +4,15 @@ import { useState } from 'react';
 import { Box, Typography, Paper, Stack, Chip } from '@mui/material';
 import PageContainer from '@/components/common/PageContainer';
 import YearPicker from '@/components/common/YearPicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import isLeapYear from 'dayjs/plugin/isLeapYear';
 
 dayjs.extend(isLeapYear);
 
 export default function YearPickerDemoPage() {
-  const [year1, setYear1] = useState<Dayjs | null>(null);
-  const [year2, setYear2] = useState<Dayjs | null>(dayjs());
-  const [year3, setYear3] = useState<Dayjs | null>(dayjs().year(2020));
+  const [year1, setYear1] = useState<string>('');
+  const [year2, setYear2] = useState<string>(dayjs().format('YYYY'));
+  const [year3, setYear3] = useState<string>('2020');
 
   return (
     <PageContainer
@@ -40,7 +40,7 @@ export default function YearPickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={year1 ? year1.format('YYYY') : 'Not selected'}
+              label={year1 || 'Not selected'}
               color={year1 ? 'primary' : 'default'}
             />
           </Box>
@@ -66,12 +66,12 @@ export default function YearPickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={year2 ? year2.format('YYYY') : 'Not selected'}
+              label={year2 || 'Not selected'}
               color="primary"
             />
             {year2 && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {year2.year() === dayjs().year() ? 'Current year' : `${Math.abs(dayjs().year() - year2.year())} years ${year2.year() > dayjs().year() ? 'from now' : 'ago'}`}
+                {parseInt(year2) === dayjs().year() ? 'Current year' : `${Math.abs(dayjs().year() - parseInt(year2))} years ${parseInt(year2) > dayjs().year() ? 'from now' : 'ago'}`}
               </Typography>
             )}
           </Box>
@@ -98,11 +98,11 @@ export default function YearPickerDemoPage() {
             </Typography>
             {year3 ? (
               <Stack spacing={1}>
-                <Chip label={`Year: ${year3.format('YYYY')}`} variant="outlined" />
-                <Chip label={`Decade: ${Math.floor(year3.year() / 10) * 10}s`} variant="outlined" />
-                <Chip label={`Century: ${Math.ceil(year3.year() / 100)}${['st', 'nd', 'rd'][((Math.ceil(year3.year() / 100) - 20) % 10) - 1] || 'th'} century`} variant="outlined" />
-                <Chip label={`Years ago: ${dayjs().year() - year3.year()}`} variant="outlined" />
-                <Chip label={`Leap year: ${year3.isLeapYear() ? 'Yes' : 'No'}`} variant="outlined" />
+                <Chip label={`Year: ${year3}`} variant="outlined" />
+                <Chip label={`Decade: ${Math.floor(parseInt(year3) / 10) * 10}s`} variant="outlined" />
+                <Chip label={`Century: ${Math.ceil(parseInt(year3) / 100)}${['st', 'nd', 'rd'][((Math.ceil(parseInt(year3) / 100) - 20) % 10) - 1] || 'th'} century`} variant="outlined" />
+                <Chip label={`Years ago: ${dayjs().year() - parseInt(year3)}`} variant="outlined" />
+                <Chip label={`Leap year: ${dayjs(year3).isLeapYear() ? 'Yes' : 'No'}`} variant="outlined" />
               </Stack>
             ) : (
               <Chip label="Not selected" color="default" />
@@ -135,14 +135,15 @@ export default function YearPickerDemoPage() {
             <strong>Props:</strong>
           </Typography>
           <Box component="ul" sx={{ mt: 1 }}>
-            <li><code>value</code>: Dayjs | null - The selected year value</li>
-            <li><code>onChange</code>: (value: Dayjs | null) =&gt; void - Change handler</li>
-            <li><code>label</code>: string - Label for the picker</li>
-            <li><code>error</code>: boolean - Error state (optional)</li>
+            <li><code>value</code>: string - The selected year value (format: YYYY)</li>
+            <li><code>onChange</code>: (value: string) =&gt; void - Change handler</li>
+            <li><code>label</code>: string - Label for the picker (optional)</li>
             <li><code>helperText</code>: string - Helper text (optional)</li>
             <li><code>disabled</code>: boolean - Disabled state (optional)</li>
-            <li><code>minDate</code>: Dayjs - Minimum allowed year (optional)</li>
-            <li><code>maxDate</code>: Dayjs - Maximum allowed year (optional)</li>
+            <li><code>lang</code>: string - Language code (default: 'en')</li>
+            <li><code>minYear</code>: string - Minimum allowed year (optional)</li>
+            <li><code>maxYear</code>: string - Maximum allowed year (optional)</li>
+            <li><code>onEnter</code>: () =&gt; void - Enter key handler (optional)</li>
           </Box>
 
           <Typography variant="body2" sx={{ mt: 2 }}>
