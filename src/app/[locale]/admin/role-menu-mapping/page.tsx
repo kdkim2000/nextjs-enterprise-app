@@ -73,7 +73,7 @@ export default function RoleMenuMappingPage() {
       setRoles(rolesResponse.roles || []);
 
       // Fetch menus for dropdown
-      const menusResponse = await api.get('/menu');
+      const menusResponse = await api.get('/menu/all');
       setMenus(menusResponse.menus || []);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };

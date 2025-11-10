@@ -5,7 +5,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { I18nProviderClient } from '@/lib/i18n/client';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { lightTheme } from '@/styles/theme';
+import { lightTheme } from '@/theme';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

@@ -66,9 +66,10 @@ export default function Menu({
         onClose={handleClose}
         {...rest}
       >
-        {items.map((item, index) => (
-          <React.Fragment key={item.id}>
+        {items.flatMap((item, index) => {
+          const elements = [
             <MenuItem
+              key={item.id}
               onClick={() => handleItemClick(item)}
               disabled={item.disabled}
               sx={{
@@ -80,9 +81,14 @@ export default function Menu({
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText>{item.label}</ListItemText>
             </MenuItem>
-            {item.divider && index < items.length - 1 && <Divider />}
-          </React.Fragment>
-        ))}
+          ];
+
+          if (item.divider && index < items.length - 1) {
+            elements.push(<Divider key={`${item.id}-divider`} />);
+          }
+
+          return elements;
+        })}
       </MuiMenu>
     </>
   );
