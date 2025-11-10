@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { Box, Typography, Paper, Stack, Chip } from '@mui/material';
 import PageContainer from '@/components/common/PageContainer';
 import TimePicker from '@/components/common/TimePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 export default function TimePickerDemoPage() {
-  const [time1, setTime1] = useState<Dayjs | null>(null);
-  const [time2, setTime2] = useState<Dayjs | null>(dayjs().hour(9).minute(0).second(0));
-  const [time3, setTime3] = useState<Dayjs | null>(dayjs());
+  const [time1, setTime1] = useState<string>('');
+  const [time2, setTime2] = useState<string>('09:00:00');
+  const [time3, setTime3] = useState<string>(dayjs().format('HH:mm:ss'));
 
   return (
     <PageContainer
@@ -37,7 +37,7 @@ export default function TimePickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={time1 ? time1.format('HH:mm:ss') : 'Not selected'}
+              label={time1 || 'Not selected'}
               color={time1 ? 'primary' : 'default'}
             />
           </Box>
@@ -63,7 +63,7 @@ export default function TimePickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={time2 ? time2.format('HH:mm:ss') : 'Not selected'}
+              label={time2 || 'Not selected'}
               color="primary"
             />
           </Box>
@@ -90,10 +90,13 @@ export default function TimePickerDemoPage() {
             </Typography>
             {time3 ? (
               <Stack spacing={1}>
-                <Chip label={`24-hour: ${time3.format('HH:mm:ss')}`} variant="outlined" />
-                <Chip label={`12-hour: ${time3.format('hh:mm:ss A')}`} variant="outlined" />
-                <Chip label={`Short: ${time3.format('HH:mm')}`} variant="outlined" />
-                <Chip label={`Seconds since midnight: ${time3.hour() * 3600 + time3.minute() * 60 + time3.second()}`} variant="outlined" />
+                <Chip label={`24-hour: ${time3}`} variant="outlined" />
+                <Chip label={`12-hour: ${dayjs(`2000-01-01T${time3}`).format('hh:mm:ss A')}`} variant="outlined" />
+                <Chip label={`Short: ${time3.substring(0, 5)}`} variant="outlined" />
+                <Chip label={`Seconds since midnight: ${(() => {
+                  const [h, m, s] = time3.split(':').map(Number);
+                  return h * 3600 + m * 60 + s;
+                })()}`} variant="outlined" />
               </Stack>
             ) : (
               <Chip label="Not selected" color="default" />
@@ -126,14 +129,13 @@ export default function TimePickerDemoPage() {
             <strong>Props:</strong>
           </Typography>
           <Box component="ul" sx={{ mt: 1 }}>
-            <li><code>value</code>: Dayjs | null - The selected time value</li>
-            <li><code>onChange</code>: (value: Dayjs | null) =&gt; void - Change handler</li>
-            <li><code>label</code>: string - Label for the picker</li>
-            <li><code>error</code>: boolean - Error state (optional)</li>
+            <li><code>value</code>: string - The selected time value (format: HH:mm:ss)</li>
+            <li><code>onChange</code>: (value: string) =&gt; void - Change handler</li>
+            <li><code>label</code>: string - Label for the picker (optional)</li>
             <li><code>helperText</code>: string - Helper text (optional)</li>
             <li><code>disabled</code>: boolean - Disabled state (optional)</li>
-            <li><code>minTime</code>: Dayjs - Minimum allowed time (optional)</li>
-            <li><code>maxTime</code>: Dayjs - Maximum allowed time (optional)</li>
+            <li><code>onEnter</code>: () =&gt; void - Enter key handler (optional)</li>
+            <li><code>lang</code>: string - Language code (default: 'en')</li>
           </Box>
 
           <Typography variant="body2" sx={{ mt: 2 }}>

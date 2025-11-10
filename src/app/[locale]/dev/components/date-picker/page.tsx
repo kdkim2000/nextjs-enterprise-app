@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Box, Typography, Paper, Stack, Chip } from '@mui/material';
 import PageContainer from '@/components/common/PageContainer';
 import DatePicker from '@/components/common/DatePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -14,9 +14,9 @@ dayjs.extend(dayOfYear);
 dayjs.extend(weekOfYear);
 
 export default function DatePickerDemoPage() {
-  const [date1, setDate1] = useState<Dayjs | null>(null);
-  const [date2, setDate2] = useState<Dayjs | null>(dayjs());
-  const [date3, setDate3] = useState<Dayjs | null>(dayjs().add(7, 'day'));
+  const [date1, setDate1] = useState<string>('');
+  const [date2, setDate2] = useState<string>(dayjs().format('YYYY-MM-DD') + 'T00:00:00');
+  const [date3, setDate3] = useState<string>(dayjs().add(7, 'day').format('YYYY-MM-DD') + 'T00:00:00');
 
   return (
     <PageContainer
@@ -44,7 +44,7 @@ export default function DatePickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={date1 ? date1.format('YYYY-MM-DD') : 'Not selected'}
+              label={date1 ? date1.split('T')[0] : 'Not selected'}
               color={date1 ? 'primary' : 'default'}
             />
           </Box>
@@ -70,12 +70,12 @@ export default function DatePickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={date2 ? date2.format('YYYY-MM-DD') : 'Not selected'}
+              label={date2 ? date2.split('T')[0] : 'Not selected'}
               color="primary"
             />
             {date2 && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {date2.format('dddd, MMMM D, YYYY')}
+                {dayjs(date2).format('dddd, MMMM D, YYYY')}
               </Typography>
             )}
           </Box>
@@ -102,12 +102,12 @@ export default function DatePickerDemoPage() {
             </Typography>
             {date3 ? (
               <Stack spacing={1}>
-                <Chip label={`ISO: ${date3.format('YYYY-MM-DD')}`} variant="outlined" />
-                <Chip label={`Long: ${date3.format('dddd, MMMM D, YYYY')}`} variant="outlined" />
-                <Chip label={`Short: ${date3.format('MM/DD/YYYY')}`} variant="outlined" />
-                <Chip label={`Relative: ${date3.fromNow()}`} variant="outlined" />
-                <Chip label={`Day of year: ${date3.dayOfYear()}`} variant="outlined" />
-                <Chip label={`Week number: Week ${date3.week()}`} variant="outlined" />
+                <Chip label={`ISO: ${date3.split('T')[0]}`} variant="outlined" />
+                <Chip label={`Long: ${dayjs(date3).format('dddd, MMMM D, YYYY')}`} variant="outlined" />
+                <Chip label={`Short: ${dayjs(date3).format('MM/DD/YYYY')}`} variant="outlined" />
+                <Chip label={`Relative: ${dayjs(date3).fromNow()}`} variant="outlined" />
+                <Chip label={`Day of year: ${dayjs(date3).dayOfYear()}`} variant="outlined" />
+                <Chip label={`Week number: Week ${dayjs(date3).week()}`} variant="outlined" />
               </Stack>
             ) : (
               <Chip label="Not selected" color="default" />
@@ -140,14 +140,16 @@ export default function DatePickerDemoPage() {
             <strong>Props:</strong>
           </Typography>
           <Box component="ul" sx={{ mt: 1 }}>
-            <li><code>value</code>: Dayjs | null - The selected date value</li>
-            <li><code>onChange</code>: (value: Dayjs | null) =&gt; void - Change handler</li>
-            <li><code>label</code>: string - Label for the picker</li>
-            <li><code>error</code>: boolean - Error state (optional)</li>
+            <li><code>value</code>: string - The selected date value (format: YYYY-MM-DDTHH:mm:ss)</li>
+            <li><code>onChange</code>: (value: string) =&gt; void - Change handler</li>
+            <li><code>label</code>: string - Label for the picker (optional)</li>
             <li><code>helperText</code>: string - Helper text (optional)</li>
             <li><code>disabled</code>: boolean - Disabled state (optional)</li>
-            <li><code>minDate</code>: Dayjs - Minimum allowed date (optional)</li>
-            <li><code>maxDate</code>: Dayjs - Maximum allowed date (optional)</li>
+            <li><code>dateOnly</code>: boolean - Date only mode (default: true)</li>
+            <li><code>lang</code>: string - Language code (default: 'en')</li>
+            <li><code>minDate</code>: string - Minimum allowed date (optional)</li>
+            <li><code>maxDate</code>: string - Maximum allowed date (optional)</li>
+            <li><code>onEnter</code>: () =&gt; void - Enter key handler (optional)</li>
           </Box>
 
           <Typography variant="body2" sx={{ mt: 2 }}>

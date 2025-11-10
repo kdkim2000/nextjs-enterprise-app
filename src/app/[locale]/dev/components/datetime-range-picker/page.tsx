@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { Box, Typography, Paper, Stack, Chip } from '@mui/material';
 import PageContainer from '@/components/common/PageContainer';
 import DateTimeRangePicker from '@/components/common/DateTimeRangePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 export default function DateTimeRangePickerDemoPage() {
-  const [startDateTime, setStartDateTime] = useState<Dayjs | null>(null);
-  const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
+  const [startDateTime, setStartDateTime] = useState<string>('');
+  const [endDateTime, setEndDateTime] = useState<string>('');
 
-  const [startDateTime2, setStartDateTime2] = useState<Dayjs | null>(dayjs().startOf('day'));
-  const [endDateTime2, setEndDateTime2] = useState<Dayjs | null>(dayjs().endOf('day'));
+  const [startDateTime2, setStartDateTime2] = useState<string>(dayjs().startOf('day').format('YYYY-MM-DDTHH:mm:ss'));
+  const [endDateTime2, setEndDateTime2] = useState<string>(dayjs().endOf('day').format('YYYY-MM-DDTHH:mm:ss'));
 
   return (
     <PageContainer
@@ -31,8 +31,10 @@ export default function DateTimeRangePickerDemoPage() {
           <DateTimeRangePicker
             startDateTime={startDateTime}
             endDateTime={endDateTime}
-            onStartChange={setStartDateTime}
-            onEndChange={setEndDateTime}
+            onChange={(start, end) => {
+              setStartDateTime(start);
+              setEndDateTime(end);
+            }}
             startLabel="Start Date & Time"
             endLabel="End Date & Time"
           />
@@ -43,12 +45,12 @@ export default function DateTimeRangePickerDemoPage() {
             </Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
               <Chip
-                label={startDateTime ? startDateTime.format('YYYY-MM-DD HH:mm:ss') : 'Not selected'}
+                label={startDateTime ? startDateTime.replace('T', ' ') : 'Not selected'}
                 color={startDateTime ? 'primary' : 'default'}
               />
               <Typography sx={{ alignSelf: 'center' }}>~</Typography>
               <Chip
-                label={endDateTime ? endDateTime.format('YYYY-MM-DD HH:mm:ss') : 'Not selected'}
+                label={endDateTime ? endDateTime.replace('T', ' ') : 'Not selected'}
                 color={endDateTime ? 'primary' : 'default'}
               />
             </Stack>
@@ -67,8 +69,10 @@ export default function DateTimeRangePickerDemoPage() {
           <DateTimeRangePicker
             startDateTime={startDateTime2}
             endDateTime={endDateTime2}
-            onStartChange={setStartDateTime2}
-            onEndChange={setEndDateTime2}
+            onChange={(start, end) => {
+              setStartDateTime2(start);
+              setEndDateTime2(end);
+            }}
             startLabel="From"
             endLabel="To"
           />
@@ -79,18 +83,18 @@ export default function DateTimeRangePickerDemoPage() {
             </Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
               <Chip
-                label={startDateTime2 ? startDateTime2.format('YYYY-MM-DD HH:mm:ss') : 'Not selected'}
+                label={startDateTime2 ? startDateTime2.replace('T', ' ') : 'Not selected'}
                 color="primary"
               />
               <Typography sx={{ alignSelf: 'center' }}>~</Typography>
               <Chip
-                label={endDateTime2 ? endDateTime2.format('YYYY-MM-DD HH:mm:ss') : 'Not selected'}
+                label={endDateTime2 ? endDateTime2.replace('T', ' ') : 'Not selected'}
                 color="primary"
               />
             </Stack>
             {startDateTime2 && endDateTime2 && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Duration: {endDateTime2.diff(startDateTime2, 'hour')} hours
+                Duration: {dayjs(endDateTime2).diff(dayjs(startDateTime2), 'hour')} hours
               </Typography>
             )}
           </Box>
@@ -121,16 +125,21 @@ export default function DateTimeRangePickerDemoPage() {
             <strong>Props:</strong>
           </Typography>
           <Box component="ul" sx={{ mt: 1 }}>
-            <li><code>startDateTime</code>: Dayjs | null - Start date and time value</li>
-            <li><code>endDateTime</code>: Dayjs | null - End date and time value</li>
-            <li><code>onStartChange</code>: (value: Dayjs | null) =&gt; void - Start change handler</li>
-            <li><code>onEndChange</code>: (value: Dayjs | null) =&gt; void - End change handler</li>
-            <li><code>startLabel</code>: string - Label for start picker</li>
-            <li><code>endLabel</code>: string - Label for end picker</li>
-            <li><code>error</code>: boolean - Error state (optional)</li>
+            <li><code>startDateTime</code>: string - Start date and time value (format: YYYY-MM-DDTHH:mm:ss)</li>
+            <li><code>endDateTime</code>: string - End date and time value (format: YYYY-MM-DDTHH:mm:ss)</li>
+            <li><code>onChange</code>: (startDateTime: string, endDateTime: string) =&gt; void - Change handler for both values</li>
+            <li><code>label</code>: string - Label for the range picker (optional)</li>
+            <li><code>startLabel</code>: string - Label for start picker (optional)</li>
+            <li><code>endLabel</code>: string - Label for end picker (optional)</li>
             <li><code>helperText</code>: string - Helper text (optional)</li>
             <li><code>disabled</code>: boolean - Disabled state (optional)</li>
+            <li><code>lang</code>: string - Language code (default: 'en')</li>
+            <li><code>onEnter</code>: () =&gt; void - Enter key handler (optional)</li>
           </Box>
+
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            <strong>Format:</strong> YYYY-MM-DDTHH:mm:ss
+          </Typography>
         </Paper>
       </Stack>
     </PageContainer>

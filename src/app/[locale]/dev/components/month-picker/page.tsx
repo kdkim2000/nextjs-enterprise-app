@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Box, Typography, Paper, Stack, Chip } from '@mui/material';
 import PageContainer from '@/components/common/PageContainer';
 import MonthPicker from '@/components/common/MonthPicker';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
@@ -12,9 +12,9 @@ dayjs.extend(quarterOfYear);
 dayjs.extend(localizedFormat);
 
 export default function MonthPickerDemoPage() {
-  const [month1, setMonth1] = useState<Dayjs | null>(null);
-  const [month2, setMonth2] = useState<Dayjs | null>(dayjs());
-  const [month3, setMonth3] = useState<Dayjs | null>(dayjs().subtract(1, 'month'));
+  const [month1, setMonth1] = useState<string>('');
+  const [month2, setMonth2] = useState<string>(dayjs().format('YYYY-MM'));
+  const [month3, setMonth3] = useState<string>(dayjs().subtract(1, 'month').format('YYYY-MM'));
 
   return (
     <PageContainer
@@ -42,7 +42,7 @@ export default function MonthPickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={month1 ? month1.format('YYYY-MM') : 'Not selected'}
+              label={month1 || 'Not selected'}
               color={month1 ? 'primary' : 'default'}
             />
           </Box>
@@ -68,12 +68,12 @@ export default function MonthPickerDemoPage() {
               Selected:
             </Typography>
             <Chip
-              label={month2 ? month2.format('YYYY-MM') : 'Not selected'}
+              label={month2 || 'Not selected'}
               color="primary"
             />
             {month2 && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {month2.format('MMMM YYYY')}
+                {dayjs(month2).format('MMMM YYYY')}
               </Typography>
             )}
           </Box>
@@ -100,11 +100,11 @@ export default function MonthPickerDemoPage() {
             </Typography>
             {month3 ? (
               <Stack spacing={1}>
-                <Chip label={`Standard: ${month3.format('YYYY-MM')}`} variant="outlined" />
-                <Chip label={`Long: ${month3.format('MMMM YYYY')}`} variant="outlined" />
-                <Chip label={`Short: ${month3.format('MMM YY')}`} variant="outlined" />
-                <Chip label={`Localized: ${month3.format('LL').substring(0, month3.format('LL').lastIndexOf(' '))}`} variant="outlined" />
-                <Chip label={`Quarter: Q${month3.quarter()} ${month3.year()}`} variant="outlined" />
+                <Chip label={`Standard: ${month3}`} variant="outlined" />
+                <Chip label={`Long: ${dayjs(month3).format('MMMM YYYY')}`} variant="outlined" />
+                <Chip label={`Short: ${dayjs(month3).format('MMM YY')}`} variant="outlined" />
+                <Chip label={`Localized: ${dayjs(month3).format('LL').substring(0, dayjs(month3).format('LL').lastIndexOf(' '))}`} variant="outlined" />
+                <Chip label={`Quarter: Q${dayjs(month3).quarter()} ${dayjs(month3).year()}`} variant="outlined" />
               </Stack>
             ) : (
               <Chip label="Not selected" color="default" />
@@ -137,14 +137,15 @@ export default function MonthPickerDemoPage() {
             <strong>Props:</strong>
           </Typography>
           <Box component="ul" sx={{ mt: 1 }}>
-            <li><code>value</code>: Dayjs | null - The selected month value</li>
-            <li><code>onChange</code>: (value: Dayjs | null) =&gt; void - Change handler</li>
-            <li><code>label</code>: string - Label for the picker</li>
-            <li><code>error</code>: boolean - Error state (optional)</li>
+            <li><code>value</code>: string - The selected month value (format: YYYY-MM)</li>
+            <li><code>onChange</code>: (value: string) =&gt; void - Change handler</li>
+            <li><code>label</code>: string - Label for the picker (optional)</li>
             <li><code>helperText</code>: string - Helper text (optional)</li>
             <li><code>disabled</code>: boolean - Disabled state (optional)</li>
-            <li><code>minDate</code>: Dayjs - Minimum allowed month (optional)</li>
-            <li><code>maxDate</code>: Dayjs - Maximum allowed month (optional)</li>
+            <li><code>lang</code>: string - Language code (default: 'en')</li>
+            <li><code>minDate</code>: string - Minimum allowed month (optional)</li>
+            <li><code>maxDate</code>: string - Maximum allowed month (optional)</li>
+            <li><code>onEnter</code>: () =&gt; void - Enter key handler (optional)</li>
           </Box>
 
           <Typography variant="body2" sx={{ mt: 2 }}>
