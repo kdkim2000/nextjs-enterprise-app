@@ -60,8 +60,10 @@ router.get('/by-path', authenticateToken, async (req, res) => {
     const menus = await readJSON(MENUS_FILE);
     const menu = menus.find(m => m.path === menuPath);
 
+    // If menu not found, return null instead of 404
+    // This allows pages without menus to still render
     if (!menu) {
-      return res.status(404).json({ error: 'Menu not found' });
+      return res.json({ menu: null });
     }
 
     // Check if user has access

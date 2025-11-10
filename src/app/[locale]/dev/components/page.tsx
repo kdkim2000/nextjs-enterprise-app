@@ -32,10 +32,12 @@ export default function ComponentsPage() {
           Component Library
         </Typography>
         <Typography variant="body1" color="text.secondary" paragraph>
-          Explore our collection of reusable UI components. Each component comes with examples, usage guidelines, and best practices.
+          Our component library follows a <strong>MUI-first</strong> approach with theme-based consistency.
+          Simple UI components use MUI directly, while complex business logic is encapsulated in custom components.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          컴포넌트 라이브러리를 탐색하세요. 각 컴포넌트는 예제, 사용 가이드, 모범 사례를 포함합니다.
+          <strong>MUI 우선</strong> 접근 방식과 테마 기반 일관성을 따릅니다.
+          단순 UI는 MUI를 직접 사용하고, 복잡한 비즈니스 로직만 커스텀 컴포넌트로 구현합니다.
         </Typography>
       </Box>
 
@@ -122,25 +124,47 @@ export default function ComponentsPage() {
         </Box>
       ))}
 
-      <Box sx={{ mt: 6, p: 3, bgcolor: 'background.paper', borderRadius: 2, border: 1, borderColor: 'divider' }}>
+      <Box sx={{ mt: 6, p: 3, bgcolor: 'info.lighter', borderRadius: 2, border: 1, borderColor: 'info.light' }}>
         <Typography variant="h6" gutterBottom fontWeight={600}>
-          Getting Started / 시작하기
+          💡 Component Strategy / 컴포넌트 전략
+        </Typography>
+
+        <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+          1. MUI Direct Usage (MUI 직접 사용)
         </Typography>
         <Typography variant="body2" color="text.secondary" paragraph>
-          All components are located in <code>src/components/common/</code> and can be imported directly into your pages.
+          For simple UI components, use MUI directly with theme styling:
+        </Typography>
+        <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 1, fontFamily: 'monospace', fontSize: 13, mb: 2 }}>
+          <code>
+            import {'{ Button, TextField, Dialog }'} from &apos;@mui/material&apos;;
+            <br />
+            import {'{ useTheme }'} from &apos;@mui/material/styles&apos;;
+          </code>
+        </Box>
+
+        <Typography variant="subtitle2" gutterBottom>
+          2. Custom Business Components (커스텀 비즈니스 컴포넌트)
         </Typography>
         <Typography variant="body2" color="text.secondary" paragraph>
-          모든 컴포넌트는 <code>src/components/common/</code>에 위치하며 페이지에서 직접 가져올 수 있습니다.
+          Use custom components for business logic, complex patterns, or 3+ reuses:
         </Typography>
-        <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 1, fontFamily: 'monospace', fontSize: 14 }}>
+        <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 1, fontFamily: 'monospace', fontSize: 13, mb: 2 }}>
           <code>
             import DataGrid from &apos;@/components/common/DataGrid&apos;;
             <br />
             import PageHeader from &apos;@/components/common/PageHeader&apos;;
             <br />
-            import FileUpload from &apos;@/components/common/FileUpload&apos;;
+            import PermissionGuard from &apos;@/components/common/PermissionGuard&apos;;
           </code>
         </Box>
+
+        <Typography variant="subtitle2" gutterBottom>
+          3. Theme System (테마 시스템)
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          All styling consistency comes from <code>src/theme/</code> with custom status/role colors, typography, and component overrides.
+        </Typography>
       </Box>
     </PageContainer>
   );

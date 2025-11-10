@@ -268,41 +268,5 @@
       "en": "Browse all reusable UI components with examples and documentation",
       "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색"
     }
-  },
-  {
-    "id": "menu-017",
-    "code": "theme-demo",
-    "name": {
-      "en": "Theme System Demo",
-      "ko": "테마 시스템 데모"
-    },
-    "path": "/dev/theme-demo",
-    "icon": "Palette",
-    "order": 2,
-    "parentId": "menu-016",
-    "level": 2,
-    "programId": "PROG-THEME-DEMO",
-    "description": {
-      "en": "Comprehensive demonstration of MUI theme system with custom colors and styles",
-      "ko": "커스텀 색상 및 스타일이 적용된 MUI 테마 시스템의 종합 데모"
-    }
-  },
-  {
-    "id": "menu-018",
-    "code": "react-study",
-    "name": {
-      "en": "React Study Group",
-      "ko": "React 연구회"
-    },
-    "path": "/dev/react-study",
-    "icon": "School",
-    "order": 3,
-    "parentId": "menu-016",
-    "level": 2,
-    "programId": "PROG-REACT-STUDY",
-    "description": {
-      "en": "React learning materials and study resources",
-      "ko": "React 학습 교재 및 연구 자료"
-    }
   }
 ]
