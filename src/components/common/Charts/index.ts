@@ -18,3 +18,15 @@ export type { DonutChartProps, DonutChartDataItem } from './DonutChart';
 
 export { default as RadarChart } from './RadarChart';
 export type { RadarChartProps, RadarChartDataItem, RadarChartSeries } from './RadarChart';
+
+export { default as StackedAreaChart } from './StackedAreaChart';
+export type { StackedAreaChartProps, StackedAreaChartDataItem, StackedAreaChartSeries } from './StackedAreaChart';
+
+export { default as MixedBarLineChart } from './MixedBarLineChart';
+export type { MixedBarLineChartProps, MixedBarLineChartDataItem, MixedBarLineChartSeries } from './MixedBarLineChart';
+
+export { default as MultiAxisChart } from './MultiAxisChart';
+export type { MultiAxisChartProps, MultiAxisChartDataItem, MultiAxisChartSeries } from './MultiAxisChart';
+
+export { default as TrendChart } from './TrendChart';
+export type { TrendChartProps, TrendChartDataItem } from './TrendChart';

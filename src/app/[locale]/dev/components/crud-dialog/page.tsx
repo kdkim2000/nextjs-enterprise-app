@@ -5,7 +5,7 @@ import { Box, Typography, Paper, Stack, Button, Alert, Chip } from '@mui/materia
 import PageContainer from '@/components/common/PageContainer';
 import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
 
-interface User {
+interface User extends Record<string, unknown> {
   id?: string;
   name: string;
   email: string;

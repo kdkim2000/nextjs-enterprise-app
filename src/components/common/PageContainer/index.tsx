@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Container, SxProps, Theme } from '@mui/material';
+import { Container, SxProps, Theme, Typography, Box } from '@mui/material';
 
 export interface PageContainerProps {
   children: React.ReactNode;
+  title?: string;
+  description?: string;
   fullHeight?: boolean;
   noPadding?: boolean;
   maxWidth?: false | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -13,6 +15,8 @@ export interface PageContainerProps {
 
 export default function PageContainer({
   children,
+  title,
+  description,
   fullHeight = true,
   noPadding = true,
   maxWidth = false,
@@ -36,6 +40,20 @@ export default function PageContainer({
         ...sx
       }}
     >
+      {(title || description) && (
+        <Box sx={{ mb: 3 }}>
+          {title && (
+            <Typography variant="h4" component="h1" gutterBottom>
+              {title}
+            </Typography>
+          )}
+          {description && (
+            <Typography variant="body1" color="text.secondary">
+              {description}
+            </Typography>
+          )}
+        </Box>
+      )}
       {children}
     </Container>
   );
