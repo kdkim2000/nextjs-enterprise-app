@@ -156,40 +156,40 @@
     "updatedAt": "2025-11-09T13:12:34.108Z"
   },
   {
-    "id": "help-1762699394555",
-    "programId": "PROG-PROGRAM-LIST",
+    "id": "help-1762960000001",
+    "programId": "PROG-USER-MGMT",
     "language": "en",
-    "title": "User Management Help",
-    "content": "<p>This page allows you to manage all users in the system. You can search, add, edit, and delete users.</p>",
+    "title": "User Administration Help",
+    "content": "<p>This page allows you to perform administrative tasks for user management. You can configure user settings, manage permissions, and perform bulk operations.</p>",
     "sections": [
       {
         "id": "section-001",
-        "title": "Searching for Users",
-        "content": "<p><strong>Quick Search:</strong> Use the search bar at the top to quickly find users by username, name, or email.</p><p><strong>Advanced Search:</strong> Click the filter icon to access advanced search options where you can filter by role, department, and status.</p>",
+        "title": "User Configuration",
+        "content": "<p><strong>Basic Configuration:</strong> Set up default user preferences and account settings.</p><p><strong>Permission Management:</strong> Assign and manage user permissions at a granular level.</p><p><strong>Bulk Operations:</strong> Perform actions on multiple users simultaneously such as password resets or status changes.</p>",
         "order": 1
       },
       {
         "id": "section-002",
-        "title": "Adding a New User",
-        "content": "<p>1. Click the <strong>Add</strong> button in the toolbar</p><p>2. Fill in the required fields (username, password, name, email)</p><p>3. Select the appropriate role and department</p><p>4. Click <strong>Save</strong> to create the user</p>",
+        "title": "Managing User Access",
+        "content": "<p>1. Navigate to the user you want to manage</p><p>2. Click on <strong>Permissions</strong> tab</p><p>3. Check or uncheck specific permissions</p><p>4. Set access levels for different modules</p><p>5. Click <strong>Apply</strong> to save changes</p>",
         "order": 2
       },
       {
         "id": "section-003",
-        "title": "Editing User Information",
-        "content": "<p>1. Find the user in the list</p><p>2. Click the <strong>Edit</strong> icon in the actions column</p><p>3. Update the necessary information</p><p>4. Click <strong>Save</strong> to apply changes</p>",
+        "title": "Bulk User Operations",
+        "content": "<p>1. Select multiple users using checkboxes</p><p>2. Click the <strong>Bulk Actions</strong> dropdown</p><p>3. Choose from: Reset Passwords, Change Status, Assign Role, Update Department</p><p>4. Confirm the operation</p><p><strong>Note:</strong> Bulk operations cannot be undone.</p>",
         "order": 3
       },
       {
         "id": "section-004",
-        "title": "Deleting Users",
-        "content": "<p>1. Select one or more users using the checkboxes</p><p>2. Click the <strong>Delete</strong> button in the toolbar</p><p>3. Confirm the deletion in the dialog that appears</p><p><strong>Note:</strong> You cannot delete your own account.</p>",
+        "title": "Audit and Monitoring",
+        "content": "<p>View user activity logs and track changes made to user accounts. The audit trail includes login history, permission changes, and profile updates.</p>",
         "order": 4
       },
       {
         "id": "section-005",
-        "title": "Exporting Data",
-        "content": "<p>You can export user data to Excel or PDF format using the export buttons in the toolbar.</p>",
+        "title": "Security Settings",
+        "content": "<p>Configure password policies, session timeouts, and multi-factor authentication requirements for users.</p>",
         "order": 5
       }
     ],
@@ -197,77 +197,83 @@
     "faqs": [
       {
         "id": "faq-001",
-        "question": "How do I reset a user's password?",
-        "answer": "Edit the user and enter a new password in the password field. Leave it blank if you don't want to change the password.",
+        "question": "How do I enforce password policies?",
+        "answer": "Go to Security Settings and configure minimum length, complexity requirements, and expiration periods.",
         "order": 1
       },
       {
         "id": "faq-002",
-        "question": "What are the different user roles?",
-        "answer": "There are three roles: Admin (full access), Manager (can manage users in their department), and User (limited access).",
+        "question": "Can I delegate user management to other admins?",
+        "answer": "Yes, you can assign the 'User Manager' role to specific users to grant them administrative privileges.",
         "order": 2
       },
       {
         "id": "faq-003",
-        "question": "How many users can I select and delete at once?",
-        "answer": "You can select and delete multiple users at once using the checkboxes. There is no limit to the number of users you can delete simultaneously.",
+        "question": "What happens when I bulk reset passwords?",
+        "answer": "Users will receive an email with a temporary password and will be required to change it on their next login.",
         "order": 3
       }
     ],
     "relatedLinks": [
       {
         "id": "link-001",
-        "title": "User Roles and Permissions",
-        "url": "/admin/roles",
-        "description": "Learn more about user roles and permissions"
+        "title": "User List",
+        "url": "/admin/users",
+        "description": "View and manage all users"
       },
       {
         "id": "link-002",
-        "title": "Security Settings",
-        "url": "/admin/security",
-        "description": "Configure security settings for user accounts"
+        "title": "Role Management",
+        "url": "/admin/roles",
+        "description": "Configure user roles and permissions"
+      },
+      {
+        "id": "link-003",
+        "title": "System Logs",
+        "url": "/admin/logs",
+        "description": "View audit logs and user activities"
       }
     ],
-    "status": "draft",
+    "status": "published",
     "version": 1,
-    "createdAt": "2025-11-09T14:43:14.555Z",
-    "updatedAt": "2025-11-09T14:43:14.555Z"
+    "createdAt": "2025-11-12T15:00:00.001Z",
+    "updatedAt": "2025-11-12T15:00:00.001Z"
   },
   {
-    "id": "help-1762701899678",
-    "programId": "PROG-PROGRAM-LIST",
-    "language": "en",
-    "title": "User Management Help",
-    "content": "<p>This page allows you to manage all users in the system. You can search, add, edit, and delete users.</p>",
+    "id": "help-1762960000002",
+    "programId": "PROG-USER-MGMT",
+    "language": "ko",
+    "title": "사용자 관리 도움말",
+    "content": "<p>이 페이지에서 사용자 관리를 위한 관리 작업을 수행할 수 있습니다. 사용자 설정 구성, 권한 관리 및 대량 작업을 수행할 수 있습니다.</p>",
     "sections": [
       {
         "id": "section-001",
-        "title": "Searching for Users",
-        "content": "<p><strong>Quick Search:</strong> Use the search bar at the top to quickly find users by username, name, or email.</p><p><strong>Advanced Search:</strong> Click the filter icon to access advanced search options where you can filter by role, department, and status.</p>",
+        "title": "사용자 구성",
+        "content": "<p><strong>기본 구성:</strong> 기본 사용자 환경설정 및 계정 설정을 설정합니다.</p><p><strong>권한 관리:</strong> 세분화된 수준에서 사용자 권한을 할당하고 관리합니다.</p><p><strong>대량 작업:</strong> 비밀번호 재설정 또는 상태 변경과 같은 여러 사용자에 대한 작업을 동시에 수행합니다.</p>",
         "order": 1
       },
       {
         "id": "section-002",
-        "title": "Adding a New User",
-        "content": "<p>1. Click the <strong>Add</strong> button in the toolbar</p><p>2. Fill in the required fields (username, password, name, email)</p><p>3. Select the appropriate role and department</p><p>4. Click <strong>Save</strong> to create the user</p>",
+        "title": "사용자 접근 관리",
+        "content": "<p>1. 관리하려는 사용자로 이동합니다</p><p>2. <strong>권한</strong> 탭을 클릭합니다</p><p>3. 특정 권한을 체크하거나 체크 해제합니다</p><p>4. 다른 모듈에 대한 액세스 수준을 설정합니다</p><p>5. <strong>적용</strong>을 클릭하여 변경 사항을 저장합니다</p>",
         "order": 2
       },
       {
         "id": "section-003",
-        "title": "Editing User Information",
-        "content": "<p>1. Find the user in the list</p><p>2. Click the <strong>Edit</strong> icon in the actions column</p><p>3. Update the necessary information</p><p>4. Click <strong>Save</strong> to apply changes</p>",
+        "title": "대량 사용자 작업",
+        "content": "<p>1. 체크박스를 사용하여 여러 사용자를 선택합니다</p><p>2. <strong>대량 작업</strong> 드롭다운을 클릭합니다</p><p>3. 비밀번호 재설정, 상태 변경, 역할 할당, 부서 업데이트 중에서 선택합니다</p><p>4. 작업을 확인합니다</p><p><strong>참고:</strong> 대량 작업은 취소할 수 없습니다.</p>",
         "order": 3
       },
       {
         "id": "section-004",
-        "title": "Deleting Users",
-        "content": "<p>1. Select one or more users using the checkboxes</p><p>2. Click the <strong>Delete</strong> button in the toolbar</p><p>3. Confirm the deletion in the dialog that appears</p><p><strong>Note:</strong> You cannot delete your own account.</p>",
+        "title": "감사 및 모니터링",
+        "content": "<p>사용자 활동 로그를 보고 사용자 계정에 대한 변경 사항을 추적합니다. 감사 추적에는 로그인 기록, 권한 변경 및 프로필 업데이트가 포함됩니다.</p>",
         "order": 4
       },
       {
         "id": "section-005",
-        "title": "Exporting Data",
-        "content": "<p>You can export user data to Excel or PDF format using the export buttons in the toolbar.</p>",
+        "title": "보안 설정",
+        "content": "<p>사용자에 대한 비밀번호 정책, 세션 시간 초과 및 다중 인증 요구 사항을 구성합니다.</p>",
         "order": 5
       }
     ],
@@ -275,40 +281,886 @@
     "faqs": [
       {
         "id": "faq-001",
-        "question": "How do I reset a user's password?",
-        "answer": "Edit the user and enter a new password in the password field. Leave it blank if you don't want to change the password.",
+        "question": "비밀번호 정책을 어떻게 적용하나요?",
+        "answer": "보안 설정으로 이동하여 최소 길이, 복잡성 요구 사항 및 만료 기간을 구성합니다.",
         "order": 1
       },
       {
         "id": "faq-002",
-        "question": "What are the different user roles?",
-        "answer": "There are three roles: Admin (full access), Manager (can manage users in their department), and User (limited access).",
+        "question": "다른 관리자에게 사용자 관리를 위임할 수 있나요?",
+        "answer": "예, 특정 사용자에게 '사용자 관리자' 역할을 할당하여 관리 권한을 부여할 수 있습니다.",
         "order": 2
       },
       {
         "id": "faq-003",
-        "question": "How many users can I select and delete at once?",
-        "answer": "You can select and delete multiple users at once using the checkboxes. There is no limit to the number of users you can delete simultaneously.",
+        "question": "대량으로 비밀번호를 재설정하면 어떻게 되나요?",
+        "answer": "사용자는 임시 비밀번호가 포함된 이메일을 받게 되며 다음 로그인 시 변경해야 합니다.",
         "order": 3
       }
     ],
     "relatedLinks": [
       {
         "id": "link-001",
-        "title": "User Roles and Permissions",
+        "title": "사용자 목록",
+        "url": "/admin/users",
+        "description": "모든 사용자 보기 및 관리"
+      },
+      {
+        "id": "link-002",
+        "title": "역할 관리",
         "url": "/admin/roles",
-        "description": "Learn more about user roles and permissions"
+        "description": "사용자 역할 및 권한 구성"
+      },
+      {
+        "id": "link-003",
+        "title": "시스템 로그",
+        "url": "/admin/logs",
+        "description": "감사 로그 및 사용자 활동 보기"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.002Z",
+    "updatedAt": "2025-11-12T15:00:00.002Z"
+  },
+  {
+    "id": "help-1762960000003",
+    "programId": "PROG-SETTINGS",
+    "language": "en",
+    "title": "System Settings Help",
+    "content": "<p>Configure system-wide settings and preferences. This page allows administrators to customize application behavior, appearance, and operational parameters.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "General Settings",
+        "content": "<p><strong>Application Name:</strong> Set the display name for your application.</p><p><strong>Time Zone:</strong> Configure the default time zone for all users.</p><p><strong>Language:</strong> Set the default system language (English or Korean).</p><p><strong>Date Format:</strong> Choose how dates are displayed throughout the system.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "Security Settings",
+        "content": "<p>1. Navigate to the <strong>Security</strong> tab</p><p>2. Configure password requirements (length, complexity, expiration)</p><p>3. Set session timeout duration</p><p>4. Enable or disable multi-factor authentication</p><p>5. Configure IP whitelisting if needed</p><p>6. Click <strong>Save</strong> to apply changes</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "Email Configuration",
+        "content": "<p>1. Go to the <strong>Email</strong> section</p><p>2. Enter SMTP server details</p><p>3. Configure sender email and display name</p><p>4. Test email configuration using the <strong>Send Test Email</strong> button</p><p>5. Save settings once verified</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "Appearance Settings",
+        "content": "<p>Customize the look and feel of the application including theme colors, logo, favicon, and default page layouts.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "Advanced Settings",
+        "content": "<p>Configure advanced options such as API rate limiting, cache settings, logging levels, and maintenance mode.</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "Will changing settings affect all users?",
+        "answer": "Yes, most system settings apply globally to all users. Individual user preferences can override some settings.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "How do I backup settings before making changes?",
+        "answer": "Use the Export Settings button to download a JSON file with current configuration. You can restore it later if needed.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "What happens if I enter incorrect email settings?",
+        "answer": "The system will show an error when you test the email. No changes are saved until you click Save, so you can safely test different configurations.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "User Management",
+        "url": "/admin/users",
+        "description": "Manage users and their settings"
+      },
+      {
+        "id": "link-002",
+        "title": "System Logs",
+        "url": "/admin/logs",
+        "description": "View system activity and errors"
+      },
+      {
+        "id": "link-003",
+        "title": "Backup & Restore",
+        "url": "/admin/backup",
+        "description": "Backup and restore system data"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.003Z",
+    "updatedAt": "2025-11-12T15:00:00.003Z"
+  },
+  {
+    "id": "help-1762960000004",
+    "programId": "PROG-SETTINGS",
+    "language": "ko",
+    "title": "시스템 설정 도움말",
+    "content": "<p>시스템 전체 설정 및 환경설정을 구성합니다. 이 페이지에서 관리자는 애플리케이션 동작, 모양 및 운영 매개변수를 사용자 지정할 수 있습니다.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "일반 설정",
+        "content": "<p><strong>애플리케이션 이름:</strong> 애플리케이션의 표시 이름을 설정합니다.</p><p><strong>시간대:</strong> 모든 사용자의 기본 시간대를 구성합니다.</p><p><strong>언어:</strong> 기본 시스템 언어를 설정합니다(영어 또는 한국어).</p><p><strong>날짜 형식:</strong> 시스템 전체에서 날짜가 표시되는 방식을 선택합니다.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "보안 설정",
+        "content": "<p>1. <strong>보안</strong> 탭으로 이동합니다</p><p>2. 비밀번호 요구 사항을 구성합니다(길이, 복잡성, 만료)</p><p>3. 세션 시간 초과 기간을 설정합니다</p><p>4. 다중 인증을 활성화하거나 비활성화합니다</p><p>5. 필요한 경우 IP 화이트리스트를 구성합니다</p><p>6. <strong>저장</strong>을 클릭하여 변경 사항을 적용합니다</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "이메일 구성",
+        "content": "<p>1. <strong>이메일</strong> 섹션으로 이동합니다</p><p>2. SMTP 서버 세부 정보를 입력합니다</p><p>3. 발신자 이메일 및 표시 이름을 구성합니다</p><p>4. <strong>테스트 이메일 보내기</strong> 버튼을 사용하여 이메일 구성을 테스트합니다</p><p>5. 확인되면 설정을 저장합니다</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "모양 설정",
+        "content": "<p>테마 색상, 로고, 파비콘 및 기본 페이지 레이아웃을 포함하여 애플리케이션의 모양을 사용자 지정합니다.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "고급 설정",
+        "content": "<p>API 속도 제한, 캐시 설정, 로깅 수준 및 유지 관리 모드와 같은 고급 옵션을 구성합니다.</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "설정을 변경하면 모든 사용자에게 영향을 미치나요?",
+        "answer": "예, 대부분의 시스템 설정은 모든 사용자에게 전역적으로 적용됩니다. 개별 사용자 환경설정은 일부 설정을 재정의할 수 있습니다.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "변경하기 전에 설정을 백업하려면 어떻게 하나요?",
+        "answer": "설정 내보내기 버튼을 사용하여 현재 구성이 포함된 JSON 파일을 다운로드합니다. 나중에 필요할 때 복원할 수 있습니다.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "잘못된 이메일 설정을 입력하면 어떻게 되나요?",
+        "answer": "이메일을 테스트할 때 시스템에 오류가 표시됩니다. 저장을 클릭할 때까지 변경 사항이 저장되지 않으므로 다양한 구성을 안전하게 테스트할 수 있습니다.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "사용자 관리",
+        "url": "/admin/users",
+        "description": "사용자 및 설정 관리"
+      },
+      {
+        "id": "link-002",
+        "title": "시스템 로그",
+        "url": "/admin/logs",
+        "description": "시스템 활동 및 오류 보기"
+      },
+      {
+        "id": "link-003",
+        "title": "백업 및 복원",
+        "url": "/admin/backup",
+        "description": "시스템 데이터 백업 및 복원"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.004Z",
+    "updatedAt": "2025-11-12T15:00:00.004Z"
+  },
+  {
+    "id": "help-1762960000005",
+    "programId": "PROG-ROLE-MGMT",
+    "language": "en",
+    "title": "Role Management Help",
+    "content": "<p>Manage user roles and permissions. Define what actions users with specific roles can perform and which pages they can access.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "Understanding Roles",
+        "content": "<p><strong>What are Roles?</strong> Roles are collections of permissions that define what users can do in the system.</p><p><strong>Built-in Roles:</strong> The system includes Admin, Manager, and User roles by default.</p><p><strong>Custom Roles:</strong> You can create custom roles with specific permission sets.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "Creating a New Role",
+        "content": "<p>1. Click the <strong>Add</strong> button in the toolbar</p><p>2. Enter a role code and name (English and Korean)</p><p>3. Write a description explaining the role's purpose</p><p>4. Click <strong>Save</strong> to create the role</p><p>5. After creation, you can assign permissions to the role</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "Assigning Permissions",
+        "content": "<p>1. Find the role in the list and click <strong>Edit</strong></p><p>2. Go to the <strong>Permissions</strong> tab</p><p>3. Check the boxes for menus and actions this role should access</p><p>4. Set granular permissions: Read, Write, Delete, Export</p><p>5. Click <strong>Save</strong> to apply permission changes</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "Role Hierarchy",
+        "content": "<p>Roles can inherit permissions from parent roles. This allows you to create a hierarchy where Manager roles inherit basic User permissions and add additional capabilities.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "Best Practices",
+        "content": "<p>- Follow the principle of least privilege: grant only necessary permissions</p><p>- Regularly review role permissions</p><p>- Use descriptive names and document role purposes</p><p>- Test roles before assigning them to users</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "Can I delete built-in roles?",
+        "answer": "No, built-in roles (Admin, Manager, User) cannot be deleted, but their permissions can be modified.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "What happens to users when I delete a role?",
+        "answer": "Users assigned to a deleted role will lose access. You should reassign users to a different role before deleting.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "Can a user have multiple roles?",
+        "answer": "Currently, each user is assigned one primary role. For complex permission needs, create a custom role that combines the required permissions.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "User Management",
+        "url": "/admin/users",
+        "description": "Assign roles to users"
+      },
+      {
+        "id": "link-002",
+        "title": "Menu Management",
+        "url": "/admin/menus",
+        "description": "Manage menu access for roles"
+      },
+      {
+        "id": "link-003",
+        "title": "Role-Menu Mapping",
+        "url": "/admin/role-menu-mapping",
+        "description": "Configure which menus each role can access"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.005Z",
+    "updatedAt": "2025-11-12T15:00:00.005Z"
+  },
+  {
+    "id": "help-1762960000006",
+    "programId": "PROG-ROLE-MGMT",
+    "language": "ko",
+    "title": "역할 관리 도움말",
+    "content": "<p>사용자 역할 및 권한을 관리합니다. 특정 역할을 가진 사용자가 수행할 수 있는 작업과 액세스할 수 있는 페이지를 정의합니다.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "역할 이해하기",
+        "content": "<p><strong>역할이란?</strong> 역할은 사용자가 시스템에서 수행할 수 있는 작업을 정의하는 권한 모음입니다.</p><p><strong>기본 제공 역할:</strong> 시스템에는 기본적으로 관리자, 매니저 및 사용자 역할이 포함됩니다.</p><p><strong>사용자 정의 역할:</strong> 특정 권한 세트로 사용자 정의 역할을 만들 수 있습니다.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "새 역할 만들기",
+        "content": "<p>1. 도구 모음에서 <strong>추가</strong> 버튼을 클릭합니다</p><p>2. 역할 코드 및 이름을 입력합니다(영어 및 한국어)</p><p>3. 역할의 목적을 설명하는 설명을 작성합니다</p><p>4. <strong>저장</strong>을 클릭하여 역할을 생성합니다</p><p>5. 생성 후 역할에 권한을 할당할 수 있습니다</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "권한 할당",
+        "content": "<p>1. 목록에서 역할을 찾아 <strong>편집</strong>을 클릭합니다</p><p>2. <strong>권한</strong> 탭으로 이동합니다</p><p>3. 이 역할이 액세스해야 하는 메뉴 및 작업에 대한 확인란을 선택합니다</p><p>4. 세분화된 권한을 설정합니다: 읽기, 쓰기, 삭제, 내보내기</p><p>5. <strong>저장</strong>을 클릭하여 권한 변경 사항을 적용합니다</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "역할 계층 구조",
+        "content": "<p>역할은 상위 역할에서 권한을 상속할 수 있습니다. 이를 통해 매니저 역할이 기본 사용자 권한을 상속하고 추가 기능을 추가하는 계층 구조를 만들 수 있습니다.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "모범 사례",
+        "content": "<p>- 최소 권한 원칙을 따르십시오: 필요한 권한만 부여</p><p>- 역할 권한을 정기적으로 검토</p><p>- 설명이 포함된 이름을 사용하고 역할 목적을 문서화</p><p>- 사용자에게 할당하기 전에 역할을 테스트</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "기본 제공 역할을 삭제할 수 있나요?",
+        "answer": "아니요, 기본 제공 역할(관리자, 매니저, 사용자)은 삭제할 수 없지만 권한은 수정할 수 있습니다.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "역할을 삭제하면 사용자는 어떻게 되나요?",
+        "answer": "삭제된 역할에 할당된 사용자는 액세스 권한을 잃게 됩니다. 삭제하기 전에 사용자를 다른 역할에 재할당해야 합니다.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "사용자가 여러 역할을 가질 수 있나요?",
+        "answer": "현재 각 사용자에게는 하나의 기본 역할이 할당됩니다. 복잡한 권한이 필요한 경우 필요한 권한을 결합한 사용자 정의 역할을 만드십시오.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "사용자 관리",
+        "url": "/admin/users",
+        "description": "사용자에게 역할 할당"
+      },
+      {
+        "id": "link-002",
+        "title": "메뉴 관리",
+        "url": "/admin/menus",
+        "description": "역할에 대한 메뉴 액세스 관리"
+      },
+      {
+        "id": "link-003",
+        "title": "역할-메뉴 매핑",
+        "url": "/admin/role-menu-mapping",
+        "description": "각 역할이 액세스할 수 있는 메뉴 구성"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.006Z",
+    "updatedAt": "2025-11-12T15:00:00.006Z"
+  },
+  {
+    "id": "help-1762960000007",
+    "programId": "PROG-MENU-MGMT",
+    "language": "en",
+    "title": "Menu Management Help",
+    "content": "<p>Configure and organize the application's navigation menu structure. Create, edit, and arrange menu items that users see in the sidebar.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "Understanding Menu Structure",
+        "content": "<p><strong>Menu Hierarchy:</strong> Menus can have parent-child relationships with up to 3 levels.</p><p><strong>Quick Search:</strong> Find menus by code, name, path, or icon.</p><p><strong>Advanced Search:</strong> Filter by specific criteria like level, parent menu, or associated program.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "Creating a New Menu",
+        "content": "<p>1. Click the <strong>Add</strong> button in the toolbar</p><p>2. Enter menu code (unique identifier)</p><p>3. Provide names in both English and Korean</p><p>4. Set the menu path (URL route)</p><p>5. Choose an icon from the available options</p><p>6. Set the display order number</p><p>7. Select parent menu if creating a submenu</p><p>8. Associate with a program ID if applicable</p><p>9. Click <strong>Save</strong></p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "Organizing Menus",
+        "content": "<p><strong>Menu Order:</strong> Use the order field to control the display sequence. Lower numbers appear first.</p><p><strong>Menu Levels:</strong> Level 0 is top-level, Level 1 is submenu, Level 2 is nested submenu.</p><p><strong>Parent-Child:</strong> Set parentId to create menu hierarchy.</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "Menu Icons",
+        "content": "<p>Choose from 20+ Material-UI icons: Dashboard, People, Settings, Assessment, and more. Icons help users quickly identify menu items.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "Managing Menu Access",
+        "content": "<p>After creating menus, use the Role-Menu Mapping page to control which roles can see each menu item.</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "What happens if I delete a parent menu?",
+        "answer": "Deleting a parent menu will make its child menus orphaned. You should either delete children first or reassign them to a different parent.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "How do I reorder menus?",
+        "answer": "Edit the menu and change the order number. Lower numbers appear first in the navigation.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "Can I use custom icons?",
+        "answer": "Currently, only the predefined Material-UI icons are supported. Contact your administrator if you need additional icons.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "Program Management",
+        "url": "/admin/programs",
+        "description": "Manage programs associated with menus"
+      },
+      {
+        "id": "link-002",
+        "title": "Role-Menu Mapping",
+        "url": "/admin/role-menu-mapping",
+        "description": "Control menu access by role"
+      },
+      {
+        "id": "link-003",
+        "title": "Navigation Preview",
+        "url": "/",
+        "description": "See how menus appear to users"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.007Z",
+    "updatedAt": "2025-11-12T15:00:00.007Z"
+  },
+  {
+    "id": "help-1762960000008",
+    "programId": "PROG-MENU-MGMT",
+    "language": "ko",
+    "title": "메뉴 관리 도움말",
+    "content": "<p>애플리케이션의 탐색 메뉴 구조를 구성하고 정리합니다. 사용자가 사이드바에서 보는 메뉴 항목을 생성, 편집 및 정렬합니다.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "메뉴 구조 이해",
+        "content": "<p><strong>메뉴 계층 구조:</strong> 메뉴는 최대 3개 수준의 부모-자식 관계를 가질 수 있습니다.</p><p><strong>빠른 검색:</strong> 코드, 이름, 경로 또는 아이콘으로 메뉴를 찾습니다.</p><p><strong>고급 검색:</strong> 수준, 상위 메뉴 또는 연결된 프로그램과 같은 특정 기준으로 필터링합니다.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "새 메뉴 만들기",
+        "content": "<p>1. 도구 모음에서 <strong>추가</strong> 버튼을 클릭합니다</p><p>2. 메뉴 코드를 입력합니다(고유 식별자)</p><p>3. 영어 및 한국어로 이름을 제공합니다</p><p>4. 메뉴 경로를 설정합니다(URL 경로)</p><p>5. 사용 가능한 옵션에서 아이콘을 선택합니다</p><p>6. 표시 순서 번호를 설정합니다</p><p>7. 하위 메뉴를 만드는 경우 상위 메뉴를 선택합니다</p><p>8. 해당하는 경우 프로그램 ID와 연결합니다</p><p>9. <strong>저장</strong>을 클릭합니다</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "메뉴 구성",
+        "content": "<p><strong>메뉴 순서:</strong> 순서 필드를 사용하여 표시 순서를 제어합니다. 낮은 숫자가 먼저 나타납니다.</p><p><strong>메뉴 수준:</strong> 수준 0은 최상위, 수준 1은 하위 메뉴, 수준 2는 중첩 하위 메뉴입니다.</p><p><strong>부모-자식:</strong> parentId를 설정하여 메뉴 계층 구조를 만듭니다.</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "메뉴 아이콘",
+        "content": "<p>Dashboard, People, Settings, Assessment 등 20개 이상의 Material-UI 아이콘 중에서 선택합니다. 아이콘은 사용자가 메뉴 항목을 빠르게 식별하는 데 도움이 됩니다.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "메뉴 액세스 관리",
+        "content": "<p>메뉴를 만든 후 역할-메뉴 매핑 페이지를 사용하여 각 메뉴 항목을 볼 수 있는 역할을 제어합니다.</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "상위 메뉴를 삭제하면 어떻게 되나요?",
+        "answer": "상위 메뉴를 삭제하면 하위 메뉴가 고아가 됩니다. 먼저 하위 메뉴를 삭제하거나 다른 상위 메뉴에 재할당해야 합니다.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "메뉴를 재정렬하려면 어떻게 하나요?",
+        "answer": "메뉴를 편집하고 순서 번호를 변경합니다. 낮은 숫자가 탐색에서 먼저 나타납니다.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "사용자 정의 아이콘을 사용할 수 있나요?",
+        "answer": "현재는 미리 정의된 Material-UI 아이콘만 지원됩니다. 추가 아이콘이 필요한 경우 관리자에게 문의하십시오.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "프로그램 관리",
+        "url": "/admin/programs",
+        "description": "메뉴와 연결된 프로그램 관리"
+      },
+      {
+        "id": "link-002",
+        "title": "역할-메뉴 매핑",
+        "url": "/admin/role-menu-mapping",
+        "description": "역할별 메뉴 액세스 제어"
+      },
+      {
+        "id": "link-003",
+        "title": "탐색 미리보기",
+        "url": "/",
+        "description": "사용자에게 메뉴가 표시되는 방식 보기"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.008Z",
+    "updatedAt": "2025-11-12T15:00:00.008Z"
+  },
+  {
+    "id": "help-1762960000009",
+    "programId": "PROG-LOGS",
+    "language": "en",
+    "title": "System Logs Help",
+    "content": "<p>View and analyze system activity logs. Monitor user actions, system events, errors, and security-related activities.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "Understanding Log Types",
+        "content": "<p><strong>User Activity:</strong> Login/logout events, page visits, and user actions.</p><p><strong>System Events:</strong> Application startup, configuration changes, scheduled tasks.</p><p><strong>Error Logs:</strong> Application errors, warnings, and exceptions.</p><p><strong>Security Logs:</strong> Failed login attempts, permission denials, suspicious activities.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "Searching Logs",
+        "content": "<p><strong>Quick Search:</strong> Search by username, action type, or description.</p><p><strong>Time Range:</strong> Filter logs by date range using the date picker.</p><p><strong>Log Level:</strong> Filter by severity: Info, Warning, Error, Critical.</p><p><strong>User Filter:</strong> View logs for specific users.</p><p><strong>Action Filter:</strong> Filter by action types like CREATE, UPDATE, DELETE, LOGIN.</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "Log Details",
+        "content": "<p>Click on any log entry to view detailed information including:</p><p>- Timestamp with milliseconds</p><p>- User who performed the action</p><p>- IP address and browser information</p><p>- Full request/response data</p><p>- Stack trace for errors</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "Exporting Logs",
+        "content": "<p>Export logs to Excel or PDF for analysis or archival purposes. Use filters to export only relevant logs.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "Security Monitoring",
+        "content": "<p>Regularly review security logs for:</p><p>- Multiple failed login attempts</p><p>- Unusual activity patterns</p><p>- Unauthorized access attempts</p><p>- Changes to sensitive data</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "How long are logs retained?",
+        "answer": "Logs are retained for 90 days by default. Contact your administrator to adjust retention policies.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "Can I delete log entries?",
+        "answer": "No, log entries cannot be deleted to maintain audit trail integrity. Old logs are automatically archived based on retention policy.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "What should I do if I see suspicious activity?",
+        "answer": "Document the log entries, take screenshots, and immediately notify your security team or administrator.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "User Management",
+        "url": "/admin/users",
+        "description": "Manage user accounts and access"
       },
       {
         "id": "link-002",
         "title": "Security Settings",
         "url": "/admin/security",
-        "description": "Configure security settings for user accounts"
+        "description": "Configure security policies"
+      },
+      {
+        "id": "link-003",
+        "title": "System Settings",
+        "url": "/admin/settings",
+        "description": "Configure log retention and settings"
       }
     ],
-    "status": "draft",
+    "status": "published",
     "version": 1,
-    "createdAt": "2025-11-09T15:24:59.679Z",
-    "updatedAt": "2025-11-09T15:24:59.679Z"
+    "createdAt": "2025-11-12T15:00:00.009Z",
+    "updatedAt": "2025-11-12T15:00:00.009Z"
+  },
+  {
+    "id": "help-1762960000010",
+    "programId": "PROG-LOGS",
+    "language": "ko",
+    "title": "시스템 로그 도움말",
+    "content": "<p>시스템 활동 로그를 보고 분석합니다. 사용자 작업, 시스템 이벤트, 오류 및 보안 관련 활동을 모니터링합니다.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "로그 유형 이해",
+        "content": "<p><strong>사용자 활동:</strong> 로그인/로그아웃 이벤트, 페이지 방문 및 사용자 작업.</p><p><strong>시스템 이벤트:</strong> 애플리케이션 시작, 구성 변경, 예약된 작업.</p><p><strong>오류 로그:</strong> 애플리케이션 오류, 경고 및 예외.</p><p><strong>보안 로그:</strong> 로그인 실패 시도, 권한 거부, 의심스러운 활동.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "로그 검색",
+        "content": "<p><strong>빠른 검색:</strong> 사용자 이름, 작업 유형 또는 설명으로 검색합니다.</p><p><strong>시간 범위:</strong> 날짜 선택기를 사용하여 날짜 범위별로 로그를 필터링합니다.</p><p><strong>로그 수준:</strong> 심각도별로 필터링: 정보, 경고, 오류, 중요.</p><p><strong>사용자 필터:</strong> 특정 사용자에 대한 로그를 봅니다.</p><p><strong>작업 필터:</strong> CREATE, UPDATE, DELETE, LOGIN과 같은 작업 유형으로 필터링합니다.</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "로그 세부정보",
+        "content": "<p>로그 항목을 클릭하여 다음을 포함한 자세한 정보를 봅니다:</p><p>- 밀리초 단위의 타임스탬프</p><p>- 작업을 수행한 사용자</p><p>- IP 주소 및 브라우저 정보</p><p>- 전체 요청/응답 데이터</p><p>- 오류에 대한 스택 추적</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "로그 내보내기",
+        "content": "<p>분석 또는 보관 목적으로 로그를 Excel 또는 PDF로 내보냅니다. 필터를 사용하여 관련 로그만 내보냅니다.</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "보안 모니터링",
+        "content": "<p>다음에 대한 보안 로그를 정기적으로 검토합니다:</p><p>- 여러 번의 로그인 실패 시도</p><p>- 비정상적인 활동 패턴</p><p>- 무단 액세스 시도</p><p>- 민감한 데이터 변경</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "로그는 얼마나 오래 보관되나요?",
+        "answer": "로그는 기본적으로 90일 동안 보관됩니다. 보관 정책을 조정하려면 관리자에게 문의하십시오.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "로그 항목을 삭제할 수 있나요?",
+        "answer": "아니요, 감사 추적 무결성을 유지하기 위해 로그 항목은 삭제할 수 없습니다. 오래된 로그는 보관 정책에 따라 자동으로 아카이브됩니다.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "의심스러운 활동을 발견하면 어떻게 해야 하나요?",
+        "answer": "로그 항목을 문서화하고 스크린샷을 찍은 다음 즉시 보안 팀 또는 관리자에게 알리십시오.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "사용자 관리",
+        "url": "/admin/users",
+        "description": "사용자 계정 및 액세스 관리"
+      },
+      {
+        "id": "link-002",
+        "title": "보안 설정",
+        "url": "/admin/security",
+        "description": "보안 정책 구성"
+      },
+      {
+        "id": "link-003",
+        "title": "시스템 설정",
+        "url": "/admin/settings",
+        "description": "로그 보관 및 설정 구성"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.010Z",
+    "updatedAt": "2025-11-12T15:00:00.010Z"
+  },
+  {
+    "id": "help-1762960000011",
+    "programId": "PROG-HELP-MGMT",
+    "language": "en",
+    "title": "Help Content Management",
+    "content": "<p>Create and manage help documentation for all application pages. Provide users with comprehensive guides, FAQs, and related resources.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "Understanding Help Structure",
+        "content": "<p><strong>Program-based:</strong> Each help entry is associated with a program ID.</p><p><strong>Bilingual Support:</strong> Create help content in both English and Korean.</p><p><strong>Sections:</strong> Organize help into logical sections with ordering.</p><p><strong>FAQs:</strong> Add frequently asked questions with answers.</p><p><strong>Related Links:</strong> Link to related pages and resources.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "Creating Help Content",
+        "content": "<p>1. Click the <strong>Add</strong> button</p><p>2. Select the program ID this help is for</p><p>3. Choose the language (en or ko)</p><p>4. Enter a descriptive title</p><p>5. Write overview content (supports HTML)</p><p>6. Add sections with titles and detailed content</p><p>7. Add FAQ entries</p><p>8. Add related links to other pages</p><p>9. Set status to 'draft' or 'published'</p><p>10. Click <strong>Save</strong></p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "Organizing Content",
+        "content": "<p><strong>Sections:</strong> Use the order field to control section display sequence.</p><p><strong>HTML Formatting:</strong> Content supports HTML tags for rich formatting.</p><p><strong>Versioning:</strong> Each save increments the version number.</p><p><strong>Status:</strong> Use 'draft' for work in progress, 'published' for live content.</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "Best Practices",
+        "content": "<p>- Write clear, concise instructions</p><p>- Use screenshots and examples</p><p>- Keep language simple and accessible</p><p>- Update help when features change</p><p>- Test all related links</p><p>- Get feedback from actual users</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "Publishing Workflow",
+        "content": "<p>1. Create help content in draft status</p><p>2. Review and test all content</p><p>3. Have another person proofread</p><p>4. Update status to 'published'</p><p>5. Verify it displays correctly on the target page</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "How do I add images to help content?",
+        "answer": "Upload images to the server first, then use HTML <img> tags with the image URL in your content.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "Can I have multiple help entries for one program?",
+        "answer": "Yes, you can have one entry per language (English and Korean) for each program.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "What HTML tags are supported?",
+        "answer": "Common tags like <p>, <strong>, <ul>, <ol>, <li>, <a>, <h1-h6>, <br>, <hr>, and <img> are supported.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "Program Management",
+        "url": "/admin/programs",
+        "description": "View all program IDs"
+      },
+      {
+        "id": "link-002",
+        "title": "Menu Management",
+        "url": "/admin/menus",
+        "description": "See which pages need help content"
+      },
+      {
+        "id": "link-003",
+        "title": "HTML Reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+        "description": "HTML formatting reference"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.011Z",
+    "updatedAt": "2025-11-12T15:00:00.011Z"
+  },
+  {
+    "id": "help-1762960000012",
+    "programId": "PROG-HELP-MGMT",
+    "language": "ko",
+    "title": "도움말 콘텐츠 관리",
+    "content": "<p>모든 애플리케이션 페이지에 대한 도움말 문서를 생성하고 관리합니다. 사용자에게 포괄적인 가이드, FAQ 및 관련 리소스를 제공합니다.</p>",
+    "sections": [
+      {
+        "id": "section-001",
+        "title": "도움말 구조 이해",
+        "content": "<p><strong>프로그램 기반:</strong> 각 도움말 항목은 프로그램 ID와 연결됩니다.</p><p><strong>이중 언어 지원:</strong> 영어와 한국어로 도움말 콘텐츠를 만듭니다.</p><p><strong>섹션:</strong> 순서가 있는 논리적 섹션으로 도움말을 구성합니다.</p><p><strong>FAQ:</strong> 답변과 함께 자주 묻는 질문을 추가합니다.</p><p><strong>관련 링크:</strong> 관련 페이지 및 리소스에 대한 링크.</p>",
+        "order": 1
+      },
+      {
+        "id": "section-002",
+        "title": "도움말 콘텐츠 만들기",
+        "content": "<p>1. <strong>추가</strong> 버튼을 클릭합니다</p><p>2. 도움말이 필요한 프로그램 ID를 선택합니다</p><p>3. 언어를 선택합니다(en 또는 ko)</p><p>4. 설명적인 제목을 입력합니다</p><p>5. 개요 콘텐츠를 작성합니다(HTML 지원)</p><p>6. 제목과 자세한 내용이 포함된 섹션을 추가합니다</p><p>7. FAQ 항목을 추가합니다</p><p>8. 다른 페이지에 대한 관련 링크를 추가합니다</p><p>9. 상태를 '초안' 또는 '게시됨'으로 설정합니다</p><p>10. <strong>저장</strong>을 클릭합니다</p>",
+        "order": 2
+      },
+      {
+        "id": "section-003",
+        "title": "콘텐츠 구성",
+        "content": "<p><strong>섹션:</strong> 순서 필드를 사용하여 섹션 표시 순서를 제어합니다.</p><p><strong>HTML 형식:</strong> 콘텐츠는 풍부한 서식을 위해 HTML 태그를 지원합니다.</p><p><strong>버전 관리:</strong> 각 저장은 버전 번호를 증가시킵니다.</p><p><strong>상태:</strong> 진행 중인 작업에는 '초안'을, 라이브 콘텐츠에는 '게시됨'을 사용합니다.</p>",
+        "order": 3
+      },
+      {
+        "id": "section-004",
+        "title": "모범 사례",
+        "content": "<p>- 명확하고 간결한 지침 작성</p><p>- 스크린샷 및 예제 사용</p><p>- 언어를 간단하고 접근 가능하게 유지</p><p>- 기능이 변경될 때 도움말 업데이트</p><p>- 모든 관련 링크 테스트</p><p>- 실제 사용자로부터 피드백 받기</p>",
+        "order": 4
+      },
+      {
+        "id": "section-005",
+        "title": "게시 워크플로",
+        "content": "<p>1. 초안 상태로 도움말 콘텐츠를 만듭니다</p><p>2. 모든 콘텐츠를 검토하고 테스트합니다</p><p>3. 다른 사람에게 교정을 받습니다</p><p>4. 상태를 '게시됨'으로 업데이트합니다</p><p>5. 대상 페이지에서 올바르게 표시되는지 확인합니다</p>",
+        "order": 5
+      }
+    ],
+    "videos": [],
+    "faqs": [
+      {
+        "id": "faq-001",
+        "question": "도움말 콘텐츠에 이미지를 추가하려면 어떻게 하나요?",
+        "answer": "먼저 서버에 이미지를 업로드한 다음 콘텐츠에서 이미지 URL과 함께 HTML <img> 태그를 사용합니다.",
+        "order": 1
+      },
+      {
+        "id": "faq-002",
+        "question": "하나의 프로그램에 대해 여러 도움말 항목을 가질 수 있나요?",
+        "answer": "예, 각 프로그램에 대해 언어당 하나의 항목(영어 및 한국어)을 가질 수 있습니다.",
+        "order": 2
+      },
+      {
+        "id": "faq-003",
+        "question": "어떤 HTML 태그가 지원되나요?",
+        "answer": "<p>, <strong>, <ul>, <ol>, <li>, <a>, <h1-h6>, <br>, <hr> 및 <img>와 같은 일반적인 태그가 지원됩니다.",
+        "order": 3
+      }
+    ],
+    "relatedLinks": [
+      {
+        "id": "link-001",
+        "title": "프로그램 관리",
+        "url": "/admin/programs",
+        "description": "모든 프로그램 ID 보기"
+      },
+      {
+        "id": "link-002",
+        "title": "메뉴 관리",
+        "url": "/admin/menus",
+        "description": "도움말 콘텐츠가 필요한 페이지 보기"
+      },
+      {
+        "id": "link-003",
+        "title": "HTML 참조",
+        "url": "https://developer.mozilla.org/ko/docs/Web/HTML",
+        "description": "HTML 형식 참조"
+      }
+    ],
+    "status": "published",
+    "version": 1,
+    "createdAt": "2025-11-12T15:00:00.012Z",
+    "updatedAt": "2025-11-12T15:00:00.012Z"
   }
 ]
