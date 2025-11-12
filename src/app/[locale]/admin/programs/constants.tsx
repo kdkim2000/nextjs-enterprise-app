@@ -1,19 +1,23 @@
 'use client';
 
 import { GridColDef } from '@mui/x-data-grid';
-import { IconButton } from '@mui/material';
-import { Edit } from '@mui/icons-material';
-import { PROGRAM_STATUS } from '@/types/program';
+import ActionsCell from '@/components/common/ActionsCell';
+import { Program } from './types';
+
+export const PROGRAM_CATEGORIES = ['admin', 'user', 'report', 'system', 'analytics', 'configuration'];
+export const PROGRAM_TYPES = ['page', 'function', 'api', 'report'] as const;
+export const PROGRAM_STATUS = ['active', 'inactive', 'development'] as const;
 
 export const createColumns = (
   locale: string,
   handleEdit: (id: string | number) => void
 ): GridColDef[] => [
+  { field: 'id', headerName: 'ID', width: 70 },
   { field: 'code', headerName: 'Program Code', width: 150 },
   {
     field: 'name',
     headerName: 'Program Name',
-    width: 180,
+    width: 200,
     valueGetter: (_value, row) => locale === 'ko' ? row.nameKo : row.nameEn
   },
   { field: 'category', headerName: 'Category', width: 120 },
@@ -21,12 +25,12 @@ export const createColumns = (
   {
     field: 'status',
     headerName: 'Status',
-    width: 100,
+    width: 120,
     type: 'singleSelect',
     valueOptions: PROGRAM_STATUS as unknown as string[]
   },
   { field: 'version', headerName: 'Version', width: 100 },
-  { field: 'author', headerName: 'Author', width: 120 },
+  { field: 'author', headerName: 'Author', width: 130 },
   {
     field: 'actions',
     headerName: 'Actions',
@@ -34,13 +38,10 @@ export const createColumns = (
     sortable: false,
     filterable: false,
     renderCell: (params) => (
-      <IconButton
-        size="small"
-        onClick={() => handleEdit(params.row.id)}
-        color="primary"
-      >
-        <Edit fontSize="small" />
-      </IconButton>
+      <ActionsCell
+        onEdit={() => handleEdit(params.row.id)}
+        showMore={false}
+      />
     )
   }
 ];
