@@ -1,5 +1,6 @@
 import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
-import { PROGRAM_CATEGORIES, PROGRAM_TYPES, PROGRAM_STATUS, ProgramSearchCriteria } from '@/types/program';
+import { PROGRAM_CATEGORIES, PROGRAM_TYPES, PROGRAM_STATUS } from './constants';
+import { SearchCriteria } from './types';
 
 export const createFilterFields = (): FilterFieldConfig[] => [
   {
@@ -20,7 +21,7 @@ export const createFilterFields = (): FilterFieldConfig[] => [
     type: 'select',
     options: [
       { value: '', label: 'All Categories' },
-      ...PROGRAM_CATEGORIES.map(cat => ({ value: cat, label: cat }))
+      ...PROGRAM_CATEGORIES.map(cat => ({ value: cat, label: cat.charAt(0).toUpperCase() + cat.slice(1) }))
     ]
   },
   {
@@ -29,7 +30,7 @@ export const createFilterFields = (): FilterFieldConfig[] => [
     type: 'select',
     options: [
       { value: '', label: 'All Types' },
-      ...PROGRAM_TYPES.map(type => ({ value: type, label: type }))
+      ...PROGRAM_TYPES.map(type => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1) }))
     ]
   },
   {
@@ -38,12 +39,12 @@ export const createFilterFields = (): FilterFieldConfig[] => [
     type: 'select',
     options: [
       { value: '', label: 'All Status' },
-      ...PROGRAM_STATUS.map(status => ({ value: status, label: status }))
+      ...PROGRAM_STATUS.map(status => ({ value: status, label: status.charAt(0).toUpperCase() + status.slice(1) }))
     ]
   }
 ];
 
-export const calculateActiveFilterCount = (searchCriteria: ProgramSearchCriteria): number => {
+export const calculateActiveFilterCount = (searchCriteria: SearchCriteria): number => {
   return Object.entries(searchCriteria).filter(([_key, value]) => {
     if (Array.isArray(value)) {
       return value.length > 0;

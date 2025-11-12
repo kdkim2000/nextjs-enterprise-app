@@ -1,24 +1,14 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import {
-  Box,
-  Paper,
-  Alert,
-  IconButton,
-  Tooltip
-} from '@mui/material';
-import { Search, HelpOutline } from '@mui/icons-material';
+import { Box, Paper } from '@mui/material';
+import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import PageHeader from '@/components/common/PageHeader';
-import QuickSearchBar from '@/components/common/QuickSearchBar';
-import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
-import PageContainer from '@/components/common/PageContainer';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import HelpViewer from '@/components/common/HelpViewer';
 import EditDrawer from '@/components/common/EditDrawer';
+import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useUserManagement } from './hooks/useUserManagement';
@@ -97,74 +87,45 @@ export default function UserManagementPage() {
   );
 
   return (
-    <PageContainer>
-      {/* Header - Auto mode: fetches menu info based on current path */}
-      <PageHeader
-        useMenu
-        showBreadcrumb
-        actions={
-          // Show help button: always for admin, only when help exists for regular users
-          (isAdmin || helpExists) ? (
-            <Tooltip title={isAdmin ? "Help (Admin: Click to edit)" : "Help"}>
-              <IconButton
-                onClick={() => setHelpOpen(true)}
-                color="primary"
-                sx={{ ml: 1 }}
-              >
-                <HelpOutline />
-              </IconButton>
-            </Tooltip>
-          ) : null
-        }
-      />
-
-      {/* Error and Success Messages */}
-      {errorMessage && (
-        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }}>
-          {errorMessage}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }}>
-          {successMessage}
-        </Alert>
-      )}
-
-      {/* Quick Search Bar */}
-      <QuickSearchBar
-        searchValue={quickSearch}
-        onSearchChange={setQuickSearch}
-        onSearch={handleQuickSearch}
-        onClear={handleQuickSearchClear}
-        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        placeholder="Search by username, name, or email..."
-        searching={searching}
-        activeFilterCount={activeFilterCount}
-        showAdvancedButton={true}
-      />
-
-      {/* Advanced Filter Panel - Only show when open */}
-      {advancedFilterOpen && (
-        <SearchFilterPanel
-          title={`${t('common.search')} / ${t('common.filter')}`}
-          activeFilterCount={activeFilterCount}
-          onApply={handleAdvancedFilterApply}
-          onClear={handleQuickSearchClear}
-          onClose={handleAdvancedFilterClose}
-          mode="advanced"
-          expanded={true}
-          showHeader={false}
-        >
-          <SearchFilterFields
-            fields={filterFields}
-            values={searchCriteria}
-            onChange={handleSearchChange}
-            onEnter={handleAdvancedFilterApply}
-          />
-        </SearchFilterPanel>
-      )}
-
+    <StandardCrudPageLayout
+      // Page Header
+      useMenu
+      showBreadcrumb
+      // Messages
+      successMessage={successMessage}
+      errorMessage={errorMessage}
+      // Quick Search
+      quickSearch={quickSearch}
+      onQuickSearchChange={setQuickSearch}
+      onQuickSearch={handleQuickSearch}
+      onQuickSearchClear={handleQuickSearchClear}
+      quickSearchPlaceholder="Search by username, name, or email..."
+      searching={searching}
+      // Advanced Filter
+      showAdvancedFilter
+      advancedFilterOpen={advancedFilterOpen}
+      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
+      activeFilterCount={activeFilterCount}
+      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
+      filterContent={
+        <SearchFilterFields
+          fields={filterFields}
+          values={searchCriteria}
+          onChange={handleSearchChange}
+          onEnter={handleAdvancedFilterApply}
+        />
+      }
+      onFilterApply={handleAdvancedFilterApply}
+      onFilterClear={handleQuickSearchClear}
+      onFilterClose={handleAdvancedFilterClose}
+      // Help
+      programId="PROG-USER-LIST"
+      helpOpen={helpOpen}
+      onHelpOpenChange={setHelpOpen}
+      isAdmin={isAdmin}
+      helpExists={helpExists}
+      language={currentLocale}
+    >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         {users.length === 0 && !searching ? (
@@ -228,15 +189,6 @@ export default function UserManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-
-      {/* Help Viewer */}
-      <HelpViewer
-        open={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        programId="PROG-USER-LIST"
-        language={currentLocale}
-        isAdmin={isAdmin}
-      />
-    </PageContainer>
+    </StandardCrudPageLayout>
   );
 }

@@ -1,106 +1,79 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/axios';
-import { ProgramFormData, ProgramSearchCriteria } from '@/types/program';
+import { usePageState } from '@/hooks/usePageState';
+import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { Program, SearchCriteria } from '../types';
 
 interface UseProgramManagementOptions {
   storageKey?: string;
 }
 
-const savePageState = (storageKey: string, state: {
-  searchCriteria: ProgramSearchCriteria;
-  paginationModel: { page: number; pageSize: number };
-  quickSearch: string;
-  programs: ProgramFormData[];
-  rowCount: number;
-}) => {
-  try {
-    sessionStorage.setItem(storageKey, JSON.stringify(state));
-  } catch (error) {
-    console.error('Failed to save page state:', error);
-  }
-};
-
-const loadPageState = (storageKey: string) => {
-  try {
-    const saved = sessionStorage.getItem(storageKey);
-    return saved ? JSON.parse(saved) : null;
-  } catch (error) {
-    console.error('Failed to load page state:', error);
-    return null;
-  }
-};
-
 export const useProgramManagement = (options: UseProgramManagementOptions = {}) => {
   const { storageKey = 'admin-programs-page-state' } = options;
 
-  // Load saved state
-  const savedState = loadPageState(storageKey);
-
-  // States
-  const [programs, setPrograms] = useState<ProgramFormData[]>(savedState?.programs || []);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProgram, setEditingProgram] = useState<ProgramFormData | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
-  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [paginationModel, setPaginationModel] = useState(
-    savedState?.paginationModel || { page: 0, pageSize: 50 }
-  );
-  const [rowCount, setRowCount] = useState(savedState?.rowCount || 0);
-  const [searchCriteria, setSearchCriteria] = useState<ProgramSearchCriteria>(
-    savedState?.searchCriteria || {
+  // Use page state hook
+  const {
+    searchCriteria,
+    setSearchCriteria,
+    paginationModel,
+    setPaginationModel,
+    quickSearch,
+    setQuickSearch,
+    data: programs,
+    setData: setPrograms,
+    rowCount,
+    setRowCount
+  } = usePageState<SearchCriteria, Program>({
+    storageKey,
+    initialCriteria: {
       code: '',
       name: '',
       category: '',
       type: '',
       status: ''
+    },
+    initialPaginationModel: {
+      page: 0,
+      pageSize: 50
     }
-  );
+  });
 
-  // Save state to session storage
-  useEffect(() => {
-    savePageState(storageKey, {
-      searchCriteria,
-      paginationModel,
-      quickSearch,
-      programs,
-      rowCount
-    });
-  }, [searchCriteria, paginationModel, quickSearch, programs, rowCount, storageKey]);
+  // Use auto-hide message hook
+  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
 
-  // Auto-hide success/error messages
-  useEffect(() => {
-    if (successMessage || error) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-        setError(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, error]);
+  // Local states
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpExists, setHelpExists] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Check user role and help content availability on mount
   useEffect(() => {
     const checkHelpAndRole = async () => {
       try {
+        // Check if user is admin
         const userStr = localStorage.getItem('user');
         if (userStr) {
           const user = JSON.parse(userStr);
           setIsAdmin(user.role === 'admin');
         }
 
-        const response = await api.get('/help?pageId=admin-programs&language=en');
-        setHelpExists(!!response.help);
-      } catch {
+        // Check if help content exists for this page
+        try {
+          const response = await api.get('/help?programId=PROG-PROGRAM-LIST&language=en');
+          setHelpExists(!!response.help);
+        } catch {
+          setHelpExists(false);
+        }
+      } catch (error) {
+        console.error('Error checking help and role:', error);
         setHelpExists(false);
       }
     };
@@ -116,14 +89,16 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
   ) => {
     try {
       setSearching(true);
-      setError(null);
 
+      // Build query parameters
       const params = new URLSearchParams();
 
       if (useQuickSearch && quickSearch) {
-        params.append('name', quickSearch);
+        // Quick search: search in code and name
         params.append('code', quickSearch);
+        params.append('name', quickSearch);
       } else {
+        // Advanced search: use specific criteria
         if (searchCriteria.code) params.append('code', searchCriteria.code);
         if (searchCriteria.name) params.append('name', searchCriteria.name);
         if (searchCriteria.category) params.append('category', searchCriteria.category);
@@ -131,7 +106,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         if (searchCriteria.status) params.append('status', searchCriteria.status);
       }
 
-      params.append('page', (page + 1).toString());
+      params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
       const response = await api.get(`/program?${params.toString()}`);
@@ -160,8 +135,8 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         descriptionEn: prog.description.en,
         descriptionKo: prog.description.ko,
         category: prog.category,
-        type: prog.type,
-        status: prog.status,
+        type: prog.type as 'page' | 'function' | 'api' | 'report',
+        status: prog.status as 'active' | 'inactive' | 'development',
         permissions: prog.permissions || [],
         version: prog.metadata?.version || '',
         author: prog.metadata?.author || '',
@@ -178,14 +153,14 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      setError(err.response?.data?.error || 'Failed to load programs');
+      showError(err.response?.data?.error || 'Failed to load programs');
       console.error('Failed to fetch programs:', error);
       setPrograms([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria]);
+  }, [quickSearch, searchCriteria, setPrograms, setRowCount, showError]);
 
   // Program CRUD operations
   const handleAdd = useCallback(() => {
@@ -215,97 +190,40 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     }
   }, [programs]);
 
-  const handleDeleteClick = useCallback((ids: (string | number)[]) => {
-    setSelectedForDelete(ids);
-    setDeleteConfirmOpen(true);
-  }, []);
+  const handleSave = useCallback(async () => {
+    if (!editingProgram) return;
 
-  const handleDeleteCancel = useCallback(() => {
-    setDeleteConfirmOpen(false);
-    setSelectedForDelete([]);
-  }, []);
-
-  const handleDeleteConfirm = useCallback(async () => {
-    try {
-      setDeleteLoading(true);
-      setError(null);
-
-      for (const id of selectedForDelete) {
-        await api.delete(`/program/${id}`);
-      }
-
-      setPrograms(programs.filter((p) => !selectedForDelete.includes(p.id!)));
-
-      const count = selectedForDelete.length;
-      setSuccessMessage(`Successfully deleted ${count} program${count > 1 ? 's' : ''}`);
-
-      setDeleteConfirmOpen(false);
-      setSelectedForDelete([]);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to delete programs');
-      console.error('Failed to delete programs:', err);
-    } finally {
-      setDeleteLoading(false);
-    }
-  }, [selectedForDelete, programs]);
-
-  const handleSave = useCallback(async (programData: ProgramFormData) => {
     try {
       setSaveLoading(true);
-      setError(null);
 
       // Transform data for API
       const apiData = {
-        code: programData.code,
+        code: editingProgram.code,
         name: {
-          en: programData.nameEn,
-          ko: programData.nameKo
+          en: editingProgram.nameEn,
+          ko: editingProgram.nameKo
         },
         description: {
-          en: programData.descriptionEn,
-          ko: programData.descriptionKo
+          en: editingProgram.descriptionEn,
+          ko: editingProgram.descriptionKo
         },
-        category: programData.category,
-        type: programData.type,
-        status: programData.status,
-        permissions: programData.permissions || [],
+        category: editingProgram.category,
+        type: editingProgram.type,
+        status: editingProgram.status,
+        permissions: editingProgram.permissions || [],
         metadata: {
-          version: programData.version,
-          author: programData.author,
-          tags: programData.tags ? programData.tags.split(',').map(t => t.trim()) : []
+          version: editingProgram.version,
+          author: editingProgram.author,
+          tags: editingProgram.tags ? editingProgram.tags.split(',').map(t => t.trim()) : []
         }
       };
 
-      if (programData.id) {
-        // Update existing program
-        const response = await api.put(`/program/${programData.id}`, apiData);
-
-        // Transform response back
-        const transformed = {
-          id: response.program.id,
-          code: response.program.code,
-          nameEn: response.program.name.en,
-          nameKo: response.program.name.ko,
-          descriptionEn: response.program.description.en,
-          descriptionKo: response.program.description.ko,
-          category: response.program.category,
-          type: response.program.type,
-          status: response.program.status,
-          permissions: response.program.permissions || [],
-          version: response.program.metadata?.version || '',
-          author: response.program.metadata?.author || '',
-          tags: response.program.metadata?.tags?.join(', ') || ''
-        };
-
-        setPrograms(programs.map((p) => (p.id === programData.id ? transformed : p)));
-        setSuccessMessage('Program updated successfully');
-      } else {
-        // Create new program
+      if (!editingProgram.id) {
+        // Add new program
         const response = await api.post('/program', apiData);
 
         // Transform response back
-        const transformed = {
+        const transformed: Program = {
           id: response.program.id,
           code: response.program.code,
           nameEn: response.program.name.en,
@@ -322,19 +240,80 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         };
 
         setPrograms([...programs, transformed]);
-        setSuccessMessage('Program created successfully');
+        showSuccess('Program created successfully');
+      } else {
+        // Update existing program
+        const response = await api.put(`/program/${editingProgram.id}`, apiData);
+
+        // Transform response back
+        const transformed: Program = {
+          id: response.program.id,
+          code: response.program.code,
+          nameEn: response.program.name.en,
+          nameKo: response.program.name.ko,
+          descriptionEn: response.program.description.en,
+          descriptionKo: response.program.description.ko,
+          category: response.program.category,
+          type: response.program.type,
+          status: response.program.status,
+          permissions: response.program.permissions || [],
+          version: response.program.metadata?.version || '',
+          author: response.program.metadata?.author || '',
+          tags: response.program.metadata?.tags?.join(', ') || ''
+        };
+
+        setPrograms(programs.map((p) => (p.id === editingProgram.id ? transformed : p)));
+        showSuccess('Program updated successfully');
       }
 
       setDialogOpen(false);
       setEditingProgram(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to save program');
+      showError(error.response?.data?.error || 'Failed to save program');
       console.error('Failed to save program:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [programs]);
+  }, [editingProgram, programs, setPrograms, showSuccess, showError]);
+
+  const handleDeleteClick = useCallback((ids: (string | number)[]) => {
+    setSelectedForDelete(ids);
+    setDeleteConfirmOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    try {
+      setDeleteLoading(true);
+
+      // Delete programs from API
+      for (const id of selectedForDelete) {
+        await api.delete(`/program/${id}`);
+      }
+
+      // Remove from local state
+      setPrograms(programs.filter((program) => !selectedForDelete.includes(program.id!)));
+
+      // Show success message
+      const count = selectedForDelete.length;
+      showSuccess(`Successfully deleted ${count} program${count > 1 ? 's' : ''}`);
+
+      // Close dialog
+      setDeleteConfirmOpen(false);
+      setSelectedForDelete([]);
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      showError(error.response?.data?.error || 'Failed to delete programs');
+      console.error('Failed to delete programs:', err);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }, [selectedForDelete, programs, setPrograms, showSuccess, showError]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteConfirmOpen(false);
+    setSelectedForDelete([]);
+  }, []);
 
   // Search handlers
   const handleRefresh = useCallback(() => {
@@ -342,14 +321,14 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     fetchPrograms(paginationModel.page, paginationModel.pageSize, useQuickSearch);
   }, [fetchPrograms, quickSearch, paginationModel]);
 
-  const handleSearchChange = useCallback((field: keyof ProgramSearchCriteria, value: string | string[]) => {
+  const handleSearchChange = useCallback((field: keyof SearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
-  }, []);
+  }, [setSearchCriteria]);
 
   const handleQuickSearch = useCallback(() => {
     setPaginationModel({ ...paginationModel, page: 0 });
     fetchPrograms(0, paginationModel.pageSize, true);
-  }, [fetchPrograms, paginationModel]);
+  }, [fetchPrograms, paginationModel, setPaginationModel]);
 
   const handleQuickSearchClear = useCallback(() => {
     setQuickSearch('');
@@ -357,12 +336,12 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     setRowCount(0);
     setPaginationModel({ page: 0, pageSize: 50 });
     sessionStorage.removeItem(storageKey);
-  }, [storageKey]);
+  }, [setQuickSearch, setPrograms, setRowCount, setPaginationModel, storageKey]);
 
   const handleAdvancedSearch = useCallback(() => {
     setPaginationModel({ ...paginationModel, page: 0 });
     fetchPrograms(0, paginationModel.pageSize, false);
-  }, [fetchPrograms, paginationModel]);
+  }, [fetchPrograms, paginationModel, setPaginationModel]);
 
   const handleAdvancedSearchClear = useCallback(() => {
     setSearchCriteria({
@@ -373,7 +352,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       status: ''
     });
     sessionStorage.removeItem(storageKey);
-  }, [storageKey]);
+  }, [setSearchCriteria, storageKey]);
 
   const handleAdvancedFilterApply = useCallback(() => {
     setAdvancedFilterOpen(false);
@@ -388,7 +367,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     setPaginationModel(newModel);
     const useQuickSearch = quickSearch.trim() !== '';
     fetchPrograms(newModel.page, newModel.pageSize, useQuickSearch);
-  }, [fetchPrograms, quickSearch]);
+  }, [fetchPrograms, quickSearch, setPaginationModel]);
 
   return {
     // State
@@ -402,7 +381,6 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     searching,
     saveLoading,
     dialogOpen,
-    setDialogOpen,
     editingProgram,
     setEditingProgram,
     advancedFilterOpen,
@@ -415,7 +393,8 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     helpExists,
     isAdmin,
     successMessage,
-    error,
+    errorMessage,
+    showError,
 
     // Handlers
     handleAdd,
@@ -432,6 +411,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     handleAdvancedSearchClear,
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
-    handlePaginationModelChange
+    handlePaginationModelChange,
+    setDialogOpen
   };
 };
