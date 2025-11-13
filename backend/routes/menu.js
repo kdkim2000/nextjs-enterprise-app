@@ -99,12 +99,13 @@ router.get('/by-path', authenticateToken, async (req, res) => {
 });
 
 /**
- * Get all menus (admin only)
+ * Get all menus (admin and manager)
  */
 router.get('/all', authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+    // Allow admin and manager roles to view all menus
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+      return res.status(403).json({ error: 'Admin or manager access required' });
     }
 
     const menus = await readJSON(MENUS_FILE);

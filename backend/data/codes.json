@@ -1,0 +1,788 @@
+[
+  {
+    "id": "code-001",
+    "codeType": "USER_STATUS",
+    "code": "ACTIVE",
+    "name": {
+      "en": "Active",
+      "ko": "활성"
+    },
+    "description": {
+      "en": "User account is active",
+      "ko": "사용자 계정이 활성화됨"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-002",
+    "codeType": "USER_STATUS",
+    "code": "INACTIVE",
+    "name": {
+      "en": "Inactive",
+      "ko": "비활성"
+    },
+    "description": {
+      "en": "User account is inactive",
+      "ko": "사용자 계정이 비활성화됨"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-003",
+    "codeType": "USER_STATUS",
+    "code": "SUSPENDED",
+    "name": {
+      "en": "Suspended",
+      "ko": "정지"
+    },
+    "description": {
+      "en": "User account is suspended",
+      "ko": "사용자 계정이 정지됨"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-004",
+    "codeType": "DEPT_STATUS",
+    "code": "ACTIVE",
+    "name": {
+      "en": "Active",
+      "ko": "활성"
+    },
+    "description": {
+      "en": "Department is active",
+      "ko": "부서가 활성화됨"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-005",
+    "codeType": "DEPT_STATUS",
+    "code": "INACTIVE",
+    "name": {
+      "en": "Inactive",
+      "ko": "비활성"
+    },
+    "description": {
+      "en": "Department is inactive",
+      "ko": "부서가 비활성화됨"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-006",
+    "codeType": "USER_ROLE",
+    "code": "ADMIN",
+    "name": {
+      "en": "Administrator",
+      "ko": "관리자"
+    },
+    "description": {
+      "en": "System administrator role",
+      "ko": "시스템 관리자 역할"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "level": 1,
+      "color": "#FF5722"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-007",
+    "codeType": "USER_ROLE",
+    "code": "MANAGER",
+    "name": {
+      "en": "Manager",
+      "ko": "매니저"
+    },
+    "description": {
+      "en": "Manager role",
+      "ko": "매니저 역할"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "level": 2,
+      "color": "#2196F3"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-008",
+    "codeType": "USER_ROLE",
+    "code": "USER",
+    "name": {
+      "en": "User",
+      "ko": "사용자"
+    },
+    "description": {
+      "en": "Regular user role",
+      "ko": "일반 사용자 역할"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "level": 3,
+      "color": "#4CAF50"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-009",
+    "codeType": "MENU_CATEGORY",
+    "code": "ADMIN",
+    "name": {
+      "en": "Administration",
+      "ko": "관리"
+    },
+    "description": {
+      "en": "Administration menus",
+      "ko": "관리 메뉴"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "icon": "AdminPanelSettings"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-010",
+    "codeType": "MENU_CATEGORY",
+    "code": "SYSTEM",
+    "name": {
+      "en": "System",
+      "ko": "시스템"
+    },
+    "description": {
+      "en": "System menus",
+      "ko": "시스템 메뉴"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "icon": "Settings"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-011",
+    "codeType": "PROGRAM_STATUS",
+    "code": "ACTIVE",
+    "name": {
+      "en": "Active",
+      "ko": "활성"
+    },
+    "description": {
+      "en": "Program is active and available",
+      "ko": "프로그램이 활성화되어 사용 가능함"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#4CAF50"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-012",
+    "codeType": "PROGRAM_STATUS",
+    "code": "INACTIVE",
+    "name": {
+      "en": "Inactive",
+      "ko": "비활성"
+    },
+    "description": {
+      "en": "Program is inactive and not available",
+      "ko": "프로그램이 비활성화되어 사용 불가능함"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#9E9E9E"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-013",
+    "codeType": "PROGRAM_STATUS",
+    "code": "DEVELOPMENT",
+    "name": {
+      "en": "Development",
+      "ko": "개발 중"
+    },
+    "description": {
+      "en": "Program is under development",
+      "ko": "프로그램이 개발 중임"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#FF9800"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-014",
+    "codeType": "PROGRAM_TYPE",
+    "code": "PAGE",
+    "name": {
+      "en": "Page",
+      "ko": "페이지"
+    },
+    "description": {
+      "en": "Web page program",
+      "ko": "웹 페이지 프로그램"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-015",
+    "codeType": "PROGRAM_TYPE",
+    "code": "FUNCTION",
+    "name": {
+      "en": "Function",
+      "ko": "함수"
+    },
+    "description": {
+      "en": "Function program",
+      "ko": "기능 프로그램"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-016",
+    "codeType": "PROGRAM_TYPE",
+    "code": "API",
+    "name": {
+      "en": "API",
+      "ko": "API"
+    },
+    "description": {
+      "en": "API program",
+      "ko": "API 프로그램"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-017",
+    "codeType": "PROGRAM_TYPE",
+    "code": "REPORT",
+    "name": {
+      "en": "Report",
+      "ko": "리포트"
+    },
+    "description": {
+      "en": "Report program",
+      "ko": "리포트 프로그램"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-018",
+    "codeType": "PROGRAM_TYPE",
+    "code": "DEMO",
+    "name": {
+      "en": "Demo",
+      "ko": "데모"
+    },
+    "description": {
+      "en": "Demo program",
+      "ko": "데모 프로그램"
+    },
+    "order": 5,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-019",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "ADMIN",
+    "name": {
+      "en": "Administration",
+      "ko": "관리"
+    },
+    "description": {
+      "en": "Administration programs",
+      "ko": "관리 프로그램"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-020",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "USER",
+    "name": {
+      "en": "User",
+      "ko": "사용자"
+    },
+    "description": {
+      "en": "User-related programs",
+      "ko": "사용자 관련 프로그램"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-021",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "REPORT",
+    "name": {
+      "en": "Report",
+      "ko": "리포트"
+    },
+    "description": {
+      "en": "Report programs",
+      "ko": "리포트 프로그램"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-022",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "SYSTEM",
+    "name": {
+      "en": "System",
+      "ko": "시스템"
+    },
+    "description": {
+      "en": "System programs",
+      "ko": "시스템 프로그램"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-023",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "ANALYTICS",
+    "name": {
+      "en": "Analytics",
+      "ko": "분석"
+    },
+    "description": {
+      "en": "Analytics programs",
+      "ko": "분석 프로그램"
+    },
+    "order": 5,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-024",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "CONFIGURATION",
+    "name": {
+      "en": "Configuration",
+      "ko": "설정"
+    },
+    "description": {
+      "en": "Configuration programs",
+      "ko": "설정 프로그램"
+    },
+    "order": 6,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-025",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "COMPONENT",
+    "name": {
+      "en": "Component",
+      "ko": "컴포넌트"
+    },
+    "description": {
+      "en": "Component programs",
+      "ko": "컴포넌트 프로그램"
+    },
+    "order": 7,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-026",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "DASHBOARD",
+    "name": {
+      "en": "Dashboard",
+      "ko": "대시보드"
+    },
+    "description": {
+      "en": "Dashboard programs",
+      "ko": "대시보드 프로그램"
+    },
+    "order": 8,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-027",
+    "codeType": "PROGRAM_CATEGORY",
+    "code": "DEV",
+    "name": {
+      "en": "Development",
+      "ko": "개발"
+    },
+    "description": {
+      "en": "Development-related programs",
+      "ko": "개발 관련 프로그램"
+    },
+    "order": 9,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-028",
+    "codeType": "HELP_STATUS",
+    "code": "DRAFT",
+    "name": {
+      "en": "Draft",
+      "ko": "초안"
+    },
+    "description": {
+      "en": "Help document is in draft status",
+      "ko": "도움말 문서가 작성 중임"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#FF9800"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-029",
+    "codeType": "HELP_STATUS",
+    "code": "PUBLISHED",
+    "name": {
+      "en": "Published",
+      "ko": "발행됨"
+    },
+    "description": {
+      "en": "Help document is published",
+      "ko": "도움말 문서가 공개됨"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#4CAF50"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-030",
+    "codeType": "PERMISSION_TYPE",
+    "code": "READ",
+    "name": {
+      "en": "Read",
+      "ko": "읽기"
+    },
+    "description": {
+      "en": "Permission to read data",
+      "ko": "데이터 조회 권한"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "default": true
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-031",
+    "codeType": "PERMISSION_TYPE",
+    "code": "WRITE",
+    "name": {
+      "en": "Write",
+      "ko": "쓰기"
+    },
+    "description": {
+      "en": "Permission to create and update data",
+      "ko": "데이터 생성 및 수정 권한"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "default": false
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-032",
+    "codeType": "PERMISSION_TYPE",
+    "code": "DELETE",
+    "name": {
+      "en": "Delete",
+      "ko": "삭제"
+    },
+    "description": {
+      "en": "Permission to delete data",
+      "ko": "데이터 삭제 권한"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "default": false
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-033",
+    "codeType": "PERMISSION_TYPE",
+    "code": "EXPORT",
+    "name": {
+      "en": "Export",
+      "ko": "내보내기"
+    },
+    "description": {
+      "en": "Permission to export data",
+      "ko": "데이터 내보내기 권한"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "default": false
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-034",
+    "codeType": "LANGUAGE",
+    "code": "EN",
+    "name": {
+      "en": "English",
+      "ko": "영어"
+    },
+    "description": {
+      "en": "English language",
+      "ko": "영어"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "locale": "en",
+      "flag": "🇺🇸"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-035",
+    "codeType": "LANGUAGE",
+    "code": "KO",
+    "name": {
+      "en": "Korean",
+      "ko": "한국어"
+    },
+    "description": {
+      "en": "Korean language",
+      "ko": "한국어"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "locale": "ko",
+      "flag": "🇰🇷"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-036",
+    "codeType": "HTTP_METHOD",
+    "code": "GET",
+    "name": {
+      "en": "Get",
+      "ko": "조회"
+    },
+    "description": {
+      "en": "HTTP GET method for retrieving data",
+      "ko": "데이터 조회를 위한 HTTP GET 메서드"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#4CAF50"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-037",
+    "codeType": "HTTP_METHOD",
+    "code": "POST",
+    "name": {
+      "en": "Create",
+      "ko": "생성"
+    },
+    "description": {
+      "en": "HTTP POST method for creating data",
+      "ko": "데이터 생성을 위한 HTTP POST 메서드"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#2196F3"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-038",
+    "codeType": "HTTP_METHOD",
+    "code": "PUT",
+    "name": {
+      "en": "Update",
+      "ko": "수정"
+    },
+    "description": {
+      "en": "HTTP PUT method for updating data",
+      "ko": "데이터 수정을 위한 HTTP PUT 메서드"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#FF9800"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-039",
+    "codeType": "HTTP_METHOD",
+    "code": "DELETE",
+    "name": {
+      "en": "Delete",
+      "ko": "삭제"
+    },
+    "description": {
+      "en": "HTTP DELETE method for deleting data",
+      "ko": "데이터 삭제를 위한 HTTP DELETE 메서드"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "#F44336"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]

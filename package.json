@@ -50,6 +50,7 @@
     "react-dom": "19.2.0",
     "react-dropzone": "^14.2.10",
     "react-hook-form": "^7.53.1",
+    "react-split": "^2.0.14",
     "react-toastify": "^11.0.5",
     "recharts": "^3.3.0",
     "uuid": "^10.0.0",

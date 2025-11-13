@@ -280,6 +280,73 @@
     }
   },
   {
+    "id": "prog-005",
+    "code": "PROG-CODE-MGMT",
+    "name": {
+      "en": "Code Management",
+      "ko": "코드 관리"
+    },
+    "description": {
+      "en": "Manage system codes and code types",
+      "ko": "시스템 코드 및 코드 타입 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View code data",
+          "ko": "코드 데이터 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update codes",
+          "ko": "코드 생성 및 수정"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete codes",
+          "ko": "코드 삭제"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "EXPORT",
+        "name": {
+          "en": "Export",
+          "ko": "내보내기"
+        },
+        "description": {
+          "en": "Export code data",
+          "ko": "코드 데이터 내보내기"
+        },
+        "isDefault": false
+      }
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
     "id": "prog-004",
     "code": "PROG-HELP-MGMT",
     "name": {
