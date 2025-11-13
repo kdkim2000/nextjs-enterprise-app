@@ -108,6 +108,24 @@
     }
   },
   {
+    "id": "menu-020",
+    "code": "code-management",
+    "name": {
+      "en": "Code Management",
+      "ko": "코드 관리"
+    },
+    "path": "/admin/codes",
+    "icon": "Code",
+    "order": 5,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-CODE-MGMT",
+    "description": {
+      "en": "Manage system codes and code types",
+      "ko": "시스템 코드 및 코드 타입 관리"
+    }
+  },
+  {
     "id": "menu-010",
     "code": "help-management",
     "name": {
@@ -116,7 +134,7 @@
     },
     "path": "/admin/help",
     "icon": "Help",
-    "order": 5,
+    "order": 6,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-HELP-MGMT",

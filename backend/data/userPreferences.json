@@ -9,16 +9,16 @@
       "menu-008"
     ],
     "recentMenus": [
+      "menu-020",
+      "menu-001",
+      "menu-009",
+      "menu-019",
+      "menu-003",
+      "menu-004",
+      "menu-007",
       "menu-018",
       "menu-017",
-      "menu-008",
-      "menu-003",
-      "menu-010",
-      "menu-013",
-      "menu-009",
-      "menu-004",
-      "menu-014",
-      "menu-001"
+      "menu-008"
     ],
     "language": "ko",
     "theme": "light",
@@ -26,7 +26,7 @@
     "emailNotifications": true,
     "systemNotifications": true,
     "sessionTimeout": 30,
-    "updatedAt": "2025-11-12T14:06:39.788Z"
+    "updatedAt": "2025-11-13T19:01:38.224Z"
   },
   {
     "userId": "user-002",

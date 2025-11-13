@@ -23,12 +23,13 @@ export interface StandardCrudPageLayoutProps {
   infoMessage?: string | null;
 
   // Quick Search
-  quickSearch: string;
-  onQuickSearchChange: (value: string) => void;
-  onQuickSearch: () => void;
-  onQuickSearchClear: () => void;
+  quickSearch?: string;
+  onQuickSearchChange?: (value: string) => void;
+  onQuickSearch?: () => void;
+  onQuickSearchClear?: () => void;
   quickSearchPlaceholder?: string;
   searching?: boolean;
+  showQuickSearch?: boolean;
 
   // Advanced Filter
   showAdvancedFilter?: boolean;
@@ -111,12 +112,13 @@ export default function StandardCrudPageLayout({
   infoMessage,
 
   // Quick Search
-  quickSearch,
+  quickSearch = '',
   onQuickSearchChange,
   onQuickSearch,
   onQuickSearchClear,
   quickSearchPlaceholder = 'Search...',
   searching = false,
+  showQuickSearch = true,
 
   // Advanced Filter
   showAdvancedFilter = true,
@@ -171,17 +173,19 @@ export default function StandardCrudPageLayout({
       />
 
       {/* Quick Search Bar */}
-      <QuickSearchBar
-        searchValue={quickSearch}
-        onSearchChange={onQuickSearchChange}
-        onSearch={onQuickSearch}
-        onClear={onQuickSearchClear}
-        onAdvancedFilterClick={onAdvancedFilterClick}
-        placeholder={quickSearchPlaceholder}
-        searching={searching}
-        activeFilterCount={activeFilterCount}
-        showAdvancedButton={showAdvancedFilter}
-      />
+      {showQuickSearch && onQuickSearchChange && onQuickSearch && onQuickSearchClear && (
+        <QuickSearchBar
+          searchValue={quickSearch}
+          onSearchChange={onQuickSearchChange}
+          onSearch={onQuickSearch}
+          onClear={onQuickSearchClear}
+          onAdvancedFilterClick={onAdvancedFilterClick}
+          placeholder={quickSearchPlaceholder}
+          searching={searching}
+          activeFilterCount={activeFilterCount}
+          showAdvancedButton={showAdvancedFilter}
+        />
+      )}
 
       {/* Advanced Filter Panel */}
       {showAdvancedFilter && advancedFilterOpen && filterContent && (

@@ -19,6 +19,8 @@ const roleMenuMappingRoutes = require('./routes/roleMenuMapping');
 const programRoutes = require('./routes/program');
 const helpRoutes = require('./routes/help');
 const departmentRoutes = require('./routes/department');
+const codeRoutes = require('./routes/code');
+const codeTypeRoutes = require('./routes/codeType');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -63,6 +65,8 @@ app.use('/api/role-menu-mapping', roleMenuMappingRoutes);
 app.use('/api/program', programRoutes);
 app.use('/api/help', helpRoutes);
 app.use('/api/department', departmentRoutes);
+app.use('/api/code', codeRoutes);
+app.use('/api/code-type', codeTypeRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

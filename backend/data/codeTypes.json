@@ -1,0 +1,206 @@
+[
+  {
+    "id": "codetype-001",
+    "code": "USER_STATUS",
+    "name": {
+      "en": "User Status",
+      "ko": "사용자 상태"
+    },
+    "description": {
+      "en": "Status codes for user accounts",
+      "ko": "사용자 계정 상태 코드"
+    },
+    "order": 1,
+    "status": "active",
+    "category": "user",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-002",
+    "code": "DEPT_STATUS",
+    "name": {
+      "en": "Department Status",
+      "ko": "부서 상태"
+    },
+    "description": {
+      "en": "Status codes for departments",
+      "ko": "부서 상태 코드"
+    },
+    "order": 2,
+    "status": "active",
+    "category": "organization",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-003",
+    "code": "USER_ROLE",
+    "name": {
+      "en": "User Role",
+      "ko": "사용자 역할"
+    },
+    "description": {
+      "en": "User role types",
+      "ko": "사용자 역할 타입"
+    },
+    "order": 3,
+    "status": "active",
+    "category": "user",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-004",
+    "code": "MENU_CATEGORY",
+    "name": {
+      "en": "Menu Category",
+      "ko": "메뉴 카테고리"
+    },
+    "description": {
+      "en": "Menu category types",
+      "ko": "메뉴 카테고리 타입"
+    },
+    "order": 4,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-005",
+    "code": "PRIORITY",
+    "name": {
+      "en": "Priority Level",
+      "ko": "우선순위"
+    },
+    "description": {
+      "en": "Priority level codes",
+      "ko": "우선순위 레벨 코드"
+    },
+    "order": 5,
+    "status": "active",
+    "category": "common",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-006",
+    "code": "PROGRAM_STATUS",
+    "name": {
+      "en": "Program Status",
+      "ko": "프로그램 상태"
+    },
+    "description": {
+      "en": "Status codes for programs",
+      "ko": "프로그램 상태 코드"
+    },
+    "order": 6,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-007",
+    "code": "PROGRAM_TYPE",
+    "name": {
+      "en": "Program Type",
+      "ko": "프로그램 유형"
+    },
+    "description": {
+      "en": "Program type classifications",
+      "ko": "프로그램 유형 분류"
+    },
+    "order": 7,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-008",
+    "code": "PROGRAM_CATEGORY",
+    "name": {
+      "en": "Program Category",
+      "ko": "프로그램 카테고리"
+    },
+    "description": {
+      "en": "Program category classifications",
+      "ko": "프로그램 카테고리 분류"
+    },
+    "order": 8,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-009",
+    "code": "HELP_STATUS",
+    "name": {
+      "en": "Help Document Status",
+      "ko": "도움말 문서 상태"
+    },
+    "description": {
+      "en": "Status codes for help documents",
+      "ko": "도움말 문서 상태 코드"
+    },
+    "order": 9,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-010",
+    "code": "PERMISSION_TYPE",
+    "name": {
+      "en": "Permission Type",
+      "ko": "권한 유형"
+    },
+    "description": {
+      "en": "Permission type codes",
+      "ko": "권한 유형 코드"
+    },
+    "order": 10,
+    "status": "active",
+    "category": "security",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-011",
+    "code": "LANGUAGE",
+    "name": {
+      "en": "Language",
+      "ko": "언어"
+    },
+    "description": {
+      "en": "Supported language codes",
+      "ko": "지원 언어 코드"
+    },
+    "order": 11,
+    "status": "active",
+    "category": "common",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-012",
+    "code": "HTTP_METHOD",
+    "name": {
+      "en": "HTTP Method",
+      "ko": "HTTP 메서드"
+    },
+    "description": {
+      "en": "HTTP request method types",
+      "ko": "HTTP 요청 메서드 타입"
+    },
+    "order": 12,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]
