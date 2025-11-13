@@ -5,6 +5,7 @@ export interface User {
   email: string;
   role: 'admin' | 'manager' | 'user';
   department: string;
+  avatarUrl?: string;
 }
 
 export interface LoginRequest {

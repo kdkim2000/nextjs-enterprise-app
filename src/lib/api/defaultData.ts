@@ -214,6 +214,8 @@ export const defaultUserPreferences = [
   },
 ];
 
+ 
 export const defaultMfaCodes: any[] = [];
 
+ 
 export const defaultLogs: any[] = [];

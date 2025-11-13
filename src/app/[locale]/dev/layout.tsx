@@ -1,6 +1,6 @@
 'use client';
 
-import { Box } from '@mui/material';
+import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 
 export default function DevLayout({
   children
@@ -8,8 +8,8 @@ export default function DevLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <AuthenticatedLayout>
       {children}
-    </Box>
+    </AuthenticatedLayout>
   );
 }

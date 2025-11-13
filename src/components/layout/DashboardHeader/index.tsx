@@ -26,6 +26,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale, useI18n } from '@/lib/i18n/client';
+import { getAvatarUrl } from '@/lib/config';
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -126,6 +127,8 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           }}
         >
           <Avatar
+            src={getAvatarUrl(user?.avatarUrl)}
+            alt={user?.name}
             sx={{
               width: 32,
               height: 32,
@@ -134,7 +137,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               fontWeight: 600
             }}
           >
-            {getUserInitials()}
+            {!user?.avatarUrl && getUserInitials()}
           </Avatar>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
             {user?.name}

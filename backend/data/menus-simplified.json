@@ -1,0 +1,272 @@
+[
+  {
+    "id": "menu-001",
+    "code": "dashboard",
+    "name": {
+      "en": "Dashboard",
+      "ko": "대시보드"
+    },
+    "path": "/dashboard",
+    "icon": "Dashboard",
+    "order": 1,
+    "parentId": null,
+    "level": 1,
+    "programId": "PROG-DASHBOARD",
+    "description": {
+      "en": "Main dashboard overview",
+      "ko": "메인 대시보드 개요"
+    }
+  },
+  {
+    "id": "menu-002",
+    "code": "admin",
+    "name": {
+      "en": "Administration",
+      "ko": "관리자"
+    },
+    "path": "/admin",
+    "icon": "AdminPanelSettings",
+    "order": 2,
+    "parentId": null,
+    "level": 1,
+    "programId": null,
+    "description": {
+      "en": "Administration and system management",
+      "ko": "관리자 및 시스템 관리"
+    }
+  },
+  {
+    "id": "menu-003",
+    "code": "user-management",
+    "name": {
+      "en": "User Management",
+      "ko": "사용자 관리"
+    },
+    "path": "/admin/users",
+    "icon": "People",
+    "order": 1,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-USER-LIST",
+    "description": {
+      "en": "View and manage users",
+      "ko": "사용자 조회 및 관리"
+    }
+  },
+  {
+    "id": "menu-004",
+    "code": "menu-management",
+    "name": {
+      "en": "Menu Management",
+      "ko": "메뉴 관리"
+    },
+    "path": "/admin/menus",
+    "icon": "Menu",
+    "order": 2,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-MENU-MGMT",
+    "description": {
+      "en": "Manage application menu structure and permissions",
+      "ko": "애플리케이션 메뉴 구조 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-009",
+    "code": "role-management",
+    "name": {
+      "en": "Role Management",
+      "ko": "역할 관리"
+    },
+    "path": "/admin/roles",
+    "icon": "Security",
+    "order": 3,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MGMT",
+    "description": {
+      "en": "Manage user roles and permissions",
+      "ko": "사용자 역할 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-010",
+    "code": "help-management",
+    "name": {
+      "en": "Help Management",
+      "ko": "도움말 관리"
+    },
+    "path": "/admin/help",
+    "icon": "Help",
+    "order": 4,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-HELP-MGMT",
+    "description": {
+      "en": "Manage help content for all pages",
+      "ko": "모든 페이지의 도움말 컨텐츠 관리"
+    }
+  },
+  {
+    "id": "menu-011",
+    "code": "user-role-mapping",
+    "name": {
+      "en": "User-Role Mapping",
+      "ko": "사용자-역할 매핑"
+    },
+    "path": "/admin/user-role-mapping",
+    "icon": "Link",
+    "order": 5,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-USER-ROLE-MAP",
+    "description": {
+      "en": "Manage user-role assignments",
+      "ko": "사용자-역할 할당 관리"
+    }
+  },
+  {
+    "id": "menu-012",
+    "code": "role-menu-mapping",
+    "name": {
+      "en": "Role-Menu Mapping",
+      "ko": "역할-메뉴 매핑"
+    },
+    "path": "/admin/role-menu-mapping",
+    "icon": "AccountTree",
+    "order": 6,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MENU-MAP",
+    "description": {
+      "en": "Manage role-menu permissions",
+      "ko": "역할-메뉴 권한 관리"
+    }
+  },
+  {
+    "id": "menu-013",
+    "code": "program-management",
+    "name": {
+      "en": "Program Management",
+      "ko": "프로그램 관리"
+    },
+    "path": "/admin/programs",
+    "icon": "Code",
+    "order": 7,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-PROGRAM-MGMT",
+    "description": {
+      "en": "Manage application programs and permissions",
+      "ko": "애플리케이션 프로그램 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-014",
+    "code": "logs",
+    "name": {
+      "en": "System Logs",
+      "ko": "시스템 로그"
+    },
+    "path": "/admin/logs",
+    "icon": "Description",
+    "order": 8,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-LOGS",
+    "description": {
+      "en": "View and analyze system logs",
+      "ko": "시스템 로그 조회 및 분석"
+    }
+  },
+  {
+    "id": "menu-005",
+    "code": "reports",
+    "name": {
+      "en": "Reports",
+      "ko": "보고서"
+    },
+    "path": "/reports",
+    "icon": "Assessment",
+    "order": 3,
+    "parentId": null,
+    "level": 1,
+    "programId": null,
+    "description": {
+      "en": "Reporting module",
+      "ko": "보고서 모듈"
+    }
+  },
+  {
+    "id": "menu-006",
+    "code": "sales-report",
+    "name": {
+      "en": "Sales Report",
+      "ko": "판매 보고서"
+    },
+    "path": "/reports/sales-report",
+    "icon": "TrendingUp",
+    "order": 1,
+    "parentId": "menu-005",
+    "level": 2,
+    "programId": "PROG-SALES-RPT",
+    "description": {
+      "en": "Sales analysis and reporting",
+      "ko": "판매 분석 및 보고서"
+    }
+  },
+  {
+    "id": "menu-007",
+    "code": "settings",
+    "name": {
+      "en": "Settings",
+      "ko": "설정"
+    },
+    "path": "/dashboard/settings",
+    "icon": "Settings",
+    "order": 4,
+    "parentId": null,
+    "level": 1,
+    "programId": "PROG-SETTINGS",
+    "description": {
+      "en": "Application settings",
+      "ko": "애플리케이션 설정"
+    }
+  },
+  {
+    "id": "menu-016",
+    "code": "dev-support",
+    "name": {
+      "en": "Dev Support",
+      "ko": "개발지원"
+    },
+    "path": "/dev",
+    "icon": "Code",
+    "order": 5,
+    "parentId": null,
+    "level": 1,
+    "programId": null,
+    "description": {
+      "en": "Development support and tools",
+      "ko": "개발 지원 및 도구"
+    }
+  },
+  {
+    "id": "menu-008",
+    "code": "components",
+    "name": {
+      "en": "Component Library",
+      "ko": "컴포넌트 라이브러리"
+    },
+    "path": "/dev/components",
+    "icon": "Widgets",
+    "order": 1,
+    "parentId": "menu-016",
+    "level": 2,
+    "programId": "PROG-COMPONENTS",
+    "description": {
+      "en": "Browse all reusable UI components with examples and documentation",
+      "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색"
+    }
+  }
+]

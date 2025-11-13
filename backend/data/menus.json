@@ -54,6 +54,24 @@
     }
   },
   {
+    "id": "menu-019",
+    "code": "department-management",
+    "name": {
+      "en": "Department Management",
+      "ko": "부서 관리"
+    },
+    "path": "/admin/departments",
+    "icon": "AccountTree",
+    "order": 2,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-DEPT-MGMT",
+    "description": {
+      "en": "Manage organizational departments and structure",
+      "ko": "조직 부서 및 구조 관리"
+    }
+  },
+  {
     "id": "menu-004",
     "code": "menu-management",
     "name": {
@@ -62,13 +80,121 @@
     },
     "path": "/admin/menus",
     "icon": "Menu",
-    "order": 2,
+    "order": 3,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-MENU-MGMT",
     "description": {
       "en": "Manage application menu structure and permissions",
       "ko": "애플리케이션 메뉴 구조 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-009",
+    "code": "role-management",
+    "name": {
+      "en": "Role Management",
+      "ko": "역할 관리"
+    },
+    "path": "/admin/roles",
+    "icon": "Security",
+    "order": 4,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MGMT",
+    "description": {
+      "en": "Manage user roles and permissions",
+      "ko": "사용자 역할 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-010",
+    "code": "help-management",
+    "name": {
+      "en": "Help Management",
+      "ko": "도움말 관리"
+    },
+    "path": "/admin/help",
+    "icon": "Help",
+    "order": 5,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-HELP-MGMT",
+    "description": {
+      "en": "Manage help content for all pages",
+      "ko": "모든 페이지의 도움말 컨텐츠 관리"
+    }
+  },
+  {
+    "id": "menu-011",
+    "code": "user-role-mapping",
+    "name": {
+      "en": "User-Role Mapping",
+      "ko": "사용자-역할 매핑"
+    },
+    "path": "/admin/user-role-mapping",
+    "icon": "Link",
+    "order": 6,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-USER-ROLE-MAP",
+    "description": {
+      "en": "Manage user-role assignments",
+      "ko": "사용자-역할 할당 관리"
+    }
+  },
+  {
+    "id": "menu-012",
+    "code": "role-menu-mapping",
+    "name": {
+      "en": "Role-Menu Mapping",
+      "ko": "역할-메뉴 매핑"
+    },
+    "path": "/admin/role-menu-mapping",
+    "icon": "Link",
+    "order": 7,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-ROLE-MENU-MAP",
+    "description": {
+      "en": "Manage role-menu permissions",
+      "ko": "역할-메뉴 권한 관리"
+    }
+  },
+  {
+    "id": "menu-013",
+    "code": "program-management",
+    "name": {
+      "en": "Program Management",
+      "ko": "프로그램 관리"
+    },
+    "path": "/admin/programs",
+    "icon": "Code",
+    "order": 8,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-PROGRAM-MGMT",
+    "description": {
+      "en": "Manage application programs and permissions",
+      "ko": "애플리케이션 프로그램 및 권한 관리"
+    }
+  },
+  {
+    "id": "menu-014",
+    "code": "logs",
+    "name": {
+      "en": "System Logs",
+      "ko": "시스템 로그"
+    },
+    "path": "/admin/logs",
+    "icon": "Description",
+    "order": 9,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-LOGS",
+    "description": {
+      "en": "View and analyze system logs",
+      "ko": "시스템 로그 조회 및 분석"
     }
   },
   {
@@ -126,21 +252,75 @@
     }
   },
   {
-    "id": "menu-008",
-    "code": "components",
+    "id": "menu-016",
+    "code": "dev-support",
     "name": {
-      "en": "Components",
-      "ko": "컴포넌트"
+      "en": "Dev Support",
+      "ko": "개발지원"
     },
-    "path": "/dev/components",
-    "icon": "Widgets",
+    "path": "/dev",
+    "icon": "Code",
     "order": 5,
     "parentId": null,
     "level": 1,
+    "programId": null,
+    "description": {
+      "en": "Development support and tools",
+      "ko": "개발 지원 및 도구"
+    }
+  },
+  {
+    "id": "menu-008",
+    "code": "components",
+    "name": {
+      "en": "Component Library",
+      "ko": "컴포넌트 라이브러리"
+    },
+    "path": "/dev/components",
+    "icon": "Widgets",
+    "order": 1,
+    "parentId": "menu-016",
+    "level": 2,
     "programId": "PROG-COMPONENTS",
     "description": {
-      "en": "Component showcase and demos",
-      "ko": "컴포넌트 쇼케이스 및 데모"
+      "en": "Browse all reusable UI components with examples and documentation",
+      "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색"
+    }
+  },
+  {
+    "id": "menu-017",
+    "code": "theme-demo",
+    "name": {
+      "en": "Theme System Demo",
+      "ko": "테마 시스템 데모"
+    },
+    "path": "/dev/theme-demo",
+    "icon": "Palette",
+    "order": 2,
+    "parentId": "menu-016",
+    "level": 2,
+    "programId": "PROG-THEME-DEMO",
+    "description": {
+      "en": "Comprehensive demonstration of MUI theme system with custom colors and styles",
+      "ko": "커스텀 색상 및 스타일이 적용된 MUI 테마 시스템의 종합 데모"
+    }
+  },
+  {
+    "id": "menu-018",
+    "code": "react-study",
+    "name": {
+      "en": "React Study Group",
+      "ko": "React 연구회"
+    },
+    "path": "/dev/react-study",
+    "icon": "School",
+    "order": 3,
+    "parentId": "menu-016",
+    "level": 2,
+    "programId": "PROG-REACT-STUDY",
+    "description": {
+      "en": "React learning materials and study resources",
+      "ko": "React 학습 교재 및 연구 자료"
     }
   }
 ]

@@ -58,6 +58,7 @@ export function useAutoLogout(options: UseAutoLogoutOptions = {}) {
     timeoutRef.current = setTimeout(() => {
       handleAutoLogout();
     }, timeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, timeout, warningTime, onWarning]);
 
   const handleAutoLogout = useCallback(async () => {

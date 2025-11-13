@@ -1,0 +1,92 @@
+{
+  "roleMenuMappings": [
+    {
+      "id": "rmm-001",
+      "roleId": "role-001",
+      "menuId": "menu-001",
+      "canView": true,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-002",
+      "roleId": "role-001",
+      "menuId": "menu-002",
+      "canView": true,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-003",
+      "roleId": "role-001",
+      "menuId": "menu-003",
+      "canView": true,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-004",
+      "roleId": "role-001",
+      "menuId": "menu-004",
+      "canView": true,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-005",
+      "roleId": "role-002",
+      "menuId": "menu-001",
+      "canView": true,
+      "canCreate": false,
+      "canUpdate": false,
+      "canDelete": false,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-006",
+      "roleId": "role-002",
+      "menuId": "menu-003",
+      "canView": true,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": false,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-007",
+      "roleId": "role-003",
+      "menuId": "menu-001",
+      "canView": true,
+      "canCreate": false,
+      "canUpdate": false,
+      "canDelete": false,
+      "createdBy": "system",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "rmm-014",
+      "roleId": "role-001",
+      "menuId": "menu-014",
+      "canView": true,
+      "canCreate": false,
+      "canUpdate": false,
+      "canDelete": false,
+      "createdBy": "system",
+      "createdAt": "2025-11-08T22:40:30.161Z"
+    }
+  ]
+}

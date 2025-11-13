@@ -3,23 +3,30 @@
     "userId": "user-001",
     "favoriteMenus": [
       "menu-001",
-      "menu-003",
       "menu-009",
-      "menu-004",
-      "menu-007",
       "menu-005",
+      "menu-003",
       "menu-008"
     ],
     "recentMenus": [
+      "menu-018",
+      "menu-017",
+      "menu-008",
       "menu-003",
+      "menu-010",
+      "menu-013",
+      "menu-009",
       "menu-004",
-      "menu-001",
-      "menu-002",
-      "menu-007"
+      "menu-014",
+      "menu-001"
     ],
-    "language": "en",
+    "language": "ko",
     "theme": "light",
-    "updatedAt": "2025-11-05T21:30:02.368Z"
+    "rowsPerPage": 10,
+    "emailNotifications": true,
+    "systemNotifications": true,
+    "sessionTimeout": 30,
+    "updatedAt": "2025-11-12T14:06:39.788Z"
   },
   {
     "userId": "user-002",
@@ -30,6 +37,10 @@
     "recentMenus": [],
     "language": "ko",
     "theme": "light",
+    "rowsPerPage": 10,
+    "emailNotifications": true,
+    "systemNotifications": true,
+    "sessionTimeout": 30,
     "updatedAt": "2024-01-15T00:00:00.000Z"
   },
   {
@@ -41,6 +52,10 @@
     "recentMenus": [],
     "language": "en",
     "theme": "light",
+    "rowsPerPage": 10,
+    "emailNotifications": true,
+    "systemNotifications": true,
+    "sessionTimeout": 30,
     "updatedAt": "2024-02-01T00:00:00.000Z"
   }
 ]

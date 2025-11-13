@@ -1,0 +1,207 @@
+'use client';
+
+import React from 'react';
+import {
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
+} from '@mui/material';
+
+export interface DepartmentFormData {
+  id?: string;
+  code: string;
+  nameEn: string;
+  nameKo: string;
+  descriptionEn: string;
+  descriptionKo: string;
+  parentId: string;
+  managerId: string;
+  status: 'active' | 'inactive';
+  email: string;
+  phone: string;
+  location: string;
+  order: number;
+}
+
+export interface DepartmentFormFieldsProps {
+  department: DepartmentFormData | null;
+  onChange: (department: DepartmentFormData) => void;
+  onError?: (error: string) => void;
+  departments?: Array<{ id: string; name: { en: string; ko: string } }>;
+  users?: Array<{ id: string; name: string }>;
+  locale?: string;
+  labels?: {
+    code?: string;
+    nameEn?: string;
+    nameKo?: string;
+    descriptionEn?: string;
+    descriptionKo?: string;
+    parentDepartment?: string;
+    manager?: string;
+    status?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    order?: string;
+    none?: string;
+  };
+}
+
+export default function DepartmentFormFields({
+  department,
+  onChange,
+  departments = [],
+  users = [],
+  locale = 'en',
+  labels = {}
+}: DepartmentFormFieldsProps) {
+  if (!department) return null;
+
+  const handleChange = (field: keyof DepartmentFormData, value: string | number) => {
+    onChange({ ...department, [field]: value });
+  };
+
+  // Filter departments to show only top-level (level 0) as parent options
+  const topLevelDepartments = departments.filter((d: any) => d.level === 0);
+
+  return (
+    <>
+      {/* Code */}
+      <TextField
+        label={labels.code || 'Code'}
+        fullWidth
+        required
+        value={department.code || ''}
+        onChange={(e) => handleChange('code', e.target.value)}
+        disabled={!!department.id}
+        helperText={department.id ? 'Code cannot be changed' : ''}
+      />
+
+      {/* Name (English) */}
+      <TextField
+        label={labels.nameEn || 'Name (English)'}
+        fullWidth
+        required
+        value={department.nameEn || ''}
+        onChange={(e) => handleChange('nameEn', e.target.value)}
+      />
+
+      {/* Name (Korean) */}
+      <TextField
+        label={labels.nameKo || 'Name (Korean)'}
+        fullWidth
+        required
+        value={department.nameKo || ''}
+        onChange={(e) => handleChange('nameKo', e.target.value)}
+      />
+
+      {/* Description (English) */}
+      <TextField
+        label={labels.descriptionEn || 'Description (English)'}
+        fullWidth
+        multiline
+        rows={2}
+        value={department.descriptionEn || ''}
+        onChange={(e) => handleChange('descriptionEn', e.target.value)}
+      />
+
+      {/* Description (Korean) */}
+      <TextField
+        label={labels.descriptionKo || 'Description (Korean)'}
+        fullWidth
+        multiline
+        rows={2}
+        value={department.descriptionKo || ''}
+        onChange={(e) => handleChange('descriptionKo', e.target.value)}
+      />
+
+      {/* Parent Department */}
+      <FormControl fullWidth>
+        <InputLabel>{labels.parentDepartment || 'Parent Department'}</InputLabel>
+        <Select
+          value={department.parentId || ''}
+          label={labels.parentDepartment || 'Parent Department'}
+          onChange={(e) => handleChange('parentId', e.target.value)}
+        >
+          <MenuItem value="">
+            <em>{labels.none || 'None'}</em>
+          </MenuItem>
+          {topLevelDepartments.map((dept: any) => (
+            <MenuItem key={dept.id} value={dept.id}>
+              {locale === 'ko' ? dept.name?.ko : dept.name?.en}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Manager */}
+      <FormControl fullWidth>
+        <InputLabel>{labels.manager || 'Manager'}</InputLabel>
+        <Select
+          value={department.managerId || ''}
+          label={labels.manager || 'Manager'}
+          onChange={(e) => handleChange('managerId', e.target.value)}
+        >
+          <MenuItem value="">
+            <em>{labels.none || 'None'}</em>
+          </MenuItem>
+          {users.map((user: any) => (
+            <MenuItem key={user.id} value={user.id}>
+              {user.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Status */}
+      <FormControl fullWidth>
+        <InputLabel>{labels.status || 'Status'}</InputLabel>
+        <Select
+          value={department.status || 'active'}
+          label={labels.status || 'Status'}
+          onChange={(e) => handleChange('status', e.target.value as 'active' | 'inactive')}
+        >
+          <MenuItem value="active">Active</MenuItem>
+          <MenuItem value="inactive">Inactive</MenuItem>
+        </Select>
+      </FormControl>
+
+      {/* Email */}
+      <TextField
+        label={labels.email || 'Email'}
+        type="email"
+        fullWidth
+        value={department.email || ''}
+        onChange={(e) => handleChange('email', e.target.value)}
+      />
+
+      {/* Phone */}
+      <TextField
+        label={labels.phone || 'Phone'}
+        fullWidth
+        value={department.phone || ''}
+        onChange={(e) => handleChange('phone', e.target.value)}
+      />
+
+      {/* Location */}
+      <TextField
+        label={labels.location || 'Location'}
+        fullWidth
+        value={department.location || ''}
+        onChange={(e) => handleChange('location', e.target.value)}
+      />
+
+      {/* Order */}
+      <TextField
+        label={labels.order || 'Display Order'}
+        type="number"
+        fullWidth
+        value={department.order || 1}
+        onChange={(e) => handleChange('order', parseInt(e.target.value) || 1)}
+        inputProps={{ min: 1 }}
+      />
+    </>
+  );
+}
