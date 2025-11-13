@@ -72,14 +72,17 @@ router.get('/by-path', authenticateToken, async (req, res) => {
     const userPermission = permissions.find(p => p.userId === userId);
 
     if (!userPermission) {
-      return res.status(403).json({ error: 'No permissions' });
+      // If no permissions found, return null menu (let page-level auth handle access)
+      return res.json({ menu: null });
     }
 
     const hasAccess = userPermission.menuAccess.includes('*') ||
                      userPermission.menuAccess.includes(menu.id);
 
     if (!hasAccess) {
-      return res.status(403).json({ error: 'Access denied' });
+      // If no access, return null menu (let page-level auth handle access)
+      // Don't log or update recent menus for unauthorized access
+      return res.json({ menu: null });
     }
 
     // Log menu access
