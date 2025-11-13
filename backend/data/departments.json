@@ -1,0 +1,222 @@
+[
+  {
+    "id": "dept-001",
+    "code": "IT",
+    "name": {
+      "en": "Information Technology",
+      "ko": "정보기술부"
+    },
+    "description": {
+      "en": "Responsible for IT infrastructure, software development, and technical support",
+      "ko": "IT 인프라, 소프트웨어 개발 및 기술 지원 담당"
+    },
+    "parentId": null,
+    "managerId": "user-001",
+    "level": 0,
+    "order": 1,
+    "status": "active",
+    "email": "it@company.com",
+    "phone": "02-1234-5678",
+    "location": "Building A, 3F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-002",
+    "code": "IT-DEV",
+    "name": {
+      "en": "Development Team",
+      "ko": "개발팀"
+    },
+    "description": {
+      "en": "Software development and engineering",
+      "ko": "소프트웨어 개발 및 엔지니어링"
+    },
+    "parentId": "dept-001",
+    "managerId": "user-002",
+    "level": 1,
+    "order": 1,
+    "status": "active",
+    "email": "dev@company.com",
+    "phone": "02-1234-5679",
+    "location": "Building A, 3F-301",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-003",
+    "code": "IT-OPS",
+    "name": {
+      "en": "Operations Team",
+      "ko": "운영팀"
+    },
+    "description": {
+      "en": "System operations and infrastructure management",
+      "ko": "시스템 운영 및 인프라 관리"
+    },
+    "parentId": "dept-001",
+    "managerId": "user-003",
+    "level": 1,
+    "order": 2,
+    "status": "active",
+    "email": "ops@company.com",
+    "phone": "02-1234-5680",
+    "location": "Building A, 3F-302",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-004",
+    "code": "HR",
+    "name": {
+      "en": "Human Resources",
+      "ko": "인사부"
+    },
+    "description": {
+      "en": "Employee management, recruitment, and HR operations",
+      "ko": "직원 관리, 채용 및 인사 운영"
+    },
+    "parentId": null,
+    "managerId": "user-004",
+    "level": 0,
+    "order": 2,
+    "status": "active",
+    "email": "hr@company.com",
+    "phone": "02-1234-5681",
+    "location": "Building A, 2F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-005",
+    "code": "FIN",
+    "name": {
+      "en": "Finance",
+      "ko": "재무부"
+    },
+    "description": {
+      "en": "Financial management, accounting, and budgeting",
+      "ko": "재무 관리, 회계 및 예산 편성"
+    },
+    "parentId": null,
+    "managerId": "user-005",
+    "level": 0,
+    "order": 3,
+    "status": "active",
+    "email": "finance@company.com",
+    "phone": "02-1234-5682",
+    "location": "Building A, 2F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-006",
+    "code": "SALES",
+    "name": {
+      "en": "Sales",
+      "ko": "영업부"
+    },
+    "description": {
+      "en": "Sales and customer relationship management",
+      "ko": "영업 및 고객 관계 관리"
+    },
+    "parentId": null,
+    "managerId": "user-006",
+    "level": 0,
+    "order": 4,
+    "status": "active",
+    "email": "sales@company.com",
+    "phone": "02-1234-5683",
+    "location": "Building B, 1F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-007",
+    "code": "MKT",
+    "name": {
+      "en": "Marketing",
+      "ko": "마케팅부"
+    },
+    "description": {
+      "en": "Marketing, branding, and promotion",
+      "ko": "마케팅, 브랜딩 및 프로모션"
+    },
+    "parentId": null,
+    "managerId": "user-007",
+    "level": 0,
+    "order": 5,
+    "status": "active",
+    "email": "marketing@company.com",
+    "phone": "02-1234-5684",
+    "location": "Building B, 2F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-008",
+    "code": "CS",
+    "name": {
+      "en": "Customer Service",
+      "ko": "고객서비스부"
+    },
+    "description": {
+      "en": "Customer support and service operations",
+      "ko": "고객 지원 및 서비스 운영"
+    },
+    "parentId": null,
+    "managerId": "user-008",
+    "level": 0,
+    "order": 6,
+    "status": "active",
+    "email": "cs@company.com",
+    "phone": "02-1234-5685",
+    "location": "Building B, 1F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-009",
+    "code": "R&D",
+    "name": {
+      "en": "Research & Development",
+      "ko": "연구개발부"
+    },
+    "description": {
+      "en": "Research, innovation, and product development",
+      "ko": "연구, 혁신 및 제품 개발"
+    },
+    "parentId": null,
+    "managerId": "user-009",
+    "level": 0,
+    "order": 7,
+    "status": "active",
+    "email": "rnd@company.com",
+    "phone": "02-1234-5686",
+    "location": "Building C, 4F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept-010",
+    "code": "ADMIN",
+    "name": {
+      "en": "Administration",
+      "ko": "총무부"
+    },
+    "description": {
+      "en": "General administration and facilities management",
+      "ko": "총무 및 시설 관리"
+    },
+    "parentId": null,
+    "managerId": "user-010",
+    "level": 0,
+    "order": 8,
+    "status": "active",
+    "email": "admin@company.com",
+    "phone": "02-1234-5687",
+    "location": "Building A, 1F",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]

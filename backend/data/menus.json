@@ -54,6 +54,24 @@
     }
   },
   {
+    "id": "menu-019",
+    "code": "department-management",
+    "name": {
+      "en": "Department Management",
+      "ko": "부서 관리"
+    },
+    "path": "/admin/departments",
+    "icon": "AccountTree",
+    "order": 2,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-DEPT-MGMT",
+    "description": {
+      "en": "Manage organizational departments and structure",
+      "ko": "조직 부서 및 구조 관리"
+    }
+  },
+  {
     "id": "menu-004",
     "code": "menu-management",
     "name": {
@@ -62,7 +80,7 @@
     },
     "path": "/admin/menus",
     "icon": "Menu",
-    "order": 2,
+    "order": 3,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-MENU-MGMT",
@@ -80,7 +98,7 @@
     },
     "path": "/admin/roles",
     "icon": "Security",
-    "order": 3,
+    "order": 4,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-ROLE-MGMT",
@@ -98,7 +116,7 @@
     },
     "path": "/admin/help",
     "icon": "Help",
-    "order": 4,
+    "order": 5,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-HELP-MGMT",
@@ -116,7 +134,7 @@
     },
     "path": "/admin/user-role-mapping",
     "icon": "Link",
-    "order": 5,
+    "order": 6,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-USER-ROLE-MAP",
@@ -133,8 +151,8 @@
       "ko": "역할-메뉴 매핑"
     },
     "path": "/admin/role-menu-mapping",
-    "icon": "AccountTree",
-    "order": 6,
+    "icon": "Link",
+    "order": 7,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-ROLE-MENU-MAP",
@@ -152,7 +170,7 @@
     },
     "path": "/admin/programs",
     "icon": "Code",
-    "order": 7,
+    "order": 8,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-PROGRAM-MGMT",
@@ -170,7 +188,7 @@
     },
     "path": "/admin/logs",
     "icon": "Description",
-    "order": 8,
+    "order": 9,
     "parentId": "menu-002",
     "level": 2,
     "programId": "PROG-LOGS",
