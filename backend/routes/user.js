@@ -27,11 +27,15 @@ router.get('/', authenticateToken, async (req, res) => {
       name,
       email,
       role,
-      department,
       status,
       page = 1,
       limit = 50
     } = req.query;
+
+    // Handle department as array (can have multiple values)
+    const departments = req.query.department
+      ? (Array.isArray(req.query.department) ? req.query.department : [req.query.department])
+      : [];
 
     // Filter users based on search criteria
     let filteredUsers = users.filter(user => {
@@ -47,7 +51,8 @@ router.get('/', authenticateToken, async (req, res) => {
       if (role && user.role !== role) {
         return false;
       }
-      if (department && user.department !== department) {
+      // Check if user's department is in the selected departments array
+      if (departments.length > 0 && !departments.includes(user.department)) {
         return false;
       }
       if (status && user.status !== status) {
@@ -213,7 +218,7 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const { username, password, name, email, role, department, status } = req.body;
+    const { username, password, name, email, role, department, status, avatarUrl } = req.body;
 
     if (!username || !password || !name || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -247,7 +252,8 @@ router.post('/', authenticateToken, async (req, res) => {
       ssoEnabled: false,
       status: status || 'active',
       createdAt: new Date().toISOString(),
-      lastLogin: null
+      lastLogin: null,
+      ...(avatarUrl && { avatarUrl })
     };
 
     users.push(newUser);
@@ -259,91 +265,6 @@ router.post('/', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Create user error:', error);
     res.status(500).json({ error: 'Failed to create user' });
-  }
-});
-
-/**
- * Update user (admin only, or user updating their own profile)
- */
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Users can update their own profile (limited fields), admins can update any profile
-    const isSelf = req.user.userId === id;
-    const isAdmin = req.user.role === 'admin';
-
-    if (!isSelf && !isAdmin) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    const { name, email, role, department, status } = req.body;
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === id);
-
-    if (userIndex === -1) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Check email uniqueness
-    if (email && email !== users[userIndex].email) {
-      if (users.some(u => u.email === email && u.id !== id)) {
-        return res.status(400).json({ error: 'Email already in use' });
-      }
-    }
-
-    // Update fields
-    if (name) users[userIndex].name = name;
-    if (email) users[userIndex].email = email;
-    if (department !== undefined) users[userIndex].department = department;
-
-    // Only admins can change role and status
-    if (isAdmin) {
-      if (role) users[userIndex].role = role;
-      if (status) users[userIndex].status = status;
-    }
-
-    await writeJSON(USERS_FILE, users);
-
-    // Remove password from response
-    const { password, ...safeUser } = users[userIndex];
-    res.json({ user: safeUser });
-  } catch (error) {
-    console.error('Update user error:', error);
-    res.status(500).json({ error: 'Failed to update user' });
-  }
-});
-
-/**
- * Delete user (admin only)
- */
-router.delete('/:id', authenticateToken, async (req, res) => {
-  try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-
-    const { id } = req.params;
-
-    // Prevent deleting self
-    if (req.user.userId === id) {
-      return res.status(400).json({ error: 'Cannot delete your own account' });
-    }
-
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === id);
-
-    if (userIndex === -1) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    users.splice(userIndex, 1);
-    await writeJSON(USERS_FILE, users);
-
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('Delete user error:', error);
-    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 
@@ -394,6 +315,92 @@ router.put('/preferences', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Update preferences error:', error);
     res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
+/**
+ * Update user (admin only, or user updating their own profile)
+ */
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Users can update their own profile (limited fields), admins can update any profile
+    const isSelf = req.user.userId === id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { name, email, role, department, status, avatarUrl } = req.body;
+    const users = await readJSON(USERS_FILE);
+    const userIndex = users.findIndex(u => u.id === id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check email uniqueness
+    if (email && email !== users[userIndex].email) {
+      if (users.some(u => u.email === email && u.id !== id)) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+    }
+
+    // Update fields
+    if (name) users[userIndex].name = name;
+    if (email) users[userIndex].email = email;
+    if (department !== undefined) users[userIndex].department = department;
+    if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
+
+    // Only admins can change role and status
+    if (isAdmin) {
+      if (role) users[userIndex].role = role;
+      if (status) users[userIndex].status = status;
+    }
+
+    await writeJSON(USERS_FILE, users);
+
+    // Remove password from response
+    const { password, ...safeUser } = users[userIndex];
+    res.json({ user: safeUser });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+/**
+ * Delete user (admin only)
+ */
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { id } = req.params;
+
+    // Prevent deleting self
+    if (req.user.userId === id) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    const users = await readJSON(USERS_FILE);
+    const userIndex = users.findIndex(u => u.id === id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    users.splice(userIndex, 1);
+    await writeJSON(USERS_FILE, users);
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 
@@ -469,7 +476,7 @@ router.delete('/favorite-menus/:menuId', authenticateToken, async (req, res) => 
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { name, email, department } = req.body;
+    const { name, email, department, avatarUrl } = req.body;
 
     const users = await readJSON(USERS_FILE);
     const userIndex = users.findIndex(u => u.id === userId);
@@ -489,6 +496,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     if (name) users[userIndex].name = name;
     if (email) users[userIndex].email = email;
     if (department) users[userIndex].department = department;
+    if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
 
     await writeJSON(USERS_FILE, users);
 
@@ -500,7 +508,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
         name: users[userIndex].name,
         email: users[userIndex].email,
         role: users[userIndex].role,
-        department: users[userIndex].department
+        department: users[userIndex].department,
+        avatarUrl: users[userIndex].avatarUrl
       }
     });
   } catch (error) {

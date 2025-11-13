@@ -29,6 +29,8 @@
       "user-management:view",
       "user-list:view",
       "user-list:edit",
+      "department-management:view",
+      "department-management:edit",
       "reports:view",
       "reports:export",
       "settings:view"
@@ -37,6 +39,7 @@
       "menu-001",
       "menu-002",
       "menu-003",
+      "menu-019",
       "menu-006",
       "menu-007",
       "menu-008"

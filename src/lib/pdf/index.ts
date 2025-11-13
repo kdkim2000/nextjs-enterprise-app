@@ -5,6 +5,7 @@ import autoTable from 'jspdf-autotable';
  * Generate PDF from table data
  */
 export function generatePDFFromTable(
+   
   data: any[],
   columns: { header: string; dataKey: string }[],
   filename: string,
@@ -94,6 +95,7 @@ export function generatePDFReport(
     content?: string;
     table?: {
       columns: { header: string; dataKey: string }[];
+       
       data: any[];
     };
   }[],
@@ -123,7 +125,7 @@ export function generatePDFReport(
   }
 
   // Add sections
-  sections.forEach((section, index) => {
+  sections.forEach((section) => {
     // Check if we need a new page
     if (yPosition > 250) {
       doc.addPage();
@@ -168,6 +170,7 @@ export function generatePDFReport(
         margin: { left: 14, right: 14 }
       });
 
+       
       yPosition = (doc as any).lastAutoTable.finalY + 10;
     }
 
@@ -197,6 +200,7 @@ export function generatePDFReport(
  * Export DataGrid data to PDF
  */
 export function exportDataGridToPDF(
+   
   rows: any[],
   columns: { field: string; headerName?: string }[],
   filename: string,

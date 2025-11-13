@@ -1,5 +1,7 @@
 'use client';
 
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useCallback } from 'react';
 import {
   DataGrid,
@@ -24,11 +26,13 @@ import {
   Add,
   Delete,
   Refresh,
-  Settings
+  Settings,
+  PictureAsPdf
 } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
 import { useI18n } from '@/lib/i18n/client';
 import { toast } from 'react-toastify';
+import { exportDataGridToPDF } from '@/lib/pdf';
 
 interface ExcelDataGridProps {
   rows: GridRowsProp;
@@ -51,6 +55,7 @@ interface ExcelDataGridProps {
 
 interface CustomToolbarProps {
   onExport: () => void;
+  onExportPDF: () => void;
   onImport: () => void;
   onAdd?: () => void;
   onDelete?: () => void;
@@ -166,6 +171,19 @@ function CustomToolbar(props: CustomToolbarProps) {
             }}
           >
             <FileDownload fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Export to PDF" arrow>
+          <IconButton
+            size="small"
+            onClick={props.onExportPDF}
+            sx={{
+              color: 'error.main',
+              '&:hover': { bgcolor: 'error.50' }
+            }}
+          >
+            <PictureAsPdf fontSize="small" />
           </IconButton>
         </Tooltip>
 
@@ -321,6 +339,22 @@ export default function ExcelDataGrid({
     }
   }, [rows, columns, exportFileName]);
 
+  // Export to PDF
+  const handleExportPDF = useCallback(() => {
+    try {
+      exportDataGridToPDF(
+        rows,
+        columns,
+        `${exportFileName}_${new Date().toISOString().slice(0, 10)}`,
+        exportFileName
+      );
+      toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error('Failed to export PDF');
+    }
+  }, [rows, columns, exportFileName]);
+
   // Import from Excel
   const handleImport = useCallback(() => {
     const input = document.createElement('input');
@@ -412,6 +446,7 @@ export default function ExcelDataGrid({
         slotProps={{
           toolbar: {
             onExport: handleExport,
+            onExportPDF: handleExportPDF,
             onImport: handleImport,
             onAdd,
             onDelete: handleDelete,

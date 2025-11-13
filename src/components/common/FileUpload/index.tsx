@@ -80,6 +80,7 @@ export default function FileUpload({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [autoUpload, files.length]
   );
 
@@ -128,30 +129,31 @@ export default function FileUpload({
       if (onUploadComplete) {
         onUploadComplete([response.file]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error);
+      const err = error as { response?: { data?: { error?: string } } };
 
       setFiles((prev) => {
         const updated = [...prev];
         updated[index] = {
           ...updated[index],
           status: 'error',
-          error: error.response?.data?.error || 'Upload failed'
+          error: err.response?.data?.error || 'Upload failed'
         };
         return updated;
       });
     }
   };
 
-  const handleManualUpload = async () => {
-    const pendingFiles = files
-      .map((f, index) => ({ ...f, index }))
-      .filter((f) => f.status === 'pending');
+  // const handleManualUpload = async () => {
+  //   const pendingFiles = files
+  //     .map((f, index) => ({ ...f, index }))
+  //     .filter((f) => f.status === 'pending');
 
-    for (const fileWithIndex of pendingFiles) {
-      await uploadFile(fileWithIndex, fileWithIndex.index);
-    }
-  };
+  //   for (const fileWithIndex of pendingFiles) {
+  //     await uploadFile(fileWithIndex, fileWithIndex.index);
+  //   }
+  // };
 
   const handleDelete = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));

@@ -1,3 +1,4 @@
+ 
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -41,7 +42,9 @@ export interface LogEntry {
   userId: string;
   ip: string;
   userAgent: string;
+   
   requestBody?: any;
+   
   responsePreview?: any;
 }
 

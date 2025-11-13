@@ -24,6 +24,7 @@ export function getDataDir(): string {
 /**
  * Get default data for a file
  */
+ 
 function getDefaultData(fileName: string): any {
   switch (fileName) {
     case 'users.json':
@@ -47,7 +48,7 @@ function getDefaultData(fileName: string): any {
 async function initializeDataFile(fileName: string): Promise<void> {
   const defaultData = getDefaultData(fileName);
   if (defaultData !== null) {
-    console.log(`Initializing ${fileName} with default data...`);
+    console.info(`Initializing ${fileName} with default data...`);
     await writeJSON(fileName, defaultData);
   }
 }
@@ -56,15 +57,17 @@ async function initializeDataFile(fileName: string): Promise<void> {
  * Read JSON file
  * Automatically initializes with default data if file doesn't exist
  */
+ 
 export async function readJSON<T = any>(fileName: string): Promise<T | null> {
   try {
     const filePath = path.join(getDataDir(), fileName);
     const data = await fs.readFile(filePath, 'utf8');
     return JSON.parse(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { code?: string };
     // File doesn't exist - initialize with default data
-    if (error.code === 'ENOENT') {
-      console.log(`File ${fileName} not found. Initializing with default data...`);
+    if (err.code === 'ENOENT') {
+      console.info(`File ${fileName} not found. Initializing with default data...`);
       await initializeDataFile(fileName);
 
       // Try reading again
@@ -88,6 +91,7 @@ export async function readJSON<T = any>(fileName: string): Promise<T | null> {
 /**
  * Write JSON file
  */
+ 
 export async function writeJSON(fileName: string, data: any): Promise<boolean> {
   try {
     const dataDir = getDataDir();
@@ -114,7 +118,7 @@ export async function resetAllData(): Promise<boolean> {
     await writeJSON('userPreferences.json', defaultUserPreferences);
     await writeJSON('mfaCodes.json', defaultMfaCodes);
     await writeJSON('logs.json', defaultLogs);
-    console.log('All data reset to defaults successfully');
+    console.info('All data reset to defaults successfully');
     return true;
   } catch (error) {
     console.error('Error resetting data:', error);

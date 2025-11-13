@@ -5,6 +5,7 @@ import ExcelJS from 'exceljs';
  * Generate Excel file from JSON data
  */
 export async function generateExcelFile(
+   
   data: any[],
   filename: string,
   options?: {
@@ -57,7 +58,7 @@ export async function generateExcelFile(
   });
 
   // Add borders to all cells
-  worksheet.eachRow((row, rowNumber) => {
+  worksheet.eachRow((row) => {
     row.eachCell((cell) => {
       cell.border = {
         top: { style: 'thin' },
@@ -70,7 +71,7 @@ export async function generateExcelFile(
 
   // Auto-filter
   if (options?.columns) {
-    const lastColumn = String.fromCharCode(64 + options.columns.length);
+    // const lastColumn = String.fromCharCode(64 + options.columns.length);
     const headerRowNumber = options.title ? 2 : 1;
     worksheet.autoFilter = {
       from: { row: headerRowNumber, column: 1 },
@@ -102,6 +103,7 @@ export function downloadExcelFile(blob: Blob, filename: string) {
 /**
  * Parse Excel file to JSON
  */
+ 
 export async function parseExcelFile(file: File): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -131,6 +133,7 @@ export async function parseExcelFile(file: File): Promise<any[]> {
  * Export DataGrid data to Excel
  */
 export async function exportDataGridToExcel(
+   
   rows: any[],
   columns: { field: string; headerName?: string; width?: number }[],
   filename: string,
@@ -145,6 +148,7 @@ export async function exportDataGridToExcel(
     }));
 
   const data = rows.map((row) => {
+     
     const rowData: any = {};
     excelColumns.forEach((col) => {
       rowData[col.key] = row[col.key];
@@ -191,6 +195,7 @@ export async function generateExcelTemplate(
 
   // Add example row
   if (columns.some((col) => col.example)) {
+     
     const exampleRow: any = {};
     columns.forEach((col) => {
       if (col.example) {

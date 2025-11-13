@@ -22,6 +22,14 @@ axiosInstance.interceptors.request.use(
       }
     }
 
+    // Debug logging
+    console.log('[Axios Request]', {
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      params: config.params
+    });
+
     return config;
   },
   (error: AxiosError) => {
@@ -87,18 +95,23 @@ export default axiosInstance;
 
 // Helper functions for common HTTP methods
 export const api = {
+   
   get: <T = any>(url: string, config?: AxiosRequestConfig) =>
     axiosInstance.get<T>(url, config).then((res) => res.data),
 
+   
   post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     axiosInstance.post<T>(url, data, config).then((res) => res.data),
 
+   
   put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     axiosInstance.put<T>(url, data, config).then((res) => res.data),
 
+   
   patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     axiosInstance.patch<T>(url, data, config).then((res) => res.data),
 
+   
   delete: <T = any>(url: string, config?: AxiosRequestConfig) =>
     axiosInstance.delete<T>(url, config).then((res) => res.data)
 };

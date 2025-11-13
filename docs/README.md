@@ -35,6 +35,7 @@ Enterprise Next.js Application의 모든 문서를 여기에서 찾을 수 있�
 
 | 문서 | 설명 |
 |------|------|
+| **[DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md)** | Docker 배포 완전 가이드 🐳 |
 | **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** | Vercel 배포 완전 가이드 |
 | **[VERCEL_DATA_INITIALIZATION.md](./VERCEL_DATA_INITIALIZATION.md)** | Vercel 데이터 초기화 가이드 |
 | **[DEPLOY_SUMMARY.md](./DEPLOY_SUMMARY.md)** | 배포 빠른 참조 체크리스트 |
@@ -70,11 +71,12 @@ Enterprise Next.js Application의 모든 문서를 여기에서 찾을 수 있�
 2. BACKEND_API_ROUTES.md (API 문서)
 ```
 
-### Vercel 배포
+### 배포하기
 ```
-1. VERCEL_DEPLOYMENT.md (배포 가이드)
-2. VERCEL_DATA_INITIALIZATION.md (데이터 초기화)
-3. DEPLOY_SUMMARY.md (체크리스트)
+1. DOCKER_DEPLOYMENT.md (Docker 배포 - 모든 환경)
+2. VERCEL_DEPLOYMENT.md (Vercel 배포 - 서버리스)
+3. VERCEL_DATA_INITIALIZATION.md (데이터 초기화)
+4. DEPLOY_SUMMARY.md (체크리스트)
 ```
 
 ### 아키텍처 이해
@@ -99,9 +101,10 @@ Enterprise Next.js Application의 모든 문서를 여기에서 찾을 수 있�
 - 사용자 API: [BACKEND_API_ROUTES.md](./BACKEND_API_ROUTES.md#user-management-apiuser)
 
 ### 배포
-- Vercel 배포 단계: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md#빠른-배포-권장)
+- Docker 배포: [DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md#빠른-시작)
+- Vercel 배포: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md#빠른-배포-권장)
 - 데이터 초기화: [VERCEL_DATA_INITIALIZATION.md](./VERCEL_DATA_INITIALIZATION.md#자동-초기화)
-- 환경 변수: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md#환경-변수-생성)
+- 환경 변수: [DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md#환경-변수-설정)
 
 ### 기능
 - 인증 시스템: [FEATURES.md](./FEATURES.md)
@@ -112,10 +115,10 @@ Enterprise Next.js Application의 모든 문서를 여기에서 찾을 수 있�
 
 ## 📊 문서 통계
 
-- **총 문서 수**: 13개
+- **총 문서 수**: 14개
 - **개발 가이드**: 5개
 - **Backend 문서**: 2개
-- **배포 가이드**: 3개
+- **배포 가이드**: 4개 (Docker 추가 🐳)
 - **기타**: 3개
 
 ---

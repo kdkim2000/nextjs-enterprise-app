@@ -1,5 +1,6 @@
 'use client';
 
+ 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AuthState } from '@/types/auth';
 import { api } from '@/lib/axios';
@@ -10,6 +11,7 @@ interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
   ssoLogin: () => Promise<void>;
+  updateUser: (user: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -178,13 +180,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const updateUser = useCallback((updatedUser: any) => {
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setAuthState((prev) => ({
+      ...prev,
+      user: updatedUser
+    }));
+  }, []);
+
   const value: AuthContextType = {
     ...authState,
     login,
     verifyMFA,
     logout,
     refreshAccessToken,
-    ssoLogin
+    ssoLogin,
+    updateUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

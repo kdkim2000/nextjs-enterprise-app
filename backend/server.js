@@ -10,8 +10,15 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const menuRoutes = require('./routes/menu');
 const userRoutes = require('./routes/user');
+const userSettingsRoutes = require('./routes/userSettings');
 const fileRoutes = require('./routes/file');
 const logRoutes = require('./routes/log');
+const roleRoutes = require('./routes/role');
+const userRoleMappingRoutes = require('./routes/userRoleMapping');
+const roleMenuMappingRoutes = require('./routes/roleMenuMapping');
+const programRoutes = require('./routes/program');
+const helpRoutes = require('./routes/help');
+const departmentRoutes = require('./routes/department');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -47,8 +54,15 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/user-settings', userSettingsRoutes);
 app.use('/api/file', fileRoutes);
 app.use('/api/log', logRoutes);
+app.use('/api/role', roleRoutes);
+app.use('/api/user-role-mapping', userRoleMappingRoutes);
+app.use('/api/role-menu-mapping', roleMenuMappingRoutes);
+app.use('/api/program', programRoutes);
+app.use('/api/help', helpRoutes);
+app.use('/api/department', departmentRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
