@@ -46,7 +46,7 @@ export interface MultiAxisChartProps {
   rightYAxisUnit?: string;
 }
 
-const CustomTooltip: React.FC<TooltipProps<number, string> & { leftUnit?: string; rightUnit?: string }> = ({
+const CustomTooltip: React.FC<any> = ({
   active,
   payload,
   label,
@@ -67,7 +67,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string> & { leftUnit?: string
         }}
       >
         <Box sx={{ fontWeight: 'medium', mb: 0.5 }}>{label}</Box>
-        {payload.map((entry, index) => {
+        {payload.map((entry: any, index: number) => {
           const unit = (entry as any).yAxisId === 'right' ? rightUnit : leftUnit;
           return (
             <Box

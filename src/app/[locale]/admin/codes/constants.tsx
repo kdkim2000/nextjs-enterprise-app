@@ -13,89 +13,92 @@ export const STATUS_OPTIONS = [
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
-  locale: string,
   handleEdit: (id: string | number) => void
-): GridColDef[] => [
-  {
-    field: 'id',
-    headerName: 'ID',
-    width: 70
-  },
-  {
-    field: 'codeType',
-    headerName: t('codeType'),
-    width: 150,
-    sortable: true
-  },
-  {
-    field: 'code',
-    headerName: t('code'),
-    width: 150,
-    sortable: true
-  },
-  {
-    field: 'name',
-    headerName: t('name'),
-    width: 200,
-    sortable: true,
-    valueGetter: (_value, row: Code) => {
-      return locale === 'ko' ? row.name?.ko : row.name?.en;
-    }
-  },
-  {
-    field: 'description',
-    headerName: t('description'),
-    width: 250,
-    sortable: false,
-    valueGetter: (_value, row: Code) => {
-      return locale === 'ko' ? row.description?.ko : row.description?.en;
-    }
-  },
-  {
-    field: 'order',
-    headerName: t('order'),
-    width: 80,
-    sortable: true,
-    align: 'center',
-    headerAlign: 'center'
-  },
-  {
-    field: 'status',
-    headerName: t('status'),
-    width: 100,
-    sortable: true,
-    type: 'singleSelect',
-    valueOptions: ['active', 'inactive'],
-    renderCell: (params) => {
-      const status = params.value as string;
-      const color = status === 'active' ? 'success' : 'default';
-      const label = STATUS_OPTIONS.find(opt => opt.value === status);
-      return (
-        <Chip
-          label={locale === 'ko' ? label?.labelKo : label?.labelEn}
-          color={color}
-          size="small"
+): GridColDef[] => {
+  const locale = t('common.appName') === '엔터프라이즈 앱' ? 'ko' : 'en';
+
+  return [
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 70
+    },
+    {
+      field: 'codeType',
+      headerName: t('fields.codeType'),
+      width: 150,
+      sortable: true
+    },
+    {
+      field: 'code',
+      headerName: t('fields.code'),
+      width: 150,
+      sortable: true
+    },
+    {
+      field: 'name',
+      headerName: t('fields.name'),
+      width: 200,
+      sortable: true,
+      valueGetter: (_value, row: Code) => {
+        return locale === 'ko' ? row.name?.ko : row.name?.en;
+      }
+    },
+    {
+      field: 'description',
+      headerName: t('fields.description'),
+      width: 250,
+      sortable: false,
+      valueGetter: (_value, row: Code) => {
+        return locale === 'ko' ? row.description?.ko : row.description?.en;
+      }
+    },
+    {
+      field: 'order',
+      headerName: t('fields.order'),
+      width: 80,
+      sortable: true,
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'status',
+      headerName: t('fields.status'),
+      width: 100,
+      sortable: true,
+      type: 'singleSelect',
+      valueOptions: ['active', 'inactive'],
+      renderCell: (params) => {
+        const status = params.value as string;
+        const color = status === 'active' ? 'success' : 'default';
+        const label = STATUS_OPTIONS.find(opt => opt.value === status);
+        return (
+          <Chip
+            label={locale === 'ko' ? label?.labelKo : label?.labelEn}
+            color={color}
+            size="small"
+          />
+        );
+      }
+    },
+    {
+      field: 'parentCode',
+      headerName: t('fields.parentCode'),
+      width: 130,
+      sortable: true
+    },
+    {
+      field: 'actions',
+      headerName: t('fields.actions'),
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <ActionsCell
+          onEdit={() => handleEdit(params.row.id)}
+          showMore={false}
         />
-      );
+      )
     }
-  },
-  {
-    field: 'parentCode',
-    headerName: t('parentCode'),
-    width: 130,
-    sortable: true
-  },
-  {
-    field: 'actions',
-    headerName: t('actions'),
-    width: 80,
-    sortable: false,
-    filterable: false,
-    renderCell: (params) => (
-      <ActionsCell
-        onEdit={() => handleEdit(params.row.id)}
-        showMore={false}
-      />
-    )
-  }
-];
+  ];
+};

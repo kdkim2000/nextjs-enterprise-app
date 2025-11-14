@@ -1,0 +1,23 @@
+
+> nextjs-enterprise-app@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.1 (Turbopack)
+   - Environments: .env.local, .env.production, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 30.9s
+   Running TypeScript ...
+Failed to compile.
+
+./src/components/common/Charts/AreaChart.tsx:44:74
+Type error: Property 'payload' does not exist on type 'TooltipProps<number, string>'.
+
+[0m [90m 42 |[39m }
+ [90m 43 |[39m
+[31m[1m>[22m[39m[90m 44 |[39m [36mconst[39m [33mCustomTooltip[39m[33m:[39m [33mReact[39m[33m.[39m[33mFC[39m[33m<[39m[33mTooltipProps[39m[33m<[39m[33mnumber[39m[33m,[39m string[33m>>[39m [33m=[39m ({ active[33m,[39m payload[33m,[39m label }) [33m=>[39m {
+ [90m    |[39m                                                                          [31m[1m^[22m[39m
+ [90m 45 |[39m   [36mconst[39m theme [33m=[39m useTheme()[33m;[39m
+ [90m 46 |[39m
+ [90m 47 |[39m   [36mif[39m (active [33m&&[39m payload [33m&&[39m payload[33m.[39mlength) {[0m
+Next.js build worker exited with code: 1 and signal: null

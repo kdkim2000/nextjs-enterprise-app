@@ -132,7 +132,7 @@ export default function SearchFilterFields({
             <Grid key={field.name} size={gridSize}>
               <UserSelector
                 label={field.label}
-                value={values[field.name] || ''}
+                value={(Array.isArray(values[field.name]) ? values[field.name][0] : values[field.name]) as string || ''}
                 onChange={(userId) => onChange(field.name, userId || '')}
                 helperText={field.placeholder}
                 disabled={disabled}
@@ -149,8 +149,8 @@ export default function SearchFilterFields({
             <Grid key={field.name} size={{ xs: 12 }}>
               <DateRangePicker
                 label={field.label}
-                startDate={values[startField] || ''}
-                endDate={values[endField] || ''}
+                startDate={(Array.isArray(values[startField]) ? values[startField][0] : values[startField]) as string || ''}
+                endDate={(Array.isArray(values[endField]) ? values[endField][0] : values[endField]) as string || ''}
                 onChange={(start, end) => {
                   onChange(startField, start);
                   onChange(endField, end);

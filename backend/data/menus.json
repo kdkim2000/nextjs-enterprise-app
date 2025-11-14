@@ -126,6 +126,24 @@
     }
   },
   {
+    "id": "menu-021",
+    "code": "message-management",
+    "name": {
+      "en": "Message Management",
+      "ko": "메시지 관리"
+    },
+    "path": "/admin/messages",
+    "icon": "Message",
+    "order": 6,
+    "parentId": "menu-002",
+    "level": 2,
+    "programId": "PROG-MESSAGE-MGMT",
+    "description": {
+      "en": "Manage application messages",
+      "ko": "어플리케이션 메시지 관리"
+    }
+  },
+  {
     "id": "menu-010",
     "code": "help-management",
     "name": {

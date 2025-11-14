@@ -31,7 +31,7 @@ export interface DonutChartProps {
   centerSubtext?: string;
 }
 
-const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
+const CustomTooltip: React.FC<any> = ({ active, payload }) => {
   const theme = useTheme();
 
   if (active && payload && payload.length) {
@@ -103,7 +103,7 @@ export default function DonutChart({
       <ResponsiveContainer width="100%" height={height}>
         <RechartsPieChart>
           <Pie
-            data={data}
+            data={data as any}
             cx="50%"
             cy="50%"
             innerRadius={innerRadius}

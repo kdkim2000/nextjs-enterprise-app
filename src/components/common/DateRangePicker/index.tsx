@@ -290,7 +290,7 @@ export default function DateRangePicker({
             onChange={handleEndDateChange}
             disabled={disabled}
             format="YYYY-MM-DD"
-            minDate={toDayjs(startDate)}
+            minDate={toDayjs(startDate) || undefined}
             slotProps={{
               textField: {
                 size: 'small',

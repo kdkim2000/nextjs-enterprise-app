@@ -182,7 +182,7 @@ export default function DateTimeRangePicker({
             disabled={disabled}
             format="YYYY-MM-DD HH:mm"
             ampm={false}
-            minDateTime={toDayjs(startDateTime)}
+            minDateTime={toDayjs(startDateTime) || undefined}
             slotProps={{
               textField: {
                 size: 'small',

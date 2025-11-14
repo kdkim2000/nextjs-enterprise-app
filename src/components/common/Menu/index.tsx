@@ -59,7 +59,7 @@ export default function Menu({
 
   return (
     <>
-      {trigger && React.cloneElement(trigger, { onClick: handleClick })}
+      {trigger && React.cloneElement(trigger, { onClick: handleClick } as any)}
       <MuiMenu
         anchorEl={controlledAnchorEl || anchorEl}
         open={open}

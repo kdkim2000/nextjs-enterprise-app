@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --turbo\" \"node backend/server.js\"",
+    "dev": "concurrently \"next dev --turbo\" \"node  --max-old-space-size=8192 backend/server.js\"",
     "dev:frontend": "next dev --turbo",
     "dev:backend": "node backend/server.js",
     "build": "next build",

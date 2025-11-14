@@ -212,7 +212,7 @@ export default function StandardCrudPageLayout({
           open={helpOpen}
           onClose={() => onHelpOpenChange(false)}
           programId={programId}
-          language={language}
+          language={language as "en" | "ko" | undefined}
           isAdmin={isAdmin}
         />
       )}

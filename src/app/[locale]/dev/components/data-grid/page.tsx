@@ -163,7 +163,7 @@ export default function DataGridPage() {
     setAdvancedFilterOpen(false);
   };
 
-  const handleSearchChange = (field: string, value: string) => {
+  const handleSearchChange = (field: string, value: string | string[]) => {
     setSearchCriteria((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -236,7 +236,6 @@ export default function DataGridPage() {
       renderCell: (params) => (
         <ActionsCell
           onEdit={() => handleEdit(params.row as RowData)}
-          onDelete={() => handleDeleteRows([params.row.id])}
         />
       )
     }
