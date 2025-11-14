@@ -115,14 +115,12 @@ export default function Breadcrumb({
           // Clickable items
           if (item.href) {
             return (
-              <StyledBreadcrumb
-                key={index}
-                component={NextLink}
-                href={item.href}
-              >
-                {item.icon}
-                {item.label}
-              </StyledBreadcrumb>
+              <NextLink key={index} href={item.href} passHref legacyBehavior>
+                <StyledBreadcrumb>
+                  {item.icon}
+                  {item.label}
+                </StyledBreadcrumb>
+              </NextLink>
             );
           }
 

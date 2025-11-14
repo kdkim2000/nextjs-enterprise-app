@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --turbo\" \"node backend/server.js\"",
+    "dev": "concurrently \"next dev --turbo\" \"node  --max-old-space-size=8192 backend/server.js\"",
     "dev:frontend": "next dev --turbo",
     "dev:backend": "node backend/server.js",
     "build": "next build",
@@ -50,6 +50,7 @@
     "react-dom": "19.2.0",
     "react-dropzone": "^14.2.10",
     "react-hook-form": "^7.53.1",
+    "react-split": "^2.0.14",
     "react-toastify": "^11.0.5",
     "recharts": "^3.3.0",
     "uuid": "^10.0.0",

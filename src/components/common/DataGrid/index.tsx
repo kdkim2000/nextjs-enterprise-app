@@ -42,6 +42,7 @@ interface ExcelDataGridProps {
   onEdit?: (id: string | number) => void;
   onDelete?: (ids: (string | number)[]) => void;
   onRefresh?: () => void;
+  onRowClick?: (params: any) => void;
   loading?: boolean;
   editable?: boolean;
   checkboxSelection?: boolean;
@@ -51,6 +52,8 @@ interface ExcelDataGridProps {
   rowCount?: number;
   paginationModel?: { page: number; pageSize: number };
   onPaginationModelChange?: (model: { page: number; pageSize: number }) => void;
+  rowSelectionModel?: GridRowSelectionModel;
+  onRowSelectionModelChange?: (model: GridRowSelectionModel) => void;
 }
 
 interface CustomToolbarProps {
@@ -281,6 +284,7 @@ export default function ExcelDataGrid({
   onEdit,
   onDelete,
   onRefresh,
+  onRowClick,
   loading = false,
   editable = false,
   checkboxSelection = true,
@@ -289,10 +293,13 @@ export default function ExcelDataGrid({
   paginationMode = 'client',
   rowCount,
   paginationModel,
-  onPaginationModelChange
+  onPaginationModelChange,
+  rowSelectionModel,
+  onRowSelectionModelChange
 }: ExcelDataGridProps) {
   const t = useI18n();
-  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([]);
+  const [internalSelectionModel, setInternalSelectionModel] = useState<GridRowSelectionModel>([]);
+  const selectionModel = rowSelectionModel !== undefined ? rowSelectionModel : internalSelectionModel;
 
   // Export to Excel
   const handleExport = useCallback(() => {
@@ -343,7 +350,7 @@ export default function ExcelDataGrid({
   const handleExportPDF = useCallback(() => {
     try {
       exportDataGridToPDF(
-        rows,
+        [...rows] as any[],
         columns,
         `${exportFileName}_${new Date().toISOString().slice(0, 10)}`,
         exportFileName
@@ -416,9 +423,14 @@ export default function ExcelDataGrid({
   const handleDelete = useCallback(() => {
     if (onDelete && selectionModel.length > 0) {
       onDelete(selectionModel as (string | number)[]);
-      setSelectionModel([]);
+      // Clear selection after delete
+      if (onRowSelectionModelChange) {
+        onRowSelectionModelChange([]);
+      } else {
+        setInternalSelectionModel([]);
+      }
     }
-  }, [onDelete, selectionModel]);
+  }, [onDelete, selectionModel, onRowSelectionModelChange]);
 
   const handleCellDoubleClick = useCallback(
     (params: GridCellParams) => {
@@ -436,10 +448,11 @@ export default function ExcelDataGrid({
         columns={columns}
         loading={loading}
         checkboxSelection={checkboxSelection}
-        disableRowSelectionOnClick
-        onRowSelectionModelChange={setSelectionModel}
+        disableRowSelectionOnClick={!onRowClick}
+        onRowSelectionModelChange={onRowSelectionModelChange || setInternalSelectionModel}
         rowSelectionModel={selectionModel}
         onCellDoubleClick={handleCellDoubleClick}
+        onRowClick={onRowClick}
         slots={{
           toolbar: CustomToolbar as any
         }}

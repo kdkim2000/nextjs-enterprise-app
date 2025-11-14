@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
 
-export interface CardProps extends MuiCardProps {
+export interface CardProps extends Omit<MuiCardProps, 'title' | 'content'> {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   avatar?: React.ReactNode;

@@ -1,0 +1,342 @@
+[
+  {
+    "id": "msg-001",
+    "code": "COMMON_SAVE_SUCCESS",
+    "category": "common",
+    "type": "success",
+    "message": {
+      "en": "Saved successfully",
+      "ko": "저장되었습니다"
+    },
+    "description": {
+      "en": "Success message for save operation",
+      "ko": "저장 성공 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-002",
+    "code": "COMMON_DELETE_SUCCESS",
+    "category": "common",
+    "type": "success",
+    "message": {
+      "en": "Deleted successfully",
+      "ko": "삭제되었습니다"
+    },
+    "description": {
+      "en": "Success message for delete operation",
+      "ko": "삭제 성공 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-003",
+    "code": "COMMON_UPDATE_SUCCESS",
+    "category": "common",
+    "type": "success",
+    "message": {
+      "en": "Updated successfully",
+      "ko": "수정되었습니다"
+    },
+    "description": {
+      "en": "Success message for update operation",
+      "ko": "수정 성공 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-004",
+    "code": "COMMON_CREATE_SUCCESS",
+    "category": "common",
+    "type": "success",
+    "message": {
+      "en": "Created successfully",
+      "ko": "생성되었습니다"
+    },
+    "description": {
+      "en": "Success message for create operation",
+      "ko": "생성 성공 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-005",
+    "code": "COMMON_LOAD_FAIL",
+    "category": "common",
+    "type": "error",
+    "message": {
+      "en": "Failed to load data",
+      "ko": "데이터 로드에 실패했습니다"
+    },
+    "description": {
+      "en": "Error message for data loading failure",
+      "ko": "데이터 로드 실패 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-006",
+    "code": "COMMON_SAVE_FAIL",
+    "category": "common",
+    "type": "error",
+    "message": {
+      "en": "Failed to save",
+      "ko": "저장에 실패했습니다"
+    },
+    "description": {
+      "en": "Error message for save failure",
+      "ko": "저장 실패 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-007",
+    "code": "COMMON_DELETE_FAIL",
+    "category": "common",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete",
+      "ko": "삭제에 실패했습니다"
+    },
+    "description": {
+      "en": "Error message for delete failure",
+      "ko": "삭제 실패 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-008",
+    "code": "COMMON_REQUIRED_FIELD",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "This field is required",
+      "ko": "필수 입력 항목입니다"
+    },
+    "description": {
+      "en": "Validation error for required fields",
+      "ko": "필수 항목 검증 오류 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-009",
+    "code": "COMMON_INVALID_EMAIL",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "Invalid email format",
+      "ko": "이메일 형식이 올바르지 않습니다"
+    },
+    "description": {
+      "en": "Validation error for invalid email",
+      "ko": "이메일 형식 검증 오류 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-010",
+    "code": "COMMON_CONFIRM_DELETE",
+    "category": "common",
+    "type": "warning",
+    "message": {
+      "en": "Are you sure you want to delete?",
+      "ko": "정말 삭제하시겠습니까?"
+    },
+    "description": {
+      "en": "Confirmation message for delete operation",
+      "ko": "삭제 확인 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-011",
+    "code": "AUTH_LOGIN_SUCCESS",
+    "category": "auth",
+    "type": "success",
+    "message": {
+      "en": "Login successful",
+      "ko": "로그인되었습니다"
+    },
+    "description": {
+      "en": "Success message for login",
+      "ko": "로그인 성공 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-012",
+    "code": "AUTH_LOGIN_FAIL",
+    "category": "auth",
+    "type": "error",
+    "message": {
+      "en": "Invalid username or password",
+      "ko": "사용자명 또는 비밀번호가 올바르지 않습니다"
+    },
+    "description": {
+      "en": "Error message for login failure",
+      "ko": "로그인 실패 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-013",
+    "code": "AUTH_LOGOUT_SUCCESS",
+    "category": "auth",
+    "type": "success",
+    "message": {
+      "en": "Logout successful",
+      "ko": "로그아웃되었습니다"
+    },
+    "description": {
+      "en": "Success message for logout",
+      "ko": "로그아웃 성공 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-014",
+    "code": "AUTH_SESSION_EXPIRED",
+    "category": "auth",
+    "type": "warning",
+    "message": {
+      "en": "Your session has expired. Please login again",
+      "ko": "세션이 만료되었습니다. 다시 로그인해주세요"
+    },
+    "description": {
+      "en": "Warning message for session expiration",
+      "ko": "세션 만료 경고 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-015",
+    "code": "AUTH_PERMISSION_DENIED",
+    "category": "auth",
+    "type": "error",
+    "message": {
+      "en": "Access denied",
+      "ko": "접근 권한이 없습니다"
+    },
+    "description": {
+      "en": "Error message for permission denied",
+      "ko": "권한 거부 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-016",
+    "code": "USER_NOT_FOUND",
+    "category": "user",
+    "type": "error",
+    "message": {
+      "en": "User not found",
+      "ko": "사용자를 찾을 수 없습니다"
+    },
+    "description": {
+      "en": "Error message when user is not found",
+      "ko": "사용자 미발견 오류 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-017",
+    "code": "USER_ALREADY_EXISTS",
+    "category": "user",
+    "type": "error",
+    "message": {
+      "en": "User already exists",
+      "ko": "이미 존재하는 사용자입니다"
+    },
+    "description": {
+      "en": "Error message when user already exists",
+      "ko": "사용자 중복 오류 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-018",
+    "code": "NETWORK_ERROR",
+    "category": "system",
+    "type": "error",
+    "message": {
+      "en": "Network error occurred",
+      "ko": "네트워크 오류가 발생했습니다"
+    },
+    "description": {
+      "en": "Error message for network issues",
+      "ko": "네트워크 오류 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-019",
+    "code": "SERVER_ERROR",
+    "category": "system",
+    "type": "error",
+    "message": {
+      "en": "Server error occurred",
+      "ko": "서버 오류가 발생했습니다"
+    },
+    "description": {
+      "en": "Error message for server issues",
+      "ko": "서버 오류 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-020",
+    "code": "COMMON_NO_DATA",
+    "category": "common",
+    "type": "info",
+    "message": {
+      "en": "No data available",
+      "ko": "데이터가 없습니다"
+    },
+    "description": {
+      "en": "Info message when no data is available",
+      "ko": "데이터 없음 안내 메시지"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]

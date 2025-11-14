@@ -194,19 +194,19 @@ export default function DepartmentsPage() {
           users={allUsers}
           locale={currentLocale}
           labels={{
-            code: t('code'),
-            nameEn: t('nameEn'),
-            nameKo: t('nameKo'),
-            descriptionEn: t('descriptionEn'),
-            descriptionKo: t('descriptionKo'),
-            parentDepartment: t('parentDepartment'),
-            manager: t('manager'),
-            status: t('status'),
-            email: t('email'),
-            phone: t('phone'),
-            location: t('location'),
-            order: t('order'),
-            none: t('none')
+            code: t('fields.code'),
+            nameEn: t('fields.nameEn'),
+            nameKo: t('fields.nameKo'),
+            descriptionEn: t('fields.descriptionEn'),
+            descriptionKo: t('fields.descriptionKo'),
+            parentDepartment: t('fields.parentDepartment'),
+            manager: t('fields.manager'),
+            status: t('fields.status'),
+            email: t('fields.email'),
+            phone: t('fields.phone'),
+            location: t('fields.location'),
+            order: t('fields.order'),
+            none: t('fields.none')
           }}
         />
       </EditDrawer>

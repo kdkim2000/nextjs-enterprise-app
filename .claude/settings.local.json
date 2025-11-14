@@ -50,7 +50,11 @@
       "Bash(npm uninstall:*)",
       "Bash(dir:*)",
       "Bash(find:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(copy:*)",
+      "Bash(tee:*)",
+      "Bash(while read file)",
+      "Bash(do echo \"Fixing: $file\" sed -i 's/: React\\.FC<TooltipProps<number, string>[^>]*>/: React.FC<any>/g' \"$file\" done echo \"✓ All Chart components fixed\")"
     ],
     "deny": [],
     "ask": []

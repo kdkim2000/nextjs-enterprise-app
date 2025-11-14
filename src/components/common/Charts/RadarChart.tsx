@@ -36,7 +36,7 @@ export interface RadarChartProps {
   showGrid?: boolean;
 }
 
-const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
   const theme = useTheme();
 
   if (active && payload && payload.length) {
@@ -51,7 +51,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
         }}
       >
         <Box sx={{ fontWeight: 'medium', mb: 0.5 }}>{label}</Box>
-        {payload.map((entry, index) => (
+        {payload.map((entry: any, index: number) => (
           <Box
             key={index}
             sx={{

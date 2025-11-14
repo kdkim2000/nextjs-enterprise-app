@@ -94,7 +94,7 @@ export default function Status({
     const iconElement = React.cloneElement(config.icon as React.ReactElement, {
       color: config.color,
       fontSize: size
-    });
+    } as any);
 
     return tooltip ? (
       <Tooltip title={tooltip || displayLabel}>
