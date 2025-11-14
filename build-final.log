@@ -1,0 +1,25 @@
+
+> nextjs-enterprise-app@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.1 (Turbopack)
+   - Environments: .env.local, .env.production, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 22.4s
+   Running TypeScript ...
+Failed to compile.
+
+./src/components/common/Charts/DonutChart.tsx:106:13
+Type error: Type 'DonutChartDataItem[]' is not assignable to type 'ChartDataInput[]'.
+  Type 'DonutChartDataItem' is not assignable to type 'ChartDataInput'.
+    Index signature for type 'string' is missing in type 'DonutChartDataItem'.
+
+[0m [90m 104 |[39m         [33m<[39m[33mRechartsPieChart[39m[33m>[39m
+ [90m 105 |[39m           [33m<[39m[33mPie[39m
+[31m[1m>[22m[39m[90m 106 |[39m             data[33m=[39m{data}
+ [90m     |[39m             [31m[1m^[22m[39m
+ [90m 107 |[39m             cx[33m=[39m[32m"50%"[39m
+ [90m 108 |[39m             cy[33m=[39m[32m"50%"[39m
+ [90m 109 |[39m             innerRadius[33m=[39m{innerRadius}[0m
+Next.js build worker exited with code: 1 and signal: null

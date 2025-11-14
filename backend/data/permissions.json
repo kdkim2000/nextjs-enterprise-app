@@ -31,6 +31,10 @@
       "user-list:edit",
       "department-management:view",
       "department-management:edit",
+      "code-management:view",
+      "code-management:edit",
+      "message-management:view",
+      "message-management:edit",
       "reports:view",
       "reports:export",
       "settings:view"
@@ -40,6 +44,8 @@
       "menu-002",
       "menu-003",
       "menu-019",
+      "menu-020",
+      "menu-021",
       "menu-006",
       "menu-007",
       "menu-008"

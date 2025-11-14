@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface UseAutoHideMessageOptions {
   duration?: number; // in milliseconds, default 10000 (10 seconds)
@@ -34,20 +34,20 @@ export function useAutoHideMessage(options: UseAutoHideMessageOptions = {}) {
     }
   }, [errorMessage, duration]);
 
-  const showSuccess = (message: string) => {
+  const showSuccess = useCallback((message: string) => {
     setSuccessMessage(message);
     setErrorMessage(null); // Clear error when showing success
-  };
+  }, []);
 
-  const showError = (message: string) => {
+  const showError = useCallback((message: string) => {
     setErrorMessage(message);
     setSuccessMessage(null); // Clear success when showing error
-  };
+  }, []);
 
-  const clearMessages = () => {
+  const clearMessages = useCallback(() => {
     setSuccessMessage(null);
     setErrorMessage(null);
-  };
+  }, []);
 
   return {
     successMessage,

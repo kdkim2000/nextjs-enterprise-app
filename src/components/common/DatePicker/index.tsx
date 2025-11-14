@@ -110,8 +110,8 @@ export default function DatePicker({
           onChange={handleChange}
           disabled={disabled}
           format="YYYY-MM-DD"
-          minDate={minDate ? toDayjs(minDate) : undefined}
-          maxDate={maxDate ? toDayjs(maxDate) : undefined}
+          minDate={minDate ? toDayjs(minDate) || undefined : undefined}
+          maxDate={maxDate ? toDayjs(maxDate) || undefined : undefined}
           slotProps={{
             textField: {
               size: 'small',

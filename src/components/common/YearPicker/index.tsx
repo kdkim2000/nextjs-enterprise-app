@@ -100,8 +100,8 @@ export default function YearPicker({
           onChange={handleChange}
           disabled={disabled}
           format="YYYY"
-          minDate={minYear ? toDayjs(minYear) : undefined}
-          maxDate={maxYear ? toDayjs(maxYear) : undefined}
+          minDate={minYear ? toDayjs(minYear) || undefined : undefined}
+          maxDate={maxYear ? toDayjs(maxYear) || undefined : undefined}
           slotProps={{
             textField: {
               size: 'small',

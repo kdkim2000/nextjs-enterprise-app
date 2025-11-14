@@ -20,13 +20,17 @@ async function writeJSON(filename, data) {
 }
 
 // Helper function to enrich mapping with user and role details
-async function enrichMappingWithDetails(mapping) {
+// Optimized version: accepts pre-loaded users and roles to avoid repeated file reads
+async function enrichMappingWithDetails(mapping, users = null, roles = null) {
   try {
-    const usersData = await readJSON('users.json');
-    const rolesData = await readJSON('roles.json');
-
-    const users = usersData.users || [];
-    const roles = rolesData.roles || [];
+    // Only load data if not provided (for single mapping case)
+    if (!users || !roles) {
+      const usersData = await readJSON('users.json');
+      const rolesData = await readJSON('roles.json');
+      // users.json is an array, roles.json is an object with 'roles' property
+      users = Array.isArray(usersData) ? usersData : (usersData.users || []);
+      roles = rolesData.roles || [];
+    }
 
     const user = users.find((u) => u.id === mapping.userId);
     const role = roles.find((r) => r.id === mapping.roleId);
@@ -35,12 +39,71 @@ async function enrichMappingWithDetails(mapping) {
       ...mapping,
       userName: user?.name || user?.username,
       userEmail: user?.email,
+      userDepartment: user?.department,
       roleName: role?.name,
       roleDisplayName: role?.displayName
     };
   } catch (error) {
     console.error('Error enriching mapping:', error);
     return mapping;
+  }
+}
+
+// Helper function to enrich multiple mappings efficiently
+async function enrichMappingsWithDetails(mappings) {
+  try {
+    // Load users and roles ONCE
+    const usersData = await readJSON('users.json');
+    const rolesData = await readJSON('roles.json');
+    const mappingsData = await readJSON('userRoleMappings.json');
+
+    // users.json is an array, roles.json is an object with 'roles' property
+    const users = Array.isArray(usersData) ? usersData : (usersData.users || []);
+    const roles = rolesData.roles || [];
+    const allMappings = mappingsData.userRoleMappings || [];
+
+    // Create lookup maps for O(1) access instead of O(n) find
+    const userMap = new Map(users.map(u => [u.id, u]));
+    const roleMap = new Map(roles.map(r => [r.id, r]));
+
+    // Create a map of user's other active roles
+    const userRolesMap = new Map();
+    allMappings.forEach(m => {
+      if (m.isActive) {
+        if (!userRolesMap.has(m.userId)) {
+          userRolesMap.set(m.userId, []);
+        }
+        userRolesMap.get(m.userId).push({
+          roleId: m.roleId,
+          roleName: roleMap.get(m.roleId)?.name,
+          roleDisplayName: roleMap.get(m.roleId)?.displayName
+        });
+      }
+    });
+
+    // Enrich all mappings with the cached data
+    return mappings.map(mapping => {
+      const user = userMap.get(mapping.userId);
+      const role = roleMap.get(mapping.roleId);
+
+      // Get user's other roles (excluding current role)
+      const userRoles = userRolesMap.get(mapping.userId) || [];
+      const otherRoles = userRoles.filter(r => r.roleId !== mapping.roleId);
+
+      return {
+        ...mapping,
+        userName: user?.name || user?.username,
+        userEmail: user?.email,
+        userDepartment: user?.department,
+        roleName: role?.name,
+        roleDisplayName: role?.displayName,
+        otherRoles: otherRoles, // Array of other active roles
+        totalRoleCount: userRoles.length // Total number of active roles for this user
+      };
+    });
+  } catch (error) {
+    console.error('Error enriching mappings:', error);
+    return mappings;
   }
 }
 
@@ -87,9 +150,8 @@ router.get('/', authenticateToken, async (req, res) => {
 
     // Enrich with user and role details if requested
     if (includeDetails === 'true') {
-      const enrichedMappings = await Promise.all(
-        filteredMappings.map((m) => enrichMappingWithDetails(m))
-      );
+      // Use optimized batch enrichment function
+      const enrichedMappings = await enrichMappingsWithDetails(filteredMappings);
       return res.json({
         mappings: enrichedMappings,
         total: enrichedMappings.length
@@ -134,7 +196,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
     // Verify user exists
     const usersData = await readJSON('users.json');
-    const users = usersData.users || [];
+    const users = Array.isArray(usersData) ? usersData : (usersData.users || []);
     const userExists = users.find((u) => u.id === userId);
     if (!userExists) {
       return res.status(404).json({ error: 'User not found' });

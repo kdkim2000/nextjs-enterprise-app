@@ -134,7 +134,7 @@ export const showPromise = <T,>(
       autoClose: options?.autoClose !== undefined ? options.autoClose : 3000,
       ...options
     }
-  );
+  ) as Promise<T>;
 };
 
 /**

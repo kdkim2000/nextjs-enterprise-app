@@ -101,8 +101,8 @@ export default function DateTimePicker({
           disabled={disabled}
           format="YYYY-MM-DD HH:mm"
           ampm={false}
-          minDateTime={minDateTime ? toDayjs(minDateTime) : undefined}
-          maxDateTime={maxDateTime ? toDayjs(maxDateTime) : undefined}
+          minDateTime={minDateTime ? toDayjs(minDateTime) || undefined : undefined}
+          maxDateTime={maxDateTime ? toDayjs(maxDateTime) || undefined : undefined}
           slotProps={{
             textField: {
               size: 'small',
