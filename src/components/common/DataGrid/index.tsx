@@ -350,7 +350,7 @@ export default function ExcelDataGrid({
   const handleExportPDF = useCallback(() => {
     try {
       exportDataGridToPDF(
-        rows,
+        [...rows] as any[],
         columns,
         `${exportFileName}_${new Date().toISOString().slice(0, 10)}`,
         exportFileName
@@ -423,9 +423,14 @@ export default function ExcelDataGrid({
   const handleDelete = useCallback(() => {
     if (onDelete && selectionModel.length > 0) {
       onDelete(selectionModel as (string | number)[]);
-      setSelectionModel([]);
+      // Clear selection after delete
+      if (onRowSelectionModelChange) {
+        onRowSelectionModelChange([]);
+      } else {
+        setInternalSelectionModel([]);
+      }
     }
-  }, [onDelete, selectionModel]);
+  }, [onDelete, selectionModel, onRowSelectionModelChange]);
 
   const handleCellDoubleClick = useCallback(
     (params: GridCellParams) => {

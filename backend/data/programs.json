@@ -1939,5 +1939,70 @@
       "updatedAt": "2025-11-10T00:00:00.000Z",
       "tags": ["component", "demo", "loading", "spinner", "progress"]
     }
+  },
+  {
+    "id": "prog-006",
+    "code": "PROG-MESSAGE-MGMT",
+    "name": {
+      "en": "Message Management",
+      "ko": "메시지 관리"
+    },
+    "description": {
+      "en": "Manage application messages",
+      "ko": "어플리케이션 메시지 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View message data",
+          "ko": "메시지 데이터 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update messages",
+          "ko": "메시지 생성 및 수정"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete messages",
+          "ko": "메시지 삭제"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "EXPORT",
+        "name": {
+          "en": "Export",
+          "ko": "내보내기"
+        },
+        "description": {
+          "en": "Export message data",
+          "ko": "메시지 데이터 내보내기"
+        },
+        "isDefault": false
+      }
+    ]
   }
 ]

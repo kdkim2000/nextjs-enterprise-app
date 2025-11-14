@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Paper, Typography, Collapse, Button, IconButton } from '@mui/material';
-import { Search, Close } from '@mui/icons-material';
+import { Box, Paper, Typography, Collapse, IconButton, Tooltip } from '@mui/material';
+import { Search, Close, RestartAlt, Check } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
@@ -360,13 +360,13 @@ export default function CodesPage() {
 
   // Memoized values
   const columns = useMemo(
-    () => createColumns(t, currentLocale, handleEditCode),
-    [t, currentLocale, handleEditCode]
+    () => createColumns(t, handleEditCode),
+    [t, handleEditCode]
   );
 
   const filterFields = useMemo(
-    () => createFilterFields(t, currentLocale),
-    [t, currentLocale]
+    () => createFilterFields(t),
+    [t]
   );
 
   const activeFilterCount = useMemo(
@@ -481,22 +481,68 @@ export default function CodesPage() {
                         onEnter={() => setAdvancedFilterOpen(false)}
                       />
                       <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            setQuickSearch('');
-                            setSearchCriteria({ codeType: '', code: '', status: '' });
-                          }}
-                        >
-                          {currentLocale === 'ko' ? '초기화' : 'Clear'}
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          onClick={() => setAdvancedFilterOpen(false)}
-                        >
-                          {currentLocale === 'ko' ? '적용' : 'Apply'}
-                        </Button>
+                        {/* Close Button */}
+                        <Tooltip title={currentLocale === 'ko' ? '닫기' : 'Close'} arrow>
+                          <IconButton
+                            onClick={() => setAdvancedFilterOpen(false)}
+                            size="small"
+                            sx={{
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              '&:hover': {
+                                borderColor: 'action.active',
+                                bgcolor: 'action.hover'
+                              }
+                            }}
+                          >
+                            <Close fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+
+                        {/* Clear Button */}
+                        <Tooltip title={currentLocale === 'ko' ? '초기화' : 'Clear'} arrow>
+                          <span>
+                            <IconButton
+                              onClick={() => {
+                                setQuickSearch('');
+                                setSearchCriteria({ codeType: '', code: '', status: '' });
+                              }}
+                              disabled={activeFilterCount === 0}
+                              size="small"
+                              sx={{
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                '&:hover': {
+                                  borderColor: 'warning.main',
+                                  bgcolor: 'warning.50'
+                                }
+                              }}
+                            >
+                              <RestartAlt fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+
+                        {/* Apply Button */}
+                        <Tooltip title={currentLocale === 'ko' ? '적용' : 'Apply'} arrow>
+                          <IconButton
+                            onClick={() => setAdvancedFilterOpen(false)}
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              color: 'white',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              },
+                              '&.Mui-disabled': {
+                                bgcolor: 'action.disabledBackground',
+                                color: 'action.disabled'
+                              }
+                            }}
+                          >
+                            <Check fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     </Paper>
                   </Collapse>
@@ -533,22 +579,22 @@ export default function CodesPage() {
         title={!editingCodeType?.id ? 'Add New Code Type' : 'Edit Code Type'}
         onSave={handleSaveCodeType}
         saveLoading={codeTypeSaveLoading}
-        saveLabel={t('common.save')}
-        cancelLabel={t('common.cancel')}
+        saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
+        cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
       >
         <CodeTypeFormFields
           codeType={editingCodeType}
           onChange={setEditingCodeType}
           locale={currentLocale}
           labels={{
-            code: t('code'),
-            nameEn: t('nameEn'),
-            nameKo: t('nameKo'),
-            descriptionEn: t('descriptionEn'),
-            descriptionKo: t('descriptionKo'),
-            order: t('order'),
-            status: t('status'),
-            category: t('category')
+            code: t('fields.code'),
+            nameEn: t('fields.nameEn'),
+            nameKo: t('fields.nameKo'),
+            descriptionEn: t('fields.descriptionEn'),
+            descriptionKo: t('fields.descriptionKo'),
+            order: t('fields.order'),
+            status: t('fields.status'),
+            category: t('fields.category')
           }}
         />
       </EditDrawer>
@@ -563,8 +609,8 @@ export default function CodesPage() {
         title={!editingCode?.id ? 'Add New Code' : 'Edit Code'}
         onSave={handleSaveCode}
         saveLoading={codeSaveLoading}
-        saveLabel={t('common.save')}
-        cancelLabel={t('common.cancel')}
+        saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
+        cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
       >
         <CodeFormFields
           code={editingCode}
@@ -572,16 +618,16 @@ export default function CodesPage() {
           onError={showError}
           locale={currentLocale}
           labels={{
-            codeType: t('codeType'),
-            code: t('code'),
-            nameEn: t('nameEn'),
-            nameKo: t('nameKo'),
-            descriptionEn: t('descriptionEn'),
-            descriptionKo: t('descriptionKo'),
-            order: t('order'),
-            status: t('status'),
-            parentCode: t('parentCode'),
-            attributes: t('attributes')
+            codeType: t('fields.codeType'),
+            code: t('fields.code'),
+            nameEn: t('fields.nameEn'),
+            nameKo: t('fields.nameKo'),
+            descriptionEn: t('fields.descriptionEn'),
+            descriptionKo: t('fields.descriptionKo'),
+            order: t('fields.order'),
+            status: t('fields.status'),
+            parentCode: t('fields.parentCode'),
+            attributes: t('fields.attributes')
           }}
         />
       </EditDrawer>

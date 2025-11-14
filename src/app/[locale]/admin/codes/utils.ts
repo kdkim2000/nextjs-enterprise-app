@@ -2,37 +2,39 @@ import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import { STATUS_OPTIONS } from './constants';
 import { SearchCriteria } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createFilterFields = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any,
-  currentLocale: string
-): FilterFieldConfig[] => [
-  {
-    name: 'codeType',
-    label: t('codeType'),
-    type: 'text',
-    placeholder: t('enterCodeType') || 'Enter code type...'
-  },
-  {
-    name: 'code',
-    label: t('code'),
-    type: 'text',
-    placeholder: t('enterCode') || 'Enter code...'
-  },
-  {
-    name: 'status',
-    label: t('status'),
-    type: 'select',
-    options: [
-      { value: '', label: t('all') || 'All' },
-      ...STATUS_OPTIONS.map(opt => ({
-        value: opt.value,
-        label: currentLocale === 'ko' ? opt.labelKo : opt.labelEn
-      }))
-    ]
-  }
-];
+  t: any
+): FilterFieldConfig[] => {
+  const locale = t('common.appName') === '엔터프라이즈 앱' ? 'ko' : 'en';
+
+  return [
+    {
+      name: 'codeType',
+      label: t('fields.codeType'),
+      type: 'text',
+      placeholder: t('placeholders.enterCodeType')
+    },
+    {
+      name: 'code',
+      label: t('fields.code'),
+      type: 'text',
+      placeholder: t('placeholders.enterCode')
+    },
+    {
+      name: 'status',
+      label: t('fields.status'),
+      type: 'select',
+      options: [
+        { value: '', label: t('common.all') },
+        ...STATUS_OPTIONS.map(opt => ({
+          value: opt.value,
+          label: locale === 'ko' ? opt.labelKo : opt.labelEn
+        }))
+      ]
+    }
+  ];
+};
 
 export const calculateActiveFilterCount = (searchCriteria: SearchCriteria): number => {
   return Object.entries(searchCriteria).filter(([_key, value]) => {
