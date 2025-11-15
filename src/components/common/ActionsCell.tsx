@@ -2,13 +2,18 @@
 
 import React from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
-import { Edit as EditIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
+import { Edit as EditIcon, MoreVert as MoreVertIcon, LockReset as LockResetIcon } from '@mui/icons-material';
 
 export interface ActionsCellProps {
   /**
    * Callback when edit button is clicked
    */
   onEdit?: () => void;
+
+  /**
+   * Callback when reset password button is clicked
+   */
+  onResetPassword?: () => void;
 
   /**
    * Callback when more (⋮) button is clicked
@@ -34,6 +39,12 @@ export interface ActionsCellProps {
   editTooltip?: string;
 
   /**
+   * Tooltip text for reset password button
+   * @default "Reset Password"
+   */
+  resetPasswordTooltip?: string;
+
+  /**
    * Tooltip text for more button
    * @default "More actions"
    */
@@ -48,14 +59,16 @@ export interface ActionsCellProps {
 
 /**
  * Common Actions Cell component for DataGrid
- * Provides Edit and More (⋮) action buttons
+ * Provides Edit, Reset Password, and More (⋮) action buttons
  */
 export default function ActionsCell({
   onEdit,
+  onResetPassword,
   onMore,
   showEdit = true,
   showMore = true,
   editTooltip = 'Edit',
+  resetPasswordTooltip = 'Reset Password',
   moreTooltip = 'More actions',
   disabled = false
 }: ActionsCellProps) {
@@ -71,6 +84,21 @@ export default function ActionsCell({
               disabled={disabled}
             >
               <EditIcon fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
+      )}
+
+      {onResetPassword && (
+        <Tooltip title={resetPasswordTooltip}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={onResetPassword}
+              color="warning"
+              disabled={disabled}
+            >
+              <LockResetIcon fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>

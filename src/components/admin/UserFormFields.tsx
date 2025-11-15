@@ -10,6 +10,7 @@ import {
   Divider
 } from '@mui/material';
 import AvatarUpload from '@/components/common/AvatarUpload';
+import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
 
 export interface UserFormData {
   id?: string;
@@ -151,6 +152,16 @@ export default function UserFormFields({
           <MenuItem value="inactive">Inactive</MenuItem>
         </Select>
       </FormControl>
+
+      {/* Role Assignment Section */}
+      <Divider sx={{ my: 2 }} />
+
+      <UserRoleAssignment
+        userId={user.id}
+        onRolesChange={(roleIds) => {
+          console.log('[UserFormFields] Roles changed:', roleIds);
+        }}
+      />
     </>
   );
 }

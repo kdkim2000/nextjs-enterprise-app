@@ -10,6 +10,7 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import MessageFormFields from '@/components/admin/MessageFormFields';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useMessageManagement } from './hooks/useMessageManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -23,6 +24,7 @@ interface MessagesPageProps {
 
 export default function MessagesPage({ params }: MessagesPageProps) {
   const { locale } = use(params);
+  const gridPermissions = useDataGridPermissions('PROG-MESSAGE-MGMT');
 
   // Use custom hook for all business logic
   const {
@@ -66,7 +68,7 @@ export default function MessagesPage({ params }: MessagesPageProps) {
   } = useMessageManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(locale, handleEdit), [locale, handleEdit]);
+  const columns = useMemo(() => createColumns(locale, handleEdit, gridPermissions.editable), [locale, handleEdit, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(locale), [locale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -140,10 +142,10 @@ export default function MessagesPage({ params }: MessagesPageProps) {
               rows={messages}
               columns={columns}
               onRowsChange={(rows) => setMessages(rows as Message[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
+              checkboxSelection={gridPermissions.checkboxSelection}
               exportFileName="messages"
               loading={searching}
               paginationMode="client"

@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
+import RouteGuard from '@/components/auth/RouteGuard';
 
 export default function DashboardPage() {
 
@@ -28,72 +29,74 @@ export default function DashboardPage() {
   ];
 
   return (
-    <PageContainer fullHeight={false}>
-      <PageHeader useMenu />
+    <RouteGuard>
+      <PageContainer fullHeight={false}>
+        <PageHeader useMenu />
 
-      <Grid container spacing={3}>
-        {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {stat.title}
-                    </Typography>
-                    <Typography variant="h4" fontWeight={600}>
-                      {stat.value}
-                    </Typography>
-                  </Box>
+        <Grid container spacing={3}>
+          {stats.map((stat, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card>
+                <CardContent>
                   <Box
                     sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: `${stat.color}15`,
-                      color: stat.color,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'space-between'
                     }}
                   >
-                    {React.cloneElement(stat.icon, { sx: { fontSize: 32 } })}
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        {stat.title}
+                      </Typography>
+                      <Typography variant="h4" fontWeight={600}>
+                        {stat.value}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        bgcolor: `${stat.color}15`,
+                        color: stat.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {React.cloneElement(stat.icon, { sx: { fontSize: 32 } })}
+                    </Box>
                   </Box>
-                </Box>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Grid container spacing={3} sx={{ mt: 1 }}>
+          <Grid item xs={12} md={8}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom fontWeight={600}>
+                Recent Activity
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                No recent activity to display
+              </Typography>
+            </Paper>
           </Grid>
-        ))}
-      </Grid>
 
-      <Grid container spacing={3} sx={{ mt: 1 }}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom fontWeight={600}>
-              Recent Activity
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              No recent activity to display
-            </Typography>
-          </Paper>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom fontWeight={600}>
+                Quick Actions
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Select a menu item from the sidebar to get started
+              </Typography>
+            </Paper>
+          </Grid>
         </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom fontWeight={600}>
-              Quick Actions
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Select a menu item from the sidebar to get started
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-    </PageContainer>
+      </PageContainer>
+    </RouteGuard>
   );
 }

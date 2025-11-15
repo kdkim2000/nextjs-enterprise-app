@@ -196,6 +196,7 @@ export default function LoginPage() {
 
               <Box component="form" onSubmit={handleMFAVerify} sx={{ mt: 4 }}>
                 <TextField
+                  id="mfa-code"
                   fullWidth
                   label="Verification Code"
                   value={mfaCode}
@@ -352,6 +353,7 @@ export default function LoginPage() {
             <Box component="form" onSubmit={handleLogin} sx={{ mt: 4 }}>
               <Stack spacing={2.5}>
                 <TextField
+                  id="login-username"
                   fullWidth
                   label="Username"
                   value={username}
@@ -367,6 +369,7 @@ export default function LoginPage() {
                 />
 
                 <TextField
+                  id="login-password"
                   fullWidth
                   label="Password"
                   type={showPassword ? 'text' : 'password'}

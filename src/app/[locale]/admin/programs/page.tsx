@@ -10,6 +10,7 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import ProgramFormFields, { ProgramFormData } from '@/components/admin/ProgramFormFields';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useProgramManagement } from './hooks/useProgramManagement';
 import { createColumns } from './constants';
@@ -19,6 +20,7 @@ import { Program } from './types';
 export default function ProgramManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const gridPermissions = useDataGridPermissions('PROG-PROGRAM-MGMT');
 
   // Use custom hook for all business logic
   const {
@@ -64,7 +66,7 @@ export default function ProgramManagementPage() {
   } = useProgramManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(currentLocale, handleEdit), [currentLocale, handleEdit]);
+  const columns = useMemo(() => createColumns(currentLocale, handleEdit, gridPermissions.editable), [currentLocale, handleEdit, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(), []);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -118,7 +120,7 @@ export default function ProgramManagementPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-PROGRAM-LIST"
+      programId="PROG-PROGRAM-MGMT"
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
@@ -139,11 +141,11 @@ export default function ProgramManagementPage() {
               rows={programs}
               columns={columns}
               onRowsChange={(rows) => setPrograms(rows as Program[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="programs"
               loading={searching}
               paginationMode="server"

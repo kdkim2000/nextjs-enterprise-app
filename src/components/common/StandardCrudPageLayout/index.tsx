@@ -9,6 +9,7 @@ import MessageAlert from '@/components/common/MessageAlert';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import HelpViewer from '@/components/common/HelpViewer';
+import RouteGuard from '@/components/auth/RouteGuard';
 
 export interface StandardCrudPageLayoutProps {
   // Page Header
@@ -159,7 +160,7 @@ export default function StandardCrudPageLayout({
     </>
   );
 
-  return (
+  const pageContent = (
     <PageContainer sx={containerSx}>
       {/* Header */}
       <PageHeader useMenu={useMenu} showBreadcrumb={showBreadcrumb} actions={finalHeaderActions} />
@@ -218,4 +219,15 @@ export default function StandardCrudPageLayout({
       )}
     </PageContainer>
   );
+
+  // If programId is provided, wrap with RouteGuard for permission check
+  if (programId) {
+    return (
+      <RouteGuard programCode={programId} requiredPermission="view" fallbackUrl="/dashboard">
+        {pageContent}
+      </RouteGuard>
+    );
+  }
+
+  return pageContent;
 }

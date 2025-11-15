@@ -15,6 +15,7 @@ import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
 import { Role, UserRoleMapping, SearchCriteria } from './types';
@@ -23,6 +24,9 @@ export default function UserRoleMappingPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+
+  // Permission control
+  const gridPermissions = useDataGridPermissions('PROG-USER-ROLE-MAP');
 
   // State
   const [roles, setRoles] = useState<Role[]>([]);
@@ -407,11 +411,11 @@ export default function UserRoleMappingPage() {
                     rows={filteredMappings}
                     columns={columns}
                     onRowsChange={(rows) => setFilteredMappings(rows as UserRoleMapping[])}
-                    onAdd={handleAddMapping}
-                    onDelete={handleDeleteMappings}
+                    {...(gridPermissions.showAddButton && { onAdd: handleAddMapping })}
+                    {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteMappings })}
                     onRefresh={fetchMappings}
-                    checkboxSelection
-                    editable
+                    checkboxSelection={gridPermissions.checkboxSelection}
+                    editable={gridPermissions.editable}
                     exportFileName={`user-role-mapping-${selectedRole.name}`}
                     loading={loading}
                     paginationMode="client"
