@@ -1,7 +1,7 @@
 [
   {
     "id": "prog-001",
-    "code": "PROG-USER-MGMT",
+    "code": "PROG-USER-LIST",
     "name": {
       "en": "User Management",
       "ko": "사용자 관리"
@@ -68,11 +68,7 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2025-11-09T15:37:59.633Z",
-      "tags": [
-        "admin",
-        "user",
-        "security"
-      ]
+      "tags": ["admin", "user", "security"]
     }
   },
   {
@@ -144,15 +140,11 @@
       "author": "System",
       "createdAt": "2025-11-13T00:00:00.000Z",
       "updatedAt": "2025-11-13T00:00:00.000Z",
-      "tags": [
-        "admin",
-        "department",
-        "organization"
-      ]
+      "tags": ["admin", "department", "organization"]
     }
   },
   {
-    "id": "prog-015",
+    "id": "prog-003",
     "code": "PROG-MENU-MGMT",
     "name": {
       "en": "Menu Management",
@@ -208,15 +200,11 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "admin",
-        "menu",
-        "navigation"
-      ]
+      "tags": ["admin", "menu", "navigation"]
     }
   },
   {
-    "id": "prog-003",
+    "id": "prog-004",
     "code": "PROG-ROLE-MGMT",
     "name": {
       "en": "Role Management",
@@ -272,11 +260,7 @@
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "admin",
-        "role",
-        "security"
-      ]
+      "tags": ["admin", "role", "security"]
     }
   },
   {
@@ -343,1601 +327,12 @@
         "isDefault": false
       }
     ],
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
-  },
-  {
-    "id": "prog-004",
-    "code": "PROG-HELP-MGMT",
-    "name": {
-      "en": "Help Management",
-      "ko": "도움말 관리"
-    },
-    "description": {
-      "en": "Manage help content for all pages",
-      "ko": "모든 페이지의 도움말 컨텐츠 관리"
-    },
-    "category": "admin",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View help content",
-          "ko": "도움말 조회"
-        },
-        "isDefault": true
-      },
-      {
-        "code": "WRITE",
-        "name": {
-          "en": "Write",
-          "ko": "쓰기"
-        },
-        "description": {
-          "en": "Create and update help content",
-          "ko": "도움말 생성 및 수정"
-        },
-        "isDefault": false
-      },
-      {
-        "code": "DELETE",
-        "name": {
-          "en": "Delete",
-          "ko": "삭제"
-        },
-        "description": {
-          "en": "Delete help content",
-          "ko": "도움말 삭제"
-        },
-        "isDefault": false
-      }
-    ],
     "metadata": {
       "version": "1.0.0",
       "author": "System",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "admin",
-        "help",
-        "documentation"
-      ]
-    }
-  },
-  {
-    "id": "prog-005",
-    "code": "PROG-USER-ROLE-MAP",
-    "name": {
-      "en": "User-Role Mapping",
-      "ko": "사용자-역할 매핑"
-    },
-    "description": {
-      "en": "Manage user-role assignments",
-      "ko": "사용자-역할 할당 관리"
-    },
-    "category": "admin",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View mappings",
-          "ko": "매핑 조회"
-        },
-        "isDefault": true
-      },
-      {
-        "code": "WRITE",
-        "name": {
-          "en": "Write",
-          "ko": "쓰기"
-        },
-        "description": {
-          "en": "Create and update mappings",
-          "ko": "매핑 생성 및 수정"
-        },
-        "isDefault": false
-      },
-      {
-        "code": "DELETE",
-        "name": {
-          "en": "Delete",
-          "ko": "삭제"
-        },
-        "description": {
-          "en": "Delete mappings",
-          "ko": "매핑 삭제"
-        },
-        "isDefault": false
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "admin",
-        "mapping",
-        "role"
-      ]
-    }
-  },
-  {
-    "id": "prog-006",
-    "code": "PROG-ROLE-MENU-MAP",
-    "name": {
-      "en": "Role-Menu Mapping",
-      "ko": "역할-메뉴 매핑"
-    },
-    "description": {
-      "en": "Manage role-menu permissions",
-      "ko": "역할-메뉴 권한 관리"
-    },
-    "category": "admin",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View mappings",
-          "ko": "매핑 조회"
-        },
-        "isDefault": true
-      },
-      {
-        "code": "WRITE",
-        "name": {
-          "en": "Write",
-          "ko": "쓰기"
-        },
-        "description": {
-          "en": "Create and update mappings",
-          "ko": "매핑 생성 및 수정"
-        },
-        "isDefault": false
-      },
-      {
-        "code": "DELETE",
-        "name": {
-          "en": "Delete",
-          "ko": "삭제"
-        },
-        "description": {
-          "en": "Delete mappings",
-          "ko": "매핑 삭제"
-        },
-        "isDefault": false
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "admin",
-        "mapping",
-        "menu"
-      ]
-    }
-  },
-  {
-    "id": "prog-007",
-    "code": "PROG-DASHBOARD",
-    "name": {
-      "en": "Dashboard",
-      "ko": "대시보드"
-    },
-    "description": {
-      "en": "Main dashboard with key metrics and insights",
-      "ko": "주요 지표 및 인사이트가 포함된 메인 대시보드"
-    },
-    "category": "dashboard",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View dashboard",
-          "ko": "대시보드 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "dashboard",
-        "analytics",
-        "overview"
-      ]
-    }
-  },
-  {
-    "id": "prog-008",
-    "code": "PROG-SETTINGS",
-    "name": {
-      "en": "User Settings",
-      "ko": "사용자 설정"
-    },
-    "description": {
-      "en": "User profile and preference settings",
-      "ko": "사용자 프로필 및 환경 설정"
-    },
-    "category": "user",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View settings",
-          "ko": "설정 조회"
-        },
-        "isDefault": true
-      },
-      {
-        "code": "WRITE",
-        "name": {
-          "en": "Write",
-          "ko": "쓰기"
-        },
-        "description": {
-          "en": "Update settings",
-          "ko": "설정 수정"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z",
-      "tags": [
-        "user",
-        "settings",
-        "profile"
-      ]
-    }
-  },
-  {
-    "id": "prog-014",
-    "code": "PROG-LOGS",
-    "name": {
-      "en": "System Logs",
-      "ko": "시스템 로그"
-    },
-    "description": {
-      "en": "View and analyze system logs and API requests",
-      "ko": "시스템 로그 및 API 요청 조회 및 분석"
-    },
-    "category": "admin",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View system logs",
-          "ko": "시스템 로그 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-08T22:39:37.733Z",
-      "updatedAt": "2025-11-08T22:39:37.735Z",
-      "tags": [
-        "logs",
-        "analytics",
-        "monitoring",
-        "admin"
-      ]
-    }
-  },
-  {
-    "id": "prog-009",
-    "code": "PROG-COMPONENTS",
-    "name": {
-      "en": "Components",
-      "ko": "컴포넌트"
-    },
-    "description": {
-      "en": "Component library showcase and demos",
-      "ko": "컴포넌트 라이브러리 쇼케이스 및 데모"
-    },
-    "category": "dashboard",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component showcase",
-          "ko": "컴포넌트 쇼케이스 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": [
-        "components",
-        "library",
-        "showcase",
-        "demo"
-      ]
-    }
-  },
-  {
-    "id": "prog-016",
-    "code": "PROG-DEV-SUPPORT",
-    "name": {
-      "en": "Dev Support",
-      "ko": "개발지원"
-    },
-    "description": {
-      "en": "Development support tools and resources",
-      "ko": "개발 지원 도구 및 리소스"
-    },
-    "category": "dev",
-    "type": "page",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "Access development tools",
-          "ko": "개발 도구 접근"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": [
-        "development",
-        "tools",
-        "support"
-      ]
-    }
-  },
-  {
-    "id": "prog-comp-001",
-    "code": "PROG-COMP-DATA-GRID",
-    "name": {
-      "en": "DataGrid Demo",
-      "ko": "DataGrid 데모"
-    },
-    "description": {
-      "en": "Excel-like data grid with sorting, filtering, pagination, export/import, and inline editing",
-      "ko": "정렬, 필터링, 페이지네이션, 내보내기/가져오기 및 인라인 편집 기능이 있는 Excel과 유사한 데이터 그리드"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "data-display", "grid"]
-    }
-  },
-  {
-    "id": "prog-comp-002",
-    "code": "PROG-COMP-EMPTY-STATE",
-    "name": {
-      "en": "Empty State Demo",
-      "ko": "Empty State 데모"
-    },
-    "description": {
-      "en": "Display empty state with icon, message, and action button",
-      "ko": "아이콘, 메시지 및 작업 버튼이 있는 빈 상태 표시"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "data-display", "empty-state"]
-    }
-  },
-  {
-    "id": "prog-comp-003",
-    "code": "PROG-COMP-PAGE-HEADER",
-    "name": {
-      "en": "Page Header Demo",
-      "ko": "Page Header 데모"
-    },
-    "description": {
-      "en": "Standardized page header with breadcrumb, title, and actions",
-      "ko": "브레드크럼, 제목 및 작업이 있는 표준 페이지 헤더"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "data-display", "header"]
-    }
-  },
-  {
-    "id": "prog-comp-004",
-    "code": "PROG-COMP-RICH-TEXT-EDITOR",
-    "name": {
-      "en": "Rich Text Editor Demo",
-      "ko": "Rich Text Editor 데모"
-    },
-    "description": {
-      "en": "WYSIWYG text editor with formatting, lists, links, images, and tables",
-      "ko": "서식, 목록, 링크, 이미지 및 테이블이 포함된 WYSIWYG 텍스트 편집기"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "editor"]
-    }
-  },
-  {
-    "id": "prog-comp-005",
-    "code": "PROG-COMP-FILE-UPLOAD",
-    "name": {
-      "en": "File Upload Demo",
-      "ko": "File Upload 데모"
-    },
-    "description": {
-      "en": "Drag-and-drop file upload with progress tracking and file size limits",
-      "ko": "진행 상황 추적 및 파일 크기 제한이 있는 드래그 앤 드롭 파일 업로드"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "upload"]
-    }
-  },
-  {
-    "id": "prog-comp-006",
-    "code": "PROG-COMP-DATE-RANGE-PICKER",
-    "name": {
-      "en": "Date Range Picker Demo",
-      "ko": "Date Range Picker 데모"
-    },
-    "description": {
-      "en": "Select date ranges with calendar interface",
-      "ko": "달력 인터페이스로 날짜 범위 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "date-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-007",
-    "code": "PROG-COMP-DATE-PICKER",
-    "name": {
-      "en": "Date Picker Demo",
-      "ko": "Date Picker 데모"
-    },
-    "description": {
-      "en": "Single date selection with calendar interface",
-      "ko": "달력 인터페이스로 단일 날짜 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "date-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-008",
-    "code": "PROG-COMP-YEAR-PICKER",
-    "name": {
-      "en": "Year Picker Demo",
-      "ko": "Year Picker 데모"
-    },
-    "description": {
-      "en": "Select year only",
-      "ko": "연도만 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "year-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-009",
-    "code": "PROG-COMP-MONTH-PICKER",
-    "name": {
-      "en": "Month Picker Demo",
-      "ko": "Month Picker 데모"
-    },
-    "description": {
-      "en": "Select year and month",
-      "ko": "연도와 월 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "month-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-010",
-    "code": "PROG-COMP-TIME-PICKER",
-    "name": {
-      "en": "Time Picker Demo",
-      "ko": "Time Picker 데모"
-    },
-    "description": {
-      "en": "Select time with hour and minute",
-      "ko": "시간과 분 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "time-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-011",
-    "code": "PROG-COMP-DATETIME-PICKER",
-    "name": {
-      "en": "DateTime Picker Demo",
-      "ko": "DateTime Picker 데모"
-    },
-    "description": {
-      "en": "Select date and time combined",
-      "ko": "날짜와 시간 통합 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "datetime-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-012",
-    "code": "PROG-COMP-DATETIME-RANGE-PICKER",
-    "name": {
-      "en": "DateTime Range Picker Demo",
-      "ko": "DateTime Range Picker 데모"
-    },
-    "description": {
-      "en": "Select date and time ranges",
-      "ko": "날짜와 시간 범위 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "datetime-range-picker"]
-    }
-  },
-  {
-    "id": "prog-comp-013",
-    "code": "PROG-COMP-MULTI-SELECT",
-    "name": {
-      "en": "Multi Select Demo",
-      "ko": "Multi Select 데모"
-    },
-    "description": {
-      "en": "Multiple selection dropdown with search and chips",
-      "ko": "검색 및 칩이 있는 다중 선택 드롭다운"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "multi-select"]
-    }
-  },
-  {
-    "id": "prog-comp-014",
-    "code": "PROG-COMP-AVATAR-UPLOAD",
-    "name": {
-      "en": "Avatar Upload Demo",
-      "ko": "Avatar Upload 데모"
-    },
-    "description": {
-      "en": "User avatar upload with crop and preview",
-      "ko": "자르기 및 미리보기가 있는 사용자 아바타 업로드"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "avatar"]
-    }
-  },
-  {
-    "id": "prog-comp-015",
-    "code": "PROG-COMP-USER-SELECTOR",
-    "name": {
-      "en": "User Selector Demo",
-      "ko": "User Selector 데모"
-    },
-    "description": {
-      "en": "Select users with search and autocomplete",
-      "ko": "검색 및 자동 완성으로 사용자 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "form", "user-selector"]
-    }
-  },
-  {
-    "id": "prog-comp-016",
-    "code": "PROG-COMP-QUICK-SEARCH",
-    "name": {
-      "en": "Quick Search Demo",
-      "ko": "Quick Search 데모"
-    },
-    "description": {
-      "en": "Simple search bar with instant results",
-      "ko": "즉각적인 결과를 제공하는 간단한 검색 바"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "search", "quick-search"]
-    }
-  },
-  {
-    "id": "prog-comp-017",
-    "code": "PROG-COMP-SEARCH-FILTER",
-    "name": {
-      "en": "Search Filter Demo",
-      "ko": "Search Filter 데모"
-    },
-    "description": {
-      "en": "Advanced filter panel with multiple criteria",
-      "ko": "여러 기준이 있는 고급 필터 패널"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "search", "filter"]
-    }
-  },
-  {
-    "id": "prog-comp-018",
-    "code": "PROG-COMP-ADVANCED-SEARCH",
-    "name": {
-      "en": "Advanced Search Demo",
-      "ko": "Advanced Search 데모"
-    },
-    "description": {
-      "en": "Dialog-based advanced search with complex filters",
-      "ko": "복잡한 필터가 있는 다이얼로그 기반 고급 검색"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "search", "advanced"]
-    }
-  },
-  {
-    "id": "prog-comp-019",
-    "code": "PROG-COMP-USER-SEARCH",
-    "name": {
-      "en": "User Search Demo",
-      "ko": "User Search 데모"
-    },
-    "description": {
-      "en": "Search and select users from a dialog",
-      "ko": "다이얼로그에서 사용자 검색 및 선택"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "search", "user"]
-    }
-  },
-  {
-    "id": "prog-comp-020",
-    "code": "PROG-COMP-CRUD-DIALOG",
-    "name": {
-      "en": "CRUD Dialog Demo",
-      "ko": "CRUD Dialog 데모"
-    },
-    "description": {
-      "en": "Generic dialog for Create, Read, Update, Delete operations",
-      "ko": "생성, 읽기, 업데이트, 삭제 작업을 위한 일반 다이얼로그"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "dialog", "crud"]
-    }
-  },
-  {
-    "id": "prog-comp-021",
-    "code": "PROG-COMP-EDIT-DRAWER",
-    "name": {
-      "en": "Edit Drawer Demo",
-      "ko": "Edit Drawer 데모"
-    },
-    "description": {
-      "en": "Side drawer for editing data with form fields",
-      "ko": "양식 필드가 있는 데이터 편집용 사이드 드로어"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "drawer", "edit"]
-    }
-  },
-  {
-    "id": "prog-comp-022",
-    "code": "PROG-COMP-DELETE-CONFIRM",
-    "name": {
-      "en": "Delete Confirm Demo",
-      "ko": "Delete Confirm 데모"
-    },
-    "description": {
-      "en": "Confirmation dialog for delete operations",
-      "ko": "삭제 작업을 위한 확인 다이얼로그"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "dialog", "delete"]
-    }
-  },
-  {
-    "id": "prog-comp-023",
-    "code": "PROG-COMP-HELP-VIEWER",
-    "name": {
-      "en": "Help Viewer Demo",
-      "ko": "Help Viewer 데모"
-    },
-    "description": {
-      "en": "Display contextual help content with markdown support",
-      "ko": "마크다운 지원으로 컨텍스트 도움말 콘텐츠 표시"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "help", "viewer"]
-    }
-  },
-  {
-    "id": "prog-comp-024",
-    "code": "PROG-COMP-PAGE-CONTAINER",
-    "name": {
-      "en": "Page Container Demo",
-      "ko": "Page Container 데모"
-    },
-    "description": {
-      "en": "Standard page container with consistent padding and spacing",
-      "ko": "일관된 패딩과 간격이 있는 표준 페이지 컨테이너"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "layout", "container"]
-    }
-  },
-  {
-    "id": "prog-comp-025",
-    "code": "PROG-COMP-ACTIONS-CELL",
-    "name": {
-      "en": "Actions Cell Demo",
-      "ko": "Actions Cell 데모"
-    },
-    "description": {
-      "en": "Action buttons for DataGrid rows (Edit, Delete, Status)",
-      "ko": "DataGrid 행에 대한 작업 버튼 (편집, 삭제, 상태)"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "layout", "actions"]
-    }
-  },
-  {
-    "id": "prog-comp-026",
-    "code": "PROG-COMP-STATUS-MENU",
-    "name": {
-      "en": "Status Menu Demo",
-      "ko": "Status Menu 데모"
-    },
-    "description": {
-      "en": "Dropdown menu for changing status with colors",
-      "ko": "색상으로 상태 변경을 위한 드롭다운 메뉴"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "layout", "status"]
-    }
-  },
-  {
-    "id": "prog-comp-027",
-    "code": "PROG-COMP-CHARTS",
-    "name": {
-      "en": "Charts Demo",
-      "ko": "Charts 데모"
-    },
-    "description": {
-      "en": "Various chart types for data visualization",
-      "ko": "데이터 시각화를 위한 다양한 차트 유형"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "chart", "visualization"]
-    }
-  },
-  {
-    "id": "prog-comp-028",
-    "code": "PROG-COMP-STACKED-AREA-CHART",
-    "name": {
-      "en": "Stacked Area Chart Demo",
-      "ko": "Stacked Area Chart 데모"
-    },
-    "description": {
-      "en": "Cumulative trends visualization with stacked areas",
-      "ko": "누적 영역으로 추세를 시각화하는 차트"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "chart", "stacked-area", "visualization"]
-    }
-  },
-  {
-    "id": "prog-comp-029",
-    "code": "PROG-COMP-MIXED-BAR-LINE-CHART",
-    "name": {
-      "en": "Mixed Bar & Line Chart Demo",
-      "ko": "Mixed Bar & Line Chart 데모"
-    },
-    "description": {
-      "en": "Combined bar and line chart for multi-metric comparison",
-      "ko": "막대와 선을 결합한 다중 지표 비교 차트"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "chart", "mixed", "bar-line", "visualization"]
-    }
-  },
-  {
-    "id": "prog-comp-030",
-    "code": "PROG-COMP-MULTI-AXIS-CHART",
-    "name": {
-      "en": "Multi-Axis Chart Demo",
-      "ko": "Multi-Axis Chart 데모"
-    },
-    "description": {
-      "en": "Dual Y-axis chart for comparing different scale metrics",
-      "ko": "다른 척도의 지표를 비교하는 이중 Y축 차트"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "chart", "multi-axis", "dual-axis", "visualization"]
-    }
-  },
-  {
-    "id": "prog-comp-031",
-    "code": "PROG-COMP-TREND-CHART",
-    "name": {
-      "en": "Trend Chart with Forecast Demo",
-      "ko": "Trend Chart 데모"
-    },
-    "description": {
-      "en": "Historical data with forecast projections and confidence intervals",
-      "ko": "실적 데이터와 예측 전망 및 신뢰구간을 표시하는 차트"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "chart", "trend", "forecast", "visualization"]
-    }
-  },
-  {
-    "id": "prog-comp-032",
-    "code": "PROG-COMP-UI-COMPONENTS",
-    "name": {
-      "en": "UI Components Demo",
-      "ko": "UI Components 데모"
-    },
-    "description": {
-      "en": "Comprehensive demo of all UI components",
-      "ko": "모든 UI 컴포넌트의 종합 데모"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "ui", "comprehensive"]
-    }
-  },
-  {
-    "id": "prog-comp-033",
-    "code": "PROG-COMP-LOADING",
-    "name": {
-      "en": "Loading Component Demo",
-      "ko": "Loading 컴포넌트 데모"
-    },
-    "description": {
-      "en": "Loading spinner, progress bar, skeleton loader",
-      "ko": "로딩 스피너, 프로그레스 바, 스켈레톤 로더"
-    },
-    "category": "component",
-    "type": "demo",
-    "status": "active",
-    "permissions": [
-      {
-        "code": "READ",
-        "name": {
-          "en": "Read",
-          "ko": "읽기"
-        },
-        "description": {
-          "en": "View component demo",
-          "ko": "컴포넌트 데모 조회"
-        },
-        "isDefault": true
-      }
-    ],
-    "metadata": {
-      "version": "1.0.0",
-      "author": "System",
-      "createdAt": "2025-11-10T00:00:00.000Z",
-      "updatedAt": "2025-11-10T00:00:00.000Z",
-      "tags": ["component", "demo", "loading", "spinner", "progress"]
+      "tags": ["admin", "code", "system"]
     }
   },
   {
@@ -2003,6 +398,529 @@
         },
         "isDefault": false
       }
-    ]
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "message", "system"]
+    }
+  },
+  {
+    "id": "prog-007",
+    "code": "PROG-HELP-MGMT",
+    "name": {
+      "en": "Help Management",
+      "ko": "도움말 관리"
+    },
+    "description": {
+      "en": "Manage help content for all pages",
+      "ko": "모든 페이지의 도움말 컨텐츠 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View help content",
+          "ko": "도움말 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update help content",
+          "ko": "도움말 생성 및 수정"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete help content",
+          "ko": "도움말 삭제"
+        },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "help", "documentation"]
+    }
+  },
+  {
+    "id": "prog-008",
+    "code": "PROG-USER-ROLE-MAP",
+    "name": {
+      "en": "User-Role Mapping",
+      "ko": "사용자-역할 매핑"
+    },
+    "description": {
+      "en": "Manage user-role assignments",
+      "ko": "사용자-역할 할당 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View mappings",
+          "ko": "매핑 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update mappings",
+          "ko": "매핑 생성 및 수정"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete mappings",
+          "ko": "매핑 삭제"
+        },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "mapping", "role"]
+    }
+  },
+  {
+    "id": "prog-009",
+    "code": "PROG-ROLE-MENU-MAP",
+    "name": {
+      "en": "Role-Menu Mapping",
+      "ko": "역할-메뉴 매핑"
+    },
+    "description": {
+      "en": "Manage role-menu permissions",
+      "ko": "역할-메뉴 권한 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View mappings",
+          "ko": "매핑 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update mappings",
+          "ko": "매핑 생성 및 수정"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete mappings",
+          "ko": "매핑 삭제"
+        },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "mapping", "menu"]
+    }
+  },
+  {
+    "id": "prog-010",
+    "code": "PROG-PROGRAM-MGMT",
+    "name": {
+      "en": "Program Management",
+      "ko": "프로그램 관리"
+    },
+    "description": {
+      "en": "Manage application programs and permissions",
+      "ko": "애플리케이션 프로그램 및 권한 관리"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View program data",
+          "ko": "프로그램 데이터 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Create and update programs",
+          "ko": "프로그램 생성 및 수정"
+        },
+        "isDefault": false
+      },
+      {
+        "code": "DELETE",
+        "name": {
+          "en": "Delete",
+          "ko": "삭제"
+        },
+        "description": {
+          "en": "Delete programs",
+          "ko": "프로그램 삭제"
+        },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["admin", "program", "system"]
+    }
+  },
+  {
+    "id": "prog-011",
+    "code": "PROG-LOGS",
+    "name": {
+      "en": "System Logs",
+      "ko": "시스템 로그"
+    },
+    "description": {
+      "en": "View and analyze system logs and API requests",
+      "ko": "시스템 로그 및 API 요청 조회 및 분석"
+    },
+    "category": "admin",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View system logs",
+          "ko": "시스템 로그 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2025-11-08T22:39:37.733Z",
+      "updatedAt": "2025-11-08T22:39:37.735Z",
+      "tags": ["logs", "analytics", "monitoring", "admin"]
+    }
+  },
+  {
+    "id": "prog-012",
+    "code": "PROG-SALES-RPT",
+    "name": {
+      "en": "Sales Report",
+      "ko": "판매 보고서"
+    },
+    "description": {
+      "en": "Sales analysis and reporting",
+      "ko": "판매 분석 및 보고서"
+    },
+    "category": "report",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View sales reports",
+          "ko": "판매 보고서 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "EXPORT",
+        "name": {
+          "en": "Export",
+          "ko": "내보내기"
+        },
+        "description": {
+          "en": "Export sales reports",
+          "ko": "판매 보고서 내보내기"
+        },
+        "isDefault": false
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["report", "sales", "analytics"]
+    }
+  },
+  {
+    "id": "prog-013",
+    "code": "PROG-DASHBOARD",
+    "name": {
+      "en": "Dashboard",
+      "ko": "대시보드"
+    },
+    "description": {
+      "en": "Main dashboard with key metrics and insights",
+      "ko": "주요 지표 및 인사이트가 포함된 메인 대시보드"
+    },
+    "category": "dashboard",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View dashboard",
+          "ko": "대시보드 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["dashboard", "analytics", "overview"]
+    }
+  },
+  {
+    "id": "prog-014",
+    "code": "PROG-SETTINGS",
+    "name": {
+      "en": "User Settings",
+      "ko": "사용자 설정"
+    },
+    "description": {
+      "en": "User profile and preference settings",
+      "ko": "사용자 프로필 및 환경 설정"
+    },
+    "category": "user",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View settings",
+          "ko": "설정 조회"
+        },
+        "isDefault": true
+      },
+      {
+        "code": "WRITE",
+        "name": {
+          "en": "Write",
+          "ko": "쓰기"
+        },
+        "description": {
+          "en": "Update settings",
+          "ko": "설정 수정"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["user", "settings", "profile"]
+    }
+  },
+  {
+    "id": "prog-015",
+    "code": "PROG-COMPONENTS",
+    "name": {
+      "en": "Component Library",
+      "ko": "컴포넌트 라이브러리"
+    },
+    "description": {
+      "en": "Browse all reusable UI components with examples and documentation",
+      "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색"
+    },
+    "category": "dev",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View component showcase",
+          "ko": "컴포넌트 쇼케이스 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-10T00:00:00.000Z",
+      "tags": ["components", "library", "showcase", "demo"]
+    }
+  },
+  {
+    "id": "prog-016",
+    "code": "PROG-THEME-DEMO",
+    "name": {
+      "en": "Theme System Demo",
+      "ko": "테마 시스템 데모"
+    },
+    "description": {
+      "en": "Comprehensive demonstration of MUI theme system with custom colors and styles",
+      "ko": "커스텀 색상 및 스타일이 적용된 MUI 테마 시스템의 종합 데모"
+    },
+    "category": "dev",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View theme demo",
+          "ko": "테마 데모 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["dev", "theme", "demo", "mui"]
+    }
+  },
+  {
+    "id": "prog-017",
+    "code": "PROG-REACT-STUDY",
+    "name": {
+      "en": "React Study Group",
+      "ko": "React 연구회"
+    },
+    "description": {
+      "en": "React learning materials and study resources",
+      "ko": "React 학습 교재 및 연구 자료"
+    },
+    "category": "dev",
+    "type": "page",
+    "status": "active",
+    "permissions": [
+      {
+        "code": "READ",
+        "name": {
+          "en": "Read",
+          "ko": "읽기"
+        },
+        "description": {
+          "en": "View study materials",
+          "ko": "학습 자료 조회"
+        },
+        "isDefault": true
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "author": "System",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "tags": ["dev", "react", "study", "learning"]
+    }
   }
 ]
