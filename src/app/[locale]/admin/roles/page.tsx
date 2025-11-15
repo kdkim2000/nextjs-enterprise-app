@@ -31,6 +31,7 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import UserSelector from '@/components/common/UserSelector';
 import RouteGuard from '@/components/auth/RouteGuard';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n } from '@/lib/i18n/client';
 import { Role } from '@/types/role';
 import { useRoleManagement } from './hooks/useRoleManagement';
@@ -39,6 +40,7 @@ import { createFilterFields, calculateActiveFilterCount } from './utils';
 
 export default function RoleManagementPage() {
   const t = useI18n();
+  const gridPermissions = useDataGridPermissions('PROG-ROLE-MGMT');
 
   // Use custom hook for all business logic
   const {
@@ -81,7 +83,7 @@ export default function RoleManagementPage() {
   } = useRoleManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(handleEdit), [handleEdit]);
+  const columns = useMemo(() => createColumns(handleEdit, gridPermissions.editable), [handleEdit, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(), []);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -186,11 +188,11 @@ export default function RoleManagementPage() {
               rows={roles}
               columns={columns}
               onRowsChange={(rows) => setRoles(rows as Role[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="roles"
               loading={searching}
             />

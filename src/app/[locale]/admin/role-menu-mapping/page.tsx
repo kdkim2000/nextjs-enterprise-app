@@ -10,19 +10,23 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import MasterDetailLayout from '@/components/common/MasterDetailLayout';
+import EditDrawer from '@/components/common/EditDrawer';
 import ProgramList from './components/ProgramList';
 import RoleSearchDialog from './components/RoleSearchDialog';
+import PermissionEditForm from './components/PermissionEditForm';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
-import { Role, Program, RoleProgramMapping, SearchCriteria } from './types';
+import { Role, Program, RoleProgramMapping, SearchCriteria, PermissionFormData } from './types';
 
 export default function RoleMenuMappingPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  const gridPermissions = useDataGridPermissions('PROG-ROLE-MENU-MAP');
 
   // State
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -44,6 +48,11 @@ export default function RoleMenuMappingPage() {
 
   // Add Roles Dialog
   const [addRolesDialogOpen, setAddRolesDialogOpen] = useState(false);
+
+  // Edit Permission Dialog
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingPermission, setEditingPermission] = useState<PermissionFormData | null>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Mapping Delete
   const [mappingDeleteConfirmOpen, setMappingDeleteConfirmOpen] = useState(false);
@@ -99,6 +108,13 @@ export default function RoleMenuMappingPage() {
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
+
+  // Auto-select first program on initial load
+  useEffect(() => {
+    if (programs.length > 0 && !selectedProgram) {
+      setSelectedProgram(programs[0]);
+    }
+  }, [programs, selectedProgram]);
 
   // Fetch mappings when program selected
   useEffect(() => {
@@ -164,6 +180,60 @@ export default function RoleMenuMappingPage() {
     }
   }, [selectedProgram, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
 
+  const handleEditPermission = useCallback((id: string | number) => {
+    const mapping = mappings.find((m) => m.id === id);
+    if (mapping) {
+      setEditingPermission({
+        id: mapping.id,
+        roleId: mapping.roleId,
+        roleName: mapping.roleName || '',
+        roleDisplayName: mapping.roleDisplayName || '',
+        programId: mapping.programId,
+        programCode: mapping.programCode || '',
+        programName: mapping.programName || { en: '', ko: '' },
+        canView: mapping.canView,
+        canCreate: mapping.canCreate,
+        canUpdate: mapping.canUpdate,
+        canDelete: mapping.canDelete
+      });
+      setEditDrawerOpen(true);
+    }
+  }, [mappings]);
+
+  const handleSavePermission = useCallback(async () => {
+    if (!editingPermission) return;
+
+    try {
+      setSaveLoading(true);
+
+      await api.put('/role-program-mapping', {
+        id: editingPermission.id,
+        canView: editingPermission.canView,
+        canCreate: editingPermission.canCreate,
+        canUpdate: editingPermission.canUpdate,
+        canDelete: editingPermission.canDelete
+      });
+
+      showSuccess(
+        currentLocale === 'ko'
+          ? '권한이 성공적으로 수정되었습니다'
+          : 'Permissions updated successfully'
+      );
+
+      setEditDrawerOpen(false);
+      setEditingPermission(null);
+      await fetchData();
+      await fetchMappings();
+    } catch (err: any) {
+      showError(
+        err.response?.data?.error ||
+          (currentLocale === 'ko' ? '권한 수정 실패' : 'Failed to update permissions')
+      );
+    } finally {
+      setSaveLoading(false);
+    }
+  }, [editingPermission, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
+
   const handleDeleteMappings = useCallback((ids: (string | number)[]) => {
     setSelectedMappingsForDelete(ids);
     setMappingDeleteConfirmOpen(true);
@@ -196,8 +266,8 @@ export default function RoleMenuMappingPage() {
 
   // Memoized values
   const columns = useMemo(
-    () => createColumns(t as (key: string) => string, currentLocale),
-    [t, currentLocale]
+    () => createColumns(t as (key: string) => string, currentLocale, handleEditPermission, gridPermissions.editable),
+    [t, currentLocale, handleEditPermission, gridPermissions.editable]
   );
 
   const filterFields = useMemo(
@@ -402,11 +472,11 @@ export default function RoleMenuMappingPage() {
                     rows={filteredMappings}
                     columns={columns}
                     onRowsChange={(rows) => setFilteredMappings(rows as RoleProgramMapping[])}
-                    onAdd={handleAddMapping}
-                    onDelete={handleDeleteMappings}
+                    {...(gridPermissions.showAddButton && { onAdd: handleAddMapping })}
+                    {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteMappings })}
                     onRefresh={fetchMappings}
-                    checkboxSelection
-                    editable
+                    checkboxSelection={gridPermissions.checkboxSelection}
+                    editable={gridPermissions.editable}
                     exportFileName={`program-role-mapping-${selectedProgram.code}`}
                     loading={loading}
                     paginationMode="client"
@@ -431,6 +501,27 @@ export default function RoleMenuMappingPage() {
         onConfirm={handleConfirmDeleteMappings}
         loading={deleting}
       />
+
+      {/* Edit Permission Drawer */}
+      <EditDrawer
+        open={editDrawerOpen}
+        onClose={() => {
+          setEditDrawerOpen(false);
+          setEditingPermission(null);
+        }}
+        title={currentLocale === 'ko' ? '권한 수정' : 'Edit Permissions'}
+        onSave={handleSavePermission}
+        saveLoading={saveLoading}
+        saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
+        cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
+        width={{ xs: '100%', sm: 500, md: 600 }}
+      >
+        <PermissionEditForm
+          permission={editingPermission}
+          onChange={setEditingPermission}
+          locale={currentLocale}
+        />
+      </EditDrawer>
 
       {/* Add Roles to Program Dialog */}
       <RoleSearchDialog

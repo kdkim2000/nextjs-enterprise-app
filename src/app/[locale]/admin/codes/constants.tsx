@@ -13,11 +13,12 @@ export const STATUS_OPTIONS = [
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
-  handleEdit: (id: string | number) => void
+  handleEdit: (id: string | number) => void,
+  canUpdate: boolean = true
 ): GridColDef[] => {
   const locale = t('common.appName') === '엔터프라이즈 앱' ? 'ko' : 'en';
 
-  return [
+  const columns: GridColDef[] = [
     {
       field: 'id',
       headerName: 'ID',
@@ -86,8 +87,11 @@ export const createColumns = (
       headerName: t('fields.parentCode'),
       width: 130,
       sortable: true
-    },
-    {
+    }
+  ];
+
+  if (canUpdate) {
+    columns.push({
       field: 'actions',
       headerName: t('fields.actions'),
       width: 80,
@@ -99,6 +103,8 @@ export const createColumns = (
           showMore={false}
         />
       )
-    }
-  ];
+    });
+  }
+
+  return columns;
 };
