@@ -14,7 +14,8 @@ export const DEPARTMENTS = [
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
-  handleEdit: (id: string | number) => void
+  handleEdit: (id: string | number) => void,
+  handleResetPassword?: (id: string | number) => void
 ): GridColDef[] => [
   { field: 'id', headerName: 'ID', width: 70 },
   {
@@ -65,14 +66,20 @@ export const createColumns = (
   {
     field: 'actions',
     headerName: 'Actions',
-    width: 80,
+    width: 150,
     sortable: false,
     filterable: false,
-    renderCell: (params) => (
-      <ActionsCell
-        onEdit={() => handleEdit(params.row.id)}
-        showMore={false}
-      />
-    )
+    renderCell: (params) => {
+      console.log('[UserManagement] Rendering actions for user:', params.row.username, 'hasResetPassword:', !!handleResetPassword);
+      return (
+        <ActionsCell
+          onEdit={() => handleEdit(params.row.id)}
+          onResetPassword={handleResetPassword ? () => handleResetPassword(params.row.id) : undefined}
+          editTooltip="Edit User"
+          resetPasswordTooltip="Reset Password"
+          showMore={false}
+        />
+      );
+    }
   }
 ];

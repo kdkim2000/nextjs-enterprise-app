@@ -34,6 +34,7 @@ import { api } from '@/lib/axios';
 import { toast } from 'react-toastify';
 import PageHeader from '@/components/common/PageHeader';
 import { getAvatarUrl } from '@/lib/config';
+import RouteGuard from '@/components/auth/RouteGuard';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -243,20 +244,21 @@ export default function SettingsPage() {
   };
 
   return (
-    <Box>
-      <PageHeader useMenu showBreadcrumb />
+    <RouteGuard programCode="PROG-SETTINGS" requiredPermission="view" fallbackUrl="/dashboard">
+      <Box>
+        <PageHeader useMenu showBreadcrumb />
 
-      <Paper sx={{ mt: 3 }}>
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          aria-label="settings tabs"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Tab icon={<Person />} label={locale === 'ko' ? '프로필' : 'Profile'} />
-          <Tab icon={<Security />} label={locale === 'ko' ? '보안' : 'Security'} />
-          <Tab icon={<Palette />} label={locale === 'ko' ? '환경설정' : 'Preferences'} />
-        </Tabs>
+        <Paper sx={{ mt: 3 }}>
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            aria-label="settings tabs"
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab icon={<Person />} label={locale === 'ko' ? '프로필' : 'Profile'} />
+            <Tab icon={<Security />} label={locale === 'ko' ? '보안' : 'Security'} />
+            <Tab icon={<Palette />} label={locale === 'ko' ? '환경설정' : 'Preferences'} />
+          </Tabs>
 
         {/* Profile Tab */}
         <TabPanel value={currentTab} index={0}>
@@ -536,5 +538,6 @@ export default function SettingsPage() {
         </TabPanel>
       </Paper>
     </Box>
+    </RouteGuard>
   );
 }

@@ -126,7 +126,7 @@ export default function MenuManagementPage() {
       onFilterClear={handleAdvancedSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-MENU-LIST"
+      programId="PROG-MENU-MGMT"
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

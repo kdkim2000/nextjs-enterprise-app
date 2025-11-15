@@ -10,6 +10,7 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
+import ResetPasswordDialog from '@/components/admin/ResetPasswordDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useUserManagement } from './hooks/useUserManagement';
 import { createColumns, DEPARTMENTS } from './constants';
@@ -47,6 +48,9 @@ export default function UserManagementPage() {
     successMessage,
     errorMessage,
     showError,
+    resetPasswordDialogOpen,
+    resetPasswordUser,
+    resetPasswordLoading,
     // Handlers
     handleAdd,
     handleEdit,
@@ -54,6 +58,9 @@ export default function UserManagementPage() {
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
+    handleResetPasswordClick,
+    handleResetPasswordConfirm,
+    handleResetPasswordCancel,
     handleRefresh,
     handleSearchChange,
     handleQuickSearch,
@@ -65,7 +72,10 @@ export default function UserManagementPage() {
   } = useUserManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(t, handleEdit), [t, handleEdit]);
+  const columns = useMemo(() => {
+    console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
+    return createColumns(t, handleEdit, handleResetPasswordClick);
+  }, [t, handleEdit, handleResetPasswordClick]);
   const filterFields = useMemo(() => createFilterFields(t), [t]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -188,6 +198,15 @@ export default function UserManagementPage() {
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
+      />
+
+      {/* Reset Password Dialog */}
+      <ResetPasswordDialog
+        open={resetPasswordDialogOpen}
+        user={resetPasswordUser}
+        loading={resetPasswordLoading}
+        onConfirm={handleResetPasswordConfirm}
+        onCancel={handleResetPasswordCancel}
       />
     </StandardCrudPageLayout>
   );

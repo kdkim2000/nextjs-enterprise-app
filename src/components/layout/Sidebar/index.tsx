@@ -108,10 +108,13 @@ export default function Sidebar({ expanded }: SidebarProps) {
   };
 
   const handleMenuClick = (menu: MenuItem) => {
+    console.log('[Sidebar] Menu clicked:', menu.code, menu.path);
     if (menu.children && menu.children.length > 0) {
       handleToggleExpand(menu.id);
     } else {
-      router.push(`/${locale}${menu.path}`);
+      const targetPath = `/${locale}${menu.path}`;
+      console.log('[Sidebar] Navigating to:', targetPath);
+      router.push(targetPath);
     }
   };
 

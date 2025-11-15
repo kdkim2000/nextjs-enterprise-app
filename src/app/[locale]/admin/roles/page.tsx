@@ -30,6 +30,7 @@ import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import UserSelector from '@/components/common/UserSelector';
+import RouteGuard from '@/components/auth/RouteGuard';
 import { useI18n } from '@/lib/i18n/client';
 import { Role } from '@/types/role';
 import { useRoleManagement } from './hooks/useRoleManagement';
@@ -102,9 +103,10 @@ export default function RoleManagementPage() {
   );
 
   return (
-    <PageContainer>
-      {/* Header - Auto mode: fetches menu info based on current path */}
-      <PageHeader
+    <RouteGuard programCode="PROG-ROLE-MGMT" requiredPermission="view" fallbackUrl="/dashboard">
+      <PageContainer>
+        {/* Header - Auto mode: fetches menu info based on current path */}
+        <PageHeader
         useMenu
         showBreadcrumb
         actions={
@@ -377,10 +379,11 @@ export default function RoleManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        programId="PROG-ROLE-LIST"
+        programId="PROG-ROLE-MGMT"
         language="en"
         isAdmin={isAdmin}
       />
     </PageContainer>
+    </RouteGuard>
   );
 }

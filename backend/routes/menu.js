@@ -2,6 +2,7 @@ const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
 const { readJSON, writeJSON } = require('../utils/fileUtils');
 const { appendLog } = require('../middleware/logger');
+const { getUserAccessiblePrograms } = require('../middleware/permissionMiddleware');
 const path = require('path');
 
 const router = express.Router();
@@ -11,35 +12,60 @@ const PERMISSIONS_FILE = path.join(__dirname, '../data/permissions.json');
 const PREFERENCES_FILE = path.join(__dirname, '../data/userPreferences.json');
 
 /**
- * Get user's accessible menus
+ * Get user's accessible menus based on program permissions
  */
 router.get('/user-menus', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
 
     const menus = await readJSON(MENUS_FILE);
-    const permissions = await readJSON(PERMISSIONS_FILE);
 
-    const userPermission = permissions.find(p => p.userId === userId);
+    // Get user's accessible programs with permissions
+    const accessiblePrograms = getUserAccessiblePrograms(userId);
 
-    if (!userPermission) {
-      return res.json({ menus: [] });
-    }
+    // Create a map of programCode -> permissions for efficient lookup
+    const programPermissionsMap = new Map();
+    accessiblePrograms.forEach(prog => {
+      programPermissionsMap.set(prog.code, prog.permissions);
+    });
 
-    // If user has * access, return all menus
-    if (userPermission.menuAccess.includes('*')) {
-      return res.json({ menus: buildMenuTree(menus) });
-    }
+    // Debug logging
+    console.log(`[Menu Filter] User ${userId} has access to programs:`,
+      Array.from(programPermissionsMap.keys()));
 
-    // Filter menus based on access
-    const accessibleMenus = menus.filter(menu =>
-      userPermission.menuAccess.includes(menu.id)
-    );
+    // Filter menus based on program access AND view permission
+    // ONLY include menus with programId that user has VIEW access to
+    // Parent menus (without programId) will be added later if they have accessible children
+    const accessibleMenus = menus.filter(menu => {
+      // If menu has programId, check if user has VIEW permission to that program
+      if (menu.programId) {
+        const permissions = programPermissionsMap.get(menu.programId);
+        const hasViewAccess = permissions && permissions.canView;
+
+        if (!hasViewAccess) {
+          console.log(`[Menu Filter] Filtering out menu "${menu.code}" - no VIEW permission for program ${menu.programId}`);
+        }
+        return hasViewAccess;
+      }
+
+      // Parent menus (no programId) are NOT automatically included here
+      // They will be added by includeParentMenus if they have accessible children
+      return false;
+    });
+
+    console.log(`[Menu Filter] Accessible leaf menus: ${accessibleMenus.length}`);
 
     // Include parent menus for accessible items
     const menusWithParents = includeParentMenus(accessibleMenus, menus);
 
-    res.json({ menus: buildMenuTree(menusWithParents) });
+    console.log(`[Menu Filter] Menus with parents: ${menusWithParents.length}`);
+
+    // Filter out parent menus that have no accessible children
+    const filteredMenus = filterEmptyParents(menusWithParents, menus);
+
+    console.log(`[Menu Filter] Final filtered menus: ${filteredMenus.length}`);
+
+    res.json({ menus: buildMenuTree(filteredMenus) });
   } catch (error) {
     console.error('Get user menus error:', error);
     res.status(500).json({ error: 'Failed to fetch menus' });
@@ -66,23 +92,19 @@ router.get('/by-path', authenticateToken, async (req, res) => {
       return res.json({ menu: null });
     }
 
-    // Check if user has access
+    // Check if user has access to the program
     const userId = req.user.userId;
-    const permissions = await readJSON(PERMISSIONS_FILE);
-    const userPermission = permissions.find(p => p.userId === userId);
 
-    if (!userPermission) {
-      // If no permissions found, return null menu (let page-level auth handle access)
-      return res.json({ menu: null });
-    }
+    // If menu has programId, check program permissions
+    if (menu.programId) {
+      const accessiblePrograms = getUserAccessiblePrograms(userId);
+      const hasAccess = accessiblePrograms.some(p => p.code === menu.programId);
 
-    const hasAccess = userPermission.menuAccess.includes('*') ||
-                     userPermission.menuAccess.includes(menu.id);
-
-    if (!hasAccess) {
-      // If no access, return null menu (let page-level auth handle access)
-      // Don't log or update recent menus for unauthorized access
-      return res.json({ menu: null });
+      if (!hasAccess) {
+        // If no access, return null menu (let page-level auth handle access)
+        // Don't log or update recent menus for unauthorized access
+        return res.json({ menu: null });
+      }
     }
 
     // Log menu access
@@ -179,6 +201,31 @@ function includeParentMenus(accessibleMenus, allMenus) {
   });
 
   return result;
+}
+
+/**
+ * Helper: Filter out parent menus that have no accessible children
+ */
+function filterEmptyParents(menusWithParents, allMenus) {
+  const menuIds = new Set(menusWithParents.map(m => m.id));
+
+  return menusWithParents.filter(menu => {
+    // If menu has programId, keep it (it's a leaf menu that passed permission check)
+    if (menu.programId) {
+      return true;
+    }
+
+    // For parent menus (no programId), check if any children are in the accessible list
+    const hasAccessibleChildren = allMenus.some(m =>
+      m.parentId === menu.id && menuIds.has(m.id)
+    );
+
+    if (!hasAccessibleChildren) {
+      console.log(`[Menu Filter] Filtering out empty parent menu "${menu.code}"`);
+    }
+
+    return hasAccessibleChildren;
+  });
 }
 
 /**

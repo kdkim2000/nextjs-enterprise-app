@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const { authenticateToken } = require('../middleware/auth');
+const { requireProgramAccess, requirePermission } = require('../middleware/permissionMiddleware');
 const { readJSON, writeJSON } = require('../utils/fileUtils');
 const path = require('path');
 
@@ -11,13 +12,10 @@ const MENUS_FILE = path.join(__dirname, '../data/menus.json');
 const USERS_FILE = path.join(__dirname, '../data/users.json');
 
 /**
- * Get all users with search and pagination (admin only)
+ * Get all users with search and pagination
  */
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
 
     const users = await readJSON(USERS_FILE);
 
@@ -182,15 +180,48 @@ router.get('/recent-menus', authenticateToken, async (req, res) => {
 });
 
 /**
+ * Get user's program permissions
+ */
+router.get('/permissions', authenticateToken, async (req, res) => {
+  try {
+    const { getUserAccessiblePrograms } = require('../middleware/permissionMiddleware');
+
+    const userId = req.user.userId;
+    const accessiblePrograms = getUserAccessiblePrograms(userId);
+
+    // Transform to the format expected by frontend
+    const permissions = accessiblePrograms.map(program => ({
+      programCode: program.code,
+      programId: program.id,
+      programName: program.name,
+      canView: program.permissions.canView,
+      canCreate: program.permissions.canCreate,
+      canUpdate: program.permissions.canUpdate,
+      canDelete: program.permissions.canDelete
+    }));
+
+    res.json({ permissions });
+  } catch (error) {
+    console.error('Get permissions error:', error);
+    res.status(500).json({ error: 'Failed to get permissions' });
+  }
+});
+
+/**
  * Get single user by ID
  */
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Users can view their own profile, admins can view any profile
-    if (req.user.userId !== id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied' });
+    // Users can view their own profile without permission check
+    // For viewing other users, require view permission
+    if (req.user.userId !== id) {
+      const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
+      const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
+      if (!permissions.hasAccess) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
     }
 
     const users = await readJSON(USERS_FILE);
@@ -210,13 +241,10 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 /**
- * Create new user (admin only)
+ * Create new user
  */
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'), async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
 
     const { username, password, name, email, role, department, status, avatarUrl } = req.body;
 
@@ -319,18 +347,22 @@ router.put('/preferences', authenticateToken, async (req, res) => {
 });
 
 /**
- * Update user (admin only, or user updating their own profile)
+ * Update user (or user updating their own profile)
  */
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Users can update their own profile (limited fields), admins can update any profile
+    // Users can update their own profile (limited fields)
+    // For updating other users, require update permission
     const isSelf = req.user.userId === id;
-    const isAdmin = req.user.role === 'admin';
 
-    if (!isSelf && !isAdmin) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!isSelf) {
+      const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
+      const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
+      if (!permissions.canUpdate) {
+        return res.status(403).json({ error: 'Update permission required' });
+      }
     }
 
     const { name, email, role, department, status, avatarUrl } = req.body;
@@ -354,8 +386,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (department !== undefined) users[userIndex].department = department;
     if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
 
-    // Only admins can change role and status
-    if (isAdmin) {
+    // Only users with update permission can change role and status (not when updating own profile)
+    if (!isSelf) {
       if (role) users[userIndex].role = role;
       if (status) users[userIndex].status = status;
     }
@@ -372,13 +404,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 /**
- * Delete user (admin only)
+ * Delete user
  */
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, requirePermission('PROG-USER-LIST', 'delete'), async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
 
     const { id } = req.params;
 
@@ -590,6 +619,56 @@ router.post('/mfa-toggle', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Toggle MFA error:', error);
     res.status(500).json({ error: 'Failed to toggle MFA' });
+  }
+});
+
+/**
+ * Reset user password (Admin only)
+ */
+router.post('/:id/reset-password', authenticateToken, requirePermission('PROG-USER-LIST', 'update'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    // Prevent resetting own password through this endpoint
+    if (req.user.userId === id) {
+      return res.status(400).json({ error: 'Cannot reset your own password. Use change-password endpoint instead.' });
+    }
+
+    // Validate new password
+    if (!newPassword) {
+      return res.status(400).json({ error: 'New password is required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const users = await readJSON(USERS_FILE);
+    const userIndex = users.findIndex(u => u.id === id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    users[userIndex].password = hashedPassword;
+
+    await writeJSON(USERS_FILE, users);
+
+    res.json({
+      message: 'Password reset successfully',
+      user: {
+        id: users[userIndex].id,
+        username: users[userIndex].username,
+        name: users[userIndex].name,
+        email: users[userIndex].email
+      }
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
   }
 });
 
