@@ -90,8 +90,15 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     try {
       const response = await api.get('/user');
       setAllUsers(response.users || []);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
+    } catch (error: any) {
+      // If user doesn't have permission to view users (403), silently set empty array
+      if (error.response?.status === 403) {
+        console.warn('User does not have permission to view user list');
+        setAllUsers([]);
+      } else {
+        console.error('Failed to fetch users:', error);
+        setAllUsers([]);
+      }
     }
   }, []);
 

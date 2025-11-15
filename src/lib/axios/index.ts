@@ -14,21 +14,17 @@ const axiosInstance = axios.create({
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Skip adding token for auth endpoints (login, refresh, etc.)
+    const authEndpoints = ['/auth/login', '/auth/refresh', '/auth/sso', '/auth/register'];
+    const isAuthEndpoint = authEndpoints.some(endpoint => config.url?.includes(endpoint));
+
     // Get token from localStorage or cookie
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isAuthEndpoint) {
       const token = localStorage.getItem('accessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
-
-    // Debug logging
-    console.log('[Axios Request]', {
-      url: config.url,
-      baseURL: config.baseURL,
-      fullURL: `${config.baseURL}${config.url}`,
-      params: config.params
-    });
 
     return config;
   },
@@ -79,7 +75,7 @@ axiosInstance.interceptors.response.use(
 
     // Handle 403 Forbidden - insufficient permissions
     if (error.response?.status === 403) {
-      console.error('Access denied:', error.response.data);
+      console.warn('Access denied to:', originalRequest.url);
     }
 
     // Handle network errors

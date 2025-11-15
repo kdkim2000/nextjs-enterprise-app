@@ -47,28 +47,21 @@ export default function PageHeader({
 }: PageHeaderProps) {
   const pathname = usePathname();
   const locale = useCurrentLocale();
-  const { getMenuByPath, menus } = useMenu();
-  const [menuInfo, setMenuInfo] = useState<MenuItem | null>(null);
+  const { getMenuByPath, menus, currentMenu } = useMenu();
 
-  // Auto-fetch menu based on current path
+  // Auto-fetch menu based on current path - only once per path
   useEffect(() => {
     if (useMenuMode && pathname) {
-      const fetchMenu = async () => {
-        try {
-          // Remove locale prefix from path
-          const cleanPath = pathname.replace(`/${locale}`, '');
-          const menu = await getMenuByPath(cleanPath);
-          setMenuInfo(menu);
-        } catch (error) {
-          console.error('Failed to fetch menu:', error);
-        }
-      };
-      fetchMenu();
+      const cleanPath = pathname.replace(`/${locale}`, '');
+      // Context will handle deduplication and set currentMenu
+      void getMenuByPath(cleanPath);
     }
-  }, [useMenuMode, pathname, locale, getMenuByPath]);
+    // getMenuByPath is stable (empty deps), pathname and locale change triggers refetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useMenuMode, pathname, locale]);
 
-  // Determine which menu to use
-  const activeMenu = menuProp || menuInfo;
+  // Determine which menu to use - use currentMenu from Context directly
+  const activeMenu = menuProp || currentMenu;
 
   // Get localized title
   const displayTitle = activeMenu

@@ -7,8 +7,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Remove requireRole - use program-based permissions via RouteGuard in each page
   return (
-    <AuthenticatedLayout requireRole="admin">
+    <AuthenticatedLayout>
       {children}
     </AuthenticatedLayout>
   );

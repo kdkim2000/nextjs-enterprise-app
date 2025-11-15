@@ -118,7 +118,7 @@ export default function ProgramManagementPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-PROGRAM-LIST"
+      programId="PROG-PROGRAM-MGMT"
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
