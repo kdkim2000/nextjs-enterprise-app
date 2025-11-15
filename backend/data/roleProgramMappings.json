@@ -71,22 +71,26 @@
       "roleId": "role-001",
       "programId": "prog-007",
       "canView": true,
-      "canCreate": false,
-      "canUpdate": false,
-      "canDelete": false,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
       "createdBy": "system",
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-15T18:46:39.796Z",
+      "updatedBy": "admin"
     },
     {
       "id": "rpm-008",
       "roleId": "role-001",
       "programId": "prog-014",
       "canView": true,
-      "canCreate": false,
-      "canUpdate": false,
-      "canDelete": false,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
       "createdBy": "system",
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-15T18:47:31.683Z",
+      "updatedBy": "admin"
     },
     {
       "id": "rpm-010",
@@ -95,9 +99,11 @@
       "canView": true,
       "canCreate": true,
       "canUpdate": true,
-      "canDelete": false,
+      "canDelete": true,
       "createdBy": "system",
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-15T18:45:49.178Z",
+      "updatedBy": "admin"
     },
     {
       "id": "rpm-011",
@@ -335,11 +341,13 @@
       "roleId": "role-001",
       "programId": "prog-006",
       "canView": true,
-      "canCreate": false,
-      "canUpdate": false,
-      "canDelete": false,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
       "createdBy": "admin",
-      "createdAt": "2025-11-15T05:58:47.577Z"
+      "createdAt": "2025-11-15T05:58:47.577Z",
+      "updatedAt": "2025-11-15T18:46:14.435Z",
+      "updatedBy": "admin"
     },
     {
       "id": "rpm-042",
@@ -456,22 +464,26 @@
       "roleId": "role-002",
       "programId": "prog-014",
       "canView": true,
-      "canCreate": false,
-      "canUpdate": false,
-      "canDelete": false,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
       "createdBy": "admin",
-      "createdAt": "2025-11-15T12:51:40.240Z"
+      "createdAt": "2025-11-15T12:51:40.240Z",
+      "updatedAt": "2025-11-15T18:47:39.133Z",
+      "updatedBy": "admin"
     },
     {
       "id": "rpm-053",
       "roleId": "role-003",
       "programId": "prog-014",
       "canView": true,
-      "canCreate": false,
-      "canUpdate": false,
-      "canDelete": false,
+      "canCreate": true,
+      "canUpdate": true,
+      "canDelete": true,
       "createdBy": "admin",
-      "createdAt": "2025-11-15T12:51:40.275Z"
+      "createdAt": "2025-11-15T12:51:40.275Z",
+      "updatedAt": "2025-11-15T18:47:44.970Z",
+      "updatedBy": "admin"
     },
     {
       "id": "rpm-054",
@@ -538,6 +550,28 @@
       "canDelete": false,
       "createdBy": "admin",
       "createdAt": "2025-11-15T12:52:28.586Z"
+    },
+    {
+      "id": "rpm-060",
+      "roleId": "role-002",
+      "programId": "prog-001",
+      "canView": true,
+      "canCreate": false,
+      "canUpdate": false,
+      "canDelete": false,
+      "createdBy": "admin",
+      "createdAt": "2025-11-15T19:00:26.967Z"
+    },
+    {
+      "id": "rpm-061",
+      "roleId": "role-002",
+      "programId": "prog-009",
+      "canView": true,
+      "canCreate": false,
+      "canUpdate": false,
+      "canDelete": false,
+      "createdBy": "admin",
+      "createdAt": "2025-11-15T19:17:44.979Z"
     }
   ]
 }

@@ -565,9 +565,9 @@
       },
       {
         "id": "link-003",
-        "title": "Role-Menu Mapping",
+        "title": "Role-Program Mapping",
         "url": "/admin/role-menu-mapping",
-        "description": "Configure which menus each role can access"
+        "description": "Configure which programs each role can access"
       }
     ],
     "status": "published",
@@ -649,9 +649,9 @@
       },
       {
         "id": "link-003",
-        "title": "역할-메뉴 매핑",
+        "title": "역할-프로그램 매핑",
         "url": "/admin/role-menu-mapping",
-        "description": "각 역할이 액세스할 수 있는 메뉴 구성"
+        "description": "각 역할이 액세스할 수 있는 프로그램 구성"
       }
     ],
     "status": "published",
@@ -727,9 +727,9 @@
       },
       {
         "id": "link-002",
-        "title": "Role-Menu Mapping",
+        "title": "Role-Program Mapping",
         "url": "/admin/role-menu-mapping",
-        "description": "Control menu access by role"
+        "description": "Control program access by role"
       },
       {
         "id": "link-003",
@@ -811,9 +811,9 @@
       },
       {
         "id": "link-002",
-        "title": "역할-메뉴 매핑",
+        "title": "역할-프로그램 매핑",
         "url": "/admin/role-menu-mapping",
-        "description": "역할별 메뉴 액세스 제어"
+        "description": "역할별 프로그램 액세스 제어"
       },
       {
         "id": "link-003",
