@@ -16,6 +16,7 @@ import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
+import RouteGuard from '@/components/auth/RouteGuard';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
@@ -394,8 +395,9 @@ export default function LogsPage() {
   ];
 
   return (
-    <PageContainer>
-      <PageHeader useMenu showBreadcrumb />
+    <RouteGuard programCode="PROG-LOGS" requiredPermission="view" fallbackUrl="/dashboard">
+      <PageContainer>
+        <PageHeader useMenu showBreadcrumb />
 
       {error && (
         <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
@@ -462,5 +464,6 @@ export default function LogsPage() {
         )}
       </Paper>
     </PageContainer>
+    </RouteGuard>
   );
 }

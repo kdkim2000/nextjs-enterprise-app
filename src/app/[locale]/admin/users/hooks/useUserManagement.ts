@@ -54,6 +54,9 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpExists, setHelpExists] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
 
   // Check user role and help content availability on mount
   useEffect(() => {
@@ -225,6 +228,40 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     setSelectedForDelete([]);
   }, []);
 
+  // Password reset handlers
+  const handleResetPasswordClick = useCallback((userId: string | number) => {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      setResetPasswordUser(user);
+      setResetPasswordDialogOpen(true);
+    }
+  }, [users]);
+
+  const handleResetPasswordConfirm = useCallback(async (newPassword: string, useDefault: boolean) => {
+    if (!resetPasswordUser) return;
+
+    try {
+      setResetPasswordLoading(true);
+      await api.post(`/user/${resetPasswordUser.id}/reset-password`, { newPassword });
+
+      const resetMethod = useDefault ? 'to default password' : 'successfully';
+      showSuccess(`Password reset ${resetMethod} for user: ${resetPasswordUser.username}`);
+      setResetPasswordDialogOpen(false);
+      setResetPasswordUser(null);
+    } catch (err) {
+      const error = err as { response?: { data?: { error?: string } } };
+      showError(error.response?.data?.error || 'Failed to reset password');
+      console.error('Failed to reset password:', err);
+    } finally {
+      setResetPasswordLoading(false);
+    }
+  }, [resetPasswordUser, showSuccess, showError]);
+
+  const handleResetPasswordCancel = useCallback(() => {
+    setResetPasswordDialogOpen(false);
+    setResetPasswordUser(null);
+  }, []);
+
   // Search handlers
   const handleRefresh = useCallback(() => {
     const useQuickSearch = quickSearch.trim() !== '';
@@ -306,6 +343,9 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     successMessage,
     errorMessage,
     showError,
+    resetPasswordDialogOpen,
+    resetPasswordUser,
+    resetPasswordLoading,
 
     // Handlers
     handleAdd,
@@ -314,6 +354,9 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
+    handleResetPasswordClick,
+    handleResetPasswordConfirm,
+    handleResetPasswordCancel,
     handleRefresh,
     handleSearchChange,
     handleQuickSearch,

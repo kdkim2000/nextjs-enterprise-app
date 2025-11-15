@@ -1,425 +1,536 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Paper,
-  Alert,
-  Chip,
-  Box,
-  Checkbox,
-  FormControlLabel
-} from '@mui/material';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Box, Paper, Typography, Collapse, IconButton, Tooltip } from '@mui/material';
+import { FolderOpen, Close, RestartAlt, Check } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import PageHeader from '@/components/common/PageHeader';
-import PageContainer from '@/components/common/PageContainer';
-import CrudDialog, { FormFieldConfig } from '@/components/common/CrudDialog';
+import SearchFilterFields from '@/components/common/SearchFilterFields';
+import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import { GridColDef } from '@mui/x-data-grid';
+import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import QuickSearchBar from '@/components/common/QuickSearchBar';
+import MasterDetailLayout from '@/components/common/MasterDetailLayout';
+import EditDrawer from '@/components/common/EditDrawer';
+import ProgramList from './components/ProgramList';
+import RoleSearchDialog from './components/RoleSearchDialog';
+import PermissionEditForm from './components/PermissionEditForm';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
-import { RoleMenuMapping } from '@/types/mapping';
-
-interface SimpleRole { id: string; name: string; displayName: string }
-interface SimpleMenu { id: string; code: string; name: { en: string; ko: string }; path?: string }
+import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { createColumns } from './constants';
+import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
+import { Role, Program, RoleProgramMapping, SearchCriteria, PermissionFormData } from './types';
 
 export default function RoleMenuMappingPage() {
-  const [mappings, setMappings] = useState<RoleMenuMapping[]>([]);
-  const [roles, setRoles] = useState<SimpleRole[]>([]);
-  const [menus, setMenus] = useState<SimpleMenu[]>([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingMapping, setEditingMapping] = useState<RoleMenuMapping | null>(null);
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
+  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  const gridPermissions = useDataGridPermissions('PROG-ROLE-MENU-MAP');
+
+  // State
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [mappings, setMappings] = useState<RoleProgramMapping[]>([]);
+  const [filteredMappings, setFilteredMappings] = useState<RoleProgramMapping[]>([]);
+  const [allMappings, setAllMappings] = useState<RoleProgramMapping[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [quickSearch, setQuickSearch] = useState('');
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
+    roleName: '',
+    roleDisplayName: '',
+    permissions: ''
+  });
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+
+  // Help
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  // Add Roles Dialog
+  const [addRolesDialogOpen, setAddRolesDialogOpen] = useState(false);
+
+  // Edit Permission Dialog
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingPermission, setEditingPermission] = useState<PermissionFormData | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Mapping Delete
+  const [mappingDeleteConfirmOpen, setMappingDeleteConfirmOpen] = useState(false);
+  const [selectedMappingsForDelete, setSelectedMappingsForDelete] = useState<(string | number)[]>([]);
+  const [deleting, setDeleting] = useState(false);
 
-  // Auto-hide success message after 10 seconds
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 10000);
-      return () => clearTimeout(timer);
+  // Fetch programs and all mappings
+  const fetchData = useCallback(async () => {
+    try {
+      const [programsResponse, mappingsResponse] = await Promise.all([
+        api.get('/program/all'),
+        api.get('/role-program-mapping', { params: { includeDetails: 'true' } })
+      ]);
+
+      setPrograms(programsResponse.programs || []);
+      setAllMappings(mappingsResponse.mappings || []);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      showError(currentLocale === 'ko' ? '데이터 로드 실패' : 'Failed to load data');
     }
-  }, [successMessage]);
+  }, [showError, currentLocale]);
 
-  // Auto-hide error message after 10 seconds
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 10000);
-      return () => clearTimeout(timer);
+  // Fetch mappings for selected program
+  const fetchMappings = useCallback(async () => {
+    if (!selectedProgram) {
+      setMappings([]);
+      setFilteredMappings([]);
+      return;
     }
-  }, [error]);
 
-  const fetchData = async () => {
     try {
       setLoading(true);
-      setError(null);
 
-      // Fetch mappings with details
-      const mappingsResponse = await api.get('/role-menu-mapping?includeDetails=true');
-      setMappings(mappingsResponse.mappings || []);
+      // Get mappings for this program
+      const response = await api.get('/role-program-mapping', {
+        params: { programId: selectedProgram.id, includeDetails: 'true' }
+      });
 
-      // Fetch roles for dropdown
-      const rolesResponse = await api.get('/role');
-      setRoles(rolesResponse.roles || []);
-
-      // Fetch menus for dropdown
-      const menusResponse = await api.get('/menu/all');
-      setMenus(menusResponse.menus || []);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to load data');
-      console.error('Failed to fetch data:', err);
+      const programMappings = response.mappings || [];
+      setMappings(programMappings);
+      setFilteredMappings(programMappings);
+    } catch (error) {
+      console.error('Failed to fetch mappings:', error);
+      showError(currentLocale === 'ko' ? '역할 매핑 로드 실패' : 'Failed to load role mappings');
+      setMappings([]);
+      setFilteredMappings([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedProgram, showError, currentLocale]);
 
-  const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 100 },
-    {
-      field: 'roleDisplayName',
-      headerName: 'Role',
-      width: 180,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
-      )
-    },
-    {
-      field: 'menuName',
-      headerName: 'Menu',
-      width: 200,
-      renderCell: (params) => {
-        const menuName = typeof params.value === 'object' ? params.value?.en || params.value?.ko : params.value;
-        return (
-          <div>
-            <div>{menuName}</div>
-            <div style={{ fontSize: '0.75rem', color: 'gray' }}>{params.row.menuPath}</div>
-          </div>
-        );
-      }
-    },
-    {
-      field: 'canView',
-      headerName: 'View',
-      width: 80,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? 'Yes' : 'No'}
-          size="small"
-          color={params.value ? 'success' : 'default'}
-        />
-      )
-    },
-    {
-      field: 'canCreate',
-      headerName: 'Create',
-      width: 80,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? 'Yes' : 'No'}
-          size="small"
-          color={params.value ? 'success' : 'default'}
-        />
-      )
-    },
-    {
-      field: 'canUpdate',
-      headerName: 'Update',
-      width: 80,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? 'Yes' : 'No'}
-          size="small"
-          color={params.value ? 'success' : 'default'}
-        />
-      )
-    },
-    {
-      field: 'canDelete',
-      headerName: 'Delete',
-      width: 80,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? 'Yes' : 'No'}
-          size="small"
-          color={params.value ? 'success' : 'default'}
-        />
-      )
-    },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      width: 130
+  // Initial fetch
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  // Auto-select first program on initial load
+  useEffect(() => {
+    if (programs.length > 0 && !selectedProgram) {
+      setSelectedProgram(programs[0]);
     }
-  ];
+  }, [programs, selectedProgram]);
 
-  const handleAdd = () => {
-    setEditingMapping(null);
-    setDialogOpen(true);
-  };
+  // Fetch mappings when program selected
+  useEffect(() => {
+    void fetchMappings();
+  }, [fetchMappings]);
 
-  const handleEdit = (id: string | number) => {
+  // Apply filters
+  useEffect(() => {
+    const filtered = applyMappingFilters(mappings, quickSearch, searchCriteria);
+    setFilteredMappings(filtered);
+  }, [mappings, quickSearch, searchCriteria]);
+
+  // Calculate role counts per program
+  const roleCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+
+    programs.forEach((program) => {
+      // Count unique roles assigned to this program
+      const programMappings = allMappings.filter(m => m.programId === program.id);
+      const uniqueRoles = new Set(programMappings.map(m => m.roleId));
+      counts[program.id] = uniqueRoles.size;
+    });
+
+    return counts;
+  }, [programs, allMappings]);
+
+  // Mapping handlers
+  const handleAddMapping = useCallback(() => {
+    if (!selectedProgram) {
+      showError(currentLocale === 'ko' ? '먼저 프로그램을 선택하세요' : 'Please select a program first');
+      return;
+    }
+    setAddRolesDialogOpen(true);
+  }, [selectedProgram, showError, currentLocale]);
+
+  const handleAddRolesSuccess = useCallback(async (
+    roles: Role[],
+    permissions: { canView: boolean; canCreate: boolean; canUpdate: boolean; canDelete: boolean }
+  ) => {
+    try {
+      if (!selectedProgram) return;
+
+      // For each role, create mapping to program
+      for (const role of roles) {
+        await api.post('/role-program-mapping', {
+          roleId: role.id,
+          programId: selectedProgram.id,
+          ...permissions
+        });
+      }
+
+      const count = roles.length;
+      showSuccess(
+        currentLocale === 'ko'
+          ? `${count}개 역할을 프로그램에 성공적으로 할당했습니다`
+          : `Successfully assigned ${count} role${count > 1 ? 's' : ''} to program`
+      );
+
+      void fetchData();
+      void fetchMappings();
+    } catch (err: any) {
+      showError(err.response?.data?.error || (currentLocale === 'ko' ? '역할 할당 실패' : 'Failed to assign roles to program'));
+    }
+  }, [selectedProgram, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
+
+  const handleEditPermission = useCallback((id: string | number) => {
     const mapping = mappings.find((m) => m.id === id);
     if (mapping) {
-      setEditingMapping(mapping);
-      setDialogOpen(true);
+      setEditingPermission({
+        id: mapping.id,
+        roleId: mapping.roleId,
+        roleName: mapping.roleName || '',
+        roleDisplayName: mapping.roleDisplayName || '',
+        programId: mapping.programId,
+        programCode: mapping.programCode || '',
+        programName: mapping.programName || { en: '', ko: '' },
+        canView: mapping.canView,
+        canCreate: mapping.canCreate,
+        canUpdate: mapping.canUpdate,
+        canDelete: mapping.canDelete
+      });
+      setEditDrawerOpen(true);
     }
-  };
+  }, [mappings]);
 
-  const handleDeleteClick = (ids: (string | number)[]) => {
-    setSelectedForDelete(ids);
-    setDeleteConfirmOpen(true);
-  };
+  const handleSavePermission = useCallback(async () => {
+    if (!editingPermission) return;
 
-  const handleDeleteCancel = () => {
-    setDeleteConfirmOpen(false);
-    setSelectedForDelete([]);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      setDeleteLoading(true);
-      setError(null);
-
-      for (const id of selectedForDelete) {
-        await api.delete(`/role-menu-mapping?id=${id}`);
-      }
-
-      setMappings(mappings.filter((m) => !selectedForDelete.includes(m.id)));
-      const count = selectedForDelete.length;
-      setSuccessMessage(`Successfully deleted ${count} mapping${count > 1 ? 's' : ''}`);
-      setDeleteConfirmOpen(false);
-      setSelectedForDelete([]);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to delete mapping(s)');
-      console.error('Failed to delete mappings:', err);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const handleSave = async (formData: Record<string, unknown>) => {
     try {
       setSaveLoading(true);
-      setError(null);
 
-      if (!editingMapping) {
-        // Add new mapping
-        const response = await api.post('/role-menu-mapping', formData);
-        setMappings([...mappings, response.mapping]);
-        setSuccessMessage('Mapping created successfully');
-      } else {
-        // Update existing mapping
-        const response = await api.put('/role-menu-mapping', {
-          ...formData,
-          id: editingMapping.id
-        });
-        setMappings(mappings.map((m) => (m.id === editingMapping.id ? response.mapping : m)));
-        setSuccessMessage('Mapping updated successfully');
-      }
+      await api.put('/role-program-mapping', {
+        id: editingPermission.id,
+        canView: editingPermission.canView,
+        canCreate: editingPermission.canCreate,
+        canUpdate: editingPermission.canUpdate,
+        canDelete: editingPermission.canDelete
+      });
 
-      setDialogOpen(false);
-      setEditingMapping(null);
-    } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to save mapping');
-      console.error('Failed to save mapping:', err);
+      showSuccess(
+        currentLocale === 'ko'
+          ? '권한이 성공적으로 수정되었습니다'
+          : 'Permissions updated successfully'
+      );
+
+      setEditDrawerOpen(false);
+      setEditingPermission(null);
+      await fetchData();
+      await fetchMappings();
+    } catch (err: any) {
+      showError(
+        err.response?.data?.error ||
+          (currentLocale === 'ko' ? '권한 수정 실패' : 'Failed to update permissions')
+      );
     } finally {
       setSaveLoading(false);
     }
-  };
+  }, [editingPermission, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
 
-  const roleOptions = useMemo(() =>
-    roles.map((role) => ({
-      value: role.id,
-      label: role.displayName
-    })),
-    [roles]
-  );
+  const handleDeleteMappings = useCallback((ids: (string | number)[]) => {
+    setSelectedMappingsForDelete(ids);
+    setMappingDeleteConfirmOpen(true);
+  }, []);
 
-  const menuOptions = useMemo(() =>
-    menus.map((menu) => {
-      const menuName = typeof menu.name === 'object' ? menu.name?.en || menu.name?.ko : menu.name;
-      return {
-        value: menu.id,
-        label: `${menuName} (${menu.path})`
-      };
-    }),
-    [menus]
-  );
-
-  const formFields: FormFieldConfig[] = useMemo(() => [
-    {
-      name: 'roleId',
-      label: 'Role',
-      type: 'select',
-      required: true,
-      options: roleOptions,
-      disabled: !!editingMapping
-    },
-    {
-      name: 'menuId',
-      label: 'Menu',
-      type: 'select',
-      required: true,
-      options: menuOptions,
-      disabled: !!editingMapping
-    },
-    {
-      name: 'permissions',
-      label: 'Permissions',
-      type: 'custom',
-      render: (value, onChange) => {
-        const permissions = typeof value === 'string' ? JSON.parse(value || '{}') : (value || {});
-        return (
-          <Box sx={{ mt: 2 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={permissions?.canView ?? true}
-                  onChange={(e) => onChange({ ...permissions, canView: e.target.checked })}
-                />
-              }
-              label="Can View"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={permissions?.canCreate ?? false}
-                  onChange={(e) => onChange({ ...permissions, canCreate: e.target.checked })}
-                />
-              }
-              label="Can Create"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={permissions?.canUpdate ?? false}
-                  onChange={(e) => onChange({ ...permissions, canUpdate: e.target.checked })}
-                />
-              }
-              label="Can Update"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={permissions?.canDelete ?? false}
-                  onChange={(e) => onChange({ ...permissions, canDelete: e.target.checked })}
-                />
-              }
-              label="Can Delete"
-            />
-          </Box>
-        );
+  const handleConfirmDeleteMappings = useCallback(async () => {
+    try {
+      setDeleting(true);
+      for (const id of selectedMappingsForDelete) {
+        await api.delete(`/role-program-mapping?id=${id}`);
       }
+
+      const count = selectedMappingsForDelete.length;
+      showSuccess(
+        currentLocale === 'ko'
+          ? `${count}개 매핑을 성공적으로 삭제했습니다`
+          : `Successfully deleted ${count} mapping${count > 1 ? 's' : ''}`
+      );
+
+      setMappingDeleteConfirmOpen(false);
+      setSelectedMappingsForDelete([]);
+      await fetchData();
+      await fetchMappings();
+    } catch (err: any) {
+      showError(err.response?.data?.error || (currentLocale === 'ko' ? '매핑 삭제 실패' : 'Failed to delete mappings'));
+    } finally {
+      setDeleting(false);
     }
-  ], [roleOptions, menuOptions, editingMapping]);
+  }, [selectedMappingsForDelete, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
+
+  // Memoized values
+  const columns = useMemo(
+    () => createColumns(t as (key: string) => string, currentLocale, handleEditPermission, gridPermissions.editable),
+    [t, currentLocale, handleEditPermission, gridPermissions.editable]
+  );
+
+  const filterFields = useMemo(
+    () => createFilterFields(currentLocale),
+    [currentLocale]
+  );
+
+  const activeFilterCount = useMemo(
+    () => calculateActiveFilterCount(searchCriteria),
+    [searchCriteria]
+  );
+
+  const deleteItemsList = useMemo(
+    () =>
+      selectedMappingsForDelete.map((id) => {
+        const mapping = mappings.find((m) => m.id === id);
+        return mapping
+          ? {
+              id: mapping.id,
+              displayName: `${mapping.roleName} - ${mapping.roleDisplayName}`
+            }
+          : { id, displayName: String(id) };
+      }),
+    [selectedMappingsForDelete, mappings]
+  );
+
+  // Get already mapped role IDs for the selected program
+  const mappedRoleIds = useMemo(() => {
+    // Get unique role IDs from all mappings
+    const uniqueRoleIds = new Set(mappings.map((m) => m.roleId));
+    return Array.from(uniqueRoleIds);
+  }, [mappings]);
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Role-Menu Mapping"
-        description="Manage role-menu permissions"
-        showBreadcrumb
+    <StandardCrudPageLayout
+      useMenu
+      showBreadcrumb
+      successMessage={successMessage}
+      errorMessage={errorMessage}
+      showQuickSearch={false}
+      showAdvancedFilter={false}
+      programId="PROG-ROLE-MENU-MAP"
+      helpOpen={helpOpen}
+      onHelpOpenChange={setHelpOpen}
+      language={currentLocale}
+      isAdmin={true}
+      helpExists={true}
+    >
+      <MasterDetailLayout
+        masterSize={30}
+        detailSize={70}
+        master={
+          <ProgramList
+            programs={programs}
+            selectedProgram={selectedProgram}
+            onProgramSelect={setSelectedProgram}
+            roleCounts={roleCounts}
+            locale={currentLocale}
+          />
+        }
+        detail={
+          <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {!selectedProgram ? (
+              <EmptyState
+                icon={FolderOpen}
+                title={currentLocale === 'ko' ? '프로그램을 선택하세요' : 'Select a Program'}
+                description={
+                  currentLocale === 'ko'
+                    ? '왼쪽 목록에서 프로그램을 선택하여 역할 매핑을 관리하세요'
+                    : 'Select a program from the list to manage role mappings'
+                }
+              />
+            ) : (
+              <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                {/* Header with Title */}
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="h6">
+                    {currentLocale === 'ko'
+                      ? `${selectedProgram.name.ko} 역할`
+                      : `${selectedProgram.name.en} Roles`}
+                  </Typography>
+                </Box>
+
+                {/* Quick Search Bar */}
+                <QuickSearchBar
+                  searchValue={quickSearch}
+                  onSearchChange={setQuickSearch}
+                  onSearch={() => {}}
+                  onClear={() => {
+                    setQuickSearch('');
+                    setSearchCriteria({
+                      roleName: '',
+                      roleDisplayName: '',
+                      permissions: ''
+                    });
+                  }}
+                  onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
+                  placeholder={currentLocale === 'ko' ? '역할 검색...' : 'Search roles...'}
+                  searching={loading}
+                  activeFilterCount={activeFilterCount}
+                  showAdvancedButton={true}
+                />
+
+                {/* Advanced Filter Panel */}
+                <Collapse in={advancedFilterOpen}>
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      bgcolor: 'background.default'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        {currentLocale === 'ko' ? '상세 필터' : 'Advanced Filter'}
+                      </Typography>
+                      <IconButton size="small" onClick={() => setAdvancedFilterOpen(false)}>
+                        <Close fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <SearchFilterFields
+                      fields={filterFields}
+                      values={searchCriteria as unknown as Record<string, string>}
+                      onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value as string }))}
+                      onEnter={() => setAdvancedFilterOpen(false)}
+                    />
+                    <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
+                      {/* Close Button */}
+                      <Tooltip title={currentLocale === 'ko' ? '닫기' : 'Close'} arrow>
+                        <IconButton
+                          onClick={() => setAdvancedFilterOpen(false)}
+                          size="small"
+                          sx={{
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            '&:hover': {
+                              borderColor: 'action.active',
+                              bgcolor: 'action.hover'
+                            }
+                          }}
+                        >
+                          <Close fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* Clear Button */}
+                      <Tooltip title={currentLocale === 'ko' ? '초기화' : 'Clear'} arrow>
+                        <span>
+                          <IconButton
+                            onClick={() => {
+                              setQuickSearch('');
+                              setSearchCriteria({
+                                roleName: '',
+                                roleDisplayName: '',
+                                permissions: ''
+                              });
+                            }}
+                            disabled={activeFilterCount === 0}
+                            size="small"
+                            sx={{
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              '&:hover': {
+                                borderColor: 'warning.main',
+                                bgcolor: 'warning.50'
+                              }
+                            }}
+                          >
+                            <RestartAlt fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+
+                      {/* Apply Button */}
+                      <Tooltip title={currentLocale === 'ko' ? '적용' : 'Apply'} arrow>
+                        <IconButton
+                          onClick={() => setAdvancedFilterOpen(false)}
+                          size="small"
+                          sx={{
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            '&:hover': {
+                              bgcolor: 'primary.dark'
+                            },
+                            '&.Mui-disabled': {
+                              bgcolor: 'action.disabledBackground',
+                              color: 'action.disabled'
+                            }
+                          }}
+                        >
+                          <Check fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Paper>
+                </Collapse>
+
+                {/* Data Grid */}
+                <Box sx={{ flex: 1, minHeight: 0 }}>
+                  <ExcelDataGrid
+                    rows={filteredMappings}
+                    columns={columns}
+                    onRowsChange={(rows) => setFilteredMappings(rows as RoleProgramMapping[])}
+                    {...(gridPermissions.showAddButton && { onAdd: handleAddMapping })}
+                    {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteMappings })}
+                    onRefresh={fetchMappings}
+                    checkboxSelection={gridPermissions.checkboxSelection}
+                    editable={gridPermissions.editable}
+                    exportFileName={`program-role-mapping-${selectedProgram.code}`}
+                    loading={loading}
+                    paginationMode="client"
+                  />
+                </Box>
+              </Box>
+            )}
+          </Paper>
+        }
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setSuccessMessage(null)}>
-          {successMessage}
-        </Alert>
-      )}
-
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        <ExcelDataGrid
-          rows={mappings}
-          columns={columns}
-          onRowsChange={(rows) => setMappings(rows as RoleMenuMapping[])}
-          onAdd={handleAdd}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
-          onRefresh={fetchData}
-          editable
-          checkboxSelection
-          exportFileName="role-menu-mappings"
-          loading={loading}
-        />
-      </Paper>
-
-      {/* CRUD Dialog */}
-      <CrudDialog
-        open={dialogOpen}
-        title={!editingMapping ? 'Add New Mapping' : 'Edit Mapping'}
-        fields={formFields}
-        data={{
-          ...(editingMapping as unknown as Record<string, unknown> || {}),
-          permissions: editingMapping ? {
-            canView: editingMapping.canView,
-            canCreate: editingMapping.canCreate,
-            canUpdate: editingMapping.canUpdate,
-            canDelete: editingMapping.canDelete
-          } : {
-            canView: true,
-            canCreate: false,
-            canUpdate: false,
-            canDelete: false
-          }
-        }}
-        onSave={(data) => {
-          const { permissions, ...rest } = data;
-          const saveData = {
-            ...rest,
-            ...(permissions as Record<string, unknown> || {})
-          };
-          return handleSave(saveData);
-        }}
-        onClose={() => {
-          setDialogOpen(false);
-          setEditingMapping(null);
-        }}
-        loading={saveLoading}
-      />
-
-      {/* Delete Confirmation Dialog */}
+      {/* Mapping Delete Confirmation */}
       <DeleteConfirmDialog
-        open={deleteConfirmOpen}
-        title="Delete Mapping(s)"
-        itemCount={selectedForDelete.length}
-        itemName="mapping"
-        itemsList={selectedForDelete.map((id) => {
-          const mapping = mappings.find((m) => m.id === id);
-          const menuName = mapping?.menuName && typeof mapping.menuName === 'object'
-            ? (mapping.menuName as { en?: string; ko?: string }).en || (mapping.menuName as { en?: string; ko?: string }).ko
-            : mapping?.menuName;
-          return mapping
-            ? { id, displayName: `${mapping.roleDisplayName} - ${menuName}` }
-            : { id, displayName: String(id) };
-        })}
-        onCancel={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        loading={deleteLoading}
+        open={mappingDeleteConfirmOpen}
+        itemCount={selectedMappingsForDelete.length}
+        itemName="role program mapping"
+        itemsList={deleteItemsList}
+        onCancel={() => {
+          setMappingDeleteConfirmOpen(false);
+          setSelectedMappingsForDelete([]);
+        }}
+        onConfirm={handleConfirmDeleteMappings}
+        loading={deleting}
       />
-    </PageContainer>
+
+      {/* Edit Permission Drawer */}
+      <EditDrawer
+        open={editDrawerOpen}
+        onClose={() => {
+          setEditDrawerOpen(false);
+          setEditingPermission(null);
+        }}
+        title={currentLocale === 'ko' ? '권한 수정' : 'Edit Permissions'}
+        onSave={handleSavePermission}
+        saveLoading={saveLoading}
+        saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
+        cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
+        width={{ xs: '100%', sm: 500, md: 600 }}
+      >
+        <PermissionEditForm
+          permission={editingPermission}
+          onChange={setEditingPermission}
+          locale={currentLocale}
+        />
+      </EditDrawer>
+
+      {/* Add Roles to Program Dialog */}
+      <RoleSearchDialog
+        open={addRolesDialogOpen}
+        onClose={() => setAddRolesDialogOpen(false)}
+        onConfirm={handleAddRolesSuccess}
+        locale={currentLocale}
+        excludeRoleIds={mappedRoleIds}
+      />
+    </StandardCrudPageLayout>
   );
 }

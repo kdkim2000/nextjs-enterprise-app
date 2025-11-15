@@ -1,150 +1,90 @@
 'use client';
 
-import React from 'react';
-import { Box, Typography } from '@mui/material';
-import { Lock } from '@mui/icons-material';
+import React, { ReactNode } from 'react';
+import { useProgramPermissions } from '@/contexts/PermissionContext';
+import { Alert, Box } from '@mui/material';
+
+export type PermissionAction = 'view' | 'create' | 'update' | 'delete';
 
 export interface PermissionGuardProps {
-  /**
-   * Required permission(s)
-   */
-  permission?: string | string[];
-
-  /**
-   * Required role(s)
-   */
-  role?: string | string[];
-
-  /**
-   * User's permissions
-   */
-  userPermissions?: string[];
-
-  /**
-   * User's roles
-   */
-  userRoles?: string[];
-
-  /**
-   * Children to render if authorized
-   */
-  children: React.ReactNode;
-
-  /**
-   * Fallback content when not authorized
-   */
-  fallback?: React.ReactNode;
-
-  /**
-   * Hide instead of showing fallback
-   */
-  hideOnUnauthorized?: boolean;
-
-  /**
-   * Require all permissions/roles (AND logic) or any (OR logic)
-   */
-  requireAll?: boolean;
+  programCode: string;
+  action: PermissionAction;
+  children: ReactNode;
+  fallback?: ReactNode;
+  showAccessDenied?: boolean;
 }
 
+/**
+ * PermissionGuard - 권한에 따라 컴포넌트를 조건부 렌더링
+ *
+ * @param programCode - 프로그램 코드 (예: 'PROG-USER-LIST')
+ * @param action - 필요한 권한 타입 ('view' | 'create' | 'update' | 'delete')
+ * @param children - 권한이 있을 때 표시할 컴포넌트
+ * @param fallback - 권한이 없을 때 표시할 컴포넌트 (기본값: null)
+ * @param showAccessDenied - 권한 없을 때 "접근 권한 없음" 메시지 표시 (기본값: false)
+ *
+ * @example
+ * ```tsx
+ * <PermissionGuard programCode="PROG-USER-LIST" action="create">
+ *   <Button onClick={handleAdd}>Add User</Button>
+ * </PermissionGuard>
+ * ```
+ *
+ * @example
+ * ```tsx
+ * <PermissionGuard
+ *   programCode="PROG-USER-LIST"
+ *   action="delete"
+ *   showAccessDenied
+ * >
+ *   <Button onClick={handleDelete}>Delete</Button>
+ * </PermissionGuard>
+ * ```
+ */
 export default function PermissionGuard({
-  permission,
-  role,
-  userPermissions = [],
-  userRoles = [],
+  programCode,
+  action,
   children,
-  fallback,
-  hideOnUnauthorized = false,
-  requireAll = false
+  fallback = null,
+  showAccessDenied = false
 }: PermissionGuardProps) {
-  // Check permissions
-  const hasPermission = () => {
-    if (!permission) return true;
+  const permissions = useProgramPermissions(programCode);
 
-    const requiredPermissions = Array.isArray(permission) ? permission : [permission];
-
-    if (requireAll) {
-      return requiredPermissions.every((p) => userPermissions.includes(p));
-    } else {
-      return requiredPermissions.some((p) => userPermissions.includes(p));
+  // 권한 체크
+  const hasPermission = React.useMemo(() => {
+    switch (action) {
+      case 'view':
+        return permissions.canView;
+      case 'create':
+        return permissions.canCreate;
+      case 'update':
+        return permissions.canUpdate;
+      case 'delete':
+        return permissions.canDelete;
+      default:
+        return false;
     }
-  };
+  }, [action, permissions]);
 
-  // Check roles
-  const hasRole = () => {
-    if (!role) return true;
-
-    const requiredRoles = Array.isArray(role) ? role : [role];
-
-    if (requireAll) {
-      return requiredRoles.every((r) => userRoles.includes(r));
-    } else {
-      return requiredRoles.some((r) => userRoles.includes(r));
-    }
-  };
-
-  const isAuthorized = hasPermission() && hasRole();
-
-  if (isAuthorized) {
-    return <>{children}</>;
-  }
-
-  if (hideOnUnauthorized) {
+  // 로딩 중
+  if (permissions.loading) {
     return null;
   }
 
-  if (fallback) {
+  // 권한 없음
+  if (!hasPermission) {
+    if (showAccessDenied) {
+      return (
+        <Box sx={{ p: 2 }}>
+          <Alert severity="warning">
+            이 기능을 사용할 권한이 없습니다.
+          </Alert>
+        </Box>
+      );
+    }
     return <>{fallback}</>;
   }
 
-  // Default unauthorized UI
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 4,
-        px: 2,
-        textAlign: 'center'
-      }}
-    >
-      <Lock sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-      <Typography variant="h6" color="text.secondary" gutterBottom>
-        Access Denied
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        You don&apos;t have permission to view this content.
-      </Typography>
-    </Box>
-  );
-}
-
-// Hook version for programmatic checks
-export function usePermission(
-  permission: string | string[],
-  userPermissions: string[] = [],
-  requireAll: boolean = false
-): boolean {
-  const requiredPermissions = Array.isArray(permission) ? permission : [permission];
-
-  if (requireAll) {
-    return requiredPermissions.every((p) => userPermissions.includes(p));
-  } else {
-    return requiredPermissions.some((p) => userPermissions.includes(p));
-  }
-}
-
-export function useRole(
-  role: string | string[],
-  userRoles: string[] = [],
-  requireAll: boolean = false
-): boolean {
-  const requiredRoles = Array.isArray(role) ? role : [role];
-
-  if (requireAll) {
-    return requiredRoles.every((r) => userRoles.includes(r));
-  } else {
-    return requiredRoles.some((r) => userRoles.includes(r));
-  }
+  // 권한 있음
+  return <>{children}</>;
 }

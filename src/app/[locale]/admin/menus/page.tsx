@@ -10,6 +10,7 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import MenuFormFields from '@/components/admin/MenuFormFields';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useMenuManagement } from './hooks/useMenuManagement';
 import { createColumns } from './constants';
@@ -19,6 +20,7 @@ import { Menu } from './types';
 export default function MenuManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const gridPermissions = useDataGridPermissions('PROG-MENU-MGMT');
 
   // Use custom hook for all business logic
   const {
@@ -65,8 +67,8 @@ export default function MenuManagementPage() {
 
   // Memoized computed values
   const columns = useMemo(
-    () => createColumns(t, currentLocale, allMenus, handleEdit),
-    [t, currentLocale, allMenus, handleEdit]
+    () => createColumns(t, currentLocale, allMenus, handleEdit, gridPermissions.editable),
+    [t, currentLocale, allMenus, handleEdit, gridPermissions.editable]
   );
 
   const filterFields = useMemo(
@@ -126,7 +128,7 @@ export default function MenuManagementPage() {
       onFilterClear={handleAdvancedSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-MENU-LIST"
+      programId="PROG-MENU-MGMT"
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
@@ -147,11 +149,11 @@ export default function MenuManagementPage() {
               rows={filteredMenus}
               columns={columns}
               onRowsChange={(rows) => setMenus(rows)}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="menus"
               loading={loading}
             />

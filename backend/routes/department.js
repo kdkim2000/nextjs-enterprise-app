@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
+const { authenticateToken } = require('../middleware/auth');
+const { requireProgramAccess, requirePermission } = require('../middleware/permissionMiddleware');
 
 const DEPARTMENTS_FILE = path.join(__dirname, '../data/departments.json');
 
@@ -64,7 +66,7 @@ function buildDepartmentTree(departments) {
 }
 
 // GET /api/department - Get all departments (flat list)
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, requireProgramAccess('PROG-DEPT-MGMT'), async (req, res) => {
   try {
     const departments = await readDepartments();
     const flattened = flattenDepartments(departments);
@@ -105,7 +107,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/department - Create a new department
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'create'), async (req, res) => {
   try {
     const departments = await readDepartments();
     const { code, name, description, parentId, managerId, status, email, phone, location } = req.body;
@@ -166,7 +168,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/department/:id - Update a department
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'update'), async (req, res) => {
   try {
     const departments = await readDepartments();
     const index = departments.findIndex(d => d.id === req.params.id);
@@ -228,7 +230,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/department/:id - Delete a department
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'delete'), async (req, res) => {
   try {
     const departments = await readDepartments();
     const index = departments.findIndex(d => d.id === req.params.id);
@@ -254,7 +256,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // DELETE /api/department - Bulk delete departments
-router.delete('/', async (req, res) => {
+router.delete('/', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'delete'), async (req, res) => {
   try {
     const { ids } = req.body;
 

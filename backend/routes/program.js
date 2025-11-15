@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 // GET /api/program - Get all programs with pagination and filtering
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const {
       code,
       name,
@@ -68,7 +68,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // GET /api/program/all - Get all programs without pagination
 router.get('/all', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     res.json({ programs });
   } catch (error) {
     console.error('Error fetching all programs:', error);
@@ -79,7 +79,7 @@ router.get('/all', authenticateToken, async (req, res) => {
 // GET /api/program/:id - Get a specific program by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const program = programs.find(p => p.id === req.params.id);
 
     if (!program) {
@@ -96,7 +96,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // GET /api/program/code/:code - Get a specific program by code
 router.get('/code/:code', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const program = programs.find(p => p.code === req.params.code);
 
     if (!program) {
@@ -118,7 +118,7 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const {
       code,
       name,
@@ -159,7 +159,7 @@ router.post('/', authenticateToken, async (req, res) => {
     };
 
     programs.push(newProgram);
-    await writeJSON('backend/data/programs.json', programs);
+    await writeJSON('data/programs.json', programs);
 
     res.status(201).json({ program: newProgram });
   } catch (error) {
@@ -176,7 +176,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const index = programs.findIndex(p => p.id === req.params.id);
 
     if (index === -1) {
@@ -220,7 +220,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     };
 
     programs[index] = updatedProgram;
-    await writeJSON('backend/data/programs.json', programs);
+    await writeJSON('data/programs.json', programs);
 
     res.json({ program: updatedProgram });
   } catch (error) {
@@ -237,7 +237,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const index = programs.findIndex(p => p.id === req.params.id);
 
     if (index === -1) {
@@ -246,7 +246,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
     const deletedProgram = programs[index];
     programs.splice(index, 1);
-    await writeJSON('backend/data/programs.json', programs);
+    await writeJSON('data/programs.json', programs);
 
     res.json({ message: 'Program deleted successfully', program: deletedProgram });
   } catch (error) {
@@ -258,7 +258,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 // GET /api/program/:id/permissions - Get program permissions
 router.get('/:id/permissions', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const program = programs.find(p => p.id === req.params.id);
 
     if (!program) {
@@ -280,7 +280,7 @@ router.put('/:id/permissions', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const programs = await readJSON('data/programs.json') || [];
     const index = programs.findIndex(p => p.id === req.params.id);
 
     if (index === -1) {
@@ -299,7 +299,7 @@ router.put('/:id/permissions', authenticateToken, async (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    await writeJSON('backend/data/programs.json', programs);
+    await writeJSON('data/programs.json', programs);
 
     res.json({ program: programs[index] });
   } catch (error) {

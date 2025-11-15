@@ -10,15 +10,20 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
+import ResetPasswordDialog from '@/components/admin/ResetPasswordDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useUserManagement } from './hooks/useUserManagement';
 import { createColumns, DEPARTMENTS } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { User } from './types';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 
 export default function UserManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+
+  // Permission control
+  const gridPermissions = useDataGridPermissions('PROG-USER-LIST');
 
   // Use custom hook for all business logic
   const {
@@ -47,6 +52,9 @@ export default function UserManagementPage() {
     successMessage,
     errorMessage,
     showError,
+    resetPasswordDialogOpen,
+    resetPasswordUser,
+    resetPasswordLoading,
     // Handlers
     handleAdd,
     handleEdit,
@@ -54,6 +62,9 @@ export default function UserManagementPage() {
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
+    handleResetPasswordClick,
+    handleResetPasswordConfirm,
+    handleResetPasswordCancel,
     handleRefresh,
     handleSearchChange,
     handleQuickSearch,
@@ -65,7 +76,10 @@ export default function UserManagementPage() {
   } = useUserManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(t, handleEdit), [t, handleEdit]);
+  const columns = useMemo(() => {
+    console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
+    return createColumns(t, handleEdit, handleResetPasswordClick, gridPermissions.editable);
+  }, [t, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(t), [t]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -140,11 +154,11 @@ export default function UserManagementPage() {
               rows={users}
               columns={columns}
               onRowsChange={(rows) => setUsers(rows as User[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="users"
               loading={searching}
               paginationMode="server"
@@ -188,6 +202,15 @@ export default function UserManagementPage() {
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
+      />
+
+      {/* Reset Password Dialog */}
+      <ResetPasswordDialog
+        open={resetPasswordDialogOpen}
+        user={resetPasswordUser}
+        loading={resetPasswordLoading}
+        onConfirm={handleResetPasswordConfirm}
+        onCancel={handleResetPasswordCancel}
       />
     </StandardCrudPageLayout>
   );

@@ -17,6 +17,7 @@ import CodeTypeList from './components/CodeTypeList';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { Code, CodeType, SearchCriteria } from './types';
@@ -25,6 +26,7 @@ export default function CodesPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  const gridPermissions = useDataGridPermissions('PROG-CODE-MGMT');
 
   // State
   const [codeTypes, setCodeTypes] = useState<CodeType[]>([]);
@@ -360,8 +362,8 @@ export default function CodesPage() {
 
   // Memoized values
   const columns = useMemo(
-    () => createColumns(t, handleEditCode),
-    [t, handleEditCode]
+    () => createColumns(t, handleEditCode, gridPermissions.editable),
+    [t, handleEditCode, gridPermissions.editable]
   );
 
   const filterFields = useMemo(
@@ -553,11 +555,11 @@ export default function CodesPage() {
                       rows={filteredCodes}
                       columns={columns}
                       onRowsChange={(rows) => setFilteredCodes(rows as Code[])}
-                      onAdd={handleAddCode}
-                      onDelete={handleDeleteCodes}
+                      {...(gridPermissions.showAddButton && { onAdd: handleAddCode })}
+                      {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteCodes })}
                       onRefresh={fetchCodes}
-                      checkboxSelection
-                      editable
+                      checkboxSelection={gridPermissions.checkboxSelection}
+                      editable={gridPermissions.editable}
                       exportFileName={`codes-${selectedCodeType.code}`}
                       loading={loading}
                       paginationMode="client"

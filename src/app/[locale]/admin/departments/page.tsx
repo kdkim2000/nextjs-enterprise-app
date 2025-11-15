@@ -15,10 +15,14 @@ import { useDepartmentManagement } from './hooks/useDepartmentManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { Department } from './types';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 
 export default function DepartmentsPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+
+  // Permission control
+  const gridPermissions = useDataGridPermissions('PROG-DEPT-MGMT');
 
   // Use custom hook for all business logic
   const {
@@ -75,8 +79,8 @@ export default function DepartmentsPage() {
 
   // Memoized computed values
   const columns = useMemo(
-    () => createColumns(t, currentLocale, departments, allUsers, handleEdit),
-    [t, currentLocale, departments, allUsers, handleEdit]
+    () => createColumns(t, currentLocale, departments, allUsers, handleEdit, gridPermissions.editable),
+    [t, currentLocale, departments, allUsers, handleEdit, gridPermissions.editable]
   );
 
   const filterFields = useMemo(
@@ -157,11 +161,11 @@ export default function DepartmentsPage() {
               rows={departments}
               columns={columns}
               onRowsChange={(rows) => setDepartments(rows as Department[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="departments"
               loading={searching}
               paginationMode="server"
