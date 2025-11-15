@@ -80,3 +80,20 @@ export interface SearchCriteria {
   roleDisplayName: string;
   permissions: string; // 'view', 'create', 'update', 'delete', 'full'
 }
+
+export interface PermissionFormData {
+  id: string;
+  roleId: string;
+  roleName: string;
+  roleDisplayName: string;
+  programId: string;
+  programCode: string;
+  programName: {
+    en: string;
+    ko: string;
+  };
+  canView: boolean;
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+}

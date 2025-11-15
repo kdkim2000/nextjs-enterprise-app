@@ -1,12 +1,14 @@
 import { GridColDef } from '@mui/x-data-grid';
-import { Chip, Box, Typography } from '@mui/material';
-import { CheckCircle, Cancel } from '@mui/icons-material';
+import { Chip, Box, Typography, IconButton, Tooltip } from '@mui/material';
+import { CheckCircle, Cancel, Edit } from '@mui/icons-material';
 
 export const createColumns = (
   t: (key: string) => string,
-  locale: string
+  locale: string,
+  onEdit?: (id: string | number) => void,
+  canUpdate: boolean = true
 ): GridColDef[] => {
-  return [
+  const columns: GridColDef[] = [
     {
       field: 'roleName',
       headerName: locale === 'ko' ? '역할 코드' : 'Role Code',
@@ -95,4 +97,39 @@ export const createColumns = (
       width: 120
     }
   ];
+
+  if (canUpdate) {
+    columns.push({
+      field: 'actions',
+      headerName: locale === 'ko' ? '작업' : 'Actions',
+      width: 100,
+      align: 'center',
+      headerAlign: 'center',
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Tooltip title={locale === 'ko' ? '권한 수정' : 'Edit Permissions'}>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onEdit) {
+                onEdit(params.row.id);
+              }
+            }}
+            sx={{
+              color: 'primary.main',
+              '&:hover': {
+                bgcolor: 'primary.50'
+              }
+            }}
+          >
+            <Edit fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )
+    });
+  }
+
+  return columns;
 };

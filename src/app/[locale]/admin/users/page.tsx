@@ -16,10 +16,14 @@ import { useUserManagement } from './hooks/useUserManagement';
 import { createColumns, DEPARTMENTS } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { User } from './types';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 
 export default function UserManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+
+  // Permission control
+  const gridPermissions = useDataGridPermissions('PROG-USER-LIST');
 
   // Use custom hook for all business logic
   const {
@@ -74,8 +78,8 @@ export default function UserManagementPage() {
   // Memoized computed values
   const columns = useMemo(() => {
     console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
-    return createColumns(t, handleEdit, handleResetPasswordClick);
-  }, [t, handleEdit, handleResetPasswordClick]);
+    return createColumns(t, handleEdit, handleResetPasswordClick, gridPermissions.editable);
+  }, [t, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(t), [t]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -150,11 +154,11 @@ export default function UserManagementPage() {
               rows={users}
               columns={columns}
               onRowsChange={(rows) => setUsers(rows as User[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="users"
               loading={searching}
               paginationMode="server"

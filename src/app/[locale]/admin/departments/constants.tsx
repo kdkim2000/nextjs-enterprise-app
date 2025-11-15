@@ -17,8 +17,10 @@ export const createColumns = (
   allDepartments: Department[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   allUsers: any[],
-  handleEdit: (id: string | number) => void
-): GridColDef[] => [
+  handleEdit: (id: string | number) => void,
+  canUpdate: boolean = true
+): GridColDef[] => {
+  const columns: GridColDef[] = [
   {
     field: 'id',
     headerName: 'ID',
@@ -115,18 +117,25 @@ export const createColumns = (
     headerName: t('phone'),
     width: 130,
     sortable: true
-  },
-  {
-    field: 'actions',
-    headerName: t('actions'),
-    width: 80,
-    sortable: false,
-    filterable: false,
-    renderCell: (params) => (
-      <ActionsCell
-        onEdit={() => handleEdit(params.row.id)}
-        showMore={false}
-      />
-    )
   }
 ];
+
+  // Add actions column only if user has update permission
+  if (canUpdate) {
+    columns.push({
+      field: 'actions',
+      headerName: t('actions'),
+      width: 80,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <ActionsCell
+          onEdit={() => handleEdit(params.row.id)}
+          showMore={false}
+        />
+      )
+    });
+  }
+
+  return columns;
+};

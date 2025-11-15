@@ -15,10 +15,14 @@ import { useHelpManagement } from './hooks/useHelpManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { HelpContent } from './types';
+import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 
 export default function HelpManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+
+  // Permission control
+  const gridPermissions = useDataGridPermissions('PROG-HELP-MGMT');
 
   // Use custom hook for all business logic
   const {
@@ -65,7 +69,7 @@ export default function HelpManagementPage() {
   } = useHelpManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(t, handleEdit), [t, handleEdit]);
+  const columns = useMemo(() => createColumns(t, handleEdit, gridPermissions.editable), [t, handleEdit, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(t), [t]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -140,11 +144,11 @@ export default function HelpManagementPage() {
               rows={helps}
               columns={columns}
               onRowsChange={(rows) => setHelps(rows as HelpContent[])}
-              onAdd={handleAdd}
-              onDelete={handleDeleteClick}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
               onRefresh={handleRefresh}
-              checkboxSelection
-              editable
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
               exportFileName="help-content"
               loading={searching}
               paginationMode="server"
