@@ -1,0 +1,29 @@
+# Database Configuration (Contains Passwords)
+migrate.config.json
+
+# Node modules
+node_modules/
+
+# Test scripts
+test-connection.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Environment variables
+.env
+.env.*
+
+# Database backups
+*.dump
+*.sql.backup
+*.backup
+
+# PostgreSQL password file
+.pgpass
+
+# Temporary files
+*.tmp
+*.temp
