@@ -22,8 +22,8 @@ import { PROGRAM_CATEGORIES, PROGRAM_TYPES, PROGRAM_STATUS } from '@/app/[locale
 
 export interface ProgramPermission {
   code: string;
-  name: { en: string; ko: string };
-  description: { en: string; ko: string };
+  name: { en: string; ko: string; zh: string; vi: string };
+  description: { en: string; ko: string; zh: string; vi: string };
   isDefault?: boolean;
 }
 
@@ -32,8 +32,12 @@ export interface ProgramFormData {
   code: string;
   nameEn: string;
   nameKo: string;
+  nameZh: string;
+  nameVi: string;
   descriptionEn: string;
   descriptionKo: string;
+  descriptionZh: string;
+  descriptionVi: string;
   category: string;
   type: 'page' | 'function' | 'api' | 'report';
   status: 'active' | 'inactive' | 'development';
@@ -66,8 +70,8 @@ export default function ProgramFormFields({
   const handleAddPermission = () => {
     setEditingPermission({
       code: '',
-      name: { en: '', ko: '' },
-      description: { en: '', ko: '' },
+      name: { en: '', ko: '', zh: '', vi: '' },
+      description: { en: '', ko: '', zh: '', vi: '' },
       isDefault: false
     });
     setPermissionDialogOpen(true);
@@ -142,6 +146,24 @@ export default function ProgramFormFields({
         required
       />
 
+      {/* Program Name (Chinese) */}
+      <TextField
+        label="Program Name (Chinese)"
+        value={program.nameZh || ''}
+        onChange={(e) => handleChange('nameZh', e.target.value)}
+        fullWidth
+        placeholder="中文程序名称"
+      />
+
+      {/* Program Name (Vietnamese) */}
+      <TextField
+        label="Program Name (Vietnamese)"
+        value={program.nameVi || ''}
+        onChange={(e) => handleChange('nameVi', e.target.value)}
+        fullWidth
+        placeholder="Tên chương trình tiếng Việt"
+      />
+
       <Divider>Descriptions</Divider>
 
       {/* Description (English) */}
@@ -162,6 +184,28 @@ export default function ProgramFormFields({
         fullWidth
         multiline
         rows={2}
+      />
+
+      {/* Description (Chinese) */}
+      <TextField
+        label="Description (Chinese)"
+        value={program.descriptionZh || ''}
+        onChange={(e) => handleChange('descriptionZh', e.target.value)}
+        fullWidth
+        multiline
+        rows={2}
+        placeholder="中文描述"
+      />
+
+      {/* Description (Vietnamese) */}
+      <TextField
+        label="Description (Vietnamese)"
+        value={program.descriptionVi || ''}
+        onChange={(e) => handleChange('descriptionVi', e.target.value)}
+        fullWidth
+        multiline
+        rows={2}
+        placeholder="Mô tả tiếng Việt"
       />
 
       <Divider>Properties</Divider>
@@ -374,6 +418,24 @@ export default function ProgramFormFields({
                 required
               />
 
+              {/* Name (Chinese) */}
+              <TextField
+                label="Name (Chinese)"
+                value={editingPermission?.name.zh || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, name: { ...editingPermission.name, zh: e.target.value } } : null)}
+                fullWidth
+                placeholder="中文名称"
+              />
+
+              {/* Name (Vietnamese) */}
+              <TextField
+                label="Name (Vietnamese)"
+                value={editingPermission?.name.vi || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, name: { ...editingPermission.name, vi: e.target.value } } : null)}
+                fullWidth
+                placeholder="Tên tiếng Việt"
+              />
+
               <Divider>Descriptions</Divider>
 
               {/* Description (English) */}
@@ -394,6 +456,28 @@ export default function ProgramFormFields({
                 fullWidth
                 multiline
                 rows={2}
+              />
+
+              {/* Description (Chinese) */}
+              <TextField
+                label="Description (Chinese)"
+                value={editingPermission?.description.zh || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, description: { ...editingPermission.description, zh: e.target.value } } : null)}
+                fullWidth
+                multiline
+                rows={2}
+                placeholder="中文描述"
+              />
+
+              {/* Description (Vietnamese) */}
+              <TextField
+                label="Description (Vietnamese)"
+                value={editingPermission?.description.vi || ''}
+                onChange={(e) => setEditingPermission(editingPermission ? { ...editingPermission, description: { ...editingPermission.description, vi: e.target.value } } : null)}
+                fullWidth
+                multiline
+                rows={2}
+                placeholder="Mô tả tiếng Việt"
               />
             </Stack>
           </Box>

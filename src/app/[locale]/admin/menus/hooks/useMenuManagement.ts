@@ -2,8 +2,15 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
-import { Menu, SearchCriteria } from '../types';
+import { Menu, MenuFormData, SearchCriteria } from '../types';
 import { MenuItem as MenuItemType } from '@/types/menu';
+import {
+  multiLangFieldsToFormData,
+  formDataToMultiLangFields,
+  createEmptyMultiLangFormFields,
+  searchMultiLangField,
+  getLocalizedValue
+} from '@/lib/i18n/multiLang';
 
 interface UseMenuManagementOptions {
   storageKey?: string;
@@ -41,7 +48,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   // Local states
   const [allMenus, setAllMenus] = useState<MenuItemType[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
+  const [editingMenu, setEditingMenu] = useState<MenuFormData | null>(null);
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
@@ -85,16 +92,14 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       const flatItem: Menu = {
         id: item.id,
         code: item.code,
-        nameEn: item.name.en,
-        nameKo: item.name.ko,
+        name: item.name,
         path: item.path,
         icon: item.icon,
         order: item.order,
         parentId: item.parentId,
         level: item.level,
         programId: item.programId || '',
-        descriptionEn: item.description.en,
-        descriptionKo: item.description.ko
+        description: item.description
       };
       acc.push(flatItem);
       if (item.children && item.children.length > 0) {
@@ -134,24 +139,33 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     setEditingMenu({
       id: '',
       code: '',
-      nameEn: '',
-      nameKo: '',
+      ...createEmptyMultiLangFormFields(),
       path: '',
       icon: 'Dashboard',
       order: 0,
       parentId: null,
       level: 0,
-      programId: '',
-      descriptionEn: '',
-      descriptionKo: ''
-    });
+      programId: ''
+    } as MenuFormData);
     setDialogOpen(true);
   }, []);
 
   const handleEdit = useCallback((id: string | number) => {
     const menu = menus.find((m) => m.id === id);
     if (menu) {
-      setEditingMenu(menu);
+      const formFields = multiLangFieldsToFormData(menu.name, menu.description);
+
+      setEditingMenu({
+        id: menu.id,
+        code: menu.code,
+        ...formFields,
+        path: menu.path,
+        icon: menu.icon,
+        order: menu.order,
+        parentId: menu.parentId,
+        level: menu.level,
+        programId: menu.programId
+      } as MenuFormData);
       setDialogOpen(true);
     }
   }, [menus]);
@@ -162,22 +176,18 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     try {
       setSaveLoading(true);
 
+      const { name, description } = formDataToMultiLangFields(editingMenu);
+
       const menuData = {
         code: editingMenu.code,
-        name: {
-          en: editingMenu.nameEn,
-          ko: editingMenu.nameKo
-        },
+        name,
         path: editingMenu.path,
         icon: editingMenu.icon,
         order: editingMenu.order,
         parentId: editingMenu.parentId || null,
         level: editingMenu.level,
         programId: editingMenu.programId || null,
-        description: {
-          en: editingMenu.descriptionEn,
-          ko: editingMenu.descriptionKo
-        }
+        description
       };
 
       if (editingMenu.id) {
@@ -286,29 +296,29 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       const searchLower = quickSearch.toLowerCase().trim();
       return menus.filter((menu) => {
         const code = String(menu.code || '').toLowerCase();
-        const nameEn = String(menu.nameEn || '').toLowerCase();
-        const nameKo = String(menu.nameKo || '').toLowerCase();
         const path = String(menu.path || '').toLowerCase();
         const programId = String(menu.programId || '').toLowerCase();
         const icon = String(menu.icon || '').toLowerCase();
 
+        // Search in multi-language name field
+        const nameMatches = searchMultiLangField(menu.name, searchLower);
+
         // Also search in parent menu name
-        let parentName = '';
+        let parentNameMatches = false;
         if (menu.parentId) {
           const parent = allMenus.find(m => m.id === menu.parentId);
           if (parent) {
-            parentName = (locale === 'ko' ? parent.name.ko : parent.name.en).toLowerCase();
+            parentNameMatches = searchMultiLangField(parent.name, searchLower);
           }
         }
 
         return (
           code.includes(searchLower) ||
-          nameEn.includes(searchLower) ||
-          nameKo.includes(searchLower) ||
+          nameMatches ||
           path.includes(searchLower) ||
           programId.includes(searchLower) ||
           icon.includes(searchLower) ||
-          parentName.includes(searchLower)
+          parentNameMatches
         );
       });
     }
@@ -323,10 +333,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
           match = match && String(menu.code || '').toLowerCase().includes(searchCriteria.code.toLowerCase());
         }
         if (searchCriteria.name) {
-          const searchName = searchCriteria.name.toLowerCase();
-          const nameEn = String(menu.nameEn || '').toLowerCase();
-          const nameKo = String(menu.nameKo || '').toLowerCase();
-          match = match && (nameEn.includes(searchName) || nameKo.includes(searchName));
+          match = match && searchMultiLangField(menu.name, searchCriteria.name);
         }
         if (searchCriteria.path) {
           match = match && String(menu.path || '').toLowerCase().includes(searchCriteria.path.toLowerCase());

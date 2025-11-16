@@ -1,14 +1,10 @@
+import { MultiLangField } from '@/lib/i18n/multiLang';
+
 export interface Department {
   id: string;
   code: string;
-  name: {
-    en: string;
-    ko: string;
-  };
-  description: {
-    en: string;
-    ko: string;
-  };
+  name: MultiLangField;
+  description: MultiLangField;
   parentId: string | null;
   managerId: string | null;
   level: number;
@@ -35,8 +31,12 @@ export interface DepartmentFormData {
   code: string;
   nameEn: string;
   nameKo: string;
+  nameZh: string;
+  nameVi: string;
   descriptionEn: string;
   descriptionKo: string;
+  descriptionZh: string;
+  descriptionVi: string;
   parentId: string;
   managerId: string;
   status: 'active' | 'inactive';

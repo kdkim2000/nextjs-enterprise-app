@@ -7,6 +7,7 @@ import { I18nProviderClient } from '@/lib/i18n/client';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PermissionProvider } from '@/contexts/PermissionContext';
 import { MenuProvider } from '@/contexts/MenuContext';
+import LanguageLoader from './LanguageLoader';
 import { lightTheme } from '@/theme';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,6 +24,7 @@ export function ClientProviders({
       <ThemeProvider theme={lightTheme}>
         <CssBaseline />
         <AuthProvider>
+          <LanguageLoader />
           <PermissionProvider>
             <MenuProvider>
               {children}

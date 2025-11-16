@@ -15,8 +15,12 @@ export interface CodeFormData {
   code: string;
   nameEn: string;
   nameKo: string;
+  nameZh: string;
+  nameVi: string;
   descriptionEn: string;
   descriptionKo: string;
+  descriptionZh: string;
+  descriptionVi: string;
   order: number;
   status: 'active' | 'inactive';
   parentCode: string;
@@ -33,8 +37,12 @@ export interface CodeFormFieldsProps {
     code?: string;
     nameEn?: string;
     nameKo?: string;
+    nameZh?: string;
+    nameVi?: string;
     descriptionEn?: string;
     descriptionKo?: string;
+    descriptionZh?: string;
+    descriptionVi?: string;
     order?: string;
     status?: string;
     parentCode?: string;
@@ -99,6 +107,26 @@ export default function CodeFormFields({
         placeholder="한글 표시 이름"
       />
 
+      {/* Name (Chinese) */}
+      <TextField
+        label={labels.nameZh || 'Name (Chinese)'}
+        fullWidth
+        required
+        value={code.nameZh || ''}
+        onChange={(e) => handleChange('nameZh', e.target.value)}
+        placeholder="中文显示名称"
+      />
+
+      {/* Name (Vietnamese) */}
+      <TextField
+        label={labels.nameVi || 'Name (Vietnamese)'}
+        fullWidth
+        required
+        value={code.nameVi || ''}
+        onChange={(e) => handleChange('nameVi', e.target.value)}
+        placeholder="Tên hiển thị tiếng Việt"
+      />
+
       {/* Description (English) */}
       <TextField
         label={labels.descriptionEn || 'Description (English)'}
@@ -119,6 +147,28 @@ export default function CodeFormFields({
         value={code.descriptionKo || ''}
         onChange={(e) => handleChange('descriptionKo', e.target.value)}
         placeholder="한글 설명"
+      />
+
+      {/* Description (Chinese) */}
+      <TextField
+        label={labels.descriptionZh || 'Description (Chinese)'}
+        fullWidth
+        multiline
+        rows={2}
+        value={code.descriptionZh || ''}
+        onChange={(e) => handleChange('descriptionZh', e.target.value)}
+        placeholder="中文说明"
+      />
+
+      {/* Description (Vietnamese) */}
+      <TextField
+        label={labels.descriptionVi || 'Description (Vietnamese)'}
+        fullWidth
+        multiline
+        rows={2}
+        value={code.descriptionVi || ''}
+        onChange={(e) => handleChange('descriptionVi', e.target.value)}
+        placeholder="Mô tả tiếng Việt"
       />
 
       {/* Order */}

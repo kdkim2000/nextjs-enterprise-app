@@ -1,0 +1,312 @@
+{
+  "currentVersion": "2.0",
+  "versions": [
+    {
+      "version": "2.0",
+      "effectiveDate": "2025-01-15",
+      "title": "Privacy Policy",
+      "lastUpdated": "Last Updated: January 15, 2025",
+      "isLatest": true,
+      "sections": [
+        {
+          "id": "introduction",
+          "title": "1. Introduction",
+          "content": [
+            "Enterprise App (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our enterprise application.",
+            "Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the application.",
+            "We have updated our policy to provide greater transparency and control over your personal data."
+          ]
+        },
+        {
+          "id": "information-collection",
+          "title": "2. Information We Collect",
+          "content": [
+            "We collect information that you provide directly to us, including:",
+            "• Personal identification information (name, email address, phone number)",
+            "• Account credentials and authentication information",
+            "• User preferences and settings",
+            "• Usage data and activity logs",
+            "• Device and browser information",
+            "• IP address and location data",
+            "• Biometric data (with explicit consent only)"
+          ]
+        },
+        {
+          "id": "information-use",
+          "title": "3. How We Use Your Information",
+          "content": [
+            "We use the information we collect to:",
+            "• Provide, maintain, and improve our services",
+            "• Process your requests and transactions",
+            "• Send you technical notices, updates, and security alerts",
+            "• Respond to your comments and questions",
+            "• Monitor and analyze trends, usage, and activities",
+            "• Detect, prevent, and address technical issues and security threats",
+            "• Comply with legal obligations and enforce our policies",
+            "• Conduct research and development for service improvement"
+          ]
+        },
+        {
+          "id": "information-sharing",
+          "title": "4. Information Sharing and Disclosure",
+          "content": [
+            "We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:",
+            "• With your explicit consent or at your direction",
+            "• With service providers who assist in our operations (under strict confidentiality agreements)",
+            "• To comply with legal obligations, court orders, or government requests",
+            "• To protect the rights, property, or safety of our company, users, or others",
+            "• In connection with a merger, acquisition, or sale of assets (with prior notice)"
+          ]
+        },
+        {
+          "id": "data-security",
+          "title": "5. Data Security",
+          "content": [
+            "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. These measures include:",
+            "• End-to-end encryption of data in transit and at rest",
+            "• Regular security assessments and penetration testing",
+            "• Multi-factor authentication and access controls",
+            "• Employee training on data protection and security best practices",
+            "• Incident response and breach notification procedures",
+            "• Regular backups and disaster recovery procedures"
+          ]
+        },
+        {
+          "id": "data-retention",
+          "title": "6. Data Retention",
+          "content": [
+            "We retain your personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law.",
+            "When your information is no longer needed, we will securely delete or anonymize it within 90 days.",
+            "You may request earlier deletion by contacting us directly."
+          ]
+        },
+        {
+          "id": "user-rights",
+          "title": "7. Your Rights",
+          "content": [
+            "You have the right to:",
+            "• Access and receive a copy of your personal information",
+            "• Correct inaccurate or incomplete information",
+            "• Request deletion of your personal information",
+            "• Object to or restrict certain processing activities",
+            "• Withdraw consent where processing is based on consent",
+            "• Data portability in a structured, commonly used format",
+            "• Lodge a complaint with a supervisory authority",
+            "To exercise these rights, please contact us using the information provided below. We will respond within 30 days."
+          ]
+        },
+        {
+          "id": "cookies",
+          "title": "8. Cookies and Tracking Technologies",
+          "content": [
+            "We use cookies and similar tracking technologies to collect information about your browsing activities. You can control cookies through your browser settings.",
+            "Types of cookies we use:",
+            "• Essential cookies: Required for the application to function properly",
+            "• Analytics cookies: Help us understand how users interact with our application",
+            "• Preference cookies: Remember your settings and preferences",
+            "• Security cookies: Authenticate users and prevent fraudulent use"
+          ]
+        },
+        {
+          "id": "third-party",
+          "title": "9. Third-Party Services",
+          "content": [
+            "Our application may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.",
+            "We carefully vet all third-party service providers to ensure they meet our security and privacy standards."
+          ]
+        },
+        {
+          "id": "children",
+          "title": "10. Children's Privacy",
+          "content": [
+            "Our application is not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately and we will delete it within 48 hours."
+          ]
+        },
+        {
+          "id": "international",
+          "title": "11. International Data Transfers",
+          "content": [
+            "Your information may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place to protect your information in accordance with this Privacy Policy.",
+            "We comply with GDPR, CCPA, and other applicable data protection regulations."
+          ]
+        },
+        {
+          "id": "ai-processing",
+          "title": "12. AI and Automated Decision Making",
+          "content": [
+            "We may use artificial intelligence and automated systems to process your data for service improvement and personalization.",
+            "You have the right to:",
+            "• Be informed when automated decision-making affects you",
+            "• Request human review of automated decisions",
+            "• Challenge and contest automated decisions"
+          ]
+        },
+        {
+          "id": "changes",
+          "title": "13. Changes to This Privacy Policy",
+          "content": [
+            "We may update this Privacy Policy from time to time. We will notify you of any significant changes by email and by posting the new Privacy Policy on this page with an updated \"Last Updated\" date.",
+            "Your continued use of the application after any changes indicates your acceptance of the updated Privacy Policy. You may review previous versions of this policy at any time."
+          ]
+        },
+        {
+          "id": "contact",
+          "title": "14. Contact Us",
+          "content": [
+            "If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:",
+            "Email: privacy@enterpriseapp.com",
+            "Address: 123 Enterprise Street, Business City, 12345",
+            "Phone: +1 (555) 123-4567",
+            "Data Protection Officer: dpo@enterpriseapp.com"
+          ]
+        }
+      ],
+      "footer": {
+        "message": "Thank you for reading our Privacy Policy. If you have any questions, please feel free to contact us."
+      }
+    },
+    {
+      "version": "1.0",
+      "effectiveDate": "2024-01-01",
+      "title": "Privacy Policy",
+      "lastUpdated": "Last Updated: January 2024",
+      "isLatest": false,
+      "sections": [
+        {
+          "id": "introduction",
+          "title": "1. Introduction",
+          "content": [
+            "Enterprise App (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our enterprise application.",
+            "Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the application."
+          ]
+        },
+        {
+          "id": "information-collection",
+          "title": "2. Information We Collect",
+          "content": [
+            "We collect information that you provide directly to us, including:",
+            "• Personal identification information (name, email address, phone number)",
+            "• Account credentials and authentication information",
+            "• User preferences and settings",
+            "• Usage data and activity logs",
+            "• Device and browser information",
+            "• IP address and location data"
+          ]
+        },
+        {
+          "id": "information-use",
+          "title": "3. How We Use Your Information",
+          "content": [
+            "We use the information we collect to:",
+            "• Provide, maintain, and improve our services",
+            "• Process your requests and transactions",
+            "• Send you technical notices, updates, and security alerts",
+            "• Respond to your comments and questions",
+            "• Monitor and analyze trends, usage, and activities",
+            "• Detect, prevent, and address technical issues and security threats",
+            "• Comply with legal obligations and enforce our policies"
+          ]
+        },
+        {
+          "id": "information-sharing",
+          "title": "4. Information Sharing and Disclosure",
+          "content": [
+            "We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:",
+            "• With your consent or at your direction",
+            "• With service providers who assist in our operations",
+            "• To comply with legal obligations, court orders, or government requests",
+            "• To protect the rights, property, or safety of our company, users, or others",
+            "• In connection with a merger, acquisition, or sale of assets"
+          ]
+        },
+        {
+          "id": "data-security",
+          "title": "5. Data Security",
+          "content": [
+            "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. These measures include:",
+            "• Encryption of data in transit and at rest",
+            "• Regular security assessments and audits",
+            "• Access controls and authentication mechanisms",
+            "• Employee training on data protection",
+            "• Incident response and breach notification procedures"
+          ]
+        },
+        {
+          "id": "data-retention",
+          "title": "6. Data Retention",
+          "content": [
+            "We retain your personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law.",
+            "When your information is no longer needed, we will securely delete or anonymize it."
+          ]
+        },
+        {
+          "id": "user-rights",
+          "title": "7. Your Rights",
+          "content": [
+            "You have the right to:",
+            "• Access and receive a copy of your personal information",
+            "• Correct inaccurate or incomplete information",
+            "• Request deletion of your personal information",
+            "• Object to or restrict certain processing activities",
+            "• Withdraw consent where processing is based on consent",
+            "• Data portability",
+            "To exercise these rights, please contact us using the information provided below."
+          ]
+        },
+        {
+          "id": "cookies",
+          "title": "8. Cookies and Tracking Technologies",
+          "content": [
+            "We use cookies and similar tracking technologies to collect information about your browsing activities. You can control cookies through your browser settings.",
+            "Types of cookies we use:",
+            "• Essential cookies: Required for the application to function",
+            "• Analytics cookies: Help us understand how users interact with our application",
+            "• Preference cookies: Remember your settings and preferences"
+          ]
+        },
+        {
+          "id": "third-party",
+          "title": "9. Third-Party Services",
+          "content": [
+            "Our application may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies."
+          ]
+        },
+        {
+          "id": "children",
+          "title": "10. Children's Privacy",
+          "content": [
+            "Our application is not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately."
+          ]
+        },
+        {
+          "id": "international",
+          "title": "11. International Data Transfers",
+          "content": [
+            "Your information may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place to protect your information in accordance with this Privacy Policy."
+          ]
+        },
+        {
+          "id": "changes",
+          "title": "12. Changes to This Privacy Policy",
+          "content": [
+            "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last Updated\" date.",
+            "Your continued use of the application after any changes indicates your acceptance of the updated Privacy Policy."
+          ]
+        },
+        {
+          "id": "contact",
+          "title": "13. Contact Us",
+          "content": [
+            "If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:",
+            "Email: privacy@enterpriseapp.com",
+            "Address: 123 Enterprise Street, Business City, 12345",
+            "Phone: +1 (555) 123-4567"
+          ]
+        }
+      ],
+      "footer": {
+        "message": "Thank you for reading our Privacy Policy. If you have any questions, please feel free to contact us."
+      }
+    }
+  ]
+}

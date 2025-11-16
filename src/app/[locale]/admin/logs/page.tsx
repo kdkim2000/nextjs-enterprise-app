@@ -19,7 +19,8 @@ import PageContainer from '@/components/common/PageContainer';
 import RouteGuard from '@/components/auth/RouteGuard';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
-import { useI18n } from '@/lib/i18n/client';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import type { LogEntry } from '@/types/log';
 
 interface SearchCriteria {
@@ -63,6 +64,7 @@ const loadPageState = () => {
 
 export default function LogsPage() {
   const t = useI18n();
+  const locale = useCurrentLocale();
 
   // Load saved state on mount
   const savedState = loadPageState();
@@ -274,68 +276,68 @@ export default function LogsPage() {
   const filterFields: FilterFieldConfig[] = useMemo(() => [
     {
       name: 'method',
-      label: 'Method',
+      label: getLocalizedValue({ en: 'Method', ko: '메서드', zh: '方法', vi: 'Phương thức' }, locale),
       type: 'multi-select',
       options: [
-        { value: 'MENU', label: 'MENU (Menu Access)' },
+        { value: 'MENU', label: getLocalizedValue({ en: 'MENU (Menu Access)', ko: 'MENU (메뉴 접근)', zh: 'MENU (菜单访问)', vi: 'MENU (Truy cập menu)' }, locale) },
         { value: 'GET', label: 'GET' },
         { value: 'POST', label: 'POST' },
         { value: 'PUT', label: 'PUT' },
         { value: 'PATCH', label: 'PATCH' },
         { value: 'DELETE', label: 'DELETE' }
       ],
-      allLabel: 'All Methods'
+      allLabel: getLocalizedValue({ en: 'All Methods', ko: '전체 메서드', zh: '所有方法', vi: 'Tất cả phương thức' }, locale)
     },
     {
       name: 'path',
-      label: 'Path',
+      label: getLocalizedValue({ en: 'Path', ko: '경로', zh: '路径', vi: 'Đường dẫn' }, locale),
       type: 'text',
-      placeholder: 'Search by path...'
+      placeholder: getLocalizedValue({ en: 'Search by path...', ko: '경로로 검색...', zh: '按路径搜索...', vi: 'Tìm theo đường dẫn...' }, locale)
     },
     {
       name: 'userId',
-      label: 'User ID',
+      label: getLocalizedValue({ en: 'User ID', ko: '사용자 ID', zh: '用户 ID', vi: 'ID Người dùng' }, locale),
       type: 'text',
-      placeholder: 'Search by user ID...'
+      placeholder: getLocalizedValue({ en: 'Search by user ID...', ko: '사용자 ID로 검색...', zh: '按用户 ID 搜索...', vi: 'Tìm theo ID người dùng...' }, locale)
     },
     {
       name: 'programId',
-      label: 'Program ID',
+      label: getLocalizedValue({ en: 'Program ID', ko: '프로그램 ID', zh: '程序 ID', vi: 'ID Chương trình' }, locale),
       type: 'select',
       options: [
-        { value: '', label: 'All Programs' },
+        { value: '', label: getLocalizedValue({ en: 'All Programs', ko: '전체 프로그램', zh: '所有程序', vi: 'Tất cả chương trình' }, locale) },
         ...programIds.map(id => ({ value: id, label: id }))
       ]
     },
     {
       name: 'statusCode',
-      label: 'Status Code',
+      label: getLocalizedValue({ en: 'Status Code', ko: '상태 코드', zh: '状态码', vi: 'Mã trạng thái' }, locale),
       type: 'text',
-      placeholder: 'e.g., 200, 404, 500...'
+      placeholder: getLocalizedValue({ en: 'e.g., 200, 404, 500...', ko: '예: 200, 404, 500...', zh: '例如：200, 404, 500...', vi: 'ví dụ: 200, 404, 500...' }, locale)
     },
     {
       name: 'dateRange',
-      label: 'Search Period',
+      label: getLocalizedValue({ en: 'Search Period', ko: '조회 기간', zh: '搜索期间', vi: 'Khoảng thời gian' }, locale),
       type: 'date-range',
       startDateField: 'startDate',
       endDateField: 'endDate',
-      startLabel: 'Start Date',
-      endLabel: 'End Date',
+      startLabel: getLocalizedValue({ en: 'Start Date', ko: '시작일', zh: '开始日期', vi: 'Ngày bắt đầu' }, locale),
+      endLabel: getLocalizedValue({ en: 'End Date', ko: '종료일', zh: '结束日期', vi: 'Ngày kết thúc' }, locale),
       gridSize: { xs: 12, sm: 6, md: 6 },
       dateOnly: true // Date only, time auto-filled (00:00:00 ~ 23:59:59)
     }
-  ], [programIds]);
+  ], [programIds, locale]);
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef[] = useMemo(() => [
     {
       field: 'timestamp',
-      headerName: 'Time',
+      headerName: getLocalizedValue({ en: 'Time', ko: '시간', zh: '时间', vi: 'Thời gian' }, locale),
       width: 180,
       valueFormatter: (value) => new Date(value).toLocaleString()
     },
     {
       field: 'method',
-      headerName: 'Method',
+      headerName: getLocalizedValue({ en: 'Method', ko: '메서드', zh: '方法', vi: 'Phương thức' }, locale),
       width: 90,
       renderCell: (params) => (
         <Chip
@@ -347,13 +349,13 @@ export default function LogsPage() {
     },
     {
       field: 'path',
-      headerName: 'Path',
+      headerName: getLocalizedValue({ en: 'Path', ko: '경로', zh: '路径', vi: 'Đường dẫn' }, locale),
       width: 200,
       flex: 1
     },
     {
       field: 'programId',
-      headerName: 'Program',
+      headerName: getLocalizedValue({ en: 'Program', ko: '프로그램', zh: '程序', vi: 'Chương trình' }, locale),
       width: 150,
       renderCell: (params) => (
         <Tooltip title={params.value || 'N/A'}>
@@ -367,7 +369,7 @@ export default function LogsPage() {
     },
     {
       field: 'statusCode',
-      headerName: 'Status',
+      headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       width: 100,
       renderCell: (params) => (
         <Chip
@@ -379,20 +381,20 @@ export default function LogsPage() {
     },
     {
       field: 'duration',
-      headerName: 'Duration',
+      headerName: getLocalizedValue({ en: 'Duration', ko: '소요시간', zh: '持续时间', vi: 'Thời lượng' }, locale),
       width: 100
     },
     {
       field: 'userId',
-      headerName: 'User',
+      headerName: getLocalizedValue({ en: 'User', ko: '사용자', zh: '用户', vi: 'Người dùng' }, locale),
       width: 120
     },
     {
       field: 'ip',
-      headerName: 'IP',
+      headerName: getLocalizedValue({ en: 'IP', ko: 'IP', zh: 'IP', vi: 'IP' }, locale),
       width: 120
     }
-  ];
+  ], [locale]);
 
   return (
     <RouteGuard programCode="PROG-LOGS" requiredPermission="view" fallbackUrl="/dashboard">
@@ -412,7 +414,7 @@ export default function LogsPage() {
         onSearch={handleQuickSearch}
         onClear={handleQuickSearchClear}
         onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        placeholder="Search by path, user ID, or program ID..."
+        placeholder={getLocalizedValue({ en: 'Search by path, user ID, or program ID...', ko: '경로, 사용자 ID 또는 프로그램 ID로 검색...', zh: '按路径、用户 ID 或程序 ID 搜索...', vi: 'Tìm theo đường dẫn, ID người dùng hoặc ID chương trình...' }, locale)}
         searching={loading}
         activeFilterCount={activeFilterCount}
         showAdvancedButton={true}
@@ -444,8 +446,8 @@ export default function LogsPage() {
         {logs.length === 0 && !loading ? (
           <EmptyState
             icon={Search}
-            title="No logs loaded"
-            description="Use the search filters above to load log data"
+            title={getLocalizedValue({ en: 'No logs loaded', ko: '로그가 없습니다', zh: '未加载日志', vi: 'Không có nhật ký' }, locale)}
+            description={getLocalizedValue({ en: 'Use the search filters above to load log data', ko: '검색 필터를 사용하여 로그 데이터를 불러오세요', zh: '使用上面的搜索过滤器加载日志数据', vi: 'Sử dụng bộ lọc tìm kiếm ở trên để tải dữ liệu nhật ký' }, locale)}
           />
         ) : (
           <Box sx={{ flex: 1, minHeight: 0 }}>

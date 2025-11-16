@@ -1,32 +1,31 @@
 import { RoleProgramMapping, SearchCriteria } from './types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createFilterFields = (locale: string) => {
-  const isKorean = locale === 'ko';
-
   return [
     {
       name: 'roleName',
-      label: isKorean ? '역할 코드' : 'Role Code',
+      label: getLocalizedValue({ en: 'Role Code', ko: '역할 코드', zh: '角色代码', vi: 'Mã vai trò' }, locale),
       type: 'text' as const,
-      placeholder: isKorean ? '역할 코드로 검색' : 'Search by role code'
+      placeholder: getLocalizedValue({ en: 'Search by role code', ko: '역할 코드로 검색', zh: '按角色代码搜索', vi: 'Tìm theo mã vai trò' }, locale)
     },
     {
       name: 'roleDisplayName',
-      label: isKorean ? '역할명' : 'Role Name',
+      label: getLocalizedValue({ en: 'Role Name', ko: '역할명', zh: '角色名称', vi: 'Tên vai trò' }, locale),
       type: 'text' as const,
-      placeholder: isKorean ? '역할명으로 검색' : 'Search by role name'
+      placeholder: getLocalizedValue({ en: 'Search by role name', ko: '역할명으로 검색', zh: '按角色名称搜索', vi: 'Tìm theo tên vai trò' }, locale)
     },
     {
       name: 'permissions',
-      label: isKorean ? '권한' : 'Permissions',
+      label: getLocalizedValue({ en: 'Permissions', ko: '권한', zh: '权限', vi: 'Quyền' }, locale),
       type: 'select' as const,
       options: [
-        { value: '', label: isKorean ? '전체' : 'All' },
-        { value: 'view', label: isKorean ? '조회' : 'View' },
-        { value: 'create', label: isKorean ? '생성' : 'Create' },
-        { value: 'update', label: isKorean ? '수정' : 'Update' },
-        { value: 'delete', label: isKorean ? '삭제' : 'Delete' },
-        { value: 'full', label: isKorean ? '전체 권한' : 'Full Access' }
+        { value: '', label: getLocalizedValue({ en: 'All', ko: '전체', zh: '全部', vi: 'Tất cả' }, locale) },
+        { value: 'view', label: getLocalizedValue({ en: 'View', ko: '조회', zh: '查看', vi: 'Xem' }, locale) },
+        { value: 'create', label: getLocalizedValue({ en: 'Create', ko: '생성', zh: '创建', vi: 'Tạo' }, locale) },
+        { value: 'update', label: getLocalizedValue({ en: 'Update', ko: '수정', zh: '更新', vi: 'Cập nhật' }, locale) },
+        { value: 'delete', label: getLocalizedValue({ en: 'Delete', ko: '삭제', zh: '删除', vi: 'Xóa' }, locale) },
+        { value: 'full', label: getLocalizedValue({ en: 'Full Access', ko: '전체 권한', zh: '完全访问', vi: 'Toàn quyền' }, locale) }
       ]
     }
   ];
