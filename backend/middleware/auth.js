@@ -24,7 +24,9 @@ function authenticateToken(req, res, next) {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
+    // Return 401 for invalid/expired tokens (not 403)
+    // 401 = authentication failed, 403 = insufficient permissions
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 

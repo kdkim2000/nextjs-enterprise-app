@@ -5,7 +5,8 @@ import {
   Security,
   ShowChart,
   Storage,
-  ViewModule
+  ViewModule,
+  ListAlt
 } from '@mui/icons-material';
 
 export const componentCategories = [
@@ -122,6 +123,20 @@ export const componentCategories = [
         description: 'User avatar upload with crop and preview',
         path: '/dev/components/avatar-upload',
         tags: ['Image', 'Profile', 'Upload']
+      }
+    ]
+  },
+  {
+    category: 'Code Management Components',
+    description: 'Database-driven select components that load options from code management system',
+    icon: ListAlt,
+    color: '#00695c',
+    components: [
+      {
+        title: 'CodeSelect & CodeMultiSelect',
+        description: 'Single/Multi select components with automatic option loading from code types - just provide codeType prop',
+        path: '/dev/components/code-select',
+        tags: ['Select', 'Code', 'Dynamic', 'Database']
       }
     ]
   },

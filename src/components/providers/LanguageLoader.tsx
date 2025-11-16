@@ -26,6 +26,15 @@ export default function LanguageLoader() {
         return;
       }
 
+      // Additional safety check: ensure accessToken exists
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          console.log('[LanguageLoader] No access token found, skipping preference load');
+          return;
+        }
+      }
+
       try {
         // Fetch user preferences from backend
         const response = await api.get('/user/preferences');
@@ -41,8 +50,14 @@ export default function LanguageLoader() {
             changeLocale(savedLanguage as LanguageCode);
           }
         }
-      } catch (error) {
-        console.error('[LanguageLoader] Failed to load user preferences:', error);
+      } catch (error: any) {
+        // Handle authentication errors gracefully
+        if (error?.response?.status === 403 || error?.response?.status === 401) {
+          console.log('[LanguageLoader] Authentication required - user preferences not loaded');
+          // Token might be expired/invalid - let axios interceptor handle refresh
+        } else {
+          console.error('[LanguageLoader] Failed to load user preferences:', error);
+        }
         // Fail silently - don't block user experience
       }
     };
