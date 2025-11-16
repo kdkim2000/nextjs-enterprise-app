@@ -6,6 +6,8 @@ export interface Role {
   roleType: 'management' | 'general'; // management: 관리용 역할, general: 일반 역할
   manager: string | null; // User ID of the role manager (관리자)
   representative: string | null; // User ID of the role representative (담당자)
+  managerName?: string | null; // Enriched: Name of the role manager
+  representativeName?: string | null; // Enriched: Name of the role representative
   isSystem: boolean; // System roles cannot be deleted
   isActive: boolean;
   createdAt: string;

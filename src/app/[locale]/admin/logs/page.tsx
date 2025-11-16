@@ -296,9 +296,9 @@ export default function LogsPage() {
     },
     {
       name: 'userId',
-      label: getLocalizedValue({ en: 'User ID', ko: '사용자 ID', zh: '用户 ID', vi: 'ID Người dùng' }, locale),
+      label: getLocalizedValue({ en: 'User', ko: '사용자', zh: '用户', vi: 'Người dùng' }, locale),
       type: 'text',
-      placeholder: getLocalizedValue({ en: 'Search by user ID...', ko: '사용자 ID로 검색...', zh: '按用户 ID 搜索...', vi: 'Tìm theo ID người dùng...' }, locale)
+      placeholder: getLocalizedValue({ en: 'Search by user ID or name...', ko: '사용자 ID 또는 이름으로 검색...', zh: '按用户 ID 或名称搜索...', vi: 'Tìm theo ID hoặc tên người dùng...' }, locale)
     },
     {
       name: 'programId',
@@ -385,9 +385,15 @@ export default function LogsPage() {
       width: 100
     },
     {
-      field: 'userId',
+      field: 'userName',
       headerName: getLocalizedValue({ en: 'User', ko: '사용자', zh: '用户', vi: 'Người dùng' }, locale),
-      width: 120
+      width: 150,
+      valueGetter: (_value, row) => row.userName || row.userId || 'N/A',
+      renderCell: (params) => (
+        <Tooltip title={`User ID: ${params.row.userId}`}>
+          <span>{params.value}</span>
+        </Tooltip>
+      )
     },
     {
       field: 'ip',
@@ -414,7 +420,7 @@ export default function LogsPage() {
         onSearch={handleQuickSearch}
         onClear={handleQuickSearchClear}
         onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        placeholder={getLocalizedValue({ en: 'Search by path, user ID, or program ID...', ko: '경로, 사용자 ID 또는 프로그램 ID로 검색...', zh: '按路径、用户 ID 或程序 ID 搜索...', vi: 'Tìm theo đường dẫn, ID người dùng hoặc ID chương trình...' }, locale)}
+        placeholder={getLocalizedValue({ en: 'Search by path, user, or program...', ko: '경로, 사용자 또는 프로그램으로 검색...', zh: '按路径、用户或程序搜索...', vi: 'Tìm theo đường dẫn, người dùng hoặc chương trình...' }, locale)}
         searching={loading}
         activeFilterCount={activeFilterCount}
         showAdvancedButton={true}

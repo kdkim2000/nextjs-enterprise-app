@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { HelpContent, SearchCriteria } from '../types';
 
 interface UseHelpManagementOptions {
@@ -39,8 +40,14 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
     }
   });
 
-  // Use auto-hide message hook
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
 
   // Local states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -143,14 +150,14 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      showError(err.response?.data?.error || 'Failed to load help content');
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_HELP_LOAD_FAIL');
       console.error('Failed to fetch helps:', error);
       setHelps([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria, setHelps, setRowCount, showError]);
+  }, [quickSearch, searchCriteria, setHelps, setRowCount, showErrorMessage]);
 
   // Help CRUD operations
   const handleAdd = useCallback(() => {
@@ -186,24 +193,24 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
         // Add new help
         const response = await api.post('/help', editingHelp);
         setHelps([...helps, response.help]);
-        showSuccess('Help content created successfully');
+        await showSuccessMessage('CRUD_HELP_CREATE_SUCCESS');
       } else {
         // Update existing help
         const response = await api.put('/help', editingHelp);
         setHelps(helps.map((h) => (h.id === editingHelp.id ? response.help : h)));
-        showSuccess('Help content updated successfully');
+        await showSuccessMessage('CRUD_HELP_UPDATE_SUCCESS');
       }
 
       setDialogOpen(false);
       setEditingHelp(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to save help content');
+      await showErrorMessage('CRUD_HELP_SAVE_FAIL');
       console.error('Failed to save help:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [editingHelp, helps, setHelps, showSuccess, showError]);
+  }, [editingHelp, helps, setHelps, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteClick = useCallback((ids: (string | number)[]) => {
     setSelectedForDelete(ids);
@@ -224,19 +231,19 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
       // Show success message
       const count = selectedForDelete.length;
-      showSuccess(`Successfully deleted ${count} help content${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_HELP_DELETE_SUCCESS', { count });
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to delete help content');
+      await showErrorMessage('CRUD_HELP_DELETE_FAIL');
       console.error('Failed to delete helps:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, helps, setHelps, showSuccess, showError]);
+  }, [selectedForDelete, helps, setHelps, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -321,7 +328,6 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
 
     // Handlers
     handleAdd,

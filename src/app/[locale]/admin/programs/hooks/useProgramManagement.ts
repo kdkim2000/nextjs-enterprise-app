@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { Program, SearchCriteria } from '../types';
 import { ProgramFormData } from '@/components/admin/ProgramFormFields';
 import {
@@ -44,8 +45,14 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     }
   });
 
-  // Use auto-hide message hook
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
 
   // Local states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -95,6 +102,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
   ) => {
     try {
       setSearching(true);
+      console.log('[useProgramManagement] fetchPrograms called - page:', page, 'pageSize:', pageSize, 'useQuickSearch:', useQuickSearch);
 
       // Build query parameters
       const params = new URLSearchParams();
@@ -103,6 +111,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         // Quick search: search in code and name
         params.append('code', quickSearch);
         params.append('name', quickSearch);
+        console.log('[useProgramManagement] Using quick search:', quickSearch);
       } else {
         // Advanced search: use specific criteria
         if (searchCriteria.code) params.append('code', searchCriteria.code);
@@ -110,12 +119,17 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         if (searchCriteria.category) params.append('category', searchCriteria.category);
         if (searchCriteria.type) params.append('type', searchCriteria.type);
         if (searchCriteria.status) params.append('status', searchCriteria.status);
+        console.log('[useProgramManagement] Using advanced search:', searchCriteria);
       }
 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/program?${params.toString()}`);
+      const url = `/program?${params.toString()}`;
+      console.log('[useProgramManagement] API URL:', url);
+
+      const response = await api.get(url);
+      console.log('[useProgramManagement] API response:', response);
 
       // Programs now use MultiLangField format directly
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,24 +140,27 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         tags: typeof prog.tags === 'string' ? prog.tags : (Array.isArray(prog.tags) ? prog.tags.join(', ') : '')
       }));
 
+      console.log('[useProgramManagement] Transformed programs count:', transformedPrograms.length);
       setPrograms(transformedPrograms);
 
       // Update row count for DataGrid
       if (response.pagination) {
+        console.log('[useProgramManagement] Using pagination totalCount:', response.pagination.totalCount);
         setRowCount(response.pagination.totalCount || 0);
       } else {
+        console.log('[useProgramManagement] No pagination, using array length:', transformedPrograms.length);
         setRowCount(transformedPrograms.length);
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      showError(err.response?.data?.error || 'Failed to load programs');
-      console.error('Failed to fetch programs:', error);
+      console.error('[useProgramManagement] Failed to fetch programs:', error);
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_PROGRAM_LOAD_FAIL');
       setPrograms([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria, setPrograms, setRowCount, showError]);
+  }, [quickSearch, searchCriteria, setPrograms, setRowCount, showErrorMessage]);
 
   // Program CRUD operations
   const handleAdd = useCallback(() => {
@@ -212,25 +229,25 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         const response = await api.post('/program', apiData);
 
         setPrograms([...programs, response.program]);
-        showSuccess('Program created successfully');
+        await showSuccessMessage('CRUD_PROGRAM_CREATE_SUCCESS');
       } else {
         // Update existing program
         const response = await api.put(`/program/${editingProgram.id}`, apiData);
 
         setPrograms(programs.map((p) => (p.id === editingProgram.id ? response.program : p)));
-        showSuccess('Program updated successfully');
+        await showSuccessMessage('CRUD_PROGRAM_UPDATE_SUCCESS');
       }
 
       setDialogOpen(false);
       setEditingProgram(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to save program');
+      await showErrorMessage('CRUD_PROGRAM_SAVE_FAIL');
       console.error('Failed to save program:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [editingProgram, programs, setPrograms, showSuccess, showError]);
+  }, [editingProgram, programs, setPrograms, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteClick = useCallback((ids: (string | number)[]) => {
     setSelectedForDelete(ids);
@@ -251,19 +268,19 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       // Show success message
       const count = selectedForDelete.length;
-      showSuccess(`Successfully deleted ${count} program${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_PROGRAM_DELETE_SUCCESS', { count });
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to delete programs');
+      await showErrorMessage('CRUD_PROGRAM_DELETE_FAIL');
       console.error('Failed to delete programs:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, programs, setPrograms, showSuccess, showError]);
+  }, [selectedForDelete, programs, setPrograms, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -324,6 +341,12 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     fetchPrograms(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchPrograms, quickSearch, setPaginationModel]);
 
+  // Initial load - fetch programs on mount
+  useEffect(() => {
+    console.log('[useProgramManagement] Initial load triggered');
+    fetchPrograms(0, 50, false);
+  }, [fetchPrograms]);
+
   return {
     // State
     programs,
@@ -349,7 +372,6 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
 
     // Handlers
     handleAdd,

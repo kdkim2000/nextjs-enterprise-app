@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GridRowSelectionModel, GridPaginationModel } from '@mui/x-data-grid';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { Message } from '../types';
 import { MessageFormData } from '@/components/admin/MessageFormFields';
@@ -26,13 +27,50 @@ export function useMessageManagement() {
   const [selectedForDelete, setSelectedForDelete] = useState<GridRowSelectionModel>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [helpExists, setHelpExists] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10
   });
   const [rowCount, setRowCount] = useState(0);
 
-  const { successMessage, errorMessage, showSuccess, showError, clearMessages } = useAutoHideMessage();
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage,
+    clearMessages
+  } = useMessage({ locale });
+
+  // Check user role and help content availability on mount
+  useEffect(() => {
+    const checkHelpAndRole = async () => {
+      try {
+        // Check if user is admin
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setIsAdmin(user.role === 'admin');
+        }
+
+        // Check if help content exists for this page
+        try {
+          const response = await api.get('/help?programId=PROG-MESSAGE-MGMT&language=en');
+          setHelpExists(!!response.help);
+        } catch {
+          setHelpExists(false);
+        }
+      } catch (error) {
+        console.error('Error checking help and role:', error);
+        setHelpExists(false);
+      }
+    };
+
+    checkHelpAndRole();
+  }, []);
 
   // Fetch messages
   const fetchMessages = useCallback(async (search?: string, criteria?: SearchCriteria) => {
@@ -87,11 +125,11 @@ export function useMessageManagement() {
       setRowCount(fetchedMessages.length);
     } catch (error) {
       console.error('Error fetching messages:', error);
-      showError('Failed to load messages');
+      await showErrorMessage('CRUD_MESSAGE_LOAD_FAIL');
     } finally {
       setSearching(false);
     }
-  }, [clearMessages, showError]);
+  }, [clearMessages, showErrorMessage]);
 
   // Initial load
   useEffect(() => {
@@ -134,26 +172,39 @@ export function useMessageManagement() {
       code: '',
       category: 'common',
       type: 'info',
-      message: { en: '', ko: '' },
-      description: { en: '', ko: '' },
+      message: { en: '', ko: '', zh: '', vi: '' },
+      description: { en: '', ko: '', zh: '', vi: '' },
       status: 'active'
     });
     setDialogOpen(true);
   }, []);
 
   // Edit handler
-  const handleEdit = useCallback((message: Message) => {
-    setEditingMessage({
-      id: message.id,
-      code: message.code,
-      category: message.category,
-      type: message.type,
-      message: message.message,
-      description: message.description,
-      status: message.status
-    });
-    setDialogOpen(true);
-  }, []);
+  const handleEdit = useCallback((id: string | number) => {
+    const message = messages.find((m) => m.id === id);
+    if (message) {
+      setEditingMessage({
+        id: message.id,
+        code: message.code,
+        category: message.category,
+        type: message.type,
+        message: {
+          en: message.message.en || '',
+          ko: message.message.ko || '',
+          zh: message.message.zh || '',
+          vi: message.message.vi || ''
+        },
+        description: {
+          en: message.description.en || '',
+          ko: message.description.ko || '',
+          zh: message.description.zh || '',
+          vi: message.description.vi || ''
+        },
+        status: message.status
+      });
+      setDialogOpen(true);
+    }
+  }, [messages]);
 
   // Save handler
   const handleSave = useCallback(async () => {
@@ -165,19 +216,21 @@ export function useMessageManagement() {
       // Validate required fields
       if (!editingMessage.code || !editingMessage.category || !editingMessage.type ||
           !editingMessage.message?.en || !editingMessage.message?.ko ||
-          !editingMessage.description?.en || !editingMessage.description?.ko) {
-        showError('Please fill in all required fields');
+          !editingMessage.message?.zh || !editingMessage.message?.vi ||
+          !editingMessage.description?.en || !editingMessage.description?.ko ||
+          !editingMessage.description?.zh || !editingMessage.description?.vi) {
+        await showErrorMessage('VALIDATION_REQUIRED_FIELDS');
         return;
       }
 
       if (editingMessage.id) {
         // Update existing message
         await api.put(`/message/${editingMessage.id}`, editingMessage);
-        showSuccess('Message updated successfully');
+        await showSuccessMessage('CRUD_MESSAGE_UPDATE_SUCCESS');
       } else {
         // Create new message
         await api.post('/message', editingMessage);
-        showSuccess('Message created successfully');
+        await showSuccessMessage('CRUD_MESSAGE_CREATE_SUCCESS');
       }
 
       await fetchMessages(quickSearch);
@@ -185,11 +238,11 @@ export function useMessageManagement() {
       setEditingMessage(null);
     } catch (error) {
       console.error('Error saving message:', error);
-      showError(error instanceof Error ? error.message : 'Failed to save message');
+      await showErrorMessage('CRUD_MESSAGE_SAVE_FAIL');
     } finally {
       setSaveLoading(false);
     }
-  }, [editingMessage, fetchMessages, quickSearch, showSuccess, showError]);
+  }, [editingMessage, fetchMessages, quickSearch, showSuccessMessage, showErrorMessage]);
 
   // Delete handlers
   const handleDeleteClick = useCallback((selection: GridRowSelectionModel) => {
@@ -207,16 +260,17 @@ export function useMessageManagement() {
       );
 
       await fetchMessages(quickSearch);
-      showSuccess(`${selectedForDelete.length} message(s) deleted successfully`);
+      const count = selectedForDelete.length;
+      await showSuccessMessage('CRUD_MESSAGE_DELETE_SUCCESS', { count });
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (error) {
       console.error('Error deleting messages:', error);
-      showError('Failed to delete messages');
+      await showErrorMessage('CRUD_MESSAGE_DELETE_FAIL');
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, fetchMessages, quickSearch, showSuccess, showError]);
+  }, [selectedForDelete, fetchMessages, quickSearch, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -254,9 +308,10 @@ export function useMessageManagement() {
     deleteLoading,
     helpOpen,
     setHelpOpen,
+    helpExists,
+    isAdmin,
     successMessage,
     errorMessage,
-    showError,
     // Handlers
     handleAdd,
     handleEdit,

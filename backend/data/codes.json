@@ -2186,5 +2186,51 @@
     "attributes": {},
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-093",
+    "codeType": "ROLE_TYPE",
+    "code": "general",
+    "name": {
+      "en": "General",
+      "ko": "일반",
+      "zh": "一般",
+      "vi": "Chung"
+    },
+    "description": {
+      "en": "General role - Users can request",
+      "ko": "일반 역할 - 사용자 신청 가능",
+      "zh": "一般角色 - 用户可以申请",
+      "vi": "Vai trò chung - Người dùng có thể yêu cầu"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-094",
+    "codeType": "ROLE_TYPE",
+    "code": "management",
+    "name": {
+      "en": "Management",
+      "ko": "관리",
+      "zh": "管理",
+      "vi": "Quản lý"
+    },
+    "description": {
+      "en": "Management role - Admin-only",
+      "ko": "관리용 역할 - 관리자 전용",
+      "zh": "管理角色 - 仅限管理员",
+      "vi": "Vai trò quản lý - Chỉ dành cho quản trị viên"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
   }
 ]

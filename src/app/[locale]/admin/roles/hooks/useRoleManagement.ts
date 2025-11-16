@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/axios';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { Role } from '@/types/role';
 import { SearchCriteria } from '../types';
 
@@ -35,19 +37,26 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
   // Load saved state
   const savedState = loadPageState(storageKey);
 
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
+
   // States
   const [roles, setRoles] = useState<Role[]>(savedState?.roles || []);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [searching, setSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpExists, setHelpExists] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -71,17 +80,6 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
       roles
     });
   }, [searchCriteria, quickSearch, roles, storageKey]);
-
-  // Auto-hide success/error messages
-  useEffect(() => {
-    if (successMessage || error) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-        setError(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, error]);
 
   // Check user role and help content availability on mount
   useEffect(() => {
@@ -109,7 +107,6 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
   const fetchRoles = useCallback(async (useQuickSearch: boolean = false) => {
     try {
       setSearching(true);
-      setError(null);
 
       const response = await api.get('/role');
       const allRoles = response.roles || [];
@@ -146,13 +143,13 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
       setRoles(filtered);
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      setError(err.response?.data?.error || 'Failed to load roles');
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_ROLE_LOAD_FAIL');
       console.error('Failed to fetch roles:', error);
       setRoles([]);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria]);
+  }, [quickSearch, searchCriteria, showErrorMessage]);
 
   // Role CRUD operations
   const handleAdd = useCallback(() => {
@@ -181,55 +178,57 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
   const handleDeleteConfirm = useCallback(async () => {
     try {
       setDeleteLoading(true);
-      setError(null);
 
+      // Delete roles from API
       for (const id of selectedForDelete) {
         await api.delete(`/role?id=${id}`);
       }
 
+      // Remove from local state
       setRoles(roles.filter((r) => !selectedForDelete.includes(r.id)));
 
+      // Show success message
       const count = selectedForDelete.length;
-      setSuccessMessage(`Successfully deleted ${count} role${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_ROLE_DELETE_SUCCESS', { count });
 
+      // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to delete roles');
+      await showErrorMessage('CRUD_ROLE_DELETE_FAIL');
       console.error('Failed to delete roles:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, roles]);
+  }, [selectedForDelete, roles, showSuccessMessage, showErrorMessage]);
 
   const handleSave = useCallback(async (roleData: Role) => {
     try {
       setSaveLoading(true);
-      setError(null);
 
       if (roleData.id) {
         // Update existing role
         const response = await api.put('/role', roleData);
         setRoles(roles.map((r) => (r.id === roleData.id ? response.role : r)));
-        setSuccessMessage('Role updated successfully');
+        await showSuccessMessage('CRUD_ROLE_UPDATE_SUCCESS');
       } else {
         // Create new role
         const response = await api.post('/role', roleData);
         setRoles([...roles, response.role]);
-        setSuccessMessage('Role created successfully');
+        await showSuccessMessage('CRUD_ROLE_CREATE_SUCCESS');
       }
 
       setDialogOpen(false);
       setEditingRole(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to save role');
+      await showErrorMessage('CRUD_ROLE_SAVE_FAIL');
       console.error('Failed to save role:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [roles]);
+  }, [roles, showSuccessMessage, showErrorMessage]);
 
   // Search handlers
   const handleRefresh = useCallback(() => {
@@ -300,7 +299,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
     helpExists,
     isAdmin,
     successMessage,
-    error,
+    errorMessage,
 
     // Handlers
     handleAdd,

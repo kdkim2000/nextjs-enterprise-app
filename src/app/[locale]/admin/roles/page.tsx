@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -11,15 +11,14 @@ import {
   Typography,
   TextField,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Stack,
   Divider,
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+  Chip
 } from '@mui/material';
-import { Search, HelpOutline, Close } from '@mui/icons-material';
+import { Search, HelpOutline, Close, PersonSearch, Clear } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
@@ -29,7 +28,8 @@ import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
-import UserSelector from '@/components/common/UserSelector';
+import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
+import CodeSelect from '@/components/common/CodeSelect';
 import RouteGuard from '@/components/auth/RouteGuard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
@@ -42,6 +42,12 @@ export default function RoleManagementPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
   const gridPermissions = useDataGridPermissions('PROG-ROLE-MGMT');
+
+  // User search dialog state
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  const [userSearchType, setUserSearchType] = useState<'manager' | 'representative' | null>(null);
+  const [managerName, setManagerName] = useState<string>('');
+  const [representativeName, setRepresentativeName] = useState<string>('');
 
   // Use custom hook for all business logic
   const {
@@ -67,7 +73,7 @@ export default function RoleManagementPage() {
     helpExists,
     isAdmin,
     successMessage,
-    error,
+    errorMessage,
     // Handlers
     handleAdd,
     handleEdit,
@@ -105,6 +111,17 @@ export default function RoleManagementPage() {
     [selectedForDelete, roles]
   );
 
+  // Initialize user names when editing role
+  useEffect(() => {
+    if (editingRole) {
+      setManagerName(editingRole.managerName || '');
+      setRepresentativeName(editingRole.representativeName || '');
+    } else {
+      setManagerName('');
+      setRepresentativeName('');
+    }
+  }, [editingRole]);
+
   return (
     <RouteGuard programCode="PROG-ROLE-MGMT" requiredPermission="view" fallbackUrl="/dashboard">
       <PageContainer>
@@ -129,9 +146,9 @@ export default function RoleManagementPage() {
       />
 
       {/* Error and Success Messages */}
-      {error && (
+      {errorMessage && (
         <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }}>
-          {error}
+          {errorMessage}
         </Alert>
       )}
 
@@ -208,9 +225,11 @@ export default function RoleManagementPage() {
         onClose={() => {
           setDialogOpen(false);
           setEditingRole(null);
+          setManagerName('');
+          setRepresentativeName('');
         }}
         PaperProps={{
-          sx: { width: { xs: '100%', sm: 500 } }
+          sx: { width: { xs: '100%', sm: 600, md: 700 } }
         }}
       >
         <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -223,6 +242,8 @@ export default function RoleManagementPage() {
               onClick={() => {
                 setDialogOpen(false);
                 setEditingRole(null);
+                setManagerName('');
+                setRepresentativeName('');
               }}
             >
               <Close />
@@ -231,7 +252,7 @@ export default function RoleManagementPage() {
 
           {/* Form */}
           <Box sx={{ flex: 1, overflowY: 'auto' }}>
-            <Stack spacing={2.5}>
+            <Stack spacing={3}>
               {/* ID (read-only for edit) */}
               {editingRole?.id && (
                 <TextField
@@ -250,8 +271,7 @@ export default function RoleManagementPage() {
                 onChange={(e) => setEditingRole(editingRole ? { ...editingRole, name: e.target.value } : null)}
                 fullWidth
                 required
-                size="small"
-                helperText="Unique identifier (e.g., ROLE_ADMIN)"
+                helperText="Unique identifier (e.g., admin, manager)"
               />
 
               {/* Display Name */}
@@ -261,8 +281,7 @@ export default function RoleManagementPage() {
                 onChange={(e) => setEditingRole(editingRole ? { ...editingRole, displayName: e.target.value } : null)}
                 fullWidth
                 required
-                size="small"
-                helperText="User-friendly name"
+                helperText="User-friendly name shown in UI"
               />
 
               {/* Description */}
@@ -273,73 +292,146 @@ export default function RoleManagementPage() {
                 fullWidth
                 multiline
                 rows={3}
-                size="small"
+                helperText="Brief description of this role's purpose"
               />
 
               <Divider />
 
               {/* Role Type */}
-              <FormControl fullWidth required>
-                <InputLabel>Role Type</InputLabel>
-                <Select
-                  value={editingRole?.roleType || 'general'}
-                  label="Role Type"
-                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, roleType: e.target.value as 'management' | 'general' } : null)}
-                >
-                  <MenuItem value="general">General (일반 역할 - 사용자 신청 가능)</MenuItem>
-                  <MenuItem value="management">Management (관리용 역할 - 관리자 전용)</MenuItem>
-                </Select>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
-                  General: Users can request | Management: Admin-only
-                </Typography>
-              </FormControl>
+              <CodeSelect
+                codeType="ROLE_TYPE"
+                value={editingRole?.roleType || 'general'}
+                onChange={(value) => setEditingRole(editingRole ? { ...editingRole, roleType: value as 'management' | 'general' } : null)}
+                label="Role Type *"
+                required
+                locale={locale}
+                helperText="General: Users can request | Management: Admin-only"
+              />
 
               {/* Manager */}
-              <UserSelector
-                label="Manager"
-                value={editingRole?.manager || null}
-                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, manager: userId } : null)}
-                helperText="User who manages this role"
-              />
+              <Box>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Manager
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PersonSearch />}
+                    onClick={() => {
+                      setUserSearchType('manager');
+                      setUserSearchOpen(true);
+                    }}
+                    fullWidth
+                  >
+                    {managerName || editingRole?.managerName || 'Select Manager'}
+                  </Button>
+                  {(editingRole?.manager || managerName) && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setEditingRole(editingRole ? { ...editingRole, manager: null, managerName: null } : null);
+                        setManagerName('');
+                      }}
+                    >
+                      <Clear />
+                    </IconButton>
+                  )}
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5, display: 'block' }}>
+                  User who manages this role
+                </Typography>
+              </Box>
 
               {/* Representative */}
-              <UserSelector
-                label="Representative"
-                value={editingRole?.representative || null}
-                onChange={(userId) => setEditingRole(editingRole ? { ...editingRole, representative: userId } : null)}
-                helperText="Main contact person for this role"
-              />
+              <Box>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Representative
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PersonSearch />}
+                    onClick={() => {
+                      setUserSearchType('representative');
+                      setUserSearchOpen(true);
+                    }}
+                    fullWidth
+                  >
+                    {representativeName || editingRole?.representativeName || 'Select Representative'}
+                  </Button>
+                  {(editingRole?.representative || representativeName) && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setEditingRole(editingRole ? { ...editingRole, representative: null, representativeName: null } : null);
+                        setRepresentativeName('');
+                      }}
+                    >
+                      <Clear />
+                    </IconButton>
+                  )}
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5, display: 'block' }}>
+                  Main contact person for this role
+                </Typography>
+              </Box>
 
               <Divider />
 
-              {/* System Role */}
-              <FormControl fullWidth>
-                <InputLabel>System Role</InputLabel>
-                <Select
-                  value={editingRole?.isSystem ? 'true' : 'false'}
-                  label="System Role"
-                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, isSystem: e.target.value === 'true' } : null)}
-                >
-                  <MenuItem value="false">Custom</MenuItem>
-                  <MenuItem value="true">System</MenuItem>
-                </Select>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
-                  System roles cannot be deleted
-                </Typography>
-              </FormControl>
+              {/* System Role - Switch */}
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={editingRole?.isSystem || false}
+                      onChange={(e) => setEditingRole(editingRole ? { ...editingRole, isSystem: e.target.checked } : null)}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2">System Role</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        System roles cannot be deleted
+                      </Typography>
+                    </Box>
+                  }
+                />
+                {editingRole?.isSystem && (
+                  <Chip
+                    label="Protected"
+                    size="small"
+                    color="secondary"
+                    sx={{ ml: 2 }}
+                  />
+                )}
+              </Box>
 
-              {/* Active Status */}
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={editingRole?.isActive ? 'true' : 'false'}
-                  label="Status"
-                  onChange={(e) => setEditingRole(editingRole ? { ...editingRole, isActive: e.target.value === 'true' } : null)}
-                >
-                  <MenuItem value="true">Active</MenuItem>
-                  <MenuItem value="false">Inactive</MenuItem>
-                </Select>
-              </FormControl>
+              {/* Active Status - Switch */}
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={editingRole?.isActive !== false}
+                      onChange={(e) => setEditingRole(editingRole ? { ...editingRole, isActive: e.target.checked } : null)}
+                      color="success"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2">Active Status</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Inactive roles cannot be assigned to users
+                      </Typography>
+                    </Box>
+                  }
+                />
+                <Chip
+                  label={editingRole?.isActive !== false ? 'Active' : 'Inactive'}
+                  size="small"
+                  color={editingRole?.isActive !== false ? 'success' : 'default'}
+                  sx={{ ml: 2 }}
+                />
+              </Box>
             </Stack>
           </Box>
 
@@ -350,6 +442,8 @@ export default function RoleManagementPage() {
               onClick={() => {
                 setDialogOpen(false);
                 setEditingRole(null);
+                setManagerName('');
+                setRepresentativeName('');
               }}
               disabled={saveLoading}
             >
@@ -385,6 +479,29 @@ export default function RoleManagementPage() {
         programId="PROG-ROLE-MGMT"
         language="en"
         isAdmin={isAdmin}
+      />
+
+      {/* User Search Dialog */}
+      <UserSearchDialog
+        open={userSearchOpen}
+        onClose={() => {
+          setUserSearchOpen(false);
+          setUserSearchType(null);
+        }}
+        onSelect={(user: User) => {
+          if (userSearchType === 'manager') {
+            setEditingRole(editingRole ? { ...editingRole, manager: user.id, managerName: user.name } : null);
+            setManagerName(user.name);
+          } else if (userSearchType === 'representative') {
+            setEditingRole(editingRole ? { ...editingRole, representative: user.id, representativeName: user.name } : null);
+            setRepresentativeName(user.name);
+          }
+          setUserSearchOpen(false);
+          setUserSearchType(null);
+        }}
+        title={userSearchType === 'manager' ? 'Select Manager' : 'Select Representative'}
+        locale={locale}
+        multiSelect={false}
       />
     </PageContainer>
     </RouteGuard>

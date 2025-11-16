@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { Menu, MenuFormData, SearchCriteria } from '../types';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import {
@@ -42,8 +43,14 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   // Menus data state (not persisted to avoid infinite loop)
   const [menus, setMenus] = useState<Menu[]>([]);
 
-  // Use auto-hide message hook
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  // Use unified message system
+  const currentLocale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale: currentLocale });
 
   // Local states
   const [allMenus, setAllMenus] = useState<MenuItemType[]>([]);
@@ -121,7 +128,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       setMenus(flatMenus);
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      showError(err.response?.data?.error || 'Failed to load menus');
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_MENU_LOAD_FAIL');
       console.error('Error fetching menus:', err);
     } finally {
       setLoading(false);
@@ -193,11 +200,11 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       if (editingMenu.id) {
         // Update existing menu
         await api.put(`/menu/${editingMenu.id}`, menuData);
-        showSuccess('Menu updated successfully');
+        await showSuccessMessage('CRUD_MENU_UPDATE_SUCCESS');
       } else {
         // Add new menu
         await api.post('/menu', menuData);
-        showSuccess('Menu created successfully');
+        await showSuccessMessage('CRUD_MENU_CREATE_SUCCESS');
       }
 
       setDialogOpen(false);
@@ -205,12 +212,12 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       await fetchMenus();
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to save menu');
+      await showErrorMessage('CRUD_MENU_SAVE_FAIL');
       console.error('Failed to save menu:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [editingMenu, showSuccess, showError]);
+  }, [editingMenu, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteClick = useCallback((ids: (string | number)[]) => {
     setSelectedForDelete(ids);
@@ -231,19 +238,19 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       // Show success message
       const count = selectedForDelete.length;
-      showSuccess(`Successfully deleted ${count} menu${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_MENU_DELETE_SUCCESS', { count });
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to delete menus');
+      await showErrorMessage('CRUD_MENU_DELETE_FAIL');
       console.error('Failed to delete menus:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, showSuccess, showError]);
+  }, [selectedForDelete, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -388,7 +395,6 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
 
     // Handlers
     handleAdd,

@@ -10,6 +10,7 @@ export interface LogEntry {
   statusCode: number;
   duration: string;
   userId: string;
+  userName?: string; // Enriched: Name of the user
   programId: string;
   ip: string;
   userAgent: string;

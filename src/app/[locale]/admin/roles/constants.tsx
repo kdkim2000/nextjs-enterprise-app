@@ -1,8 +1,8 @@
 'use client';
 
 import { GridColDef } from '@mui/x-data-grid';
-import { Chip, IconButton } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Chip } from '@mui/material';
+import ActionsCell from '@/components/common/ActionsCell';
 import { Role } from '@/types/role';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
@@ -53,13 +53,13 @@ export const createColumns = (
       field: 'manager',
       headerName: getLocalizedValue({ en: 'Manager', ko: '담당자', zh: '管理者', vi: 'Người quản lý' }, locale),
       width: 150,
-      renderCell: (params) => params.value || '-'
+      valueGetter: (_value, row: Role) => row.managerName || '-'
     },
     {
       field: 'representative',
       headerName: getLocalizedValue({ en: 'Representative', ko: '대표자', zh: '代表', vi: 'Đại diện' }, locale),
       width: 150,
-      renderCell: (params) => params.value || '-'
+      valueGetter: (_value, row: Role) => row.representativeName || '-'
     },
     {
       field: 'isSystem',
@@ -95,18 +95,18 @@ export const createColumns = (
     columns.push({
       field: 'actions',
       headerName: getLocalizedValue({ en: 'Actions', ko: '작업', zh: '操作', vi: 'Thao tác' }, locale),
-      width: 80,
+      width: 150,
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleEdit(params.row.id)}
-          color="primary"
-        >
-          <Edit fontSize="small" />
-        </IconButton>
-      )
+      renderCell: (params) => {
+        return (
+          <ActionsCell
+            onEdit={() => handleEdit(params.row.id)}
+            editTooltip={getLocalizedValue({ en: 'Edit Role', ko: '역할 수정', zh: '编辑角色', vi: 'Sửa vai trò' }, locale)}
+            showMore={false}
+          />
+        );
+      }
     });
   }
 
