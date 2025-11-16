@@ -1,12 +1,11 @@
 import { GridColDef } from '@mui/x-data-grid';
-import { IconButton } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import ActionsCell from '@/components/common/ActionsCell';
 import { Message, MESSAGE_CATEGORIES, MESSAGE_TYPES } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
   locale: string,
-  onEdit: (message: Message) => void,
+  handleEdit: (id: string | number) => void,
   canUpdate: boolean = true
 ): GridColDef[] => {
   const columns: GridColDef[] = [
@@ -65,20 +64,18 @@ export const createColumns = (
     columns.push({
       field: 'actions',
       headerName: getLocalizedValue({ en: 'Actions', ko: '작업', zh: '操作', vi: 'Thao tác' }, locale),
-      width: 80,
+      width: 150,
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(params.row as Message);
-          }}
-        >
-          <Edit fontSize="small" />
-        </IconButton>
-      )
+      renderCell: (params) => {
+        return (
+          <ActionsCell
+            onEdit={() => handleEdit(params.row.id)}
+            editTooltip={getLocalizedValue({ en: 'Edit Message', ko: '메시지 수정', zh: '编辑消息', vi: 'Sửa tin nhắn' }, locale)}
+            showMore={false}
+          />
+        );
+      }
     });
   }
 

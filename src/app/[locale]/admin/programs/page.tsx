@@ -133,8 +133,8 @@ export default function ProgramManagementPage() {
         {programs.length === 0 && !searching ? (
           <EmptyState
             icon={Search}
-            title="No programs loaded"
-            description="Use the search filters above to find programs"
+            title="No programs found"
+            description="Try adjusting your search criteria"
           />
         ) : (
           <Box sx={{ flex: 1, minHeight: 0 }}>

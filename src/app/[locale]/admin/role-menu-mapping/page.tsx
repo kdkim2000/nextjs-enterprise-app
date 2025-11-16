@@ -16,7 +16,7 @@ import RoleSearchDialog from './components/RoleSearchDialog';
 import PermissionEditForm from './components/PermissionEditForm';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
@@ -25,7 +25,12 @@ import { Role, Program, RoleProgramMapping, SearchCriteria, PermissionFormData }
 export default function RoleMenuMappingPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale: currentLocale });
   const gridPermissions = useDataGridPermissions('PROG-ROLE-MENU-MAP');
 
   // State
@@ -62,22 +67,30 @@ export default function RoleMenuMappingPage() {
   // Fetch programs and all mappings
   const fetchData = useCallback(async () => {
     try {
+      console.log('[role-menu-mapping] Fetching programs and mappings...');
       const [programsResponse, mappingsResponse] = await Promise.all([
         api.get('/program/all'),
         api.get('/role-program-mapping', { params: { includeDetails: 'true' } })
       ]);
 
+      console.log('[role-menu-mapping] Programs response:', programsResponse);
+      console.log('[role-menu-mapping] Mappings response:', mappingsResponse);
+
       setPrograms(programsResponse.programs || []);
       setAllMappings(mappingsResponse.mappings || []);
+
+      console.log('[role-menu-mapping] Set programs:', programsResponse.programs?.length || 0);
+      console.log('[role-menu-mapping] Set mappings:', mappingsResponse.mappings?.length || 0);
     } catch (error) {
-      console.error('Failed to fetch data:', error);
-      showError(currentLocale === 'ko' ? '데이터 로드 실패' : 'Failed to load data');
+      console.error('[role-menu-mapping] Failed to fetch data:', error);
+      await showErrorMessage('MAPPING_DATA_LOAD_FAIL');
     }
-  }, [showError, currentLocale]);
+  }, [showErrorMessage]);
 
   // Fetch mappings for selected program
   const fetchMappings = useCallback(async () => {
     if (!selectedProgram) {
+      console.log('[role-menu-mapping] No program selected, clearing mappings');
       setMappings([]);
       setFilteredMappings([]);
       return;
@@ -85,39 +98,47 @@ export default function RoleMenuMappingPage() {
 
     try {
       setLoading(true);
+      console.log('[role-menu-mapping] Fetching mappings for program:', selectedProgram.id, selectedProgram.code);
 
       // Get mappings for this program
       const response = await api.get('/role-program-mapping', {
         params: { programId: selectedProgram.id, includeDetails: 'true' }
       });
 
+      console.log('[role-menu-mapping] Mappings response:', response);
       const programMappings = response.mappings || [];
+      console.log('[role-menu-mapping] Program mappings count:', programMappings.length);
+
       setMappings(programMappings);
       setFilteredMappings(programMappings);
     } catch (error) {
-      console.error('Failed to fetch mappings:', error);
-      showError(currentLocale === 'ko' ? '역할 매핑 로드 실패' : 'Failed to load role mappings');
+      console.error('[role-menu-mapping] Failed to fetch mappings:', error);
+      await showErrorMessage('MAPPING_ROLE_LOAD_FAIL');
       setMappings([]);
       setFilteredMappings([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedProgram, showError, currentLocale]);
+  }, [selectedProgram, showErrorMessage]);
 
   // Initial fetch
   useEffect(() => {
+    console.log('[role-menu-mapping] Initial fetch useEffect triggered');
     void fetchData();
   }, [fetchData]);
 
   // Auto-select first program on initial load
   useEffect(() => {
+    console.log('[role-menu-mapping] Auto-select useEffect - programs:', programs.length, 'selectedProgram:', selectedProgram?.code);
     if (programs.length > 0 && !selectedProgram) {
+      console.log('[role-menu-mapping] Auto-selecting first program:', programs[0].code);
       setSelectedProgram(programs[0]);
     }
   }, [programs, selectedProgram]);
 
   // Fetch mappings when program selected
   useEffect(() => {
+    console.log('[role-menu-mapping] Fetch mappings useEffect triggered');
     void fetchMappings();
   }, [fetchMappings]);
 
@@ -144,11 +165,11 @@ export default function RoleMenuMappingPage() {
   // Mapping handlers
   const handleAddMapping = useCallback(() => {
     if (!selectedProgram) {
-      showError(currentLocale === 'ko' ? '먼저 프로그램을 선택하세요' : 'Please select a program first');
+      void showErrorMessage('MAPPING_SELECT_PROGRAM_REQUIRED');
       return;
     }
     setAddRolesDialogOpen(true);
-  }, [selectedProgram, showError, currentLocale]);
+  }, [selectedProgram, showErrorMessage]);
 
   const handleAddRolesSuccess = useCallback(async (
     roles: Role[],
@@ -167,18 +188,14 @@ export default function RoleMenuMappingPage() {
       }
 
       const count = roles.length;
-      showSuccess(
-        currentLocale === 'ko'
-          ? `${count}개 역할을 프로그램에 성공적으로 할당했습니다`
-          : `Successfully assigned ${count} role${count > 1 ? 's' : ''} to program`
-      );
+      await showSuccessMessage('MAPPING_ROLE_ASSIGN_SUCCESS', { count });
 
       void fetchData();
       void fetchMappings();
     } catch (err: any) {
-      showError(err.response?.data?.error || (currentLocale === 'ko' ? '역할 할당 실패' : 'Failed to assign roles to program'));
+      await showErrorMessage('MAPPING_ROLE_ASSIGN_FAIL');
     }
-  }, [selectedProgram, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
+  }, [selectedProgram, fetchData, fetchMappings, showSuccessMessage, showErrorMessage]);
 
   const handleEditPermission = useCallback((id: string | number) => {
     const mapping = mappings.find((m) => m.id === id);
@@ -214,25 +231,18 @@ export default function RoleMenuMappingPage() {
         canDelete: editingPermission.canDelete
       });
 
-      showSuccess(
-        currentLocale === 'ko'
-          ? '권한이 성공적으로 수정되었습니다'
-          : 'Permissions updated successfully'
-      );
+      await showSuccessMessage('MAPPING_PERMISSION_UPDATE_SUCCESS');
 
       setEditDrawerOpen(false);
       setEditingPermission(null);
       await fetchData();
       await fetchMappings();
     } catch (err: any) {
-      showError(
-        err.response?.data?.error ||
-          (currentLocale === 'ko' ? '권한 수정 실패' : 'Failed to update permissions')
-      );
+      await showErrorMessage('MAPPING_PERMISSION_UPDATE_FAIL');
     } finally {
       setSaveLoading(false);
     }
-  }, [editingPermission, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
+  }, [editingPermission, fetchData, fetchMappings, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteMappings = useCallback((ids: (string | number)[]) => {
     setSelectedMappingsForDelete(ids);
@@ -247,22 +257,18 @@ export default function RoleMenuMappingPage() {
       }
 
       const count = selectedMappingsForDelete.length;
-      showSuccess(
-        currentLocale === 'ko'
-          ? `${count}개 매핑을 성공적으로 삭제했습니다`
-          : `Successfully deleted ${count} mapping${count > 1 ? 's' : ''}`
-      );
+      await showSuccessMessage('MAPPING_DELETE_SUCCESS', { count });
 
       setMappingDeleteConfirmOpen(false);
       setSelectedMappingsForDelete([]);
       await fetchData();
       await fetchMappings();
     } catch (err: any) {
-      showError(err.response?.data?.error || (currentLocale === 'ko' ? '매핑 삭제 실패' : 'Failed to delete mappings'));
+      await showErrorMessage('MAPPING_DELETE_FAIL');
     } finally {
       setDeleting(false);
     }
-  }, [selectedMappingsForDelete, fetchData, fetchMappings, showSuccess, showError, currentLocale]);
+  }, [selectedMappingsForDelete, fetchData, fetchMappings, showSuccessMessage, showErrorMessage]);
 
   // Memoized values
   const columns = useMemo(

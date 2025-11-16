@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, use } from 'react';
+import React, { useMemo } from 'react';
 import { Box, Paper } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
@@ -11,20 +11,16 @@ import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import MessageFormFields from '@/components/admin/MessageFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useMessageManagement } from './hooks/useMessageManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { Message } from './types';
 
-interface MessagesPageProps {
-  params: Promise<{
-    locale: string;
-  }>;
-}
-
-export default function MessagesPage({ params }: MessagesPageProps) {
-  const { locale } = use(params);
+export default function MessagesPage() {
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
   const gridPermissions = useDataGridPermissions('PROG-MESSAGE-MGMT');
 
   // Use custom hook for all business logic
@@ -49,6 +45,8 @@ export default function MessagesPage({ params }: MessagesPageProps) {
     deleteLoading,
     helpOpen,
     setHelpOpen,
+    helpExists,
+    isAdmin,
     successMessage,
     errorMessage,
     // Handlers
@@ -69,8 +67,8 @@ export default function MessagesPage({ params }: MessagesPageProps) {
   } = useMessageManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(locale, handleEdit, gridPermissions.editable), [locale, handleEdit, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(locale), [locale]);
+  const columns = useMemo(() => createColumns(currentLocale, handleEdit, gridPermissions.editable), [currentLocale, handleEdit, gridPermissions.editable]);
+  const filterFields = useMemo(() => createFilterFields(currentLocale), [currentLocale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
@@ -83,11 +81,11 @@ export default function MessagesPage({ params }: MessagesPageProps) {
         return message
           ? {
               id: message.id,
-              displayName: `${message.code} (${getLocalizedValue(message.message, locale)})`
+              displayName: `${message.code} (${getLocalizedValue(message.message, currentLocale)})`
             }
           : { id, displayName: String(id) };
       }),
-    [selectedForDelete, messages, locale]
+    [selectedForDelete, messages, currentLocale]
   );
 
   return (
@@ -103,24 +101,14 @@ export default function MessagesPage({ params }: MessagesPageProps) {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder={getLocalizedValue({
-        en: 'Search by code, category, or message...',
-        ko: '코드, 카테고리, 메시지로 검색...',
-        zh: '按代码、类别或消息搜索...',
-        vi: 'Tìm theo mã, danh mục hoặc tin nhắn...'
-      }, locale)}
+      quickSearchPlaceholder="Search by code, category, or message..."
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
       advancedFilterOpen={advancedFilterOpen}
       onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
       activeFilterCount={activeFilterCount}
-      filterTitle={getLocalizedValue({
-        en: 'Search / Filter',
-        ko: '검색 / 필터',
-        zh: '搜索 / 筛选',
-        vi: 'Tìm kiếm / Lọc'
-      }, locale)}
+      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
       filterContent={
         <SearchFilterFields
           fields={filterFields}
@@ -134,28 +122,19 @@ export default function MessagesPage({ params }: MessagesPageProps) {
       onFilterClose={handleAdvancedFilterClose}
       // Help
       programId="PROG-MESSAGE-MGMT"
-      helpExists={true}
+      helpExists={helpExists}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
-      language={locale}
+      isAdmin={isAdmin}
+      language={currentLocale}
     >
       {/* DataGrid Area */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         {messages.length === 0 && !searching ? (
           <EmptyState
             icon={Search}
-            title={getLocalizedValue({
-              en: 'No messages found',
-              ko: '메시지가 없습니다',
-              zh: '未找到消息',
-              vi: 'Không tìm thấy tin nhắn'
-            }, locale)}
-            description={getLocalizedValue({
-              en: 'Use the search above or add a new message',
-              ko: '검색어를 입력하여 메시지를 찾거나 새 메시지를 추가해주세요',
-              zh: '使用上面的搜索或添加新消息',
-              vi: 'Sử dụng tìm kiếm ở trên hoặc thêm tin nhắn mới'
-            }, locale)}
+            title="No messages found"
+            description="Use the search above to find messages"
           />
         ) : (
           <Box sx={{ flex: 1, minHeight: 0 }}>
@@ -187,15 +166,15 @@ export default function MessagesPage({ params }: MessagesPageProps) {
         title={!editingMessage?.id ? 'Add New Message' : 'Edit Message'}
         onSave={handleSave}
         saveLoading={saveLoading}
-        saveLabel={getLocalizedValue({ en: 'Save', ko: '저장', zh: '保存', vi: 'Lưu' }, locale)}
-        cancelLabel={getLocalizedValue({ en: 'Cancel', ko: '취소', zh: '取消', vi: 'Hủy' }, locale)}
+        saveLabel={t('common.save')}
+        cancelLabel={t('common.cancel')}
       >
         {editingMessage && (
           <MessageFormFields
             data={editingMessage}
             onChange={setEditingMessage}
             mode={editingMessage.id ? 'edit' : 'add'}
-            locale={locale}
+            locale={currentLocale}
           />
         )}
       </EditDrawer>
