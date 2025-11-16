@@ -1,18 +1,18 @@
+import { MultiLangField } from '@/lib/i18n/multiLang';
+
 // Local types for program management page
 export interface ProgramPermission {
   code: string;
-  name: { en: string; ko: string };
-  description: { en: string; ko: string };
+  name: MultiLangField;
+  description: MultiLangField;
   isDefault?: boolean;
 }
 
 export interface Program {
   id?: string;
   code: string;
-  nameEn: string;
-  nameKo: string;
-  descriptionEn: string;
-  descriptionKo: string;
+  name: MultiLangField;
+  description: MultiLangField;
   category: string;
   type: 'page' | 'function' | 'api' | 'report';
   status: 'active' | 'inactive' | 'development';

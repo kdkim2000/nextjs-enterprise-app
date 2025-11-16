@@ -2,6 +2,7 @@ import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import { SearchCriteria } from './types';
 import { AVAILABLE_ICONS } from './constants';
 import { MenuItem as MenuItemType } from '@/types/menu';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createFilterFields = (
@@ -58,7 +59,7 @@ export const createFilterFields = (
       { value: 'null', label: t('menuManagement.rootMenu') },
       ...allMenus.map(menu => ({
         value: menu.id,
-        label: locale === 'ko' ? menu.name.ko : menu.name.en
+        label: getLocalizedValue(menu.name, locale)
       }))
     ]
   },

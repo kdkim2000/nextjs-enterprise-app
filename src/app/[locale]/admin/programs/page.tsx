@@ -12,6 +12,7 @@ import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import ProgramFormFields, { ProgramFormData } from '@/components/admin/ProgramFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useProgramManagement } from './hooks/useProgramManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -80,7 +81,7 @@ export default function ProgramManagementPage() {
         return program
           ? {
               id: program.id!,
-              displayName: `${program.code} (${currentLocale === 'ko' ? program.nameKo : program.nameEn})`
+              displayName: `${program.code} (${getLocalizedValue(program.name, currentLocale)})`
             }
           : { id, displayName: String(id) };
       }),
@@ -172,8 +173,8 @@ export default function ProgramManagementPage() {
         width={{ xs: '100%', sm: 700, md: 800 }}
       >
         <ProgramFormFields
-          program={editingProgram as ProgramFormData}
-          onChange={(program) => setEditingProgram(program as Program)}
+          program={editingProgram}
+          onChange={setEditingProgram}
           locale={currentLocale}
         />
       </EditDrawer>

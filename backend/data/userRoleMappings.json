@@ -173404,15 +173404,6 @@
       "isActive": true
     },
     {
-      "id": "urm-19591",
-      "userId": "user-001",
-      "roleId": "role-036",
-      "assignedBy": "admin",
-      "assignedAt": "2025-10-14T18:24:07.526Z",
-      "expiresAt": null,
-      "isActive": true
-    },
-    {
       "id": "urm-19592",
       "userId": "user-25564",
       "roleId": "role-004",
@@ -377061,6 +377052,24 @@
       "roleId": "role-001",
       "assignedBy": "admin",
       "assignedAt": "2025-11-14T18:42:40.404Z",
+      "expiresAt": null,
+      "isActive": true
+    },
+    {
+      "id": "urm-43257",
+      "userId": "user-002",
+      "roleId": "role-002",
+      "assignedBy": "admin",
+      "assignedAt": "2025-11-15T12:41:32.982Z",
+      "expiresAt": null,
+      "isActive": true
+    },
+    {
+      "id": "urm-43258",
+      "userId": "user-002",
+      "roleId": "role-003",
+      "assignedBy": "admin",
+      "assignedAt": "2025-11-15T12:41:47.013Z",
       "expiresAt": null,
       "isActive": true
     }

@@ -1,0 +1,312 @@
+{
+  "currentVersion": "2.0",
+  "versions": [
+    {
+      "version": "2.0",
+      "effectiveDate": "2025-01-15",
+      "title": "Chính Sách Bảo Mật",
+      "lastUpdated": "Cập nhật lần cuối: 15 Tháng 1, 2025",
+      "isLatest": true,
+      "sections": [
+        {
+          "id": "introduction",
+          "title": "1. Giới Thiệu",
+          "content": [
+            "Ứng dụng Doanh nghiệp (\"chúng tôi\", \"của chúng tôi\" hoặc \"công ty\") cam kết bảo vệ quyền riêng tư của bạn. Chính sách Bảo mật này giải thích cách chúng tôi thu thập, sử dụng, tiết lộ và bảo vệ thông tin của bạn khi bạn sử dụng ứng dụng doanh nghiệp của chúng tôi.",
+            "Vui lòng đọc kỹ chính sách bảo mật này. Nếu bạn không đồng ý với các điều khoản của chính sách bảo mật này, vui lòng không truy cập ứng dụng.",
+            "Chúng tôi đã cập nhật chính sách của mình để cung cấp tính minh bạch cao hơn và kiểm soát tốt hơn đối với dữ liệu cá nhân của bạn."
+          ]
+        },
+        {
+          "id": "information-collection",
+          "title": "2. Thông Tin Chúng Tôi Thu Thập",
+          "content": [
+            "Chúng tôi thu thập thông tin mà bạn cung cấp trực tiếp cho chúng tôi, bao gồm:",
+            "• Thông tin nhận dạng cá nhân (tên, địa chỉ email, số điện thoại)",
+            "• Thông tin đăng nhập tài khoản và xác thực",
+            "• Sở thích và cài đặt của người dùng",
+            "• Dữ liệu sử dụng và nhật ký hoạt động",
+            "• Thông tin thiết bị và trình duyệt",
+            "• Địa chỉ IP và dữ liệu vị trí",
+            "• Dữ liệu sinh trắc học (chỉ khi có sự đồng ý rõ ràng)"
+          ]
+        },
+        {
+          "id": "information-use",
+          "title": "3. Cách Chúng Tôi Sử Dụng Thông Tin Của Bạn",
+          "content": [
+            "Chúng tôi sử dụng thông tin thu thập được để:",
+            "• Cung cấp, duy trì và cải thiện dịch vụ của chúng tôi",
+            "• Xử lý các yêu cầu và giao dịch của bạn",
+            "• Gửi thông báo kỹ thuật, cập nhật và cảnh báo bảo mật",
+            "• Phản hồi các bình luận và câu hỏi của bạn",
+            "• Giám sát và phân tích xu hướng, mức sử dụng và hoạt động",
+            "• Phát hiện, ngăn chặn và giải quyết các vấn đề kỹ thuật và mối đe dọa bảo mật",
+            "• Tuân thủ các nghĩa vụ pháp lý và thực thi các chính sách của chúng tôi",
+            "• Tiến hành nghiên cứu và phát triển để cải thiện dịch vụ"
+          ]
+        },
+        {
+          "id": "information-sharing",
+          "title": "4. Chia Sẻ và Tiết Lộ Thông Tin",
+          "content": [
+            "Chúng tôi không bán, trao đổi hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba. Chúng tôi chỉ chia sẻ thông tin của bạn trong các trường hợp sau:",
+            "• Với sự đồng ý rõ ràng của bạn hoặc theo chỉ đạo của bạn",
+            "• Với các nhà cung cấp dịch vụ hỗ trợ hoạt động của chúng tôi (theo các thỏa thuận bảo mật nghiêm ngặt)",
+            "• Để tuân thủ các nghĩa vụ pháp lý, lệnh của tòa án hoặc yêu cầu của chính phủ",
+            "• Để bảo vệ quyền, tài sản hoặc sự an toàn của công ty, người dùng hoặc người khác",
+            "• Liên quan đến việc sáp nhập, mua lại hoặc bán tài sản (với thông báo trước)"
+          ]
+        },
+        {
+          "id": "data-security",
+          "title": "5. Bảo Mật Dữ Liệu",
+          "content": [
+            "Chúng tôi thực hiện các biện pháp kỹ thuật và tổ chức phù hợp để bảo vệ thông tin cá nhân của bạn khỏi truy cập, thay đổi, tiết lộ hoặc phá hủy trái phép. Các biện pháp này bao gồm:",
+            "• Mã hóa đầu cuối dữ liệu đang truyền và dữ liệu lưu trữ",
+            "• Đánh giá bảo mật thường xuyên và kiểm tra thâm nhập",
+            "• Xác thực đa yếu tố và kiểm soát truy cập",
+            "• Đào tạo nhân viên về bảo vệ dữ liệu và các phương pháp bảo mật tốt nhất",
+            "• Quy trình ứng phó sự cố và thông báo vi phạm",
+            "• Sao lưu thường xuyên và quy trình khôi phục thảm họa"
+          ]
+        },
+        {
+          "id": "data-retention",
+          "title": "6. Lưu Giữ Dữ Liệu",
+          "content": [
+            "Chúng tôi lưu giữ thông tin cá nhân của bạn trong khoảng thời gian cần thiết để thực hiện các mục đích được nêu trong Chính sách Bảo mật này, trừ khi luật pháp yêu cầu hoặc cho phép thời gian lưu giữ lâu hơn.",
+            "Khi thông tin của bạn không còn cần thiết, chúng tôi sẽ xóa hoặc ẩn danh một cách an toàn trong vòng 90 ngày.",
+            "Bạn có thể yêu cầu xóa sớm hơn bằng cách liên hệ trực tiếp với chúng tôi."
+          ]
+        },
+        {
+          "id": "user-rights",
+          "title": "7. Quyền Của Bạn",
+          "content": [
+            "Bạn có quyền:",
+            "• Truy cập và nhận một bản sao thông tin cá nhân của bạn",
+            "• Sửa chữa thông tin không chính xác hoặc không đầy đủ",
+            "• Yêu cầu xóa thông tin cá nhân của bạn",
+            "• Phản đối hoặc hạn chế một số hoạt động xử lý nhất định",
+            "• Rút lại sự đồng ý khi xử lý dựa trên sự đồng ý",
+            "• Khả năng chuyển dữ liệu ở định dạng có cấu trúc, thông dụng",
+            "• Nộp đơn khiếu nại lên cơ quan giám sát",
+            "Để thực hiện các quyền này, vui lòng liên hệ với chúng tôi bằng thông tin được cung cấp bên dưới. Chúng tôi sẽ phản hồi trong vòng 30 ngày."
+          ]
+        },
+        {
+          "id": "cookies",
+          "title": "8. Cookie và Công Nghệ Theo Dõi",
+          "content": [
+            "Chúng tôi sử dụng cookie và các công nghệ theo dõi tương tự để thu thập thông tin về các hoạt động duyệt web của bạn. Bạn có thể kiểm soát cookie thông qua cài đặt trình duyệt của mình.",
+            "Các loại cookie chúng tôi sử dụng:",
+            "• Cookie thiết yếu: Bắt buộc để ứng dụng hoạt động bình thường",
+            "• Cookie phân tích: Giúp chúng tôi hiểu cách người dùng tương tác với ứng dụng của chúng tôi",
+            "• Cookie sở thích: Ghi nhớ cài đặt và sở thích của bạn",
+            "• Cookie bảo mật: Xác thực người dùng và ngăn chặn việc sử dụng gian lận"
+          ]
+        },
+        {
+          "id": "third-party",
+          "title": "9. Dịch Vụ Bên Thứ Ba",
+          "content": [
+            "Ứng dụng của chúng tôi có thể chứa các liên kết đến các trang web hoặc dịch vụ của bên thứ ba. Chúng tôi không chịu trách nhiệm về các thực hành bảo mật của các bên thứ ba này. Chúng tôi khuyến khích bạn xem xét các chính sách bảo mật của họ.",
+            "Chúng tôi xem xét cẩn thận tất cả các nhà cung cấp dịch vụ bên thứ ba để đảm bảo họ đáp ứng các tiêu chuẩn bảo mật và quyền riêng tư của chúng tôi."
+          ]
+        },
+        {
+          "id": "children",
+          "title": "10. Quyền Riêng Tư Của Trẻ Em",
+          "content": [
+            "Ứng dụng của chúng tôi không dành cho các cá nhân dưới 18 tuổi. Chúng tôi không cố ý thu thập thông tin cá nhân từ trẻ em. Nếu bạn tin rằng chúng tôi đã thu thập thông tin từ trẻ em, vui lòng liên hệ với chúng tôi ngay lập tức và chúng tôi sẽ xóa trong vòng 48 giờ."
+          ]
+        },
+        {
+          "id": "international",
+          "title": "11. Chuyển Giao Dữ Liệu Quốc Tế",
+          "content": [
+            "Thông tin của bạn có thể được chuyển đến và xử lý ở các quốc gia khác với quốc gia cư trú của bạn. Chúng tôi đảm bảo có các biện pháp bảo vệ phù hợp để bảo vệ thông tin của bạn theo Chính sách Bảo mật này.",
+            "Chúng tôi tuân thủ GDPR, CCPA và các quy định bảo vệ dữ liệu hiện hành khác."
+          ]
+        },
+        {
+          "id": "ai-processing",
+          "title": "12. AI và Ra Quyết Định Tự Động",
+          "content": [
+            "Chúng tôi có thể sử dụng trí tuệ nhân tạo và các hệ thống tự động để xử lý dữ liệu của bạn nhằm cải thiện dịch vụ và cá nhân hóa.",
+            "Bạn có quyền:",
+            "• Được thông báo khi việc ra quyết định tự động ảnh hưởng đến bạn",
+            "• Yêu cầu xem xét của con người đối với các quyết định tự động",
+            "• Thách thức và phản đối các quyết định tự động"
+          ]
+        },
+        {
+          "id": "changes",
+          "title": "13. Thay Đổi Chính Sách Bảo Mật Này",
+          "content": [
+            "Chúng tôi có thể cập nhật Chính sách Bảo mật này theo thời gian. Chúng tôi sẽ thông báo cho bạn về bất kỳ thay đổi quan trọng nào qua email và bằng cách đăng Chính sách Bảo mật mới trên trang này với ngày \"Cập nhật lần cuối\" được cập nhật.",
+            "Việc bạn tiếp tục sử dụng ứng dụng sau bất kỳ thay đổi nào cho thấy bạn chấp nhận Chính sách Bảo mật được cập nhật. Bạn có thể xem xét các phiên bản trước của chính sách này bất cứ lúc nào."
+          ]
+        },
+        {
+          "id": "contact",
+          "title": "14. Liên Hệ Với Chúng Tôi",
+          "content": [
+            "Nếu bạn có bất kỳ câu hỏi hoặc mối quan tâm nào về Chính sách Bảo mật này hoặc các thực hành dữ liệu của chúng tôi, vui lòng liên hệ với chúng tôi tại:",
+            "Email: privacy@enterpriseapp.com",
+            "Địa chỉ: 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh, Việt Nam",
+            "Điện thoại: +84 (028) 1234-5678",
+            "Nhân viên Bảo vệ Dữ liệu: dpo@enterpriseapp.com"
+          ]
+        }
+      ],
+      "footer": {
+        "message": "Cảm ơn bạn đã đọc Chính sách Bảo mật của chúng tôi. Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi."
+      }
+    },
+    {
+      "version": "1.0",
+      "effectiveDate": "2024-01-01",
+      "title": "Chính Sách Bảo Mật",
+      "lastUpdated": "Cập nhật lần cuối: Tháng 1, 2024",
+      "isLatest": false,
+      "sections": [
+        {
+          "id": "introduction",
+          "title": "1. Giới Thiệu",
+          "content": [
+            "Ứng dụng Doanh nghiệp (\"chúng tôi\", \"của chúng tôi\" hoặc \"công ty\") cam kết bảo vệ quyền riêng tư của bạn. Chính sách Bảo mật này giải thích cách chúng tôi thu thập, sử dụng, tiết lộ và bảo vệ thông tin của bạn khi bạn sử dụng ứng dụng doanh nghiệp của chúng tôi.",
+            "Vui lòng đọc kỹ chính sách bảo mật này. Nếu bạn không đồng ý với các điều khoản của chính sách bảo mật này, vui lòng không truy cập ứng dụng."
+          ]
+        },
+        {
+          "id": "information-collection",
+          "title": "2. Thông Tin Chúng Tôi Thu Thập",
+          "content": [
+            "Chúng tôi thu thập thông tin mà bạn cung cấp trực tiếp cho chúng tôi, bao gồm:",
+            "• Thông tin nhận dạng cá nhân (tên, địa chỉ email, số điện thoại)",
+            "• Thông tin đăng nhập tài khoản và xác thực",
+            "• Sở thích và cài đặt của người dùng",
+            "• Dữ liệu sử dụng và nhật ký hoạt động",
+            "• Thông tin thiết bị và trình duyệt",
+            "• Địa chỉ IP và dữ liệu vị trí"
+          ]
+        },
+        {
+          "id": "information-use",
+          "title": "3. Cách Chúng Tôi Sử Dụng Thông Tin Của Bạn",
+          "content": [
+            "Chúng tôi sử dụng thông tin thu thập được để:",
+            "• Cung cấp, duy trì và cải thiện dịch vụ của chúng tôi",
+            "• Xử lý các yêu cầu và giao dịch của bạn",
+            "• Gửi thông báo kỹ thuật, cập nhật và cảnh báo bảo mật",
+            "• Phản hồi các bình luận và câu hỏi của bạn",
+            "• Giám sát và phân tích xu hướng, mức sử dụng và hoạt động",
+            "• Phát hiện, ngăn chặn và giải quyết các vấn đề kỹ thuật và mối đe dọa bảo mật",
+            "• Tuân thủ các nghĩa vụ pháp lý và thực thi các chính sách của chúng tôi"
+          ]
+        },
+        {
+          "id": "information-sharing",
+          "title": "4. Chia Sẻ và Tiết Lộ Thông Tin",
+          "content": [
+            "Chúng tôi không bán, trao đổi hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba. Chúng tôi chỉ chia sẻ thông tin của bạn trong các trường hợp sau:",
+            "• Với sự đồng ý của bạn hoặc theo chỉ đạo của bạn",
+            "• Với các nhà cung cấp dịch vụ hỗ trợ hoạt động của chúng tôi",
+            "• Để tuân thủ các nghĩa vụ pháp lý, lệnh của tòa án hoặc yêu cầu của chính phủ",
+            "• Để bảo vệ quyền, tài sản hoặc sự an toàn của công ty, người dùng hoặc người khác",
+            "• Liên quan đến việc sáp nhập, mua lại hoặc bán tài sản"
+          ]
+        },
+        {
+          "id": "data-security",
+          "title": "5. Bảo Mật Dữ Liệu",
+          "content": [
+            "Chúng tôi thực hiện các biện pháp kỹ thuật và tổ chức phù hợp để bảo vệ thông tin cá nhân của bạn khỏi truy cập, thay đổi, tiết lộ hoặc phá hủy trái phép. Các biện pháp này bao gồm:",
+            "• Mã hóa dữ liệu đang truyền và dữ liệu lưu trữ",
+            "• Đánh giá bảo mật thường xuyên và kiểm toán",
+            "• Kiểm soát truy cập và cơ chế xác thực",
+            "• Đào tạo nhân viên về bảo vệ dữ liệu",
+            "• Quy trình ứng phó sự cố và thông báo vi phạm"
+          ]
+        },
+        {
+          "id": "data-retention",
+          "title": "6. Lưu Giữ Dữ Liệu",
+          "content": [
+            "Chúng tôi lưu giữ thông tin cá nhân của bạn trong khoảng thời gian cần thiết để thực hiện các mục đích được nêu trong Chính sách Bảo mật này, trừ khi luật pháp yêu cầu hoặc cho phép thời gian lưu giữ lâu hơn.",
+            "Khi thông tin của bạn không còn cần thiết, chúng tôi sẽ xóa hoặc ẩn danh một cách an toàn."
+          ]
+        },
+        {
+          "id": "user-rights",
+          "title": "7. Quyền Của Bạn",
+          "content": [
+            "Bạn có quyền:",
+            "• Truy cập và nhận một bản sao thông tin cá nhân của bạn",
+            "• Sửa chữa thông tin không chính xác hoặc không đầy đủ",
+            "• Yêu cầu xóa thông tin cá nhân của bạn",
+            "• Phản đối hoặc hạn chế một số hoạt động xử lý nhất định",
+            "• Rút lại sự đồng ý khi xử lý dựa trên sự đồng ý",
+            "• Khả năng chuyển dữ liệu",
+            "Để thực hiện các quyền này, vui lòng liên hệ với chúng tôi bằng thông tin được cung cấp bên dưới."
+          ]
+        },
+        {
+          "id": "cookies",
+          "title": "8. Cookie và Công Nghệ Theo Dõi",
+          "content": [
+            "Chúng tôi sử dụng cookie và các công nghệ theo dõi tương tự để thu thập thông tin về các hoạt động duyệt web của bạn. Bạn có thể kiểm soát cookie thông qua cài đặt trình duyệt của mình.",
+            "Các loại cookie chúng tôi sử dụng:",
+            "• Cookie thiết yếu: Bắt buộc để ứng dụng hoạt động",
+            "• Cookie phân tích: Giúp chúng tôi hiểu cách người dùng tương tác với ứng dụng của chúng tôi",
+            "• Cookie sở thích: Ghi nhớ cài đặt và sở thích của bạn"
+          ]
+        },
+        {
+          "id": "third-party",
+          "title": "9. Dịch Vụ Bên Thứ Ba",
+          "content": [
+            "Ứng dụng của chúng tôi có thể chứa các liên kết đến các trang web hoặc dịch vụ của bên thứ ba. Chúng tôi không chịu trách nhiệm về các thực hành bảo mật của các bên thứ ba này. Chúng tôi khuyến khích bạn xem xét các chính sách bảo mật của họ."
+          ]
+        },
+        {
+          "id": "children",
+          "title": "10. Quyền Riêng Tư Của Trẻ Em",
+          "content": [
+            "Ứng dụng của chúng tôi không dành cho các cá nhân dưới 18 tuổi. Chúng tôi không cố ý thu thập thông tin cá nhân từ trẻ em. Nếu bạn tin rằng chúng tôi đã thu thập thông tin từ trẻ em, vui lòng liên hệ với chúng tôi ngay lập tức."
+          ]
+        },
+        {
+          "id": "international",
+          "title": "11. Chuyển Giao Dữ Liệu Quốc Tế",
+          "content": [
+            "Thông tin của bạn có thể được chuyển đến và xử lý ở các quốc gia khác với quốc gia cư trú của bạn. Chúng tôi đảm bảo có các biện pháp bảo vệ phù hợp để bảo vệ thông tin của bạn theo Chính sách Bảo mật này."
+          ]
+        },
+        {
+          "id": "changes",
+          "title": "12. Thay Đổi Chính Sách Bảo Mật Này",
+          "content": [
+            "Chúng tôi có thể cập nhật Chính sách Bảo mật này theo thời gian. Chúng tôi sẽ thông báo cho bạn về bất kỳ thay đổi nào bằng cách đăng Chính sách Bảo mật mới trên trang này và cập nhật ngày \"Cập nhật lần cuối\".",
+            "Việc bạn tiếp tục sử dụng ứng dụng sau bất kỳ thay đổi nào cho thấy bạn chấp nhận Chính sách Bảo mật được cập nhật."
+          ]
+        },
+        {
+          "id": "contact",
+          "title": "13. Liên Hệ Với Chúng Tôi",
+          "content": [
+            "Nếu bạn có bất kỳ câu hỏi hoặc mối quan tâm nào về Chính sách Bảo mật này hoặc các thực hành dữ liệu của chúng tôi, vui lòng liên hệ với chúng tôi tại:",
+            "Email: privacy@enterpriseapp.com",
+            "Địa chỉ: 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh, Việt Nam",
+            "Điện thoại: +84 (028) 1234-5678"
+          ]
+        }
+      ],
+      "footer": {
+        "message": "Cảm ơn bạn đã đọc Chính sách Bảo mật của chúng tôi. Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi."
+      }
+    }
+  ]
+}

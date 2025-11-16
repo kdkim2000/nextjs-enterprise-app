@@ -4,11 +4,15 @@
     "code": "USER_STATUS",
     "name": {
       "en": "User Status",
-      "ko": "사용자 상태"
+      "ko": "사용자 상태",
+      "zh": "用户状态",
+      "vi": "Trạng thái người dùng"
     },
     "description": {
       "en": "Status codes for user accounts",
-      "ko": "사용자 계정 상태 코드"
+      "ko": "사용자 계정 상태 코드",
+      "zh": "用户账户状态代码",
+      "vi": "Mã trạng thái tài khoản người dùng"
     },
     "order": 1,
     "status": "active",
@@ -21,11 +25,15 @@
     "code": "DEPT_STATUS",
     "name": {
       "en": "Department Status",
-      "ko": "부서 상태"
+      "ko": "부서 상태",
+      "zh": "部门状态",
+      "vi": "Trạng thái phòng ban"
     },
     "description": {
       "en": "Status codes for departments",
-      "ko": "부서 상태 코드"
+      "ko": "부서 상태 코드",
+      "zh": "部门状态代码",
+      "vi": "Mã trạng thái phòng ban"
     },
     "order": 2,
     "status": "active",
@@ -38,11 +46,15 @@
     "code": "USER_ROLE",
     "name": {
       "en": "User Role",
-      "ko": "사용자 역할"
+      "ko": "사용자 역할",
+      "zh": "用户角色",
+      "vi": "Vai trò người dùng"
     },
     "description": {
       "en": "User role types",
-      "ko": "사용자 역할 타입"
+      "ko": "사용자 역할 타입",
+      "zh": "用户角色类型",
+      "vi": "Loại vai trò người dùng"
     },
     "order": 3,
     "status": "active",
@@ -55,11 +67,15 @@
     "code": "MENU_CATEGORY",
     "name": {
       "en": "Menu Category",
-      "ko": "메뉴 카테고리"
+      "ko": "메뉴 카테고리",
+      "zh": "菜单类别",
+      "vi": "Danh mục menu"
     },
     "description": {
       "en": "Menu category types",
-      "ko": "메뉴 카테고리 타입"
+      "ko": "메뉴 카테고리 타입",
+      "zh": "菜单类别类型",
+      "vi": "Loại danh mục menu"
     },
     "order": 4,
     "status": "active",
@@ -72,11 +88,15 @@
     "code": "PRIORITY",
     "name": {
       "en": "Priority Level",
-      "ko": "우선순위"
+      "ko": "우선순위",
+      "zh": "优先级",
+      "vi": "Mức độ ưu tiên"
     },
     "description": {
       "en": "Priority level codes",
-      "ko": "우선순위 레벨 코드"
+      "ko": "우선순위 레벨 코드",
+      "zh": "优先级代码",
+      "vi": "Mã mức độ ưu tiên"
     },
     "order": 5,
     "status": "active",
@@ -89,11 +109,15 @@
     "code": "PROGRAM_STATUS",
     "name": {
       "en": "Program Status",
-      "ko": "프로그램 상태"
+      "ko": "프로그램 상태",
+      "zh": "程序状态",
+      "vi": "Trạng thái chương trình"
     },
     "description": {
       "en": "Status codes for programs",
-      "ko": "프로그램 상태 코드"
+      "ko": "프로그램 상태 코드",
+      "zh": "程序状态代码",
+      "vi": "Mã trạng thái chương trình"
     },
     "order": 6,
     "status": "active",
@@ -106,11 +130,15 @@
     "code": "PROGRAM_TYPE",
     "name": {
       "en": "Program Type",
-      "ko": "프로그램 유형"
+      "ko": "프로그램 유형",
+      "zh": "程序类型",
+      "vi": "Loại chương trình"
     },
     "description": {
       "en": "Program type classifications",
-      "ko": "프로그램 유형 분류"
+      "ko": "프로그램 유형 분류",
+      "zh": "程序类型分类",
+      "vi": "Phân loại chương trình"
     },
     "order": 7,
     "status": "active",
@@ -123,11 +151,15 @@
     "code": "PROGRAM_CATEGORY",
     "name": {
       "en": "Program Category",
-      "ko": "프로그램 카테고리"
+      "ko": "프로그램 카테고리",
+      "zh": "程序分类",
+      "vi": "Danh mục chương trình"
     },
     "description": {
       "en": "Program category classifications",
-      "ko": "프로그램 카테고리 분류"
+      "ko": "프로그램 카테고리 분류",
+      "zh": "程序分类分类",
+      "vi": "Phân loại danh mục chương trình"
     },
     "order": 8,
     "status": "active",
@@ -140,11 +172,15 @@
     "code": "HELP_STATUS",
     "name": {
       "en": "Help Document Status",
-      "ko": "도움말 문서 상태"
+      "ko": "도움말 문서 상태",
+      "zh": "帮助文档状态",
+      "vi": "Trạng thái tài liệu trợ giúp"
     },
     "description": {
       "en": "Status codes for help documents",
-      "ko": "도움말 문서 상태 코드"
+      "ko": "도움말 문서 상태 코드",
+      "zh": "帮助文档状态代码",
+      "vi": "Mã trạng thái tài liệu trợ giúp"
     },
     "order": 9,
     "status": "active",
@@ -157,11 +193,15 @@
     "code": "PERMISSION_TYPE",
     "name": {
       "en": "Permission Type",
-      "ko": "권한 유형"
+      "ko": "권한 유형",
+      "zh": "权限类型",
+      "vi": "Loại quyền"
     },
     "description": {
       "en": "Permission type codes",
-      "ko": "권한 유형 코드"
+      "ko": "권한 유형 코드",
+      "zh": "权限类型代码",
+      "vi": "Mã loại quyền"
     },
     "order": 10,
     "status": "active",
@@ -174,11 +214,15 @@
     "code": "LANGUAGE",
     "name": {
       "en": "Language",
-      "ko": "언어"
+      "ko": "언어",
+      "zh": "语言",
+      "vi": "Ngôn ngữ"
     },
     "description": {
       "en": "Supported language codes",
-      "ko": "지원 언어 코드"
+      "ko": "지원 언어 코드",
+      "zh": "支持的语言代码",
+      "vi": "Mã ngôn ngữ được hỗ trợ"
     },
     "order": 11,
     "status": "active",
@@ -191,11 +235,15 @@
     "code": "HTTP_METHOD",
     "name": {
       "en": "HTTP Method",
-      "ko": "HTTP 메서드"
+      "ko": "HTTP 메서드",
+      "zh": "HTTP方法",
+      "vi": "Phương thức HTTP"
     },
     "description": {
       "en": "HTTP request method types",
-      "ko": "HTTP 요청 메서드 타입"
+      "ko": "HTTP 요청 메서드 타입",
+      "zh": "HTTP请求方法类型",
+      "vi": "Loại phương thức yêu cầu HTTP"
     },
     "order": 12,
     "status": "active",

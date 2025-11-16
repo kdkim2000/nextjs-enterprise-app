@@ -29,9 +29,11 @@ import {
   Person,
   Star
 } from '@mui/icons-material';
+import { useI18n } from '@/lib/i18n/client';
 
 export default function ThemeDemoPage() {
   const theme = useTheme();
+  const t = useI18n();
 
   return (
     <PageContainer sx={{ height: 'auto', minHeight: '100vh', overflow: 'auto' }}>
@@ -39,10 +41,10 @@ export default function ThemeDemoPage() {
 
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight={600}>
-          Theme System Demo
+          {t('themeDemo.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Demonstration of the comprehensive MUI Theme system with custom colors, typography, and component overrides.
+          {t('themeDemo.description')}
         </Typography>
       </Box>
 
@@ -50,38 +52,38 @@ export default function ThemeDemoPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom fontWeight={600}>
-            1. Typography System
+            {t('themeDemo.typography.title')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
           <Stack spacing={3}>
             <Box>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Headings
+                {t('themeDemo.typography.headings')}
               </Typography>
               <Stack spacing={1}>
-                <Typography variant="h1">Heading 1 - 2.5rem / 700</Typography>
-                <Typography variant="h2">Heading 2 - 2rem / 700</Typography>
-                <Typography variant="h3">Heading 3 - 1.75rem / 600</Typography>
-                <Typography variant="h4">Heading 4 - 1.5rem / 600</Typography>
-                <Typography variant="h5">Heading 5 - 1.25rem / 600</Typography>
-                <Typography variant="h6">Heading 6 - 1rem / 600</Typography>
+                <Typography variant="h1">{t('themeDemo.typography.heading1')}</Typography>
+                <Typography variant="h2">{t('themeDemo.typography.heading2')}</Typography>
+                <Typography variant="h3">{t('themeDemo.typography.heading3')}</Typography>
+                <Typography variant="h4">{t('themeDemo.typography.heading4')}</Typography>
+                <Typography variant="h5">{t('themeDemo.typography.heading5')}</Typography>
+                <Typography variant="h6">{t('themeDemo.typography.heading6')}</Typography>
               </Stack>
             </Box>
 
             <Box>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Body Text
+                {t('themeDemo.typography.bodyText')}
               </Typography>
               <Stack spacing={1}>
                 <Typography variant="body1">
-                  Body 1 - 1rem (16px) - Default body text with comfortable reading size
+                  {t('themeDemo.typography.body1')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Body 2 - 0.875rem (14px) - Secondary information text
+                  {t('themeDemo.typography.body2')}
                 </Typography>
                 <Typography variant="caption" display="block">
-                  Caption - 0.75rem (12px) - Small supplementary text
+                  {t('themeDemo.typography.caption')}
                 </Typography>
               </Stack>
             </Box>
@@ -93,7 +95,7 @@ export default function ThemeDemoPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom fontWeight={600}>
-            2. Custom Status Colors
+            {t('themeDemo.statusColors.title')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
@@ -108,7 +110,7 @@ export default function ThemeDemoPage() {
                 }}
               >
                 <CheckCircle sx={{ fontSize: 40, mb: 1 }} />
-                <Typography variant="h6">Active</Typography>
+                <Typography variant="h6">{t('themeDemo.statusColors.active')}</Typography>
                 <Typography variant="caption">{theme.palette.status.active}</Typography>
               </Paper>
             </Grid>
@@ -123,7 +125,7 @@ export default function ThemeDemoPage() {
                 }}
               >
                 <Error sx={{ fontSize: 40, mb: 1 }} />
-                <Typography variant="h6">Inactive</Typography>
+                <Typography variant="h6">{t('themeDemo.statusColors.inactive')}</Typography>
                 <Typography variant="caption">{theme.palette.status.inactive}</Typography>
               </Paper>
             </Grid>
@@ -138,7 +140,7 @@ export default function ThemeDemoPage() {
                 }}
               >
                 <Warning sx={{ fontSize: 40, mb: 1 }} />
-                <Typography variant="h6">Pending</Typography>
+                <Typography variant="h6">{t('themeDemo.statusColors.pending')}</Typography>
                 <Typography variant="caption">{theme.palette.status.pending}</Typography>
               </Paper>
             </Grid>
@@ -153,7 +155,7 @@ export default function ThemeDemoPage() {
                 }}
               >
                 <Info sx={{ fontSize: 40, mb: 1 }} />
-                <Typography variant="h6">Info</Typography>
+                <Typography variant="h6">{t('themeDemo.statusColors.info')}</Typography>
                 <Typography variant="caption">{theme.palette.status.info}</Typography>
               </Paper>
             </Grid>
@@ -161,28 +163,28 @@ export default function ThemeDemoPage() {
 
           <Box sx={{ mt: 3 }}>
             <Typography variant="subtitle2" gutterBottom>
-              Status Chips:
+              {t('themeDemo.statusColors.statusChips')}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               <Chip
-                label="Active"
+                label={t('themeDemo.statusColors.active')}
                 icon={<CheckCircle />}
                 sx={{ bgcolor: theme.palette.status.active, color: 'white' }}
               />
               <Chip
-                label="Inactive"
+                label={t('themeDemo.statusColors.inactive')}
                 sx={{ bgcolor: theme.palette.status.inactive, color: 'white' }}
               />
               <Chip
-                label="Pending"
+                label={t('themeDemo.statusColors.pending')}
                 sx={{ bgcolor: theme.palette.status.pending, color: 'white' }}
               />
               <Chip
-                label="Success"
+                label={t('themeDemo.statusColors.success')}
                 sx={{ bgcolor: theme.palette.status.success, color: 'white' }}
               />
               <Chip
-                label="Error"
+                label={t('themeDemo.statusColors.error')}
                 sx={{ bgcolor: theme.palette.status.error, color: 'white' }}
               />
             </Box>
@@ -194,7 +196,7 @@ export default function ThemeDemoPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom fontWeight={600}>
-            3. Custom Role Colors
+            {t('themeDemo.roleColors.title')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
@@ -211,10 +213,10 @@ export default function ThemeDemoPage() {
                   <AdminPanelSettings />
                 </Avatar>
                 <Typography variant="body2" fontWeight={600}>
-                  Admin
+                  {t('themeDemo.roleColors.admin')}
                 </Typography>
                 <Chip
-                  label="Admin"
+                  label={t('themeDemo.roleColors.admin')}
                   size="small"
                   sx={{
                     bgcolor: theme.palette.role.admin,
@@ -236,10 +238,10 @@ export default function ThemeDemoPage() {
                   <Star />
                 </Avatar>
                 <Typography variant="body2" fontWeight={600}>
-                  Manager
+                  {t('themeDemo.roleColors.manager')}
                 </Typography>
                 <Chip
-                  label="Manager"
+                  label={t('themeDemo.roleColors.manager')}
                   size="small"
                   sx={{
                     bgcolor: theme.palette.role.manager,
@@ -261,10 +263,10 @@ export default function ThemeDemoPage() {
                   M
                 </Avatar>
                 <Typography variant="body2" fontWeight={600}>
-                  Moderator
+                  {t('themeDemo.roleColors.moderator')}
                 </Typography>
                 <Chip
-                  label="Moderator"
+                  label={t('themeDemo.roleColors.moderator')}
                   size="small"
                   sx={{
                     bgcolor: theme.palette.role.moderator,
@@ -286,10 +288,10 @@ export default function ThemeDemoPage() {
                   <Person />
                 </Avatar>
                 <Typography variant="body2" fontWeight={600}>
-                  User
+                  {t('themeDemo.roleColors.user')}
                 </Typography>
                 <Chip
-                  label="User"
+                  label={t('themeDemo.roleColors.user')}
                   size="small"
                   sx={{
                     bgcolor: theme.palette.role.user,
@@ -311,10 +313,10 @@ export default function ThemeDemoPage() {
                   G
                 </Avatar>
                 <Typography variant="body2" fontWeight={600}>
-                  Guest
+                  {t('themeDemo.roleColors.guest')}
                 </Typography>
                 <Chip
-                  label="Guest"
+                  label={t('themeDemo.roleColors.guest')}
                   size="small"
                   sx={{
                     bgcolor: theme.palette.role.guest,
@@ -331,56 +333,56 @@ export default function ThemeDemoPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom fontWeight={600}>
-            4. Component Overrides (Auto-Applied)
+            {t('themeDemo.componentOverrides.title')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
           <Stack spacing={3}>
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                Buttons (borderRadius: 8, no elevation, textTransform: none)
+                {t('themeDemo.componentOverrides.buttons')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                <Button variant="contained">Contained Button</Button>
-                <Button variant="outlined">Outlined Button</Button>
-                <Button variant="text">Text Button</Button>
+                <Button variant="contained">{t('themeDemo.componentOverrides.containedButton')}</Button>
+                <Button variant="outlined">{t('themeDemo.componentOverrides.outlinedButton')}</Button>
+                <Button variant="text">{t('themeDemo.componentOverrides.textButton')}</Button>
                 <Button variant="contained" color="secondary">
-                  Secondary
+                  {t('themeDemo.componentOverrides.secondary')}
                 </Button>
                 <Button variant="contained" color="error">
-                  Error
+                  {t('themeDemo.statusColors.error')}
                 </Button>
                 <Button variant="contained" color="success">
-                  Success
+                  {t('themeDemo.statusColors.success')}
                 </Button>
               </Box>
             </Box>
 
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                Text Fields (size: small, borderRadius: 8)
+                {t('themeDemo.componentOverrides.textFields')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                <TextField label="Standard Input" sx={{ minWidth: 200 }} />
-                <TextField label="With Helper" helperText="Helper text" sx={{ minWidth: 200 }} />
-                <TextField label="Error State" error helperText="Error message" sx={{ minWidth: 200 }} />
-                <TextField label="Disabled" disabled sx={{ minWidth: 200 }} />
+                <TextField label={t('themeDemo.componentOverrides.standardInput')} sx={{ minWidth: 200 }} />
+                <TextField label={t('themeDemo.componentOverrides.withHelper')} helperText={t('themeDemo.componentOverrides.helperText')} sx={{ minWidth: 200 }} />
+                <TextField label={t('themeDemo.componentOverrides.errorState')} error helperText={t('themeDemo.componentOverrides.errorMessage')} sx={{ minWidth: 200 }} />
+                <TextField label={t('themeDemo.componentOverrides.disabled')} disabled sx={{ minWidth: 200 }} />
               </Box>
             </Box>
 
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                Cards (borderRadius: 12, subtle shadow)
+                {t('themeDemo.componentOverrides.cards')}
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={4}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
-                        Card Title
+                        {t('themeDemo.componentOverrides.cardTitle')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Card content with automatic theme styling applied.
+                        {t('themeDemo.componentOverrides.cardContent')}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -389,10 +391,10 @@ export default function ThemeDemoPage() {
                   <Card elevation={3}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
-                        Elevated Card
+                        {t('themeDemo.componentOverrides.elevatedCard')}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Card with custom elevation.
+                        {t('themeDemo.componentOverrides.elevatedCardContent')}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -402,13 +404,13 @@ export default function ThemeDemoPage() {
 
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                Alerts (automatic styling)
+                {t('themeDemo.componentOverrides.alerts')}
               </Typography>
               <Stack spacing={1}>
-                <Alert severity="success">Success alert with theme colors</Alert>
-                <Alert severity="info">Info alert with theme colors</Alert>
-                <Alert severity="warning">Warning alert with theme colors</Alert>
-                <Alert severity="error">Error alert with theme colors</Alert>
+                <Alert severity="success">{t('themeDemo.componentOverrides.successAlert')}</Alert>
+                <Alert severity="info">{t('themeDemo.componentOverrides.infoAlert')}</Alert>
+                <Alert severity="warning">{t('themeDemo.componentOverrides.warningAlert')}</Alert>
+                <Alert severity="error">{t('themeDemo.componentOverrides.errorAlert')}</Alert>
               </Stack>
             </Box>
           </Stack>
@@ -419,22 +421,22 @@ export default function ThemeDemoPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom fontWeight={600}>
-            5. Spacing System (8px base unit)
+            {t('themeDemo.spacingSystem.title')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
           <Stack spacing={2}>
             <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 1 }}>
-              p: 1 = 8px padding
+              {t('themeDemo.spacingSystem.padding1')}
             </Box>
             <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 2 }}>
-              p: 2 = 16px padding
+              {t('themeDemo.spacingSystem.padding2')}
             </Box>
             <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 3 }}>
-              p: 3 = 24px padding
+              {t('themeDemo.spacingSystem.padding3')}
             </Box>
             <Box sx={{ bgcolor: 'primary.main', color: 'white', p: 4 }}>
-              p: 4 = 32px padding
+              {t('themeDemo.spacingSystem.padding4')}
             </Box>
           </Stack>
         </CardContent>
@@ -446,11 +448,11 @@ export default function ThemeDemoPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Info sx={{ mr: 1, color: 'info.main' }} />
             <Typography variant="h6" fontWeight={600}>
-              How to Use the Theme System
+              {t('themeDemo.usage.title')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" paragraph>
-            All theme features are automatically applied when using MUI components. No wrapper components needed!
+            {t('themeDemo.usage.description')}
           </Typography>
           <Paper
             elevation={0}

@@ -19,12 +19,20 @@ import { api } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { createColumns } from './constants';
-import { createFilterFields, calculateActiveFilterCount } from './utils';
+import {
+  createFilterFields,
+  calculateActiveFilterCount,
+  multiLangFieldsToFormData,
+  formDataToMultiLangFields,
+  getLocalizedValue,
+  createEmptyMultiLangFormFields,
+  SUPPORTED_LANGUAGES
+} from './utils';
 import { Code, CodeType, SearchCriteria } from './types';
 
 export default function CodesPage() {
   const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const locale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
   const gridPermissions = useDataGridPermissions('PROG-CODE-MGMT');
 
@@ -119,8 +127,9 @@ export default function CodesPage() {
       filtered = filtered.filter(
         (c) =>
           c.code.toLowerCase().includes(search) ||
-          c.name.en.toLowerCase().includes(search) ||
-          c.name.ko.toLowerCase().includes(search)
+          SUPPORTED_LANGUAGES.some((lang) =>
+            c.name[lang].toLowerCase().includes(search)
+          )
       );
     }
 
@@ -142,29 +151,25 @@ export default function CodesPage() {
     setEditingCodeType({
       id: '',
       code: '',
-      nameEn: '',
-      nameKo: '',
-      descriptionEn: '',
-      descriptionKo: '',
+      ...createEmptyMultiLangFormFields(),
       order: codeTypes.length + 1,
       status: 'active',
       category: 'common'
-    });
+    } as any);
     setCodeTypeDialogOpen(true);
   }, [codeTypes.length]);
 
   const handleEditCodeType = useCallback((codeType: CodeType) => {
+    const formFields = multiLangFieldsToFormData(codeType.name, codeType.description);
+
     setEditingCodeType({
       id: codeType.id,
       code: codeType.code,
-      nameEn: codeType.name.en,
-      nameKo: codeType.name.ko,
-      descriptionEn: codeType.description.en,
-      descriptionKo: codeType.description.ko,
+      ...formFields,
       order: codeType.order,
       status: codeType.status,
       category: codeType.category
-    });
+    } as any);
     setCodeTypeDialogOpen(true);
   }, []);
 
@@ -179,16 +184,12 @@ export default function CodesPage() {
     try {
       setCodeTypeSaveLoading(true);
 
+      const { name, description } = formDataToMultiLangFields(editingCodeType);
+
       const payload = {
         code: editingCodeType.code,
-        name: {
-          en: editingCodeType.nameEn,
-          ko: editingCodeType.nameKo
-        },
-        description: {
-          en: editingCodeType.descriptionEn,
-          ko: editingCodeType.descriptionKo
-        },
+        name,
+        description,
         order: editingCodeType.order,
         status: editingCodeType.status,
         category: editingCodeType.category
@@ -221,13 +222,13 @@ export default function CodesPage() {
 
       if (deletedCodesCount > 0) {
         showSuccess(
-          currentLocale === 'ko'
+          locale === 'ko'
             ? `코드 타입과 관련된 ${deletedCodesCount}개의 코드가 삭제되었습니다`
             : `Code type and ${deletedCodesCount} related code(s) deleted successfully`
         );
       } else {
         showSuccess(
-          currentLocale === 'ko' ? '코드 타입이 삭제되었습니다' : 'Code type deleted successfully'
+          locale === 'ko' ? '코드 타입이 삭제되었습니다' : 'Code type deleted successfully'
         );
       }
 
@@ -245,7 +246,7 @@ export default function CodesPage() {
     } catch (err: any) {
       showError(err.response?.data?.error || 'Failed to delete code type');
     }
-  }, [codeTypeToDelete, selectedCodeType, fetchCodeTypes, showSuccess, showError, currentLocale]);
+  }, [codeTypeToDelete, selectedCodeType, fetchCodeTypes, showSuccess, showError, locale]);
 
   // Code handlers
   const handleAddCode = useCallback(() => {
@@ -258,34 +259,30 @@ export default function CodesPage() {
       id: '',
       codeType: selectedCodeType.code,
       code: '',
-      nameEn: '',
-      nameKo: '',
-      descriptionEn: '',
-      descriptionKo: '',
+      ...createEmptyMultiLangFormFields(),
       order: codes.length + 1,
       status: 'active',
       parentCode: '',
       attributes: '{}'
-    });
+    } as any);
     setCodeDialogOpen(true);
   }, [selectedCodeType, codes.length, showError]);
 
   const handleEditCode = useCallback((id: string | number) => {
     const code = codes.find((c) => c.id === id);
     if (code) {
+      const formFields = multiLangFieldsToFormData(code.name, code.description);
+
       setEditingCode({
         id: code.id,
         codeType: code.codeType,
         code: code.code,
-        nameEn: code.name.en,
-        nameKo: code.name.ko,
-        descriptionEn: code.description.en,
-        descriptionKo: code.description.ko,
+        ...formFields,
         order: code.order,
         status: code.status,
         parentCode: code.parentCode || '',
         attributes: JSON.stringify(code.attributes || {}, null, 2)
-      });
+      } as any);
       setCodeDialogOpen(true);
     }
   }, [codes]);
@@ -304,17 +301,13 @@ export default function CodesPage() {
         return;
       }
 
+      const { name, description } = formDataToMultiLangFields(editingCode);
+
       const payload = {
         codeType: editingCode.codeType,
         code: editingCode.code,
-        name: {
-          en: editingCode.nameEn,
-          ko: editingCode.nameKo
-        },
-        description: {
-          en: editingCode.descriptionEn,
-          ko: editingCode.descriptionKo
-        },
+        name,
+        description,
         order: editingCode.order,
         status: editingCode.status,
         parentCode: editingCode.parentCode || null,
@@ -367,8 +360,8 @@ export default function CodesPage() {
   );
 
   const filterFields = useMemo(
-    () => createFilterFields(t),
-    [t]
+    () => createFilterFields(t, locale),
+    [t, locale]
   );
 
   const activeFilterCount = useMemo(
@@ -383,11 +376,11 @@ export default function CodesPage() {
         return code
           ? {
               id: code.id,
-              displayName: `${code.code} (${currentLocale === 'ko' ? code.name.ko : code.name.en})`
+              displayName: `${code.code} (${getLocalizedValue(code.name, locale)})`
             }
           : { id, displayName: String(id) };
       }),
-    [selectedCodesForDelete, codes, currentLocale]
+    [selectedCodesForDelete, codes, locale]
   );
 
   return (
@@ -403,7 +396,7 @@ export default function CodesPage() {
       onHelpOpenChange={setHelpOpen}
       isAdmin={true}
       helpExists={true}
-      language={currentLocale}
+      language={locale}
     >
       <MasterDetailLayout
         masterSize={30}
@@ -416,7 +409,7 @@ export default function CodesPage() {
             onAddCodeType={handleAddCodeType}
             onEditCodeType={handleEditCodeType}
             onDeleteCodeType={handleDeleteCodeType}
-            locale={currentLocale}
+            locale={locale}
           />
         }
         detail={
@@ -424,9 +417,9 @@ export default function CodesPage() {
               {!selectedCodeType ? (
                 <EmptyState
                   icon={Search}
-                  title={currentLocale === 'ko' ? '코드 타입을 선택하세요' : 'Select a Code Type'}
+                  title={locale === 'ko' ? '코드 타입을 선택하세요' : 'Select a Code Type'}
                   description={
-                    currentLocale === 'ko'
+                    locale === 'ko'
                       ? '왼쪽 목록에서 코드 타입을 선택하여 코드를 관리하세요'
                       : 'Select a code type from the list to manage codes'
                   }
@@ -436,9 +429,9 @@ export default function CodesPage() {
                   {/* Header with Title */}
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="h6">
-                      {currentLocale === 'ko'
-                        ? `${selectedCodeType.name.ko} 코드`
-                        : `${selectedCodeType.name.en} Codes`}
+                      {locale === 'ko'
+                        ? `${getLocalizedValue(selectedCodeType.name, locale)} 코드`
+                        : `${getLocalizedValue(selectedCodeType.name, locale)} Codes`}
                     </Typography>
                   </Box>
 
@@ -452,7 +445,7 @@ export default function CodesPage() {
                       setSearchCriteria({ codeType: '', code: '', status: '' });
                     }}
                     onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-                    placeholder={currentLocale === 'ko' ? '코드 검색...' : 'Search codes...'}
+                    placeholder={locale === 'ko' ? '코드 검색...' : 'Search codes...'}
                     searching={loading}
                     activeFilterCount={activeFilterCount}
                     showAdvancedButton={true}
@@ -470,7 +463,7 @@ export default function CodesPage() {
                     >
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                         <Typography variant="subtitle2" fontWeight="bold">
-                          {currentLocale === 'ko' ? '상세 필터' : 'Advanced Filter'}
+                          {locale === 'ko' ? '상세 필터' : 'Advanced Filter'}
                         </Typography>
                         <IconButton size="small" onClick={() => setAdvancedFilterOpen(false)}>
                           <Close fontSize="small" />
@@ -484,7 +477,7 @@ export default function CodesPage() {
                       />
                       <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
                         {/* Close Button */}
-                        <Tooltip title={currentLocale === 'ko' ? '닫기' : 'Close'} arrow>
+                        <Tooltip title={locale === 'ko' ? '닫기' : 'Close'} arrow>
                           <IconButton
                             onClick={() => setAdvancedFilterOpen(false)}
                             size="small"
@@ -502,7 +495,7 @@ export default function CodesPage() {
                         </Tooltip>
 
                         {/* Clear Button */}
-                        <Tooltip title={currentLocale === 'ko' ? '초기화' : 'Clear'} arrow>
+                        <Tooltip title={locale === 'ko' ? '초기화' : 'Clear'} arrow>
                           <span>
                             <IconButton
                               onClick={() => {
@@ -526,7 +519,7 @@ export default function CodesPage() {
                         </Tooltip>
 
                         {/* Apply Button */}
-                        <Tooltip title={currentLocale === 'ko' ? '적용' : 'Apply'} arrow>
+                        <Tooltip title={locale === 'ko' ? '적용' : 'Apply'} arrow>
                           <IconButton
                             onClick={() => setAdvancedFilterOpen(false)}
                             size="small"
@@ -581,19 +574,23 @@ export default function CodesPage() {
         title={!editingCodeType?.id ? 'Add New Code Type' : 'Edit Code Type'}
         onSave={handleSaveCodeType}
         saveLoading={codeTypeSaveLoading}
-        saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
-        cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
+        saveLabel={locale === 'ko' ? '저장' : 'Save'}
+        cancelLabel={locale === 'ko' ? '취소' : 'Cancel'}
       >
         <CodeTypeFormFields
           codeType={editingCodeType}
           onChange={setEditingCodeType}
-          locale={currentLocale}
+          locale={locale}
           labels={{
             code: t('fields.code'),
             nameEn: t('fields.nameEn'),
             nameKo: t('fields.nameKo'),
+            nameZh: t('fields.nameZh'),
+            nameVi: t('fields.nameVi'),
             descriptionEn: t('fields.descriptionEn'),
             descriptionKo: t('fields.descriptionKo'),
+            descriptionZh: t('fields.descriptionZh'),
+            descriptionVi: t('fields.descriptionVi'),
             order: t('fields.order'),
             status: t('fields.status'),
             category: t('fields.category')
@@ -611,21 +608,25 @@ export default function CodesPage() {
         title={!editingCode?.id ? 'Add New Code' : 'Edit Code'}
         onSave={handleSaveCode}
         saveLoading={codeSaveLoading}
-        saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
-        cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
+        saveLabel={locale === 'ko' ? '저장' : 'Save'}
+        cancelLabel={locale === 'ko' ? '취소' : 'Cancel'}
       >
         <CodeFormFields
           code={editingCode}
           onChange={setEditingCode}
           onError={showError}
-          locale={currentLocale}
+          locale={locale}
           labels={{
             codeType: t('fields.codeType'),
             code: t('fields.code'),
             nameEn: t('fields.nameEn'),
             nameKo: t('fields.nameKo'),
+            nameZh: t('fields.nameZh'),
+            nameVi: t('fields.nameVi'),
             descriptionEn: t('fields.descriptionEn'),
             descriptionKo: t('fields.descriptionKo'),
+            descriptionZh: t('fields.descriptionZh'),
+            descriptionVi: t('fields.descriptionVi'),
             order: t('fields.order'),
             status: t('fields.status'),
             parentCode: t('fields.parentCode'),
@@ -638,21 +639,19 @@ export default function CodesPage() {
       <DeleteConfirmDialog
         open={codeTypeDeleteConfirmOpen}
         itemCount={1}
-        itemName={currentLocale === 'ko' ? '코드 타입' : 'code type'}
+        itemName={locale === 'ko' ? '코드 타입' : 'code type'}
         itemsList={
           codeTypeToDelete
             ? [
                 {
                   id: codeTypeToDelete.id,
-                  displayName: `${codeTypeToDelete.code} (${
-                    currentLocale === 'ko' ? codeTypeToDelete.name.ko : codeTypeToDelete.name.en
-                  })`
+                  displayName: `${codeTypeToDelete.code} (${getLocalizedValue(codeTypeToDelete.name, locale)})`
                 }
               ]
             : []
         }
         warningMessage={
-          currentLocale === 'ko'
+          locale === 'ko'
             ? '⚠️ 이 코드 타입을 삭제하면 연관된 모든 코드도 함께 삭제됩니다.'
             : '⚠️ Deleting this code type will also delete all related codes.'
         }
