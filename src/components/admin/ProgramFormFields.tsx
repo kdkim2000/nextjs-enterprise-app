@@ -3,10 +3,6 @@
 import React, { useState } from 'react';
 import {
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Divider,
   Box,
   Typography,
@@ -18,7 +14,7 @@ import {
   Drawer
 } from '@mui/material';
 import { Add, Edit, Delete, Close } from '@mui/icons-material';
-import { PROGRAM_CATEGORIES, PROGRAM_TYPES, PROGRAM_STATUS } from '@/app/[locale]/admin/programs/constants';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface ProgramPermission {
   code: string;
@@ -211,52 +207,34 @@ export default function ProgramFormFields({
       <Divider>Properties</Divider>
 
       {/* Category */}
-      <FormControl fullWidth required>
-        <InputLabel>Category</InputLabel>
-        <Select
-          value={program.category || 'admin'}
-          label="Category"
-          onChange={(e) => handleChange('category', e.target.value)}
-        >
-          {PROGRAM_CATEGORIES.map(category => (
-            <MenuItem key={category} value={category}>
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="PROGRAM_CATEGORY"
+        value={program.category || 'admin'}
+        onChange={(value) => handleChange('category', value)}
+        label="Category"
+        required
+        locale={locale}
+      />
 
       {/* Type */}
-      <FormControl fullWidth required>
-        <InputLabel>Type</InputLabel>
-        <Select
-          value={program.type || 'page'}
-          label="Type"
-          onChange={(e) => handleChange('type', e.target.value as 'page' | 'function' | 'api' | 'report')}
-        >
-          {PROGRAM_TYPES.map(type => (
-            <MenuItem key={type} value={type}>
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="PROGRAM_TYPE"
+        value={program.type || 'page'}
+        onChange={(value) => handleChange('type', value as 'page' | 'function' | 'api' | 'report')}
+        label="Type"
+        required
+        locale={locale}
+      />
 
       {/* Status */}
-      <FormControl fullWidth required>
-        <InputLabel>Status</InputLabel>
-        <Select
-          value={program.status || 'development'}
-          label="Status"
-          onChange={(e) => handleChange('status', e.target.value as 'active' | 'inactive' | 'development')}
-        >
-          {PROGRAM_STATUS.map(status => (
-            <MenuItem key={status} value={status}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="PROGRAM_STATUS"
+        value={program.status || 'development'}
+        onChange={(value) => handleChange('status', value as 'active' | 'inactive' | 'development')}
+        label="Status"
+        required
+        locale={locale}
+      />
 
       <Divider>Metadata</Divider>
 

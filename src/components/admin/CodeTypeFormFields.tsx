@@ -2,12 +2,9 @@
 
 import React from 'react';
 import {
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  TextField
 } from '@mui/material';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface CodeTypeFormData {
   id?: string;
@@ -44,14 +41,6 @@ export interface CodeTypeFormFieldsProps {
     category?: string;
   };
 }
-
-const CATEGORIES = [
-  { value: 'user', labelEn: 'User', labelKo: '사용자' },
-  { value: 'organization', labelEn: 'Organization', labelKo: '조직' },
-  { value: 'system', labelEn: 'System', labelKo: '시스템' },
-  { value: 'workflow', labelEn: 'Workflow', labelKo: '워크플로우' },
-  { value: 'common', labelEn: 'Common', labelKo: '공통' }
-];
 
 export default function CodeTypeFormFields({
   codeType,
@@ -164,20 +153,14 @@ export default function CodeTypeFormFields({
       />
 
       {/* Category */}
-      <FormControl fullWidth required>
-        <InputLabel>{labels.category || 'Category'}</InputLabel>
-        <Select
-          value={codeType.category || 'common'}
-          label={labels.category || 'Category'}
-          onChange={(e) => handleChange('category', e.target.value)}
-        >
-          {CATEGORIES.map((cat) => (
-            <MenuItem key={cat.value} value={cat.value}>
-              {locale === 'ko' ? cat.labelKo : cat.labelEn}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="CODE_TYPE_CATEGORY"
+        value={codeType.category || 'common'}
+        onChange={(value) => handleChange('category', value)}
+        label={labels.category || 'Category'}
+        required
+        locale={locale}
+      />
 
       {/* Order */}
       <TextField
@@ -192,17 +175,14 @@ export default function CodeTypeFormFields({
       />
 
       {/* Status */}
-      <FormControl fullWidth>
-        <InputLabel>{labels.status || 'Status'}</InputLabel>
-        <Select
-          value={codeType.status || 'active'}
-          label={labels.status || 'Status'}
-          onChange={(e) => handleChange('status', e.target.value as 'active' | 'inactive')}
-        >
-          <MenuItem value="active">{locale === 'ko' ? '활성' : 'Active'}</MenuItem>
-          <MenuItem value="inactive">{locale === 'ko' ? '비활성' : 'Inactive'}</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="COMMON_STATUS"
+        value={codeType.status || 'active'}
+        onChange={(value) => handleChange('status', value as 'active' | 'inactive')}
+        label={labels.status || 'Status'}
+        required
+        locale={locale}
+      />
     </>
   );
 }

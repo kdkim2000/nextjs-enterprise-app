@@ -8,6 +8,7 @@ import {
   Select,
   MenuItem
 } from '@mui/material';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface DepartmentFormData {
   id?: string;
@@ -202,17 +203,13 @@ export default function DepartmentFormFields({
       </FormControl>
 
       {/* Status */}
-      <FormControl fullWidth>
-        <InputLabel>{labels.status || 'Status'}</InputLabel>
-        <Select
-          value={department.status || 'active'}
-          label={labels.status || 'Status'}
-          onChange={(e) => handleChange('status', e.target.value as 'active' | 'inactive')}
-        >
-          <MenuItem value="active">Active</MenuItem>
-          <MenuItem value="inactive">Inactive</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="COMMON_STATUS"
+        value={department.status || 'active'}
+        onChange={(value) => handleChange('status', value as 'active' | 'inactive')}
+        label={labels.status || 'Status'}
+        required
+      />
 
       {/* Email */}
       <TextField

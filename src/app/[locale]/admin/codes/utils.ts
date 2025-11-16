@@ -1,7 +1,7 @@
 import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
-import { STATUS_OPTIONS } from './constants';
 import { SearchCriteria } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { CodeOption } from '@/hooks/useCodeOptions';
 
 // Re-export common multi-language utilities for convenience
 export {
@@ -23,7 +23,8 @@ export {
 
 export const createFilterFields = (
   t: any,
-  locale: string
+  locale: string,
+  statusOptions: CodeOption[] = []
 ): FilterFieldConfig[] => {
   return [
     {
@@ -44,9 +45,9 @@ export const createFilterFields = (
       type: 'select',
       options: [
         { value: '', label: t('common.all') },
-        ...STATUS_OPTIONS.map(opt => ({
+        ...statusOptions.map(opt => ({
           value: opt.value,
-          label: getLocalizedValue({ en: opt.labelEn, ko: opt.labelKo, zh: opt.labelEn, vi: opt.labelEn }, locale)
+          label: opt.label
         }))
       ]
     }

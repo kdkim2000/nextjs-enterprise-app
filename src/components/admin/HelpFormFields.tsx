@@ -3,10 +3,6 @@
 import React from 'react';
 import {
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Typography,
   Box,
   Button,
@@ -22,6 +18,7 @@ import {
 } from '@mui/icons-material';
 import dynamic from 'next/dynamic';
 import { HelpContent, HelpSection, HelpFAQ } from '@/app/[locale]/admin/help/types';
+import CodeSelect from '@/components/common/CodeSelect';
 
 // Dynamically import RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(() => import('@/components/common/RichTextEditor'), {
@@ -117,30 +114,22 @@ export default function HelpFormFields({
       />
 
       {/* Language */}
-      <FormControl fullWidth size="small">
-        <InputLabel>Language</InputLabel>
-        <Select
-          value={help.language || 'en'}
-          label="Language"
-          onChange={(e) => handleChange('language', e.target.value)}
-        >
-          <MenuItem value="en">English</MenuItem>
-          <MenuItem value="ko">한국어</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="LANGUAGE"
+        value={help.language || 'en'}
+        onChange={(value) => handleChange('language', value)}
+        label="Language"
+        size="small"
+      />
 
       {/* Status */}
-      <FormControl fullWidth size="small">
-        <InputLabel>Status</InputLabel>
-        <Select
-          value={help.status || 'draft'}
-          label="Status"
-          onChange={(e) => handleChange('status', e.target.value)}
-        >
-          <MenuItem value="draft">Draft</MenuItem>
-          <MenuItem value="published">Published</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="HELP_STATUS"
+        value={help.status || 'draft'}
+        onChange={(value) => handleChange('status', value)}
+        label="Status"
+        size="small"
+      />
 
       {/* Main Content */}
       <Box>

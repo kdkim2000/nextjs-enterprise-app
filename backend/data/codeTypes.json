@@ -250,5 +250,152 @@
     "category": "system",
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-013",
+    "code": "COMMON_STATUS",
+    "name": {
+      "en": "Common Status",
+      "ko": "공통 상태",
+      "zh": "通用状态",
+      "vi": "Trạng thái chung"
+    },
+    "description": {
+      "en": "Common status codes used across the system",
+      "ko": "시스템 전체에서 사용되는 공통 상태 코드",
+      "zh": "系统中使用的通用状态代码",
+      "vi": "Mã trạng thái chung được sử dụng trong hệ thống"
+    },
+    "order": 13,
+    "status": "active",
+    "category": "common",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-014",
+    "code": "MESSAGE_CATEGORY",
+    "name": {
+      "en": "Message Category",
+      "ko": "메시지 카테고리",
+      "zh": "消息类别",
+      "vi": "Danh mục tin nhắn"
+    },
+    "description": {
+      "en": "Message category classifications",
+      "ko": "메시지 카테고리 분류",
+      "zh": "消息类别分类",
+      "vi": "Phân loại danh mục tin nhắn"
+    },
+    "order": 14,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-015",
+    "code": "MESSAGE_TYPE",
+    "name": {
+      "en": "Message Type",
+      "ko": "메시지 유형",
+      "zh": "消息类型",
+      "vi": "Loại tin nhắn"
+    },
+    "description": {
+      "en": "Message type classifications (success, error, warning, info)",
+      "ko": "메시지 유형 분류 (성공, 오류, 경고, 정보)",
+      "zh": "消息类型分类（成功、错误、警告、信息）",
+      "vi": "Phân loại loại tin nhắn (thành công, lỗi, cảnh báo, thông tin)"
+    },
+    "order": 15,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-016",
+    "code": "CODE_TYPE_CATEGORY",
+    "name": {
+      "en": "Code Type Category",
+      "ko": "코드 타입 카테고리",
+      "zh": "代码类型类别",
+      "vi": "Danh mục loại mã"
+    },
+    "description": {
+      "en": "Category classifications for code types",
+      "ko": "코드 타입의 카테고리 분류",
+      "zh": "代码类型的类别分类",
+      "vi": "Phân loại danh mục cho các loại mã"
+    },
+    "order": 16,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-017",
+    "code": "DEPARTMENT",
+    "name": {
+      "en": "Department",
+      "ko": "부서",
+      "zh": "部门",
+      "vi": "Phòng ban"
+    },
+    "description": {
+      "en": "Organization department codes",
+      "ko": "조직 부서 코드",
+      "zh": "组织部门代码",
+      "vi": "Mã phòng ban tổ chức"
+    },
+    "order": 17,
+    "status": "active",
+    "category": "organization",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-018",
+    "code": "ICON_TYPE",
+    "name": {
+      "en": "Icon Type",
+      "ko": "아이콘 타입",
+      "zh": "图标类型",
+      "vi": "Loại biểu tượng"
+    },
+    "description": {
+      "en": "Material-UI icon types for menus and UI elements",
+      "ko": "메뉴 및 UI 요소를 위한 Material-UI 아이콘 타입",
+      "zh": "用于菜单和UI元素的Material-UI图标类型",
+      "vi": "Các loại biểu tượng Material-UI cho menu và các thành phần UI"
+    },
+    "order": 18,
+    "status": "active",
+    "category": "system",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "codetype-019",
+    "code": "ROLE_CATEGORY",
+    "name": {
+      "en": "Role Category",
+      "ko": "역할 카테고리",
+      "zh": "角色类别",
+      "vi": "Danh mục vai trò"
+    },
+    "description": {
+      "en": "Role category classifications",
+      "ko": "역할 카테고리 분류",
+      "zh": "角色类别分类",
+      "vi": "Phân loại danh mục vai trò"
+    },
+    "order": 19,
+    "status": "active",
+    "category": "security",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
   }
 ]
