@@ -69,8 +69,8 @@ export default function HelpManagementPage() {
   } = useHelpManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(t, handleEdit, gridPermissions.editable), [t, handleEdit, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(t), [t]);
+  const columns = useMemo(() => createColumns(t, currentLocale, handleEdit, gridPermissions.editable), [t, currentLocale, handleEdit, gridPermissions.editable]);
+  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]

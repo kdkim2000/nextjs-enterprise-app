@@ -18,14 +18,16 @@ import {
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
 import RouteGuard from '@/components/auth/RouteGuard';
+import { useI18n } from '@/lib/i18n/client';
 
 export default function DashboardPage() {
+  const t = useI18n();
 
   const stats = [
-    { title: 'Total Users', value: '1,234', icon: <People />, color: '#1976d2' },
-    { title: 'Reports', value: '89', icon: <Assessment />, color: '#2e7d32' },
-    { title: 'Growth', value: '+12%', icon: <TrendingUp />, color: '#ed6c02' },
-    { title: 'Documents', value: '456', icon: <Description />, color: '#9c27b0' }
+    { title: t('dashboard.totalUsers'), value: '1,234', icon: <People />, color: '#1976d2' },
+    { title: t('dashboard.reports'), value: '89', icon: <Assessment />, color: '#2e7d32' },
+    { title: t('dashboard.growth'), value: '+12%', icon: <TrendingUp />, color: '#ed6c02' },
+    { title: t('dashboard.documents'), value: '456', icon: <Description />, color: '#9c27b0' }
   ];
 
   return (
@@ -77,10 +79,10 @@ export default function DashboardPage() {
           <Grid item xs={12} md={8}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom fontWeight={600}>
-                Recent Activity
+                {t('dashboard.recentActivity')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                No recent activity to display
+                {t('dashboard.noRecentActivity')}
               </Typography>
             </Paper>
           </Grid>
@@ -88,10 +90,10 @@ export default function DashboardPage() {
           <Grid item xs={12} md={4}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom fontWeight={600}>
-                Quick Actions
+                {t('dashboard.quickActions')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Select a menu item from the sidebar to get started
+                {t('dashboard.selectMenuItem')}
               </Typography>
             </Paper>
           </Grid>

@@ -4,6 +4,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { IconButton } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { MenuItem as MenuItemType } from '@/types/menu';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const AVAILABLE_ICONS = [
   'Dashboard', 'People', 'Assessment', 'Settings', 'List',
@@ -27,7 +28,7 @@ export const createColumns = (
       headerName: t('menuManagement.menuName'),
       width: 180,
       valueGetter: (_value, row) => {
-        return locale === 'ko' ? row.nameKo : row.nameEn;
+        return getLocalizedValue(row.name, locale);
       }
     },
     { field: 'path', headerName: t('menuManagement.path'), width: 220, flex: 1 },
@@ -41,7 +42,7 @@ export const createColumns = (
       valueGetter: (_value, row) => {
         if (!row.parentId) return t('menuManagement.rootMenu');
         const parent = allMenus.find(m => m.id === row.parentId);
-        return parent ? (locale === 'ko' ? parent.name.ko : parent.name.en) : '-';
+        return parent ? getLocalizedValue(parent.name, locale) : '-';
       }
     },
     { field: 'programId', headerName: t('menuManagement.programId'), width: 140 }

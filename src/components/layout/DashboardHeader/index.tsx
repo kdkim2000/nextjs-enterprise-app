@@ -26,7 +26,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale, useI18n } from '@/lib/i18n/client';
+import { SUPPORTED_LANGUAGES, type LanguageCode } from '@/lib/i18n/languages';
 import { getAvatarUrl } from '@/lib/config';
+import { api } from '@/lib/axios';
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -70,19 +72,23 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     router.push(`/${locale}/login`);
   };
 
-  const handleLanguageChange = (newLocale: string) => {
+  const handleLanguageChange = async (newLocale: string) => {
     handleUserMenuClose();
-    changeLocale(newLocale as 'en' | 'ko');
-  };
 
-  // Available languages - easily expandable
-  const availableLanguages = [
-    { code: 'en', label: 'English', nativeLabel: 'English' },
-    { code: 'ko', label: 'Korean', nativeLabel: '한국어' }
-    // Add more languages here as needed:
-    // { code: 'ja', label: 'Japanese', nativeLabel: '日本語' },
-    // { code: 'zh', label: 'Chinese', nativeLabel: '中文' },
-  ];
+    // Change locale immediately for better UX
+    changeLocale(newLocale as LanguageCode);
+
+    // Save to backend asynchronously
+    try {
+      await api.put('/user/preferences', {
+        language: newLocale
+      });
+      console.log(`[DashboardHeader] Language preference saved: ${newLocale}`);
+    } catch (error) {
+      console.error('[DashboardHeader] Failed to save language preference:', error);
+      // Don't show error to user - language is already changed locally
+    }
+  };
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -204,7 +210,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             </Typography>
           </Box>
 
-          {availableLanguages.map((lang) => (
+          {SUPPORTED_LANGUAGES.map((lang) => (
             <MenuItem
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
@@ -223,12 +229,14 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 {locale === lang.code ? (
                   <Check fontSize="small" color="primary" />
                 ) : (
-                  <Language fontSize="small" sx={{ visibility: 'hidden' }} />
+                  <Box component="span" sx={{ fontSize: '1.2rem', width: 24, textAlign: 'center' }}>
+                    {lang.flag}
+                  </Box>
                 )}
               </ListItemIcon>
               <ListItemText
-                primary={lang.nativeLabel}
-                secondary={lang.label !== lang.nativeLabel ? lang.label : undefined}
+                primary={lang.nativeName}
+                secondary={lang.name !== lang.nativeName ? lang.name : undefined}
                 primaryTypographyProps={{ fontWeight: locale === lang.code ? 600 : 400 }}
               />
             </MenuItem>

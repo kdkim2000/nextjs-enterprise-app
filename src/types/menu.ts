@@ -4,6 +4,8 @@ export interface MenuItem {
   name: {
     en: string;
     ko: string;
+    zh: string;
+    vi: string;
   };
   path: string;
   icon: string;
@@ -14,6 +16,8 @@ export interface MenuItem {
   description: {
     en: string;
     ko: string;
+    zh: string;
+    vi: string;
   };
   children?: MenuItem[];
 }
@@ -30,7 +34,7 @@ export interface UserPreferences {
   userId: string;
   favoriteMenus: string[];
   recentMenus: string[];
-  language: 'en' | 'ko';
+  language: 'en' | 'ko' | 'zh' | 'vi';
   theme: 'light' | 'dark';
   updatedAt?: string;
 }

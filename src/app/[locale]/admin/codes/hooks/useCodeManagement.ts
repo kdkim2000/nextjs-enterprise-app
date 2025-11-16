@@ -4,6 +4,11 @@ import { usePageState } from '@/hooks/usePageState';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { Code, SearchCriteria } from '../types';
 import { CodeFormData } from '@/components/admin/CodeFormFields';
+import {
+  multiLangFieldsToFormData,
+  formDataToMultiLangFields,
+  createEmptyMultiLangFormFields
+} from '../utils';
 
 interface UseCodeManagementOptions {
   storageKey?: string;
@@ -132,34 +137,30 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       id: '',
       codeType: '',
       code: '',
-      nameEn: '',
-      nameKo: '',
-      descriptionEn: '',
-      descriptionKo: '',
+      ...createEmptyMultiLangFormFields(),
       order: 1,
       status: 'active',
       parentCode: '',
       attributes: '{}'
-    });
+    } as any);
     setDialogOpen(true);
   }, []);
 
   const handleEdit = useCallback((id: string | number) => {
     const code = codes.find((c) => c.id === id);
     if (code) {
+      const formFields = multiLangFieldsToFormData(code.name, code.description);
+
       setEditingCode({
         id: code.id,
         codeType: code.codeType,
         code: code.code,
-        nameEn: code.name?.en || '',
-        nameKo: code.name?.ko || '',
-        descriptionEn: code.description?.en || '',
-        descriptionKo: code.description?.ko || '',
+        ...formFields,
         order: code.order,
         status: code.status,
         parentCode: code.parentCode || '',
         attributes: JSON.stringify(code.attributes || {}, null, 2)
-      });
+      } as any);
       setDialogOpen(true);
     }
   }, [codes]);
@@ -179,17 +180,13 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
         return;
       }
 
+      const { name, description } = formDataToMultiLangFields(editingCode);
+
       const payload = {
         codeType: editingCode.codeType,
         code: editingCode.code,
-        name: {
-          en: editingCode.nameEn,
-          ko: editingCode.nameKo
-        },
-        description: {
-          en: editingCode.descriptionEn,
-          ko: editingCode.descriptionKo
-        },
+        name,
+        description,
         order: editingCode.order,
         status: editingCode.status,
         parentCode: editingCode.parentCode || null,

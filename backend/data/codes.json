@@ -5,11 +5,15 @@
     "code": "ACTIVE",
     "name": {
       "en": "Active",
-      "ko": "활성"
+      "ko": "활성",
+      "zh": "活跃",
+      "vi": "Hoạt động"
     },
     "description": {
       "en": "User account is active",
-      "ko": "사용자 계정이 활성화됨"
+      "ko": "사용자 계정이 활성화됨",
+      "zh": "用户账户处于活跃状态",
+      "vi": "Tài khoản người dùng đang hoạt động"
     },
     "order": 1,
     "status": "active",
@@ -24,11 +28,15 @@
     "code": "INACTIVE",
     "name": {
       "en": "Inactive",
-      "ko": "비활성"
+      "ko": "비활성",
+      "zh": "不活跃",
+      "vi": "Không hoạt động"
     },
     "description": {
       "en": "User account is inactive",
-      "ko": "사용자 계정이 비활성화됨"
+      "ko": "사용자 계정이 비활성화됨",
+      "zh": "用户账户处于不活跃状态",
+      "vi": "Tài khoản người dùng không hoạt động"
     },
     "order": 2,
     "status": "active",
@@ -43,11 +51,15 @@
     "code": "SUSPENDED",
     "name": {
       "en": "Suspended",
-      "ko": "정지"
+      "ko": "정지",
+      "zh": "暂停",
+      "vi": "Tạm ngưng"
     },
     "description": {
       "en": "User account is suspended",
-      "ko": "사용자 계정이 정지됨"
+      "ko": "사용자 계정이 정지됨",
+      "zh": "用户账户已暂停",
+      "vi": "Tài khoản người dùng bị tạm ngưng"
     },
     "order": 3,
     "status": "active",
@@ -62,11 +74,15 @@
     "code": "ACTIVE",
     "name": {
       "en": "Active",
-      "ko": "활성"
+      "ko": "활성",
+      "zh": "活跃",
+      "vi": "Hoạt động"
     },
     "description": {
       "en": "Department is active",
-      "ko": "부서가 활성화됨"
+      "ko": "부서가 활성화됨",
+      "zh": "部门处于活跃状态",
+      "vi": "Phòng ban đang hoạt động"
     },
     "order": 1,
     "status": "active",
@@ -81,11 +97,15 @@
     "code": "INACTIVE",
     "name": {
       "en": "Inactive",
-      "ko": "비활성"
+      "ko": "비활성",
+      "zh": "不活跃",
+      "vi": "Không hoạt động"
     },
     "description": {
       "en": "Department is inactive",
-      "ko": "부서가 비활성화됨"
+      "ko": "부서가 비활성화됨",
+      "zh": "部门处于不活跃状态",
+      "vi": "Phòng ban không hoạt động"
     },
     "order": 2,
     "status": "active",
@@ -100,11 +120,15 @@
     "code": "ADMIN",
     "name": {
       "en": "Administrator",
-      "ko": "관리자"
+      "ko": "관리자",
+      "zh": "管理员",
+      "vi": "Quản trị viên"
     },
     "description": {
       "en": "System administrator role",
-      "ko": "시스템 관리자 역할"
+      "ko": "시스템 관리자 역할",
+      "zh": "系统管理员角色",
+      "vi": "Vai trò quản trị viên hệ thống"
     },
     "order": 1,
     "status": "active",
@@ -122,11 +146,15 @@
     "code": "MANAGER",
     "name": {
       "en": "Manager",
-      "ko": "매니저"
+      "ko": "매니저",
+      "zh": "经理",
+      "vi": "Quản lý"
     },
     "description": {
       "en": "Manager role",
-      "ko": "매니저 역할"
+      "ko": "매니저 역할",
+      "zh": "经理角色",
+      "vi": "Vai trò quản lý"
     },
     "order": 2,
     "status": "active",
@@ -144,11 +172,15 @@
     "code": "USER",
     "name": {
       "en": "User",
-      "ko": "사용자"
+      "ko": "사용자",
+      "zh": "用户",
+      "vi": "Người dùng"
     },
     "description": {
       "en": "Regular user role",
-      "ko": "일반 사용자 역할"
+      "ko": "일반 사용자 역할",
+      "zh": "普通用户角色",
+      "vi": "Vai trò người dùng thông thường"
     },
     "order": 3,
     "status": "active",
@@ -166,11 +198,15 @@
     "code": "ADMIN",
     "name": {
       "en": "Administration",
-      "ko": "관리"
+      "ko": "관리",
+      "zh": "管理",
+      "vi": "Quản trị"
     },
     "description": {
       "en": "Administration menus",
-      "ko": "관리 메뉴"
+      "ko": "관리 메뉴",
+      "zh": "管理菜单",
+      "vi": "Menu quản trị"
     },
     "order": 1,
     "status": "active",
@@ -187,11 +223,15 @@
     "code": "SYSTEM",
     "name": {
       "en": "System",
-      "ko": "시스템"
+      "ko": "시스템",
+      "zh": "系统",
+      "vi": "Hệ thống"
     },
     "description": {
       "en": "System menus",
-      "ko": "시스템 메뉴"
+      "ko": "시스템 메뉴",
+      "zh": "系统菜单",
+      "vi": "Menu hệ thống"
     },
     "order": 2,
     "status": "active",
@@ -208,11 +248,15 @@
     "code": "ACTIVE",
     "name": {
       "en": "Active",
-      "ko": "활성"
+      "ko": "활성",
+      "zh": "活跃",
+      "vi": "Hoạt động"
     },
     "description": {
       "en": "Program is active and available",
-      "ko": "프로그램이 활성화되어 사용 가능함"
+      "ko": "프로그램이 활성화되어 사용 가능함",
+      "zh": "程序处于活跃状态并可用",
+      "vi": "Chương trình đang hoạt động và khả dụng"
     },
     "order": 1,
     "status": "active",
@@ -229,11 +273,15 @@
     "code": "INACTIVE",
     "name": {
       "en": "Inactive",
-      "ko": "비활성"
+      "ko": "비활성",
+      "zh": "不活跃",
+      "vi": "Không hoạt động"
     },
     "description": {
       "en": "Program is inactive and not available",
-      "ko": "프로그램이 비활성화되어 사용 불가능함"
+      "ko": "프로그램이 비활성화되어 사용 불가능함",
+      "zh": "程序处于不活跃状态且不可用",
+      "vi": "Chương trình không hoạt động và không khả dụng"
     },
     "order": 2,
     "status": "active",
@@ -250,11 +298,15 @@
     "code": "DEVELOPMENT",
     "name": {
       "en": "Development",
-      "ko": "개발 중"
+      "ko": "개발 중",
+      "zh": "开发中",
+      "vi": "Đang phát triển"
     },
     "description": {
       "en": "Program is under development",
-      "ko": "프로그램이 개발 중임"
+      "ko": "프로그램이 개발 중임",
+      "zh": "程序正在开发中",
+      "vi": "Chương trình đang được phát triển"
     },
     "order": 3,
     "status": "active",
@@ -271,11 +323,15 @@
     "code": "PAGE",
     "name": {
       "en": "Page",
-      "ko": "페이지"
+      "ko": "페이지",
+      "zh": "页面",
+      "vi": "Trang"
     },
     "description": {
       "en": "Web page program",
-      "ko": "웹 페이지 프로그램"
+      "ko": "웹 페이지 프로그램",
+      "zh": "网页程序",
+      "vi": "Chương trình trang web"
     },
     "order": 1,
     "status": "active",
@@ -290,11 +346,15 @@
     "code": "FUNCTION",
     "name": {
       "en": "Function",
-      "ko": "함수"
+      "ko": "함수",
+      "zh": "功能",
+      "vi": "Chức năng"
     },
     "description": {
       "en": "Function program",
-      "ko": "기능 프로그램"
+      "ko": "기능 프로그램",
+      "zh": "功能程序",
+      "vi": "Chương trình chức năng"
     },
     "order": 2,
     "status": "active",
@@ -309,11 +369,15 @@
     "code": "API",
     "name": {
       "en": "API",
-      "ko": "API"
+      "ko": "API",
+      "zh": "API",
+      "vi": "API"
     },
     "description": {
       "en": "API program",
-      "ko": "API 프로그램"
+      "ko": "API 프로그램",
+      "zh": "API程序",
+      "vi": "Chương trình API"
     },
     "order": 3,
     "status": "active",
@@ -328,11 +392,15 @@
     "code": "REPORT",
     "name": {
       "en": "Report",
-      "ko": "리포트"
+      "ko": "리포트",
+      "zh": "报告",
+      "vi": "Báo cáo"
     },
     "description": {
       "en": "Report program",
-      "ko": "리포트 프로그램"
+      "ko": "리포트 프로그램",
+      "zh": "报告程序",
+      "vi": "Chương trình báo cáo"
     },
     "order": 4,
     "status": "active",
@@ -347,11 +415,15 @@
     "code": "DEMO",
     "name": {
       "en": "Demo",
-      "ko": "데모"
+      "ko": "데모",
+      "zh": "演示",
+      "vi": "Demo"
     },
     "description": {
       "en": "Demo program",
-      "ko": "데모 프로그램"
+      "ko": "데모 프로그램",
+      "zh": "演示程序",
+      "vi": "Chương trình demo"
     },
     "order": 5,
     "status": "active",
@@ -366,11 +438,15 @@
     "code": "ADMIN",
     "name": {
       "en": "Administration",
-      "ko": "관리"
+      "ko": "관리",
+      "zh": "管理",
+      "vi": "Quản trị"
     },
     "description": {
       "en": "Administration programs",
-      "ko": "관리 프로그램"
+      "ko": "관리 프로그램",
+      "zh": "管理程序",
+      "vi": "Chương trình quản trị"
     },
     "order": 1,
     "status": "active",
@@ -385,11 +461,15 @@
     "code": "USER",
     "name": {
       "en": "User",
-      "ko": "사용자"
+      "ko": "사용자",
+      "zh": "用户",
+      "vi": "Người dùng"
     },
     "description": {
       "en": "User-related programs",
-      "ko": "사용자 관련 프로그램"
+      "ko": "사용자 관련 프로그램",
+      "zh": "用户相关程序",
+      "vi": "Chương trình liên quan đến người dùng"
     },
     "order": 2,
     "status": "active",
@@ -404,11 +484,15 @@
     "code": "REPORT",
     "name": {
       "en": "Report",
-      "ko": "리포트"
+      "ko": "리포트",
+      "zh": "报告",
+      "vi": "Báo cáo"
     },
     "description": {
       "en": "Report programs",
-      "ko": "리포트 프로그램"
+      "ko": "리포트 프로그램",
+      "zh": "报告程序",
+      "vi": "Chương trình báo cáo"
     },
     "order": 3,
     "status": "active",
@@ -423,11 +507,15 @@
     "code": "SYSTEM",
     "name": {
       "en": "System",
-      "ko": "시스템"
+      "ko": "시스템",
+      "zh": "系统",
+      "vi": "Hệ thống"
     },
     "description": {
       "en": "System programs",
-      "ko": "시스템 프로그램"
+      "ko": "시스템 프로그램",
+      "zh": "系统程序",
+      "vi": "Chương trình hệ thống"
     },
     "order": 4,
     "status": "active",
@@ -442,11 +530,15 @@
     "code": "ANALYTICS",
     "name": {
       "en": "Analytics",
-      "ko": "분석"
+      "ko": "분석",
+      "zh": "分析",
+      "vi": "Phân tích"
     },
     "description": {
       "en": "Analytics programs",
-      "ko": "분석 프로그램"
+      "ko": "분석 프로그램",
+      "zh": "分析程序",
+      "vi": "Chương trình phân tích"
     },
     "order": 5,
     "status": "active",
@@ -461,11 +553,15 @@
     "code": "CONFIGURATION",
     "name": {
       "en": "Configuration",
-      "ko": "설정"
+      "ko": "설정",
+      "zh": "配置",
+      "vi": "Cấu hình"
     },
     "description": {
       "en": "Configuration programs",
-      "ko": "설정 프로그램"
+      "ko": "설정 프로그램",
+      "zh": "配置程序",
+      "vi": "Chương trình cấu hình"
     },
     "order": 6,
     "status": "active",
@@ -480,11 +576,15 @@
     "code": "COMPONENT",
     "name": {
       "en": "Component",
-      "ko": "컴포넌트"
+      "ko": "컴포넌트",
+      "zh": "组件",
+      "vi": "Thành phần"
     },
     "description": {
       "en": "Component programs",
-      "ko": "컴포넌트 프로그램"
+      "ko": "컴포넌트 프로그램",
+      "zh": "组件程序",
+      "vi": "Chương trình thành phần"
     },
     "order": 7,
     "status": "active",
@@ -499,11 +599,15 @@
     "code": "DASHBOARD",
     "name": {
       "en": "Dashboard",
-      "ko": "대시보드"
+      "ko": "대시보드",
+      "zh": "仪表板",
+      "vi": "Bảng điều khiển"
     },
     "description": {
       "en": "Dashboard programs",
-      "ko": "대시보드 프로그램"
+      "ko": "대시보드 프로그램",
+      "zh": "仪表板程序",
+      "vi": "Chương trình bảng điều khiển"
     },
     "order": 8,
     "status": "active",
@@ -518,11 +622,15 @@
     "code": "DEV",
     "name": {
       "en": "Development",
-      "ko": "개발"
+      "ko": "개발",
+      "zh": "开发",
+      "vi": "Phát triển"
     },
     "description": {
       "en": "Development-related programs",
-      "ko": "개발 관련 프로그램"
+      "ko": "개발 관련 프로그램",
+      "zh": "开发相关程序",
+      "vi": "Chương trình liên quan đến phát triển"
     },
     "order": 9,
     "status": "active",
@@ -537,11 +645,15 @@
     "code": "DRAFT",
     "name": {
       "en": "Draft",
-      "ko": "초안"
+      "ko": "초안",
+      "zh": "草稿",
+      "vi": "Bản nháp"
     },
     "description": {
       "en": "Help document is in draft status",
-      "ko": "도움말 문서가 작성 중임"
+      "ko": "도움말 문서가 작성 중임",
+      "zh": "帮助文档处于草稿状态",
+      "vi": "Tài liệu trợ giúp đang ở trạng thái nháp"
     },
     "order": 1,
     "status": "active",
@@ -558,11 +670,15 @@
     "code": "PUBLISHED",
     "name": {
       "en": "Published",
-      "ko": "발행됨"
+      "ko": "발행됨",
+      "zh": "已发布",
+      "vi": "Đã xuất bản"
     },
     "description": {
       "en": "Help document is published",
-      "ko": "도움말 문서가 공개됨"
+      "ko": "도움말 문서가 공개됨",
+      "zh": "帮助文档已发布",
+      "vi": "Tài liệu trợ giúp đã được xuất bản"
     },
     "order": 2,
     "status": "active",
@@ -579,11 +695,15 @@
     "code": "READ",
     "name": {
       "en": "Read",
-      "ko": "읽기"
+      "ko": "읽기",
+      "zh": "读取",
+      "vi": "Đọc"
     },
     "description": {
       "en": "Permission to read data",
-      "ko": "데이터 조회 권한"
+      "ko": "데이터 조회 권한",
+      "zh": "读取数据的权限",
+      "vi": "Quyền đọc dữ liệu"
     },
     "order": 1,
     "status": "active",
@@ -600,11 +720,15 @@
     "code": "WRITE",
     "name": {
       "en": "Write",
-      "ko": "쓰기"
+      "ko": "쓰기",
+      "zh": "写入",
+      "vi": "Ghi"
     },
     "description": {
       "en": "Permission to create and update data",
-      "ko": "데이터 생성 및 수정 권한"
+      "ko": "데이터 생성 및 수정 권한",
+      "zh": "创建和更新数据的权限",
+      "vi": "Quyền tạo và cập nhật dữ liệu"
     },
     "order": 2,
     "status": "active",
@@ -621,11 +745,15 @@
     "code": "DELETE",
     "name": {
       "en": "Delete",
-      "ko": "삭제"
+      "ko": "삭제",
+      "zh": "删除",
+      "vi": "Xóa"
     },
     "description": {
       "en": "Permission to delete data",
-      "ko": "데이터 삭제 권한"
+      "ko": "데이터 삭제 권한",
+      "zh": "删除数据的权限",
+      "vi": "Quyền xóa dữ liệu"
     },
     "order": 3,
     "status": "active",
@@ -642,11 +770,15 @@
     "code": "EXPORT",
     "name": {
       "en": "Export",
-      "ko": "내보내기"
+      "ko": "내보내기",
+      "zh": "导出",
+      "vi": "Xuất"
     },
     "description": {
       "en": "Permission to export data",
-      "ko": "데이터 내보내기 권한"
+      "ko": "데이터 내보내기 권한",
+      "zh": "导出数据的权限",
+      "vi": "Quyền xuất dữ liệu"
     },
     "order": 4,
     "status": "active",
@@ -663,11 +795,15 @@
     "code": "EN",
     "name": {
       "en": "English",
-      "ko": "영어"
+      "ko": "영어",
+      "zh": "英语",
+      "vi": "Tiếng Anh"
     },
     "description": {
       "en": "English language",
-      "ko": "영어"
+      "ko": "영어",
+      "zh": "英语",
+      "vi": "Ngôn ngữ tiếng Anh"
     },
     "order": 1,
     "status": "active",
@@ -685,11 +821,15 @@
     "code": "KO",
     "name": {
       "en": "Korean",
-      "ko": "한국어"
+      "ko": "한국어",
+      "zh": "韩语",
+      "vi": "Tiếng Hàn"
     },
     "description": {
       "en": "Korean language",
-      "ko": "한국어"
+      "ko": "한국어",
+      "zh": "韩语",
+      "vi": "Ngôn ngữ tiếng Hàn"
     },
     "order": 2,
     "status": "active",
@@ -703,15 +843,71 @@
   },
   {
     "id": "code-036",
+    "codeType": "LANGUAGE",
+    "code": "ZH",
+    "name": {
+      "en": "Chinese",
+      "ko": "중국어",
+      "zh": "中文",
+      "vi": "Tiếng Trung"
+    },
+    "description": {
+      "en": "Chinese language",
+      "ko": "중국어",
+      "zh": "中文",
+      "vi": "Ngôn ngữ Trung Quốc"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "locale": "zh",
+      "flag": "🇨🇳"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-037",
+    "codeType": "LANGUAGE",
+    "code": "VI",
+    "name": {
+      "en": "Vietnamese",
+      "ko": "베트남어",
+      "zh": "越南语",
+      "vi": "Tiếng Việt"
+    },
+    "description": {
+      "en": "Vietnamese language",
+      "ko": "베트남어",
+      "zh": "越南语",
+      "vi": "Ngôn ngữ Việt Nam"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "locale": "vi",
+      "flag": "🇻🇳"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-038",
     "codeType": "HTTP_METHOD",
     "code": "GET",
     "name": {
       "en": "Get",
-      "ko": "조회"
+      "ko": "조회",
+      "zh": "获取",
+      "vi": "Lấy"
     },
     "description": {
       "en": "HTTP GET method for retrieving data",
-      "ko": "데이터 조회를 위한 HTTP GET 메서드"
+      "ko": "데이터 조회를 위한 HTTP GET 메서드",
+      "zh": "用于检索数据的HTTP GET方法",
+      "vi": "Phương thức HTTP GET để truy xuất dữ liệu"
     },
     "order": 1,
     "status": "active",
@@ -723,16 +919,20 @@
     "updatedAt": "2024-01-01T00:00:00.000Z"
   },
   {
-    "id": "code-037",
+    "id": "code-039",
     "codeType": "HTTP_METHOD",
     "code": "POST",
     "name": {
       "en": "Create",
-      "ko": "생성"
+      "ko": "생성",
+      "zh": "创建",
+      "vi": "Tạo"
     },
     "description": {
       "en": "HTTP POST method for creating data",
-      "ko": "데이터 생성을 위한 HTTP POST 메서드"
+      "ko": "데이터 생성을 위한 HTTP POST 메서드",
+      "zh": "用于创建数据的HTTP POST方法",
+      "vi": "Phương thức HTTP POST để tạo dữ liệu"
     },
     "order": 2,
     "status": "active",
@@ -744,16 +944,20 @@
     "updatedAt": "2024-01-01T00:00:00.000Z"
   },
   {
-    "id": "code-038",
+    "id": "code-040",
     "codeType": "HTTP_METHOD",
     "code": "PUT",
     "name": {
       "en": "Update",
-      "ko": "수정"
+      "ko": "수정",
+      "zh": "更新",
+      "vi": "Cập nhật"
     },
     "description": {
       "en": "HTTP PUT method for updating data",
-      "ko": "데이터 수정을 위한 HTTP PUT 메서드"
+      "ko": "데이터 수정을 위한 HTTP PUT 메서드",
+      "zh": "用于更新数据的HTTP PUT方法",
+      "vi": "Phương thức HTTP PUT để cập nhật dữ liệu"
     },
     "order": 3,
     "status": "active",
@@ -765,16 +969,20 @@
     "updatedAt": "2024-01-01T00:00:00.000Z"
   },
   {
-    "id": "code-039",
+    "id": "code-041",
     "codeType": "HTTP_METHOD",
     "code": "DELETE",
     "name": {
       "en": "Delete",
-      "ko": "삭제"
+      "ko": "삭제",
+      "zh": "删除",
+      "vi": "Xóa"
     },
     "description": {
       "en": "HTTP DELETE method for deleting data",
-      "ko": "데이터 삭제를 위한 HTTP DELETE 메서드"
+      "ko": "데이터 삭제를 위한 HTTP DELETE 메서드",
+      "zh": "用于删除数据的HTTP DELETE方法",
+      "vi": "Phương thức HTTP DELETE để xóa dữ liệu"
     },
     "order": 4,
     "status": "active",

@@ -22,11 +22,12 @@ import {
 import { Visibility, VisibilityOff, Login as LoginIcon, ArrowForward } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCurrentLocale } from '@/lib/i18n/client';
+import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 
 export default function LoginPage() {
   const router = useRouter();
   const locale = useCurrentLocale();
+  const t = useI18n();
   const theme = useTheme();
   const { login, verifyMFA, ssoLogin } = useAuth();
 
@@ -61,7 +62,7 @@ export default function LoginPage() {
         router.push(`/${locale}/dashboard`);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || t('auth.loginError'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ export default function LoginPage() {
       await verifyMFA(mfaUserId, mfaCode);
       router.push(`/${locale}/dashboard`);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'MFA verification failed');
+      setError(err.response?.data?.error || t('auth.mfaVerificationFailed'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +91,7 @@ export default function LoginPage() {
       await ssoLogin();
       router.push(`/${locale}/dashboard`);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'SSO login failed');
+      setError(err.response?.data?.error || t('auth.ssoLoginFailed'));
     } finally {
       setLoading(false);
     }
@@ -160,10 +161,10 @@ export default function LoginPage() {
 
                 <Stack spacing={1} alignItems="center">
                   <Typography variant="h4" component="h1" fontWeight={600}>
-                    Verification Required
+                    {t('auth.verificationRequired')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" textAlign="center">
-                    Enter the 6-digit code sent to {mfaEmail}
+                    {t('auth.enterCodeSentTo').replace('{email}', mfaEmail)}
                   </Typography>
                 </Stack>
               </Stack>
@@ -177,7 +178,7 @@ export default function LoginPage() {
                     border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`
                   }}
                 >
-                  <strong>Dev Mode:</strong> Code is {devCode}
+                  <strong>{t('auth.devMode')}:</strong> {t('auth.codeIs')} {devCode}
                 </Alert>
               )}
 
@@ -198,7 +199,7 @@ export default function LoginPage() {
                 <TextField
                   id="mfa-code"
                   fullWidth
-                  label="Verification Code"
+                  label={t('auth.mfaCode')}
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value)}
                   placeholder="000000"
@@ -242,7 +243,7 @@ export default function LoginPage() {
                     }
                   }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Verify Code'}
+                  {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.verifyCode')}
                 </Button>
 
                 <Button
@@ -258,7 +259,7 @@ export default function LoginPage() {
                     }
                   }}
                 >
-                  Back to Login
+                  {t('auth.backToLogin')}
                 </Button>
               </Box>
             </CardContent>
@@ -329,10 +330,10 @@ export default function LoginPage() {
 
               <Stack spacing={1} alignItems="center">
                 <Typography variant="h4" component="h1" fontWeight={600}>
-                  Welcome Back
+                  {t('auth.welcomeBack')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Sign in to continue to Enterprise App
+                  {t('auth.signInToContinue')}
                 </Typography>
               </Stack>
             </Stack>
@@ -355,7 +356,7 @@ export default function LoginPage() {
                 <TextField
                   id="login-username"
                   fullWidth
-                  label="Username"
+                  label={t('auth.username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -371,7 +372,7 @@ export default function LoginPage() {
                 <TextField
                   id="login-password"
                   fullWidth
-                  label="Password"
+                  label={t('auth.password')}
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -418,12 +419,12 @@ export default function LoginPage() {
                     }
                   }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+                  {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.signIn')}
                 </Button>
 
                 <Divider sx={{ my: 1 }}>
                   <Typography variant="caption" color="text.secondary">
-                    OR
+                    {t('auth.or')}
                   </Typography>
                 </Divider>
 
@@ -446,7 +447,7 @@ export default function LoginPage() {
                     }
                   }}
                 >
-                  SSO Login
+                  {t('auth.ssoLogin')}
                 </Button>
               </Stack>
             </Box>

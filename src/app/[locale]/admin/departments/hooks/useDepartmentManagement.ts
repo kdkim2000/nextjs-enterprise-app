@@ -4,6 +4,11 @@ import { usePageState } from '@/hooks/usePageState';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { Department, SearchCriteria } from '../types';
 import { DepartmentFormData } from '@/components/admin/DepartmentFormFields';
+import {
+  multiLangFieldsToFormData,
+  formDataToMultiLangFields,
+  createEmptyMultiLangFormFields
+} from '@/lib/i18n/multiLang';
 
 interface UseDepartmentManagementOptions {
   storageKey?: string;
@@ -158,10 +163,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     setEditingDepartment({
       id: '',
       code: '',
-      nameEn: '',
-      nameKo: '',
-      descriptionEn: '',
-      descriptionKo: '',
+      ...createEmptyMultiLangFormFields(),
       parentId: '',
       managerId: '',
       status: 'active',
@@ -169,20 +171,19 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       phone: '',
       location: '',
       order: 1
-    });
+    } as any);
     setDialogOpen(true);
   }, []);
 
   const handleEdit = useCallback((id: string | number) => {
     const department = departments.find((d) => d.id === id);
     if (department) {
+      const formFields = multiLangFieldsToFormData(department.name, department.description);
+
       setEditingDepartment({
         id: department.id,
         code: department.code,
-        nameEn: department.name?.en || '',
-        nameKo: department.name?.ko || '',
-        descriptionEn: department.description?.en || '',
-        descriptionKo: department.description?.ko || '',
+        ...formFields,
         parentId: department.parentId || '',
         managerId: department.managerId || '',
         status: department.status,
@@ -190,7 +191,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
         phone: department.phone || '',
         location: department.location || '',
         order: department.order
-      });
+      } as any);
       setDialogOpen(true);
     }
   }, [departments]);
@@ -201,16 +202,12 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     try {
       setSaveLoading(true);
 
+      const { name, description } = formDataToMultiLangFields(editingDepartment);
+
       const payload = {
         code: editingDepartment.code,
-        name: {
-          en: editingDepartment.nameEn,
-          ko: editingDepartment.nameKo
-        },
-        description: {
-          en: editingDepartment.descriptionEn,
-          ko: editingDepartment.descriptionKo
-        },
+        name,
+        description,
         parentId: editingDepartment.parentId || null,
         managerId: editingDepartment.managerId || null,
         status: editingDepartment.status,

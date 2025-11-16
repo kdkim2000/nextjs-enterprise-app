@@ -3,6 +3,12 @@ import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { Program, SearchCriteria } from '../types';
+import { ProgramFormData } from '@/components/admin/ProgramFormFields';
+import {
+  multiLangFieldsToFormData,
+  formDataToMultiLangFields,
+  createEmptyMultiLangFormFields
+} from '@/lib/i18n/multiLang';
 
 interface UseProgramManagementOptions {
   storageKey?: string;
@@ -43,7 +49,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
   // Local states
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [editingProgram, setEditingProgram] = useState<ProgramFormData | null>(null);
   const [searching, setSearching] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
@@ -111,36 +117,13 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       const response = await api.get(`/program?${params.toString()}`);
 
-      // Transform data for grid
-      const transformedPrograms = (response.programs || []).map((prog: {
-        id?: string;
-        code: string;
-        name: { en: string; ko: string };
-        description: { en: string; ko: string };
-        category: string;
-        type: string;
-        status: string;
-        permissions?: Array<{
-          code: string;
-          name: { en: string; ko: string };
-          description: { en: string; ko: string };
-          isDefault?: boolean;
-        }>;
-        metadata?: { version?: string; author?: string; tags?: string[] };
-      }) => ({
-        id: prog.id,
-        code: prog.code,
-        nameEn: prog.name.en,
-        nameKo: prog.name.ko,
-        descriptionEn: prog.description.en,
-        descriptionKo: prog.description.ko,
-        category: prog.category,
-        type: prog.type as 'page' | 'function' | 'api' | 'report',
-        status: prog.status as 'active' | 'inactive' | 'development',
-        permissions: prog.permissions || [],
-        version: prog.metadata?.version || '',
-        author: prog.metadata?.author || '',
-        tags: prog.metadata?.tags?.join(', ') || ''
+      // Programs now use MultiLangField format directly
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transformedPrograms = (response.programs || []).map((prog: any) => ({
+        ...prog,
+        version: prog.version || '',
+        author: prog.author || '',
+        tags: typeof prog.tags === 'string' ? prog.tags : (Array.isArray(prog.tags) ? prog.tags.join(', ') : '')
       }));
 
       setPrograms(transformedPrograms);
@@ -167,10 +150,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     setEditingProgram({
       id: '',
       code: '',
-      nameEn: '',
-      nameKo: '',
-      descriptionEn: '',
-      descriptionKo: '',
+      ...createEmptyMultiLangFormFields(),
       category: 'admin',
       type: 'page',
       status: 'development',
@@ -178,14 +158,27 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       author: '',
       tags: '',
       permissions: []
-    });
+    } as any);
     setDialogOpen(true);
   }, []);
 
   const handleEdit = useCallback((id: string | number) => {
     const program = programs.find((p) => p.id === id);
     if (program) {
-      setEditingProgram(program);
+      const formFields = multiLangFieldsToFormData(program.name, program.description);
+
+      setEditingProgram({
+        id: program.id,
+        code: program.code,
+        ...formFields,
+        category: program.category,
+        type: program.type,
+        status: program.status,
+        version: program.version || '',
+        author: program.author || '',
+        tags: program.tags || '',
+        permissions: program.permissions || []
+      } as any);
       setDialogOpen(true);
     }
   }, [programs]);
@@ -196,17 +189,13 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     try {
       setSaveLoading(true);
 
+      const { name, description } = formDataToMultiLangFields(editingProgram);
+
       // Transform data for API
       const apiData = {
         code: editingProgram.code,
-        name: {
-          en: editingProgram.nameEn,
-          ko: editingProgram.nameKo
-        },
-        description: {
-          en: editingProgram.descriptionEn,
-          ko: editingProgram.descriptionKo
-        },
+        name,
+        description,
         category: editingProgram.category,
         type: editingProgram.type,
         status: editingProgram.status,
@@ -222,47 +211,13 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         // Add new program
         const response = await api.post('/program', apiData);
 
-        // Transform response back
-        const transformed: Program = {
-          id: response.program.id,
-          code: response.program.code,
-          nameEn: response.program.name.en,
-          nameKo: response.program.name.ko,
-          descriptionEn: response.program.description.en,
-          descriptionKo: response.program.description.ko,
-          category: response.program.category,
-          type: response.program.type,
-          status: response.program.status,
-          permissions: response.program.permissions || [],
-          version: response.program.metadata?.version || '',
-          author: response.program.metadata?.author || '',
-          tags: response.program.metadata?.tags?.join(', ') || ''
-        };
-
-        setPrograms([...programs, transformed]);
+        setPrograms([...programs, response.program]);
         showSuccess('Program created successfully');
       } else {
         // Update existing program
         const response = await api.put(`/program/${editingProgram.id}`, apiData);
 
-        // Transform response back
-        const transformed: Program = {
-          id: response.program.id,
-          code: response.program.code,
-          nameEn: response.program.name.en,
-          nameKo: response.program.name.ko,
-          descriptionEn: response.program.description.en,
-          descriptionKo: response.program.description.ko,
-          category: response.program.category,
-          type: response.program.type,
-          status: response.program.status,
-          permissions: response.program.permissions || [],
-          version: response.program.metadata?.version || '',
-          author: response.program.metadata?.author || '',
-          tags: response.program.metadata?.tags?.join(', ') || ''
-        };
-
-        setPrograms(programs.map((p) => (p.id === editingProgram.id ? transformed : p)));
+        setPrograms(programs.map((p) => (p.id === editingProgram.id ? response.program : p)));
         showSuccess('Program updated successfully');
       }
 

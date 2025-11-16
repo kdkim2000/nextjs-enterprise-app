@@ -12,6 +12,7 @@ import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import MenuFormFields from '@/components/admin/MenuFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useMenuManagement } from './hooks/useMenuManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -88,7 +89,7 @@ export default function MenuManagementPage() {
         return menu
           ? {
               id: menu.id,
-              displayName: `${menu.code} - ${currentLocale === 'ko' ? menu.nameKo : menu.nameEn}`
+              displayName: `${menu.code} - ${getLocalizedValue(menu.name, currentLocale)}`
             }
           : { id, displayName: String(id) };
       }),
@@ -175,8 +176,8 @@ export default function MenuManagementPage() {
         cancelLabel={t('common.cancel')}
       >
         <MenuFormFields
-          menu={editingMenu as Menu}
-          onChange={(menu) => setEditingMenu(menu)}
+          menu={editingMenu}
+          onChange={setEditingMenu}
           allMenus={allMenus}
           locale={currentLocale}
           t={t}

@@ -49,7 +49,20 @@ export default {
     mfaVerify: '인증',
     mfaResend: '코드 재전송',
     sessionExpired: '세션이 만료되었습니다. 다시 로그인해주세요.',
-    ssoLogin: 'SSO 로그인'
+    ssoLogin: 'SSO 로그인',
+    // Login page
+    welcomeBack: '다시 오신 것을 환영합니다',
+    signInToContinue: '엔터프라이즈 앱을 계속 사용하려면 로그인하세요',
+    signIn: '로그인',
+    or: '또는',
+    verificationRequired: '인증 필요',
+    enterCodeSentTo: '{email}(으)로 전송된 6자리 코드를 입력하세요',
+    devMode: '개발 모드',
+    codeIs: '코드는',
+    verifyCode: '코드 인증',
+    backToLogin: '로그인으로 돌아가기',
+    mfaVerificationFailed: 'MFA 인증 실패',
+    ssoLoginFailed: 'SSO 로그인 실패'
   },
   menu: {
     dashboard: '대시보드',
@@ -149,9 +162,13 @@ export default {
     name: '이름',
     nameEn: '이름(영문)',
     nameKo: '이름(한글)',
+    nameZh: '이름(중문)',
+    nameVi: '이름(베트남어)',
     description: '설명',
     descriptionEn: '설명(영문)',
     descriptionKo: '설명(한글)',
+    descriptionZh: '설명(중문)',
+    descriptionVi: '설명(베트남어)',
     order: '순서',
     status: '상태',
     category: '카테고리',
@@ -182,5 +199,104 @@ export default {
     enterCode: '코드 입력...',
     searchCodes: '코드 검색...',
     enterUserId: '사용자 ID 입력...'
+  },
+  dashboard: {
+    totalUsers: '전체 사용자',
+    reports: '보고서',
+    growth: '성장률',
+    documents: '문서',
+    recentActivity: '최근 활동',
+    quickActions: '빠른 작업',
+    noRecentActivity: '표시할 최근 활동이 없습니다',
+    selectMenuItem: '시작하려면 사이드바에서 메뉴 항목을 선택하세요'
+  },
+  privacyPolicy: {
+    latest: '최신',
+    effectiveDate: '시행일',
+    versionHistory: '버전 히스토리'
+  },
+  admin: {
+    dashboard: {
+      userManagement: '사용자 관리',
+      userManagementDesc: '사용자, 역할 및 권한 관리',
+      menuManagement: '메뉴 관리',
+      menuManagementDesc: '애플리케이션 메뉴 및 네비게이션 구성',
+      securitySettings: '보안 설정',
+      securitySettingsDesc: '보안 정책 및 설정 관리',
+      systemLogs: '시스템 로그',
+      systemLogsDesc: '시스템 로그 보기 및 분석'
+    }
+  },
+  themeDemo: {
+    title: '테마 시스템 데모',
+    description: '커스텀 색상, 타이포그래피 및 컴포넌트 재정의를 포함한 포괄적인 MUI 테마 시스템 시연.',
+    typography: {
+      title: '1. 타이포그래피 시스템',
+      headings: '제목',
+      heading1: '제목 1 - 2.5rem / 700',
+      heading2: '제목 2 - 2rem / 700',
+      heading3: '제목 3 - 1.75rem / 600',
+      heading4: '제목 4 - 1.5rem / 600',
+      heading5: '제목 5 - 1.25rem / 600',
+      heading6: '제목 6 - 1rem / 600',
+      bodyText: '본문 텍스트',
+      body1: '본문 1 - 1rem (16px) - 편안한 읽기 크기의 기본 본문 텍스트',
+      body2: '본문 2 - 0.875rem (14px) - 보조 정보 텍스트',
+      caption: '캡션 - 0.75rem (12px) - 작은 보충 텍스트'
+    },
+    statusColors: {
+      title: '2. 커스텀 상태 색상',
+      active: '활성',
+      inactive: '비활성',
+      pending: '대기중',
+      info: '정보',
+      success: '성공',
+      error: '오류',
+      statusChips: '상태 칩:'
+    },
+    roleColors: {
+      title: '3. 커스텀 역할 색상',
+      admin: '관리자',
+      manager: '매니저',
+      moderator: '모더레이터',
+      user: '사용자',
+      guest: '게스트'
+    },
+    componentOverrides: {
+      title: '4. 컴포넌트 재정의 (자동 적용)',
+      buttons: '버튼 (borderRadius: 8, no elevation, textTransform: none)',
+      containedButton: 'Contained 버튼',
+      outlinedButton: 'Outlined 버튼',
+      textButton: 'Text 버튼',
+      secondary: '보조',
+      textFields: '텍스트 필드 (size: small, borderRadius: 8)',
+      standardInput: '기본 입력',
+      withHelper: '도움말 포함',
+      helperText: '도움말 텍스트',
+      errorState: '오류 상태',
+      errorMessage: '오류 메시지',
+      disabled: '비활성화',
+      cards: '카드 (borderRadius: 12, subtle shadow)',
+      cardTitle: '카드 제목',
+      cardContent: '자동 테마 스타일이 적용된 카드 내용.',
+      elevatedCard: '강조된 카드',
+      elevatedCardContent: '커스텀 elevation이 적용된 카드.',
+      alerts: '알림 (자동 스타일링)',
+      successAlert: '테마 색상이 적용된 성공 알림',
+      infoAlert: '테마 색상이 적용된 정보 알림',
+      warningAlert: '테마 색상이 적용된 경고 알림',
+      errorAlert: '테마 색상이 적용된 오류 알림'
+    },
+    spacingSystem: {
+      title: '5. 간격 시스템 (8px 기본 단위)',
+      padding1: 'p: 1 = 8px 패딩',
+      padding2: 'p: 2 = 16px 패딩',
+      padding3: 'p: 3 = 24px 패딩',
+      padding4: 'p: 4 = 32px 패딩'
+    },
+    usage: {
+      title: '테마 시스템 사용 방법',
+      description: 'MUI 컴포넌트를 사용할 때 모든 테마 기능이 자동으로 적용됩니다. 래퍼 컴포넌트가 필요하지 않습니다!'
+    }
   }
 } as const;

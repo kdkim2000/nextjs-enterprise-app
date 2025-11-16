@@ -54,7 +54,12 @@
       "Bash(copy:*)",
       "Bash(tee:*)",
       "Bash(while read file)",
-      "Bash(do echo \"Fixing: $file\" sed -i 's/: React\\.FC<TooltipProps<number, string>[^>]*>/: React.FC<any>/g' \"$file\" done echo \"✓ All Chart components fixed\")"
+      "Bash(do echo \"Fixing: $file\" sed -i 's/: React\\.FC<TooltipProps<number, string>[^>]*>/: React.FC<any>/g' \"$file\" done echo \"✓ All Chart components fixed\")",
+      "Bash(ping:*)",
+      "Bash(comm -23:*)",
+      "Bash(python -c:*)",
+      "Bash(fi)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
