@@ -1,6 +1,7 @@
 import { GridColDef } from '@mui/x-data-grid';
 import { Chip, Box, Typography, IconButton, Tooltip } from '@mui/material';
 import { CheckCircle, Cancel, Edit } from '@mui/icons-material';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
   t: (key: string) => string,
@@ -11,7 +12,7 @@ export const createColumns = (
   const columns: GridColDef[] = [
     {
       field: 'roleName',
-      headerName: locale === 'ko' ? '역할 코드' : 'Role Code',
+      headerName: getLocalizedValue({ en: 'Role Code', ko: '역할 코드', zh: '角色代码', vi: 'Mã vai trò' }, locale),
       width: 150,
       renderCell: (params) => (
         <Chip
@@ -24,7 +25,7 @@ export const createColumns = (
     },
     {
       field: 'roleDisplayName',
-      headerName: locale === 'ko' ? '역할명' : 'Role Name',
+      headerName: getLocalizedValue({ en: 'Role Name', ko: '역할명', zh: '角色名称', vi: 'Tên vai trò' }, locale),
       width: 200,
       renderCell: (params) => (
         <Typography variant="body2" fontWeight={500}>
@@ -34,7 +35,7 @@ export const createColumns = (
     },
     {
       field: 'canView',
-      headerName: locale === 'ko' ? '조회' : 'View',
+      headerName: getLocalizedValue({ en: 'View', ko: '조회', zh: '查看', vi: 'Xem' }, locale),
       width: 100,
       align: 'center',
       headerAlign: 'center',
@@ -47,7 +48,7 @@ export const createColumns = (
     },
     {
       field: 'canCreate',
-      headerName: locale === 'ko' ? '생성' : 'Create',
+      headerName: getLocalizedValue({ en: 'Create', ko: '생성', zh: '创建', vi: 'Tạo' }, locale),
       width: 100,
       align: 'center',
       headerAlign: 'center',
@@ -60,7 +61,7 @@ export const createColumns = (
     },
     {
       field: 'canUpdate',
-      headerName: locale === 'ko' ? '수정' : 'Update',
+      headerName: getLocalizedValue({ en: 'Update', ko: '수정', zh: '更新', vi: 'Cập nhật' }, locale),
       width: 100,
       align: 'center',
       headerAlign: 'center',
@@ -73,7 +74,7 @@ export const createColumns = (
     },
     {
       field: 'canDelete',
-      headerName: locale === 'ko' ? '삭제' : 'Delete',
+      headerName: getLocalizedValue({ en: 'Delete', ko: '삭제', zh: '删除', vi: 'Xóa' }, locale),
       width: 100,
       align: 'center',
       headerAlign: 'center',
@@ -86,14 +87,14 @@ export const createColumns = (
     },
     {
       field: 'createdAt',
-      headerName: locale === 'ko' ? '생성일' : 'Created',
+      headerName: getLocalizedValue({ en: 'Created', ko: '생성일', zh: '创建日期', vi: 'Ngày tạo' }, locale),
       width: 120,
       renderCell: (params) =>
         params.value ? new Date(params.value).toLocaleDateString(locale) : '-'
     },
     {
       field: 'createdBy',
-      headerName: locale === 'ko' ? '생성자' : 'Created By',
+      headerName: getLocalizedValue({ en: 'Created By', ko: '생성자', zh: '创建者', vi: 'Người tạo' }, locale),
       width: 120
     }
   ];
@@ -101,14 +102,14 @@ export const createColumns = (
   if (canUpdate) {
     columns.push({
       field: 'actions',
-      headerName: locale === 'ko' ? '작업' : 'Actions',
+      headerName: getLocalizedValue({ en: 'Actions', ko: '작업', zh: '操作', vi: 'Thao tác' }, locale),
       width: 100,
       align: 'center',
       headerAlign: 'center',
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Tooltip title={locale === 'ko' ? '권한 수정' : 'Edit Permissions'}>
+        <Tooltip title={getLocalizedValue({ en: 'Edit Permissions', ko: '권한 수정', zh: '编辑权限', vi: 'Sửa quyền' }, locale)}>
           <IconButton
             size="small"
             onClick={(e) => {

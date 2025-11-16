@@ -2,6 +2,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { IconButton } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { Message, MESSAGE_CATEGORIES, MESSAGE_TYPES } from './types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
   locale: string,
@@ -11,59 +12,59 @@ export const createColumns = (
   const columns: GridColDef[] = [
     {
       field: 'code',
-      headerName: locale === 'ko' ? '코드' : 'Code',
+      headerName: getLocalizedValue({ en: 'Code', ko: '코드', zh: '代码', vi: 'Mã' }, locale),
       flex: 1,
       minWidth: 180
     },
     {
       field: 'category',
-      headerName: locale === 'ko' ? '카테고리' : 'Category',
+      headerName: getLocalizedValue({ en: 'Category', ko: '카테고리', zh: '类别', vi: 'Danh mục' }, locale),
       flex: 0.8,
       minWidth: 120,
       valueGetter: (value) => {
         const category = MESSAGE_CATEGORIES.find(c => c.value === value);
-        return category ? (locale === 'ko' ? category.label.ko : category.label.en) : value;
+        return category ? getLocalizedValue(category.label, locale) : value;
       }
     },
     {
       field: 'type',
-      headerName: locale === 'ko' ? '타입' : 'Type',
+      headerName: getLocalizedValue({ en: 'Type', ko: '타입', zh: '类型', vi: 'Loại' }, locale),
       flex: 0.6,
       minWidth: 100,
       valueGetter: (value) => {
         const type = MESSAGE_TYPES.find(t => t.value === value);
-        return type ? (locale === 'ko' ? type.label.ko : type.label.en) : value;
+        return type ? getLocalizedValue(type.label, locale) : value;
       }
     },
     {
       field: 'message',
-      headerName: locale === 'ko' ? '메시지' : 'Message',
+      headerName: getLocalizedValue({ en: 'Message', ko: '메시지', zh: '消息', vi: 'Tin nhắn' }, locale),
       flex: 1.5,
       minWidth: 250,
-      valueGetter: (_value, row: Message) => locale === 'ko' ? row.message.ko : row.message.en
+      valueGetter: (_value, row: Message) => getLocalizedValue(row.message, locale)
     },
     {
       field: 'description',
-      headerName: locale === 'ko' ? '설명' : 'Description',
+      headerName: getLocalizedValue({ en: 'Description', ko: '설명', zh: '描述', vi: 'Mô tả' }, locale),
       flex: 1.2,
       minWidth: 200,
-      valueGetter: (_value, row: Message) => locale === 'ko' ? row.description.ko : row.description.en
+      valueGetter: (_value, row: Message) => getLocalizedValue(row.description, locale)
     },
     {
       field: 'status',
-      headerName: locale === 'ko' ? '상태' : 'Status',
+      headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       flex: 0.6,
       minWidth: 100,
       valueGetter: (value) => value === 'active'
-        ? (locale === 'ko' ? '활성' : 'Active')
-        : (locale === 'ko' ? '비활성' : 'Inactive')
+        ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
+        : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
     }
   ];
 
   if (canUpdate) {
     columns.push({
       field: 'actions',
-      headerName: locale === 'ko' ? '작업' : 'Actions',
+      headerName: getLocalizedValue({ en: 'Actions', ko: '작업', zh: '操作', vi: 'Thao tác' }, locale),
       width: 80,
       sortable: false,
       filterable: false,

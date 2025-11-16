@@ -32,7 +32,7 @@ import HelpViewer from '@/components/common/HelpViewer';
 import UserSelector from '@/components/common/UserSelector';
 import RouteGuard from '@/components/auth/RouteGuard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
-import { useI18n } from '@/lib/i18n/client';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { Role } from '@/types/role';
 import { useRoleManagement } from './hooks/useRoleManagement';
 import { createColumns } from './constants';
@@ -40,6 +40,7 @@ import { createFilterFields, calculateActiveFilterCount } from './utils';
 
 export default function RoleManagementPage() {
   const t = useI18n();
+  const locale = useCurrentLocale();
   const gridPermissions = useDataGridPermissions('PROG-ROLE-MGMT');
 
   // Use custom hook for all business logic
@@ -83,8 +84,8 @@ export default function RoleManagementPage() {
   } = useRoleManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(handleEdit, gridPermissions.editable), [handleEdit, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(), []);
+  const columns = useMemo(() => createColumns(locale, handleEdit, gridPermissions.editable), [locale, handleEdit, gridPermissions.editable]);
+  const filterFields = useMemo(() => createFilterFields(locale), [locale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]

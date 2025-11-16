@@ -3,10 +3,11 @@
 import { GridColDef } from '@mui/x-data-grid';
 import { Chip } from '@mui/material';
 import { UserRoleMapping } from './types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const STATUS_OPTIONS = [
-  { value: 'active', labelEn: 'Active', labelKo: '활성' },
-  { value: 'inactive', labelEn: 'Inactive', labelKo: '비활성' }
+  { value: 'active', labelEn: 'Active', labelKo: '활성', labelZh: '激活', labelVi: 'Kích hoạt' },
+  { value: 'inactive', labelEn: 'Inactive', labelKo: '비활성', labelZh: '未激活', labelVi: 'Không hoạt động' }
 ];
 
 export const createColumns = (
@@ -65,7 +66,7 @@ export const createColumns = (
       width: 180,
       sortable: true,
       valueGetter: (_value, row: UserRoleMapping) => {
-        return row.expiresAt ? new Date(row.expiresAt).toLocaleString(locale) : locale === 'ko' ? '무제한' : 'Unlimited';
+        return row.expiresAt ? new Date(row.expiresAt).toLocaleString(locale) : getLocalizedValue({ en: 'Unlimited', ko: '무제한', zh: '无限制', vi: 'Không giới hạn' }, locale);
       }
     },
     {
@@ -76,9 +77,10 @@ export const createColumns = (
       renderCell: (params) => {
         const isActive = params.value as boolean;
         const color = isActive ? 'success' : 'default';
-        const label = isActive
-          ? (locale === 'ko' ? '활성' : 'Active')
-          : (locale === 'ko' ? '비활성' : 'Inactive');
+        const statusOption = STATUS_OPTIONS.find(opt => opt.value === (isActive ? 'active' : 'inactive'));
+        const label = statusOption
+          ? getLocalizedValue({ en: statusOption.labelEn, ko: statusOption.labelKo, zh: statusOption.labelZh, vi: statusOption.labelVi }, locale)
+          : (isActive ? 'Active' : 'Inactive');
         return (
           <Chip
             label={label}

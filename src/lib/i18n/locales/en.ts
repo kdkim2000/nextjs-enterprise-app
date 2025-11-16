@@ -49,7 +49,20 @@ export default {
     mfaVerify: 'Verify',
     mfaResend: 'Resend Code',
     sessionExpired: 'Session expired. Please login again.',
-    ssoLogin: 'SSO Login'
+    ssoLogin: 'SSO Login',
+    // Login page
+    welcomeBack: 'Welcome Back',
+    signInToContinue: 'Sign in to continue to Enterprise App',
+    signIn: 'Sign In',
+    or: 'OR',
+    verificationRequired: 'Verification Required',
+    enterCodeSentTo: 'Enter the 6-digit code sent to {email}',
+    devMode: 'Dev Mode',
+    codeIs: 'Code is',
+    verifyCode: 'Verify Code',
+    backToLogin: 'Back to Login',
+    mfaVerificationFailed: 'MFA verification failed',
+    ssoLoginFailed: 'SSO login failed'
   },
   menu: {
     dashboard: 'Dashboard',
@@ -149,9 +162,13 @@ export default {
     name: 'Name',
     nameEn: 'Name (English)',
     nameKo: 'Name (Korean)',
+    nameZh: 'Name (Chinese)',
+    nameVi: 'Name (Vietnamese)',
     description: 'Description',
     descriptionEn: 'Description (English)',
     descriptionKo: 'Description (Korean)',
+    descriptionZh: 'Description (Chinese)',
+    descriptionVi: 'Description (Vietnamese)',
     order: 'Order',
     status: 'Status',
     category: 'Category',
@@ -182,5 +199,104 @@ export default {
     enterCode: 'Enter code...',
     searchCodes: 'Search codes...',
     enterUserId: 'Enter user ID...'
+  },
+  dashboard: {
+    totalUsers: 'Total Users',
+    reports: 'Reports',
+    growth: 'Growth',
+    documents: 'Documents',
+    recentActivity: 'Recent Activity',
+    quickActions: 'Quick Actions',
+    noRecentActivity: 'No recent activity to display',
+    selectMenuItem: 'Select a menu item from the sidebar to get started'
+  },
+  privacyPolicy: {
+    latest: 'Latest',
+    effectiveDate: 'Effective Date',
+    versionHistory: 'Version History'
+  },
+  admin: {
+    dashboard: {
+      userManagement: 'User Management',
+      userManagementDesc: 'Manage users, roles, and permissions',
+      menuManagement: 'Menu Management',
+      menuManagementDesc: 'Configure application menus and navigation',
+      securitySettings: 'Security Settings',
+      securitySettingsDesc: 'Manage security policies and settings',
+      systemLogs: 'System Logs',
+      systemLogsDesc: 'View and analyze system logs'
+    }
+  },
+  themeDemo: {
+    title: 'Theme System Demo',
+    description: 'Demonstration of the comprehensive MUI Theme system with custom colors, typography, and component overrides.',
+    typography: {
+      title: '1. Typography System',
+      headings: 'Headings',
+      heading1: 'Heading 1 - 2.5rem / 700',
+      heading2: 'Heading 2 - 2rem / 700',
+      heading3: 'Heading 3 - 1.75rem / 600',
+      heading4: 'Heading 4 - 1.5rem / 600',
+      heading5: 'Heading 5 - 1.25rem / 600',
+      heading6: 'Heading 6 - 1rem / 600',
+      bodyText: 'Body Text',
+      body1: 'Body 1 - 1rem (16px) - Default body text with comfortable reading size',
+      body2: 'Body 2 - 0.875rem (14px) - Secondary information text',
+      caption: 'Caption - 0.75rem (12px) - Small supplementary text'
+    },
+    statusColors: {
+      title: '2. Custom Status Colors',
+      active: 'Active',
+      inactive: 'Inactive',
+      pending: 'Pending',
+      info: 'Info',
+      success: 'Success',
+      error: 'Error',
+      statusChips: 'Status Chips:'
+    },
+    roleColors: {
+      title: '3. Custom Role Colors',
+      admin: 'Admin',
+      manager: 'Manager',
+      moderator: 'Moderator',
+      user: 'User',
+      guest: 'Guest'
+    },
+    componentOverrides: {
+      title: '4. Component Overrides (Auto-Applied)',
+      buttons: 'Buttons (borderRadius: 8, no elevation, textTransform: none)',
+      containedButton: 'Contained Button',
+      outlinedButton: 'Outlined Button',
+      textButton: 'Text Button',
+      secondary: 'Secondary',
+      textFields: 'Text Fields (size: small, borderRadius: 8)',
+      standardInput: 'Standard Input',
+      withHelper: 'With Helper',
+      helperText: 'Helper text',
+      errorState: 'Error State',
+      errorMessage: 'Error message',
+      disabled: 'Disabled',
+      cards: 'Cards (borderRadius: 12, subtle shadow)',
+      cardTitle: 'Card Title',
+      cardContent: 'Card content with automatic theme styling applied.',
+      elevatedCard: 'Elevated Card',
+      elevatedCardContent: 'Card with custom elevation.',
+      alerts: 'Alerts (automatic styling)',
+      successAlert: 'Success alert with theme colors',
+      infoAlert: 'Info alert with theme colors',
+      warningAlert: 'Warning alert with theme colors',
+      errorAlert: 'Error alert with theme colors'
+    },
+    spacingSystem: {
+      title: '5. Spacing System (8px base unit)',
+      padding1: 'p: 1 = 8px padding',
+      padding2: 'p: 2 = 16px padding',
+      padding3: 'p: 3 = 24px padding',
+      padding4: 'p: 4 = 32px padding'
+    },
+    usage: {
+      title: 'How to Use the Theme System',
+      description: 'All theme features are automatically applied when using MUI components. No wrapper components needed!'
+    }
   }
 } as const;

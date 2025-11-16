@@ -11,6 +11,7 @@ import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import MessageFormFields from '@/components/admin/MessageFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useMessageManagement } from './hooks/useMessageManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -82,7 +83,7 @@ export default function MessagesPage({ params }: MessagesPageProps) {
         return message
           ? {
               id: message.id,
-              displayName: `${message.code} (${locale === 'ko' ? message.message.ko : message.message.en})`
+              displayName: `${message.code} (${getLocalizedValue(message.message, locale)})`
             }
           : { id, displayName: String(id) };
       }),
@@ -102,14 +103,24 @@ export default function MessagesPage({ params }: MessagesPageProps) {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder={locale === 'ko' ? '코드, 카테고리, 메시지로 검색...' : 'Search by code, category, or message...'}
+      quickSearchPlaceholder={getLocalizedValue({
+        en: 'Search by code, category, or message...',
+        ko: '코드, 카테고리, 메시지로 검색...',
+        zh: '按代码、类别或消息搜索...',
+        vi: 'Tìm theo mã, danh mục hoặc tin nhắn...'
+      }, locale)}
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
       advancedFilterOpen={advancedFilterOpen}
       onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
       activeFilterCount={activeFilterCount}
-      filterTitle={locale === 'ko' ? '검색 / 필터' : 'Search / Filter'}
+      filterTitle={getLocalizedValue({
+        en: 'Search / Filter',
+        ko: '검색 / 필터',
+        zh: '搜索 / 筛选',
+        vi: 'Tìm kiếm / Lọc'
+      }, locale)}
       filterContent={
         <SearchFilterFields
           fields={filterFields}
@@ -133,8 +144,18 @@ export default function MessagesPage({ params }: MessagesPageProps) {
         {messages.length === 0 && !searching ? (
           <EmptyState
             icon={Search}
-            title={locale === 'ko' ? '메시지가 없습니다' : 'No messages found'}
-            description={locale === 'ko' ? '검색어를 입력하여 메시지를 찾거나 새 메시지를 추가해주세요' : 'Use the search above or add a new message'}
+            title={getLocalizedValue({
+              en: 'No messages found',
+              ko: '메시지가 없습니다',
+              zh: '未找到消息',
+              vi: 'Không tìm thấy tin nhắn'
+            }, locale)}
+            description={getLocalizedValue({
+              en: 'Use the search above or add a new message',
+              ko: '검색어를 입력하여 메시지를 찾거나 새 메시지를 추가해주세요',
+              zh: '使用上面的搜索或添加新消息',
+              vi: 'Sử dụng tìm kiếm ở trên hoặc thêm tin nhắn mới'
+            }, locale)}
           />
         ) : (
           <Box sx={{ flex: 1, minHeight: 0 }}>
@@ -166,8 +187,8 @@ export default function MessagesPage({ params }: MessagesPageProps) {
         title={!editingMessage?.id ? 'Add New Message' : 'Edit Message'}
         onSave={handleSave}
         saveLoading={saveLoading}
-        saveLabel={locale === 'ko' ? '저장' : 'Save'}
-        cancelLabel={locale === 'ko' ? '취소' : 'Cancel'}
+        saveLabel={getLocalizedValue({ en: 'Save', ko: '저장', zh: '保存', vi: 'Lưu' }, locale)}
+        cancelLabel={getLocalizedValue({ en: 'Cancel', ko: '취소', zh: '取消', vi: 'Hủy' }, locale)}
       >
         {editingMessage && (
           <MessageFormFields

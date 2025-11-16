@@ -78,9 +78,9 @@ export default function UserManagementPage() {
   // Memoized computed values
   const columns = useMemo(() => {
     console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
-    return createColumns(t, handleEdit, handleResetPasswordClick, gridPermissions.editable);
-  }, [t, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(t), [t]);
+    return createColumns(t, currentLocale, handleEdit, handleResetPasswordClick, gridPermissions.editable);
+  }, [t, currentLocale, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
+  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]

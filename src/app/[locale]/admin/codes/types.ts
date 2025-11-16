@@ -1,14 +1,10 @@
+import { MultiLangField } from '@/lib/i18n/multiLang';
+
 export interface CodeType {
   id: string;
   code: string;
-  name: {
-    en: string;
-    ko: string;
-  };
-  description: {
-    en: string;
-    ko: string;
-  };
+  name: MultiLangField;
+  description: MultiLangField;
   order: number;
   status: 'active' | 'inactive';
   category: string;
@@ -20,14 +16,8 @@ export interface Code {
   id: string;
   codeType: string;
   code: string;
-  name: {
-    en: string;
-    ko: string;
-  };
-  description: {
-    en: string;
-    ko: string;
-  };
+  name: MultiLangField;
+  description: MultiLangField;
   order: number;
   status: 'active' | 'inactive';
   parentCode: string | null;

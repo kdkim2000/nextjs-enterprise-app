@@ -12,11 +12,12 @@ import {
 } from '@mui/material';
 import { AVAILABLE_ICONS } from '@/app/[locale]/admin/menus/constants';
 import { MenuItem as MenuItemType } from '@/types/menu';
-import { Menu } from '@/app/[locale]/admin/menus/types';
+import { MenuFormData } from '@/app/[locale]/admin/menus/types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export interface MenuFormFieldsProps {
-  menu: Menu | null;
-  onChange: (menu: Menu) => void;
+  menu: MenuFormData | null;
+  onChange: (menu: MenuFormData) => void;
   allMenus: MenuItemType[];
   locale: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +33,7 @@ export default function MenuFormFields({
 }: MenuFormFieldsProps) {
   if (!menu) return null;
 
-  const handleChange = (field: keyof Menu, value: string | number | null) => {
+  const handleChange = (field: keyof MenuFormData, value: string | number | null) => {
     onChange({ ...menu, [field]: value });
   };
 
@@ -63,6 +64,24 @@ export default function MenuFormFields({
         required
         value={menu.nameKo || ''}
         onChange={(e) => handleChange('nameKo', e.target.value)}
+      />
+
+      {/* Menu Name (Chinese) */}
+      <TextField
+        label="Menu Name (Chinese)"
+        fullWidth
+        value={menu.nameZh || ''}
+        onChange={(e) => handleChange('nameZh', e.target.value)}
+        placeholder="中文菜单名称"
+      />
+
+      {/* Menu Name (Vietnamese) */}
+      <TextField
+        label="Menu Name (Vietnamese)"
+        fullWidth
+        value={menu.nameVi || ''}
+        onChange={(e) => handleChange('nameVi', e.target.value)}
+        placeholder="Tên menu tiếng Việt"
       />
 
       {/* Path */}
@@ -122,7 +141,7 @@ export default function MenuFormFields({
             .filter(m => !menu.id || m.id !== menu.id)
             .map(menuItem => (
               <MenuItem key={menuItem.id} value={menuItem.id}>
-                {locale === 'ko' ? menuItem.name.ko : menuItem.name.en}
+                {getLocalizedValue(menuItem.name, locale)}
               </MenuItem>
             ))
           }
@@ -158,6 +177,28 @@ export default function MenuFormFields({
         rows={2}
         value={menu.descriptionKo || ''}
         onChange={(e) => handleChange('descriptionKo', e.target.value)}
+      />
+
+      {/* Description (Chinese) */}
+      <TextField
+        label="Description (Chinese)"
+        fullWidth
+        multiline
+        rows={2}
+        value={menu.descriptionZh || ''}
+        onChange={(e) => handleChange('descriptionZh', e.target.value)}
+        placeholder="中文描述"
+      />
+
+      {/* Description (Vietnamese) */}
+      <TextField
+        label="Description (Vietnamese)"
+        fullWidth
+        multiline
+        rows={2}
+        value={menu.descriptionVi || ''}
+        onChange={(e) => handleChange('descriptionVi', e.target.value)}
+        placeholder="Mô tả tiếng Việt"
       />
     </Stack>
   );

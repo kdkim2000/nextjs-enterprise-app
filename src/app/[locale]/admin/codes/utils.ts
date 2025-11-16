@@ -1,13 +1,30 @@
 import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import { STATUS_OPTIONS } from './constants';
 import { SearchCriteria } from './types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
+
+// Re-export common multi-language utilities for convenience
+export {
+  SUPPORTED_LANGUAGES,
+  LANGUAGE_NAMES,
+  createEmptyMultiLangField,
+  multiLangToFormData,
+  formDataToMultiLang,
+  getLocalizedValue,
+  createEmptyMultiLangFormFields,
+  multiLangFieldsToFormData,
+  formDataToMultiLangFields,
+  validateMultiLangField,
+  hasAnyValue,
+  searchMultiLangField,
+  type SupportedLanguage,
+  type MultiLangField
+} from '@/lib/i18n/multiLang';
 
 export const createFilterFields = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any
+  t: any,
+  locale: string
 ): FilterFieldConfig[] => {
-  const locale = t('common.appName') === '엔터프라이즈 앱' ? 'ko' : 'en';
-
   return [
     {
       name: 'codeType',
@@ -29,7 +46,7 @@ export const createFilterFields = (
         { value: '', label: t('common.all') },
         ...STATUS_OPTIONS.map(opt => ({
           value: opt.value,
-          label: locale === 'ko' ? opt.labelKo : opt.labelEn
+          label: getLocalizedValue({ en: opt.labelEn, ko: opt.labelKo, zh: opt.labelEn, vi: opt.labelEn }, locale)
         }))
       ]
     }

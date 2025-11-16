@@ -3,6 +3,7 @@
 import { GridColDef } from '@mui/x-data-grid';
 import ActionsCell from '@/components/common/ActionsCell';
 import { Program } from './types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const PROGRAM_CATEGORIES = ['admin', 'user', 'report', 'system', 'analytics', 'configuration'];
 export const PROGRAM_TYPES = ['page', 'function', 'api', 'report'] as const;
@@ -20,7 +21,7 @@ export const createColumns = (
       field: 'name',
       headerName: 'Program Name',
       width: 200,
-      valueGetter: (_value, row) => locale === 'ko' ? row.nameKo : row.nameEn
+      valueGetter: (_value, row) => getLocalizedValue(row.name, locale)
     },
     { field: 'category', headerName: 'Category', width: 120 },
     { field: 'type', headerName: 'Type', width: 100 },

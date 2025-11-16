@@ -4,6 +4,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { Chip } from '@mui/material';
 import ActionsCell from '@/components/common/ActionsCell';
 import { Code } from './types';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const STATUS_OPTIONS = [
   { value: 'active', labelEn: 'Active', labelKo: '활성' },
@@ -42,7 +43,7 @@ export const createColumns = (
       width: 200,
       sortable: true,
       valueGetter: (_value, row: Code) => {
-        return locale === 'ko' ? row.name?.ko : row.name?.en;
+        return getLocalizedValue(row.name, locale);
       }
     },
     {
@@ -51,7 +52,7 @@ export const createColumns = (
       width: 250,
       sortable: false,
       valueGetter: (_value, row: Code) => {
-        return locale === 'ko' ? row.description?.ko : row.description?.en;
+        return getLocalizedValue(row.description, locale);
       }
     },
     {
@@ -73,9 +74,10 @@ export const createColumns = (
         const status = params.value as string;
         const color = status === 'active' ? 'success' : 'default';
         const label = STATUS_OPTIONS.find(opt => opt.value === status);
+        const labelText = label ? getLocalizedValue({ en: label.labelEn, ko: label.labelKo, zh: label.labelEn, vi: label.labelEn }, locale) : status;
         return (
           <Chip
-            label={locale === 'ko' ? label?.labelKo : label?.labelEn}
+            label={labelText}
             color={color}
             size="small"
           />
