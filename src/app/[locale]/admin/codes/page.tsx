@@ -18,6 +18,7 @@ import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useCodeOptions } from '@/hooks/useCodeOptions';
 import { createColumns } from './constants';
 import {
   createFilterFields,
@@ -35,6 +36,9 @@ export default function CodesPage() {
   const locale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
   const gridPermissions = useDataGridPermissions('PROG-CODE-MGMT');
+
+  // Fetch status options from code management system
+  const { codes: statusOptions } = useCodeOptions('COMMON_STATUS', locale);
 
   // State
   const [codeTypes, setCodeTypes] = useState<CodeType[]>([]);
@@ -355,13 +359,13 @@ export default function CodesPage() {
 
   // Memoized values
   const columns = useMemo(
-    () => createColumns(t, handleEditCode, gridPermissions.editable),
-    [t, handleEditCode, gridPermissions.editable]
+    () => createColumns(t, handleEditCode, gridPermissions.editable, statusOptions),
+    [t, handleEditCode, gridPermissions.editable, statusOptions]
   );
 
   const filterFields = useMemo(
-    () => createFilterFields(t, locale),
-    [t, locale]
+    () => createFilterFields(t, locale, statusOptions),
+    [t, locale, statusOptions]
   );
 
   const activeFilterCount = useMemo(

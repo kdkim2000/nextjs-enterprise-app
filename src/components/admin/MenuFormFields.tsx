@@ -10,10 +10,10 @@ import {
   Divider,
   Stack
 } from '@mui/material';
-import { AVAILABLE_ICONS } from '@/app/[locale]/admin/menus/constants';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { MenuFormData } from '@/app/[locale]/admin/menus/types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface MenuFormFieldsProps {
   menu: MenuFormData | null;
@@ -95,18 +95,13 @@ export default function MenuFormFields({
       />
 
       {/* Icon */}
-      <FormControl fullWidth>
-        <InputLabel>{t('menuManagement.icon')}</InputLabel>
-        <Select
-          value={menu.icon || 'Dashboard'}
-          label={t('menuManagement.icon')}
-          onChange={(e) => handleChange('icon', e.target.value)}
-        >
-          {AVAILABLE_ICONS.map(icon => (
-            <MenuItem key={icon} value={icon}>{icon}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="ICON_TYPE"
+        value={menu.icon || 'Dashboard'}
+        onChange={(value) => handleChange('icon', value)}
+        label={t('menuManagement.icon')}
+        locale={locale}
+      />
 
       <Divider />
 

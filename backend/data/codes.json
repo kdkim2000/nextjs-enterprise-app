@@ -992,5 +992,1199 @@
     },
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-042",
+    "codeType": "COMMON_STATUS",
+    "code": "active",
+    "name": {
+      "en": "Active",
+      "ko": "활성",
+      "zh": "活跃",
+      "vi": "Hoạt động"
+    },
+    "description": {
+      "en": "Active status",
+      "ko": "활성 상태",
+      "zh": "活跃状态",
+      "vi": "Trạng thái hoạt động"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "success",
+      "chipColor": "success"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-043",
+    "codeType": "COMMON_STATUS",
+    "code": "inactive",
+    "name": {
+      "en": "Inactive",
+      "ko": "비활성",
+      "zh": "不活跃",
+      "vi": "Không hoạt động"
+    },
+    "description": {
+      "en": "Inactive status",
+      "ko": "비활성 상태",
+      "zh": "不活跃状态",
+      "vi": "Trạng thái không hoạt động"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "default",
+      "chipColor": "default"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-044",
+    "codeType": "COMMON_STATUS",
+    "code": "pending",
+    "name": {
+      "en": "Pending",
+      "ko": "대기중",
+      "zh": "待处理",
+      "vi": "Đang chờ"
+    },
+    "description": {
+      "en": "Pending status",
+      "ko": "대기 상태",
+      "zh": "待处理状态",
+      "vi": "Trạng thái chờ"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "warning",
+      "chipColor": "warning"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-045",
+    "codeType": "MESSAGE_CATEGORY",
+    "code": "common",
+    "name": {
+      "en": "Common",
+      "ko": "공통",
+      "zh": "通用",
+      "vi": "Chung"
+    },
+    "description": {
+      "en": "Common messages",
+      "ko": "공통 메시지",
+      "zh": "通用消息",
+      "vi": "Tin nhắn chung"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-046",
+    "codeType": "MESSAGE_CATEGORY",
+    "code": "validation",
+    "name": {
+      "en": "Validation",
+      "ko": "검증",
+      "zh": "验证",
+      "vi": "Xác thực"
+    },
+    "description": {
+      "en": "Validation messages",
+      "ko": "검증 메시지",
+      "zh": "验证消息",
+      "vi": "Tin nhắn xác thực"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-047",
+    "codeType": "MESSAGE_CATEGORY",
+    "code": "auth",
+    "name": {
+      "en": "Authentication",
+      "ko": "인증",
+      "zh": "认证",
+      "vi": "Xác thực"
+    },
+    "description": {
+      "en": "Authentication messages",
+      "ko": "인증 메시지",
+      "zh": "认证消息",
+      "vi": "Tin nhắn xác thực"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-048",
+    "codeType": "MESSAGE_CATEGORY",
+    "code": "user",
+    "name": {
+      "en": "User",
+      "ko": "사용자",
+      "zh": "用户",
+      "vi": "Người dùng"
+    },
+    "description": {
+      "en": "User related messages",
+      "ko": "사용자 관련 메시지",
+      "zh": "用户相关消息",
+      "vi": "Tin nhắn liên quan đến người dùng"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-049",
+    "codeType": "MESSAGE_CATEGORY",
+    "code": "system",
+    "name": {
+      "en": "System",
+      "ko": "시스템",
+      "zh": "系统",
+      "vi": "Hệ thống"
+    },
+    "description": {
+      "en": "System messages",
+      "ko": "시스템 메시지",
+      "zh": "系统消息",
+      "vi": "Tin nhắn hệ thống"
+    },
+    "order": 5,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-050",
+    "codeType": "MESSAGE_TYPE",
+    "code": "success",
+    "name": {
+      "en": "Success",
+      "ko": "성공",
+      "zh": "成功",
+      "vi": "Thành công"
+    },
+    "description": {
+      "en": "Success message type",
+      "ko": "성공 메시지 타입",
+      "zh": "成功消息类型",
+      "vi": "Loại tin nhắn thành công"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "success",
+      "icon": "CheckCircle"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-051",
+    "codeType": "MESSAGE_TYPE",
+    "code": "error",
+    "name": {
+      "en": "Error",
+      "ko": "오류",
+      "zh": "错误",
+      "vi": "Lỗi"
+    },
+    "description": {
+      "en": "Error message type",
+      "ko": "오류 메시지 타입",
+      "zh": "错误消息类型",
+      "vi": "Loại tin nhắn lỗi"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "error",
+      "icon": "Cancel"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-052",
+    "codeType": "MESSAGE_TYPE",
+    "code": "warning",
+    "name": {
+      "en": "Warning",
+      "ko": "경고",
+      "zh": "警告",
+      "vi": "Cảnh báo"
+    },
+    "description": {
+      "en": "Warning message type",
+      "ko": "경고 메시지 타입",
+      "zh": "警告消息类型",
+      "vi": "Loại tin nhắn cảnh báo"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "warning",
+      "icon": "Warning"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-053",
+    "codeType": "MESSAGE_TYPE",
+    "code": "info",
+    "name": {
+      "en": "Info",
+      "ko": "정보",
+      "zh": "信息",
+      "vi": "Thông tin"
+    },
+    "description": {
+      "en": "Information message type",
+      "ko": "정보 메시지 타입",
+      "zh": "信息消息类型",
+      "vi": "Loại tin nhắn thông tin"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {
+      "color": "info",
+      "icon": "Info"
+    },
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-054",
+    "codeType": "CODE_TYPE_CATEGORY",
+    "code": "user",
+    "name": {
+      "en": "User",
+      "ko": "사용자",
+      "zh": "用户",
+      "vi": "Người dùng"
+    },
+    "description": {
+      "en": "User related code types",
+      "ko": "사용자 관련 코드 타입",
+      "zh": "用户相关代码类型",
+      "vi": "Loại mã liên quan đến người dùng"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-055",
+    "codeType": "CODE_TYPE_CATEGORY",
+    "code": "organization",
+    "name": {
+      "en": "Organization",
+      "ko": "조직",
+      "zh": "组织",
+      "vi": "Tổ chức"
+    },
+    "description": {
+      "en": "Organization related code types",
+      "ko": "조직 관련 코드 타입",
+      "zh": "组织相关代码类型",
+      "vi": "Loại mã liên quan đến tổ chức"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-056",
+    "codeType": "CODE_TYPE_CATEGORY",
+    "code": "system",
+    "name": {
+      "en": "System",
+      "ko": "시스템",
+      "zh": "系统",
+      "vi": "Hệ thống"
+    },
+    "description": {
+      "en": "System related code types",
+      "ko": "시스템 관련 코드 타입",
+      "zh": "系统相关代码类型",
+      "vi": "Loại mã liên quan đến hệ thống"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-057",
+    "codeType": "CODE_TYPE_CATEGORY",
+    "code": "workflow",
+    "name": {
+      "en": "Workflow",
+      "ko": "워크플로우",
+      "zh": "工作流",
+      "vi": "Quy trình làm việc"
+    },
+    "description": {
+      "en": "Workflow related code types",
+      "ko": "워크플로우 관련 코드 타입",
+      "zh": "工作流相关代码类型",
+      "vi": "Loại mã liên quan đến quy trình làm việc"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-058",
+    "codeType": "CODE_TYPE_CATEGORY",
+    "code": "common",
+    "name": {
+      "en": "Common",
+      "ko": "공통",
+      "zh": "通用",
+      "vi": "Chung"
+    },
+    "description": {
+      "en": "Common code types",
+      "ko": "공통 코드 타입",
+      "zh": "通用代码类型",
+      "vi": "Loại mã chung"
+    },
+    "order": 5,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-059",
+    "codeType": "DEPARTMENT",
+    "code": "ADMIN",
+    "name": {
+      "en": "Admin",
+      "ko": "관리",
+      "zh": "管理",
+      "vi": "Quản lý"
+    },
+    "description": {
+      "en": "Administration department",
+      "ko": "관리 부서",
+      "zh": "管理部门",
+      "vi": "Phòng quản lý"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-060",
+    "codeType": "DEPARTMENT",
+    "code": "DESIGN",
+    "name": {
+      "en": "Design",
+      "ko": "디자인",
+      "zh": "设计",
+      "vi": "Thiết kế"
+    },
+    "description": {
+      "en": "Design department",
+      "ko": "디자인 부서",
+      "zh": "设计部门",
+      "vi": "Phòng thiết kế"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-061",
+    "codeType": "DEPARTMENT",
+    "code": "ENGINEERING",
+    "name": {
+      "en": "Engineering",
+      "ko": "개발",
+      "zh": "工程",
+      "vi": "Kỹ thuật"
+    },
+    "description": {
+      "en": "Engineering department",
+      "ko": "개발 부서",
+      "zh": "工程部门",
+      "vi": "Phòng kỹ thuật"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-062",
+    "codeType": "DEPARTMENT",
+    "code": "FINANCE",
+    "name": {
+      "en": "Finance",
+      "ko": "재무",
+      "zh": "财务",
+      "vi": "Tài chính"
+    },
+    "description": {
+      "en": "Finance department",
+      "ko": "재무 부서",
+      "zh": "财务部门",
+      "vi": "Phòng tài chính"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-063",
+    "codeType": "DEPARTMENT",
+    "code": "HR",
+    "name": {
+      "en": "HR",
+      "ko": "인사",
+      "zh": "人力资源",
+      "vi": "Nhân sự"
+    },
+    "description": {
+      "en": "Human Resources department",
+      "ko": "인사 부서",
+      "zh": "人力资源部门",
+      "vi": "Phòng nhân sự"
+    },
+    "order": 5,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-064",
+    "codeType": "DEPARTMENT",
+    "code": "IT",
+    "name": {
+      "en": "IT",
+      "ko": "정보기술",
+      "zh": "信息技术",
+      "vi": "Công nghệ thông tin"
+    },
+    "description": {
+      "en": "Information Technology department",
+      "ko": "정보기술 부서",
+      "zh": "信息技术部门",
+      "vi": "Phòng công nghệ thông tin"
+    },
+    "order": 6,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-065",
+    "codeType": "DEPARTMENT",
+    "code": "LEGAL",
+    "name": {
+      "en": "Legal",
+      "ko": "법무",
+      "zh": "法务",
+      "vi": "Pháp lý"
+    },
+    "description": {
+      "en": "Legal department",
+      "ko": "법무 부서",
+      "zh": "法务部门",
+      "vi": "Phòng pháp lý"
+    },
+    "order": 7,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-066",
+    "codeType": "DEPARTMENT",
+    "code": "MARKETING",
+    "name": {
+      "en": "Marketing",
+      "ko": "마케팅",
+      "zh": "营销",
+      "vi": "Tiếp thị"
+    },
+    "description": {
+      "en": "Marketing department",
+      "ko": "마케팅 부서",
+      "zh": "营销部门",
+      "vi": "Phòng tiếp thị"
+    },
+    "order": 8,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-067",
+    "codeType": "DEPARTMENT",
+    "code": "OPERATIONS",
+    "name": {
+      "en": "Operations",
+      "ko": "운영",
+      "zh": "运营",
+      "vi": "Vận hành"
+    },
+    "description": {
+      "en": "Operations department",
+      "ko": "운영 부서",
+      "zh": "运营部门",
+      "vi": "Phòng vận hành"
+    },
+    "order": 9,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-068",
+    "codeType": "DEPARTMENT",
+    "code": "PRODUCT",
+    "name": {
+      "en": "Product",
+      "ko": "제품",
+      "zh": "产品",
+      "vi": "Sản phẩm"
+    },
+    "description": {
+      "en": "Product department",
+      "ko": "제품 부서",
+      "zh": "产品部门",
+      "vi": "Phòng sản phẩm"
+    },
+    "order": 10,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-069",
+    "codeType": "DEPARTMENT",
+    "code": "SALES",
+    "name": {
+      "en": "Sales",
+      "ko": "영업",
+      "zh": "销售",
+      "vi": "Bán hàng"
+    },
+    "description": {
+      "en": "Sales department",
+      "ko": "영업 부서",
+      "zh": "销售部门",
+      "vi": "Phòng bán hàng"
+    },
+    "order": 11,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-070",
+    "codeType": "DEPARTMENT",
+    "code": "SUPPORT",
+    "name": {
+      "en": "Support",
+      "ko": "지원",
+      "zh": "支持",
+      "vi": "Hỗ trợ"
+    },
+    "description": {
+      "en": "Support department",
+      "ko": "지원 부서",
+      "zh": "支持部门",
+      "vi": "Phòng hỗ trợ"
+    },
+    "order": 12,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-071",
+    "codeType": "ROLE_CATEGORY",
+    "code": "general",
+    "name": {
+      "en": "General",
+      "ko": "일반",
+      "zh": "一般",
+      "vi": "Chung"
+    },
+    "description": {
+      "en": "General role category",
+      "ko": "일반 역할 카테고리",
+      "zh": "一般角色类别",
+      "vi": "Danh mục vai trò chung"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-072",
+    "codeType": "ROLE_CATEGORY",
+    "code": "management",
+    "name": {
+      "en": "Management",
+      "ko": "관리",
+      "zh": "管理",
+      "vi": "Quản lý"
+    },
+    "description": {
+      "en": "Management role category",
+      "ko": "관리 역할 카테고리",
+      "zh": "管理角色类别",
+      "vi": "Danh mục vai trò quản lý"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-073",
+    "codeType": "ICON_TYPE",
+    "code": "Dashboard",
+    "name": {
+      "en": "Dashboard",
+      "ko": "대시보드",
+      "zh": "仪表板",
+      "vi": "Bảng điều khiển"
+    },
+    "description": {
+      "en": "Dashboard icon",
+      "ko": "대시보드 아이콘",
+      "zh": "仪表板图标",
+      "vi": "Biểu tượng bảng điều khiển"
+    },
+    "order": 1,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-074",
+    "codeType": "ICON_TYPE",
+    "code": "People",
+    "name": {
+      "en": "People",
+      "ko": "사람들",
+      "zh": "人员",
+      "vi": "Mọi người"
+    },
+    "description": {
+      "en": "People icon",
+      "ko": "사람 아이콘",
+      "zh": "人员图标",
+      "vi": "Biểu tượng người"
+    },
+    "order": 2,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-075",
+    "codeType": "ICON_TYPE",
+    "code": "Assessment",
+    "name": {
+      "en": "Assessment",
+      "ko": "평가",
+      "zh": "评估",
+      "vi": "Đánh giá"
+    },
+    "description": {
+      "en": "Assessment icon",
+      "ko": "평가 아이콘",
+      "zh": "评估图标",
+      "vi": "Biểu tượng đánh giá"
+    },
+    "order": 3,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-076",
+    "codeType": "ICON_TYPE",
+    "code": "Settings",
+    "name": {
+      "en": "Settings",
+      "ko": "설정",
+      "zh": "设置",
+      "vi": "Cài đặt"
+    },
+    "description": {
+      "en": "Settings icon",
+      "ko": "설정 아이콘",
+      "zh": "设置图标",
+      "vi": "Biểu tượng cài đặt"
+    },
+    "order": 4,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-077",
+    "codeType": "ICON_TYPE",
+    "code": "List",
+    "name": {
+      "en": "List",
+      "ko": "목록",
+      "zh": "列表",
+      "vi": "Danh sách"
+    },
+    "description": {
+      "en": "List icon",
+      "ko": "목록 아이콘",
+      "zh": "列表图标",
+      "vi": "Biểu tượng danh sách"
+    },
+    "order": 5,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-078",
+    "codeType": "ICON_TYPE",
+    "code": "AdminPanelSettings",
+    "name": {
+      "en": "Admin Panel",
+      "ko": "관리자 패널",
+      "zh": "管理面板",
+      "vi": "Bảng quản trị"
+    },
+    "description": {
+      "en": "Admin panel settings icon",
+      "ko": "관리자 패널 설정 아이콘",
+      "zh": "管理面板设置图标",
+      "vi": "Biểu tượng cài đặt bảng quản trị"
+    },
+    "order": 6,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-079",
+    "codeType": "ICON_TYPE",
+    "code": "GridOn",
+    "name": {
+      "en": "Grid",
+      "ko": "그리드",
+      "zh": "网格",
+      "vi": "Lưới"
+    },
+    "description": {
+      "en": "Grid icon",
+      "ko": "그리드 아이콘",
+      "zh": "网格图标",
+      "vi": "Biểu tượng lưới"
+    },
+    "order": 7,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-080",
+    "codeType": "ICON_TYPE",
+    "code": "TrendingUp",
+    "name": {
+      "en": "Trending Up",
+      "ko": "상승 추세",
+      "zh": "上升趋势",
+      "vi": "Xu hướng tăng"
+    },
+    "description": {
+      "en": "Trending up icon",
+      "ko": "상승 추세 아이콘",
+      "zh": "上升趋势图标",
+      "vi": "Biểu tượng xu hướng tăng"
+    },
+    "order": 8,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-081",
+    "codeType": "ICON_TYPE",
+    "code": "Widgets",
+    "name": {
+      "en": "Widgets",
+      "ko": "위젯",
+      "zh": "小部件",
+      "vi": "Tiện ích"
+    },
+    "description": {
+      "en": "Widgets icon",
+      "ko": "위젯 아이콘",
+      "zh": "小部件图标",
+      "vi": "Biểu tượng tiện ích"
+    },
+    "order": 9,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-082",
+    "codeType": "ICON_TYPE",
+    "code": "Description",
+    "name": {
+      "en": "Description",
+      "ko": "설명",
+      "zh": "描述",
+      "vi": "Mô tả"
+    },
+    "description": {
+      "en": "Description icon",
+      "ko": "설명 아이콘",
+      "zh": "描述图标",
+      "vi": "Biểu tượng mô tả"
+    },
+    "order": 10,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-083",
+    "codeType": "ICON_TYPE",
+    "code": "Folder",
+    "name": {
+      "en": "Folder",
+      "ko": "폴더",
+      "zh": "文件夹",
+      "vi": "Thư mục"
+    },
+    "description": {
+      "en": "Folder icon",
+      "ko": "폴더 아이콘",
+      "zh": "文件夹图标",
+      "vi": "Biểu tượng thư mục"
+    },
+    "order": 11,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-084",
+    "codeType": "ICON_TYPE",
+    "code": "Assignment",
+    "name": {
+      "en": "Assignment",
+      "ko": "할당",
+      "zh": "分配",
+      "vi": "Phân công"
+    },
+    "description": {
+      "en": "Assignment icon",
+      "ko": "할당 아이콘",
+      "zh": "分配图标",
+      "vi": "Biểu tượng phân công"
+    },
+    "order": 12,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-085",
+    "codeType": "ICON_TYPE",
+    "code": "Build",
+    "name": {
+      "en": "Build",
+      "ko": "빌드",
+      "zh": "构建",
+      "vi": "Xây dựng"
+    },
+    "description": {
+      "en": "Build icon",
+      "ko": "빌드 아이콘",
+      "zh": "构建图标",
+      "vi": "Biểu tượng xây dựng"
+    },
+    "order": 13,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-086",
+    "codeType": "ICON_TYPE",
+    "code": "Code",
+    "name": {
+      "en": "Code",
+      "ko": "코드",
+      "zh": "代码",
+      "vi": "Mã"
+    },
+    "description": {
+      "en": "Code icon",
+      "ko": "코드 아이콘",
+      "zh": "代码图标",
+      "vi": "Biểu tượng mã"
+    },
+    "order": 14,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-087",
+    "codeType": "ICON_TYPE",
+    "code": "Security",
+    "name": {
+      "en": "Security",
+      "ko": "보안",
+      "zh": "安全",
+      "vi": "Bảo mật"
+    },
+    "description": {
+      "en": "Security icon",
+      "ko": "보안 아이콘",
+      "zh": "安全图标",
+      "vi": "Biểu tượng bảo mật"
+    },
+    "order": 15,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-088",
+    "codeType": "ICON_TYPE",
+    "code": "Help",
+    "name": {
+      "en": "Help",
+      "ko": "도움말",
+      "zh": "帮助",
+      "vi": "Trợ giúp"
+    },
+    "description": {
+      "en": "Help icon",
+      "ko": "도움말 아이콘",
+      "zh": "帮助图标",
+      "vi": "Biểu tượng trợ giúp"
+    },
+    "order": 16,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-089",
+    "codeType": "ICON_TYPE",
+    "code": "Link",
+    "name": {
+      "en": "Link",
+      "ko": "링크",
+      "zh": "链接",
+      "vi": "Liên kết"
+    },
+    "description": {
+      "en": "Link icon",
+      "ko": "링크 아이콘",
+      "zh": "链接图标",
+      "vi": "Biểu tượng liên kết"
+    },
+    "order": 17,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-090",
+    "codeType": "ICON_TYPE",
+    "code": "AccountTree",
+    "name": {
+      "en": "Tree",
+      "ko": "트리",
+      "zh": "树",
+      "vi": "Cây"
+    },
+    "description": {
+      "en": "Tree structure icon",
+      "ko": "트리 구조 아이콘",
+      "zh": "树结构图标",
+      "vi": "Biểu tượng cấu trúc cây"
+    },
+    "order": 18,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-091",
+    "codeType": "ICON_TYPE",
+    "code": "School",
+    "name": {
+      "en": "School",
+      "ko": "학교",
+      "zh": "学校",
+      "vi": "Trường học"
+    },
+    "description": {
+      "en": "School icon",
+      "ko": "학교 아이콘",
+      "zh": "学校图标",
+      "vi": "Biểu tượng trường học"
+    },
+    "order": 19,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-092",
+    "codeType": "ICON_TYPE",
+    "code": "Palette",
+    "name": {
+      "en": "Palette",
+      "ko": "팔레트",
+      "zh": "调色板",
+      "vi": "Bảng màu"
+    },
+    "description": {
+      "en": "Palette icon",
+      "ko": "팔레트 아이콘",
+      "zh": "调色板图标",
+      "vi": "Biểu tượng bảng màu"
+    },
+    "order": 20,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
   }
 ]
