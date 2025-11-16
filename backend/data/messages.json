@@ -418,5 +418,1769 @@
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-021",
+    "code": "CRUD_USER_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "User created successfully",
+      "ko": "사용자가 생성되었습니다",
+      "zh": "用户创建成功",
+      "vi": "Người dùng đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for user creation",
+      "ko": "사용자 생성 성공 메시지",
+      "zh": "用户创建成功消息",
+      "vi": "Thông báo thành công cho tạo người dùng"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-022",
+    "code": "CRUD_USER_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "User updated successfully",
+      "ko": "사용자가 수정되었습니다",
+      "zh": "用户更新成功",
+      "vi": "Người dùng đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for user update",
+      "ko": "사용자 수정 성공 메시지",
+      "zh": "用户更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật người dùng"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-023",
+    "code": "CRUD_USER_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} user(s)",
+      "ko": "{count}명의 사용자가 삭제되었습니다",
+      "zh": "成功删除 {count} 个用户",
+      "vi": "Đã xóa thành công {count} người dùng"
+    },
+    "description": {
+      "en": "Success message for user deletion",
+      "ko": "사용자 삭제 성공 메시지",
+      "zh": "用户删除成功消息",
+      "vi": "Thông báo thành công cho xóa người dùng"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-024",
+    "code": "CRUD_USER_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save user",
+      "ko": "사용자 저장에 실패했습니다",
+      "zh": "保存用户失败",
+      "vi": "Không thể lưu người dùng"
+    },
+    "description": {
+      "en": "Error message for user save failure",
+      "ko": "사용자 저장 실패 메시지",
+      "zh": "保存用户失败错误消息",
+      "vi": "Thông báo lỗi khi lưu người dùng thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-025",
+    "code": "CRUD_USER_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete users",
+      "ko": "사용자 삭제에 실패했습니다",
+      "zh": "删除用户失败",
+      "vi": "Không thể xóa người dùng"
+    },
+    "description": {
+      "en": "Error message for user deletion failure",
+      "ko": "사용자 삭제 실패 메시지",
+      "zh": "删除用户失败错误消息",
+      "vi": "Thông báo lỗi khi xóa người dùng thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-026",
+    "code": "CRUD_USER_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load users",
+      "ko": "사용자 목록을 불러오는데 실패했습니다",
+      "zh": "加载用户失败",
+      "vi": "Không thể tải người dùng"
+    },
+    "description": {
+      "en": "Error message for user loading failure",
+      "ko": "사용자 로드 실패 메시지",
+      "zh": "加载用户失败错误消息",
+      "vi": "Thông báo lỗi khi tải người dùng thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-027",
+    "code": "CRUD_ROLE_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Role created successfully",
+      "ko": "역할이 생성되었습니다",
+      "zh": "角色创建成功",
+      "vi": "Vai trò đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for role creation",
+      "ko": "역할 생성 성공 메시지",
+      "zh": "角色创建成功消息",
+      "vi": "Thông báo thành công cho tạo vai trò"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-028",
+    "code": "CRUD_ROLE_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Role updated successfully",
+      "ko": "역할이 수정되었습니다",
+      "zh": "角色更新成功",
+      "vi": "Vai trò đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for role update",
+      "ko": "역할 수정 성공 메시지",
+      "zh": "角色更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật vai trò"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-029",
+    "code": "CRUD_ROLE_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} role(s)",
+      "ko": "{count}개의 역할이 삭제되었습니다",
+      "zh": "成功删除 {count} 个角色",
+      "vi": "Đã xóa thành công {count} vai trò"
+    },
+    "description": {
+      "en": "Success message for role deletion",
+      "ko": "역할 삭제 성공 메시지",
+      "zh": "角色删除成功消息",
+      "vi": "Thông báo thành công cho xóa vai trò"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-030",
+    "code": "CRUD_ROLE_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save role",
+      "ko": "역할 저장에 실패했습니다",
+      "zh": "保存角色失败",
+      "vi": "Không thể lưu vai trò"
+    },
+    "description": {
+      "en": "Error message for role save failure",
+      "ko": "역할 저장 실패 메시지",
+      "zh": "保存角色失败错误消息",
+      "vi": "Thông báo lỗi khi lưu vai trò thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-031",
+    "code": "CRUD_ROLE_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete roles",
+      "ko": "역할 삭제에 실패했습니다",
+      "zh": "删除角色失败",
+      "vi": "Không thể xóa vai trò"
+    },
+    "description": {
+      "en": "Error message for role deletion failure",
+      "ko": "역할 삭제 실패 메시지",
+      "zh": "删除角色失败错误消息",
+      "vi": "Thông báo lỗi khi xóa vai trò thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-032",
+    "code": "CRUD_ROLE_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load roles",
+      "ko": "역할 목록을 불러오는데 실패했습니다",
+      "zh": "加载角色失败",
+      "vi": "Không thể tải vai trò"
+    },
+    "description": {
+      "en": "Error message for role loading failure",
+      "ko": "역할 로드 실패 메시지",
+      "zh": "加载角色失败错误消息",
+      "vi": "Thông báo lỗi khi tải vai trò thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-033",
+    "code": "VALIDATION_PASSWORD_LENGTH",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "Password must be at least {min} characters",
+      "ko": "비밀번호는 최소 {min}자 이상이어야 합니다",
+      "zh": "密码必须至少为 {min} 个字符",
+      "vi": "Mật khẩu phải có ít nhất {min} ký tự"
+    },
+    "description": {
+      "en": "Validation error for password length",
+      "ko": "비밀번호 길이 검증 오류",
+      "zh": "密码长度验证错误",
+      "vi": "Lỗi xác thực độ dài mật khẩu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-034",
+    "code": "VALIDATION_PASSWORD_MISMATCH",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "Passwords do not match",
+      "ko": "비밀번호가 일치하지 않습니다",
+      "zh": "密码不匹配",
+      "vi": "Mật khẩu không khớp"
+    },
+    "description": {
+      "en": "Validation error for password mismatch",
+      "ko": "비밀번호 불일치 검증 오류",
+      "zh": "密码不匹配验证错误",
+      "vi": "Lỗi xác thực mật khẩu không khớp"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-035",
+    "code": "VALIDATION_REQUIRED_FIELDS",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "Please fill in all required fields",
+      "ko": "필수 입력 항목을 모두 입력해주세요",
+      "zh": "请填写所有必填字段",
+      "vi": "Vui lòng điền tất cả các trường bắt buộc"
+    },
+    "description": {
+      "en": "Validation error for required fields",
+      "ko": "필수 필드 검증 오류",
+      "zh": "必填字段验证错误",
+      "vi": "Lỗi xác thực các trường bắt buộc"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-036",
+    "code": "SYSTEM_EXPORT_SUCCESS",
+    "category": "system",
+    "type": "success",
+    "message": {
+      "en": "Data exported successfully",
+      "ko": "데이터를 성공적으로 내보냈습니다",
+      "zh": "数据导出成功",
+      "vi": "Dữ liệu đã được xuất thành công"
+    },
+    "description": {
+      "en": "Success message for data export",
+      "ko": "데이터 내보내기 성공 메시지",
+      "zh": "数据导出成功消息",
+      "vi": "Thông báo thành công cho xuất dữ liệu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-037",
+    "code": "SYSTEM_EXPORT_FAIL",
+    "category": "system",
+    "type": "error",
+    "message": {
+      "en": "Failed to export data",
+      "ko": "데이터 내보내기에 실패했습니다",
+      "zh": "导出数据失败",
+      "vi": "Không thể xuất dữ liệu"
+    },
+    "description": {
+      "en": "Error message for data export failure",
+      "ko": "데이터 내보내기 실패 메시지",
+      "zh": "导出数据失败错误消息",
+      "vi": "Thông báo lỗi khi xuất dữ liệu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-038",
+    "code": "SYSTEM_IMPORT_SUCCESS",
+    "category": "system",
+    "type": "success",
+    "message": {
+      "en": "Successfully imported {count} rows",
+      "ko": "{count}개의 행을 성공적으로 가져왔습니다",
+      "zh": "成功导入 {count} 行",
+      "vi": "Đã nhập thành công {count} hàng"
+    },
+    "description": {
+      "en": "Success message for data import",
+      "ko": "데이터 가져오기 성공 메시지",
+      "zh": "数据导入成功消息",
+      "vi": "Thông báo thành công cho nhập dữ liệu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-039",
+    "code": "SYSTEM_IMPORT_FAIL",
+    "category": "system",
+    "type": "error",
+    "message": {
+      "en": "Failed to import file",
+      "ko": "파일 가져오기에 실패했습니다",
+      "zh": "导入文件失败",
+      "vi": "Không thể nhập tệp"
+    },
+    "description": {
+      "en": "Error message for data import failure",
+      "ko": "데이터 가져오기 실패 메시지",
+      "zh": "导入数据失败错误消息",
+      "vi": "Thông báo lỗi khi nhập dữ liệu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-040",
+    "code": "USER_PASSWORD_RESET_SUCCESS",
+    "category": "user",
+    "type": "success",
+    "message": {
+      "en": "Password reset {resetMethod} for user: {username}",
+      "ko": "사용자 {username}의 비밀번호를 {resetMethod}로 재설정했습니다",
+      "zh": "用户 {username} 的密码已通过 {resetMethod} 重置",
+      "vi": "Đặt lại mật khẩu {resetMethod} cho người dùng: {username}"
+    },
+    "description": {
+      "en": "Success message for password reset",
+      "ko": "비밀번호 재설정 성공 메시지",
+      "zh": "密码重置成功消息",
+      "vi": "Thông báo thành công cho đặt lại mật khẩu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-041",
+    "code": "USER_PASSWORD_RESET_FAIL",
+    "category": "user",
+    "type": "error",
+    "message": {
+      "en": "Failed to reset password",
+      "ko": "비밀번호 재설정에 실패했습니다",
+      "zh": "密码重置失败",
+      "vi": "Không thể đặt lại mật khẩu"
+    },
+    "description": {
+      "en": "Error message for password reset failure",
+      "ko": "비밀번호 재설정 실패 메시지",
+      "zh": "密码重置失败错误消息",
+      "vi": "Thông báo lỗi khi đặt lại mật khẩu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-042",
+    "code": "CRUD_CODE_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Code created successfully",
+      "ko": "코드가 생성되었습니다",
+      "zh": "代码创建成功",
+      "vi": "Mã đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for code creation",
+      "ko": "코드 생성 성공 메시지",
+      "zh": "代码创建成功消息",
+      "vi": "Thông báo thành công cho tạo mã"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-043",
+    "code": "CRUD_CODE_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Code updated successfully",
+      "ko": "코드가 수정되었습니다",
+      "zh": "代码更新成功",
+      "vi": "Mã đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for code update",
+      "ko": "코드 수정 성공 메시지",
+      "zh": "代码更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật mã"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-044",
+    "code": "CRUD_CODE_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} code(s)",
+      "ko": "{count}개의 코드가 삭제되었습니다",
+      "zh": "成功删除 {count} 个代码",
+      "vi": "Đã xóa thành công {count} mã"
+    },
+    "description": {
+      "en": "Success message for code deletion",
+      "ko": "코드 삭제 성공 메시지",
+      "zh": "代码删除成功消息",
+      "vi": "Thông báo thành công cho xóa mã"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-045",
+    "code": "CRUD_CODE_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save code",
+      "ko": "코드 저장에 실패했습니다",
+      "zh": "保存代码失败",
+      "vi": "Không thể lưu mã"
+    },
+    "description": {
+      "en": "Error message for code save failure",
+      "ko": "코드 저장 실패 메시지",
+      "zh": "保存代码失败错误消息",
+      "vi": "Thông báo lỗi khi lưu mã thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-046",
+    "code": "CRUD_CODE_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete codes",
+      "ko": "코드 삭제에 실패했습니다",
+      "zh": "删除代码失败",
+      "vi": "Không thể xóa mã"
+    },
+    "description": {
+      "en": "Error message for code deletion failure",
+      "ko": "코드 삭제 실패 메시지",
+      "zh": "删除代码失败错误消息",
+      "vi": "Thông báo lỗi khi xóa mã thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-047",
+    "code": "CRUD_CODE_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load codes",
+      "ko": "코드 목록을 불러오는데 실패했습니다",
+      "zh": "加载代码失败",
+      "vi": "Không thể tải mã"
+    },
+    "description": {
+      "en": "Error message for code loading failure",
+      "ko": "코드 로드 실패 메시지",
+      "zh": "加载代码失败错误消息",
+      "vi": "Thông báo lỗi khi tải mã thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-048",
+    "code": "CRUD_DEPARTMENT_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Department created successfully",
+      "ko": "부서가 생성되었습니다",
+      "zh": "部门创建成功",
+      "vi": "Phòng ban đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for department creation",
+      "ko": "부서 생성 성공 메시지",
+      "zh": "部门创建成功消息",
+      "vi": "Thông báo thành công cho tạo phòng ban"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-049",
+    "code": "CRUD_DEPARTMENT_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Department updated successfully",
+      "ko": "부서가 수정되었습니다",
+      "zh": "部门更新成功",
+      "vi": "Phòng ban đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for department update",
+      "ko": "부서 수정 성공 메시지",
+      "zh": "部门更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật phòng ban"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-050",
+    "code": "CRUD_DEPARTMENT_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} department(s)",
+      "ko": "{count}개의 부서가 삭제되었습니다",
+      "zh": "成功删除 {count} 个部门",
+      "vi": "Đã xóa thành công {count} phòng ban"
+    },
+    "description": {
+      "en": "Success message for department deletion",
+      "ko": "부서 삭제 성공 메시지",
+      "zh": "部门删除成功消息",
+      "vi": "Thông báo thành công cho xóa phòng ban"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-051",
+    "code": "CRUD_DEPARTMENT_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save department",
+      "ko": "부서 저장에 실패했습니다",
+      "zh": "保存部门失败",
+      "vi": "Không thể lưu phòng ban"
+    },
+    "description": {
+      "en": "Error message for department save failure",
+      "ko": "부서 저장 실패 메시지",
+      "zh": "保存部门失败错误消息",
+      "vi": "Thông báo lỗi khi lưu phòng ban thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-052",
+    "code": "CRUD_DEPARTMENT_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete departments",
+      "ko": "부서 삭제에 실패했습니다",
+      "zh": "删除部门失败",
+      "vi": "Không thể xóa phòng ban"
+    },
+    "description": {
+      "en": "Error message for department deletion failure",
+      "ko": "부서 삭제 실패 메시지",
+      "zh": "删除部门失败错误消息",
+      "vi": "Thông báo lỗi khi xóa phòng ban thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-053",
+    "code": "CRUD_DEPARTMENT_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load departments",
+      "ko": "부서 목록을 불러오는데 실패했습니다",
+      "zh": "加载部门失败",
+      "vi": "Không thể tải phòng ban"
+    },
+    "description": {
+      "en": "Error message for department loading failure",
+      "ko": "부서 로드 실패 메시지",
+      "zh": "加载部门失败错误消息",
+      "vi": "Thông báo lỗi khi tải phòng ban thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-054",
+    "code": "CRUD_MENU_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Menu created successfully",
+      "ko": "메뉴가 생성되었습니다",
+      "zh": "菜单创建成功",
+      "vi": "Menu đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for menu creation",
+      "ko": "메뉴 생성 성공 메시지",
+      "zh": "菜单创建成功消息",
+      "vi": "Thông báo thành công cho tạo menu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-055",
+    "code": "CRUD_MENU_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Menu updated successfully",
+      "ko": "메뉴가 수정되었습니다",
+      "zh": "菜单更新成功",
+      "vi": "Menu đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for menu update",
+      "ko": "메뉴 수정 성공 메시지",
+      "zh": "菜单更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật menu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-056",
+    "code": "CRUD_MENU_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} menu(s)",
+      "ko": "{count}개의 메뉴가 삭제되었습니다",
+      "zh": "成功删除 {count} 个菜单",
+      "vi": "Đã xóa thành công {count} menu"
+    },
+    "description": {
+      "en": "Success message for menu deletion",
+      "ko": "메뉴 삭제 성공 메시지",
+      "zh": "菜单删除成功消息",
+      "vi": "Thông báo thành công cho xóa menu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-057",
+    "code": "CRUD_MENU_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save menu",
+      "ko": "메뉴 저장에 실패했습니다",
+      "zh": "保存菜单失败",
+      "vi": "Không thể lưu menu"
+    },
+    "description": {
+      "en": "Error message for menu save failure",
+      "ko": "메뉴 저장 실패 메시지",
+      "zh": "保存菜单失败错误消息",
+      "vi": "Thông báo lỗi khi lưu menu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-058",
+    "code": "CRUD_MENU_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete menus",
+      "ko": "메뉴 삭제에 실패했습니다",
+      "zh": "删除菜单失败",
+      "vi": "Không thể xóa menu"
+    },
+    "description": {
+      "en": "Error message for menu deletion failure",
+      "ko": "메뉴 삭제 실패 메시지",
+      "zh": "删除菜单失败错误消息",
+      "vi": "Thông báo lỗi khi xóa menu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-059",
+    "code": "CRUD_MENU_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load menus",
+      "ko": "메뉴 목록을 불러오는데 실패했습니다",
+      "zh": "加载菜单失败",
+      "vi": "Không thể tải menu"
+    },
+    "description": {
+      "en": "Error message for menu loading failure",
+      "ko": "메뉴 로드 실패 메시지",
+      "zh": "加载菜单失败错误消息",
+      "vi": "Thông báo lỗi khi tải menu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-060",
+    "code": "CRUD_MESSAGE_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Message created successfully",
+      "ko": "메시지가 생성되었습니다",
+      "zh": "消息创建成功",
+      "vi": "Tin nhắn đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for message creation",
+      "ko": "메시지 생성 성공 메시지",
+      "zh": "消息创建成功消息",
+      "vi": "Thông báo thành công cho tạo tin nhắn"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-061",
+    "code": "CRUD_MESSAGE_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Message updated successfully",
+      "ko": "메시지가 수정되었습니다",
+      "zh": "消息更新成功",
+      "vi": "Tin nhắn đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for message update",
+      "ko": "메시지 수정 성공 메시지",
+      "zh": "消息更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật tin nhắn"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-062",
+    "code": "CRUD_MESSAGE_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} message(s)",
+      "ko": "{count}개의 메시지가 삭제되었습니다",
+      "zh": "成功删除 {count} 个消息",
+      "vi": "Đã xóa thành công {count} tin nhắn"
+    },
+    "description": {
+      "en": "Success message for message deletion",
+      "ko": "메시지 삭제 성공 메시지",
+      "zh": "消息删除成功消息",
+      "vi": "Thông báo thành công cho xóa tin nhắn"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-063",
+    "code": "CRUD_MESSAGE_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save message",
+      "ko": "메시지 저장에 실패했습니다",
+      "zh": "保存消息失败",
+      "vi": "Không thể lưu tin nhắn"
+    },
+    "description": {
+      "en": "Error message for message save failure",
+      "ko": "메시지 저장 실패 메시지",
+      "zh": "保存消息失败错误消息",
+      "vi": "Thông báo lỗi khi lưu tin nhắn thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-064",
+    "code": "CRUD_MESSAGE_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete messages",
+      "ko": "메시지 삭제에 실패했습니다",
+      "zh": "删除消息失败",
+      "vi": "Không thể xóa tin nhắn"
+    },
+    "description": {
+      "en": "Error message for message deletion failure",
+      "ko": "메시지 삭제 실패 메시지",
+      "zh": "删除消息失败错误消息",
+      "vi": "Thông báo lỗi khi xóa tin nhắn thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-065",
+    "code": "CRUD_MESSAGE_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load messages",
+      "ko": "메시지 목록을 불러오는데 실패했습니다",
+      "zh": "加载消息失败",
+      "vi": "Không thể tải tin nhắn"
+    },
+    "description": {
+      "en": "Error message for message loading failure",
+      "ko": "메시지 로드 실패 메시지",
+      "zh": "加载消息失败错误消息",
+      "vi": "Thông báo lỗi khi tải tin nhắn thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-066",
+    "code": "CRUD_PROGRAM_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Program created successfully",
+      "ko": "프로그램이 생성되었습니다",
+      "zh": "程序创建成功",
+      "vi": "Chương trình đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for program creation",
+      "ko": "프로그램 생성 성공 메시지",
+      "zh": "程序创建成功消息",
+      "vi": "Thông báo thành công cho tạo chương trình"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-067",
+    "code": "CRUD_PROGRAM_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Program updated successfully",
+      "ko": "프로그램이 수정되었습니다",
+      "zh": "程序更新成功",
+      "vi": "Chương trình đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for program update",
+      "ko": "프로그램 수정 성공 메시지",
+      "zh": "程序更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật chương trình"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-068",
+    "code": "CRUD_PROGRAM_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} program(s)",
+      "ko": "{count}개의 프로그램이 삭제되었습니다",
+      "zh": "成功删除 {count} 个程序",
+      "vi": "Đã xóa thành công {count} chương trình"
+    },
+    "description": {
+      "en": "Success message for program deletion",
+      "ko": "프로그램 삭제 성공 메시지",
+      "zh": "程序删除成功消息",
+      "vi": "Thông báo thành công cho xóa chương trình"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-069",
+    "code": "CRUD_PROGRAM_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save program",
+      "ko": "프로그램 저장에 실패했습니다",
+      "zh": "保存程序失败",
+      "vi": "Không thể lưu chương trình"
+    },
+    "description": {
+      "en": "Error message for program save failure",
+      "ko": "프로그램 저장 실패 메시지",
+      "zh": "保存程序失败错误消息",
+      "vi": "Thông báo lỗi khi lưu chương trình thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-070",
+    "code": "CRUD_PROGRAM_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete programs",
+      "ko": "프로그램 삭제에 실패했습니다",
+      "zh": "删除程序失败",
+      "vi": "Không thể xóa chương trình"
+    },
+    "description": {
+      "en": "Error message for program deletion failure",
+      "ko": "프로그램 삭제 실패 메시지",
+      "zh": "删除程序失败错误消息",
+      "vi": "Thông báo lỗi khi xóa chương trình thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-071",
+    "code": "CRUD_PROGRAM_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load programs",
+      "ko": "프로그램 목록을 불러오는데 실패했습니다",
+      "zh": "加载程序失败",
+      "vi": "Không thể tải chương trình"
+    },
+    "description": {
+      "en": "Error message for program loading failure",
+      "ko": "프로그램 로드 실패 메시지",
+      "zh": "加载程序失败错误消息",
+      "vi": "Thông báo lỗi khi tải chương trình thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-072",
+    "code": "CRUD_HELP_CREATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Help content created successfully",
+      "ko": "도움말이 생성되었습니다",
+      "zh": "帮助内容创建成功",
+      "vi": "Nội dung trợ giúp đã được tạo thành công"
+    },
+    "description": {
+      "en": "Success message for help content creation",
+      "ko": "도움말 생성 성공 메시지",
+      "zh": "帮助内容创建成功消息",
+      "vi": "Thông báo thành công cho tạo nội dung trợ giúp"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-073",
+    "code": "CRUD_HELP_UPDATE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Help content updated successfully",
+      "ko": "도움말이 수정되었습니다",
+      "zh": "帮助内容更新成功",
+      "vi": "Nội dung trợ giúp đã được cập nhật thành công"
+    },
+    "description": {
+      "en": "Success message for help content update",
+      "ko": "도움말 수정 성공 메시지",
+      "zh": "帮助内容更新成功消息",
+      "vi": "Thông báo thành công cho cập nhật nội dung trợ giúp"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-074",
+    "code": "CRUD_HELP_DELETE_SUCCESS",
+    "category": "crud",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} help content(s)",
+      "ko": "{count}개의 도움말이 삭제되었습니다",
+      "zh": "成功删除 {count} 个帮助内容",
+      "vi": "Đã xóa thành công {count} nội dung trợ giúp"
+    },
+    "description": {
+      "en": "Success message for help content deletion",
+      "ko": "도움말 삭제 성공 메시지",
+      "zh": "帮助内容删除成功消息",
+      "vi": "Thông báo thành công cho xóa nội dung trợ giúp"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-075",
+    "code": "CRUD_HELP_SAVE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to save help content",
+      "ko": "도움말 저장에 실패했습니다",
+      "zh": "保存帮助内容失败",
+      "vi": "Không thể lưu nội dung trợ giúp"
+    },
+    "description": {
+      "en": "Error message for help content save failure",
+      "ko": "도움말 저장 실패 메시지",
+      "zh": "保存帮助内容失败错误消息",
+      "vi": "Thông báo lỗi khi lưu nội dung trợ giúp thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-076",
+    "code": "CRUD_HELP_DELETE_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete help content",
+      "ko": "도움말 삭제에 실패했습니다",
+      "zh": "删除帮助内容失败",
+      "vi": "Không thể xóa nội dung trợ giúp"
+    },
+    "description": {
+      "en": "Error message for help content deletion failure",
+      "ko": "도움말 삭제 실패 메시지",
+      "zh": "删除帮助内容失败错误消息",
+      "vi": "Thông báo lỗi khi xóa nội dung trợ giúp thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-077",
+    "code": "CRUD_HELP_LOAD_FAIL",
+    "category": "crud",
+    "type": "error",
+    "message": {
+      "en": "Failed to load help content",
+      "ko": "도움말 목록을 불러오는데 실패했습니다",
+      "zh": "加载帮助内容失败",
+      "vi": "Không thể tải nội dung trợ giúp"
+    },
+    "description": {
+      "en": "Error message for help content loading failure",
+      "ko": "도움말 로드 실패 메시지",
+      "zh": "加载帮助内容失败错误消息",
+      "vi": "Thông báo lỗi khi tải nội dung trợ giúp thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-078",
+    "code": "VALIDATION_JSON_INVALID",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "Invalid JSON format",
+      "ko": "잘못된 JSON 형식입니다",
+      "zh": "无效的JSON格式",
+      "vi": "Định dạng JSON không hợp lệ"
+    },
+    "description": {
+      "en": "Validation error for invalid JSON",
+      "ko": "JSON 형식 검증 오류",
+      "zh": "无效JSON验证错误",
+      "vi": "Lỗi xác thực JSON không hợp lệ"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-079",
+    "code": "MAPPING_DATA_LOAD_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to load data",
+      "ko": "데이터 로드 실패",
+      "zh": "加载数据失败",
+      "vi": "Không thể tải dữ liệu"
+    },
+    "description": {
+      "en": "Error message for mapping data loading failure",
+      "ko": "매핑 데이터 로드 실패 메시지",
+      "zh": "映射数据加载失败错误消息",
+      "vi": "Thông báo lỗi khi tải dữ liệu ánh xạ thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-080",
+    "code": "MAPPING_ROLE_LOAD_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to load role mappings",
+      "ko": "역할 매핑 로드 실패",
+      "zh": "加载角色映射失败",
+      "vi": "Không thể tải ánh xạ vai trò"
+    },
+    "description": {
+      "en": "Error message for role mapping loading failure",
+      "ko": "역할 매핑 로드 실패 메시지",
+      "zh": "角色映射加载失败错误消息",
+      "vi": "Thông báo lỗi khi tải ánh xạ vai trò thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-081",
+    "code": "MAPPING_USER_LOAD_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to load user role mappings",
+      "ko": "사용자 역할 매핑 로드 실패",
+      "zh": "加载用户角色映射失败",
+      "vi": "Không thể tải ánh xạ vai trò người dùng"
+    },
+    "description": {
+      "en": "Error message for user role mapping loading failure",
+      "ko": "사용자 역할 매핑 로드 실패 메시지",
+      "zh": "用户角色映射加载失败错误消息",
+      "vi": "Thông báo lỗi khi tải ánh xạ vai trò người dùng thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-082",
+    "code": "MAPPING_SELECT_PROGRAM_REQUIRED",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Please select a program first",
+      "ko": "먼저 프로그램을 선택하세요",
+      "zh": "请先选择程序",
+      "vi": "Vui lòng chọn chương trình trước"
+    },
+    "description": {
+      "en": "Error message when program is not selected",
+      "ko": "프로그램 미선택 오류 메시지",
+      "zh": "未选择程序错误消息",
+      "vi": "Thông báo lỗi khi chưa chọn chương trình"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-083",
+    "code": "MAPPING_SELECT_ROLE_REQUIRED",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Please select a role first",
+      "ko": "먼저 역할을 선택하세요",
+      "zh": "请先选择角色",
+      "vi": "Vui lòng chọn vai trò trước"
+    },
+    "description": {
+      "en": "Error message when role is not selected",
+      "ko": "역할 미선택 오류 메시지",
+      "zh": "未选择角色错误消息",
+      "vi": "Thông báo lỗi khi chưa chọn vai trò"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-084",
+    "code": "MAPPING_ROLE_ASSIGN_SUCCESS",
+    "category": "mapping",
+    "type": "success",
+    "message": {
+      "en": "Successfully assigned {count} role(s) to program",
+      "ko": "{count}개의 역할을 프로그램에 할당했습니다",
+      "zh": "成功将 {count} 个角色分配给程序",
+      "vi": "Đã phân công thành công {count} vai trò cho chương trình"
+    },
+    "description": {
+      "en": "Success message for role assignment to program",
+      "ko": "프로그램에 역할 할당 성공 메시지",
+      "zh": "角色分配给程序成功消息",
+      "vi": "Thông báo thành công khi phân công vai trò cho chương trình"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-085",
+    "code": "MAPPING_ROLE_ASSIGN_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to assign roles to program",
+      "ko": "역할 할당 실패",
+      "zh": "分配角色给程序失败",
+      "vi": "Không thể phân công vai trò cho chương trình"
+    },
+    "description": {
+      "en": "Error message for role assignment failure",
+      "ko": "역할 할당 실패 메시지",
+      "zh": "角色分配失败错误消息",
+      "vi": "Thông báo lỗi khi phân công vai trò thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-086",
+    "code": "MAPPING_USER_ASSIGN_SUCCESS",
+    "category": "mapping",
+    "type": "success",
+    "message": {
+      "en": "Successfully assigned {count} user(s) to role",
+      "ko": "{count}명의 사용자를 역할에 할당했습니다",
+      "zh": "成功将 {count} 个用户分配给角色",
+      "vi": "Đã phân công thành công {count} người dùng cho vai trò"
+    },
+    "description": {
+      "en": "Success message for user assignment to role",
+      "ko": "역할에 사용자 할당 성공 메시지",
+      "zh": "用户分配给角色成功消息",
+      "vi": "Thông báo thành công khi phân công người dùng cho vai trò"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-087",
+    "code": "MAPPING_USER_ASSIGN_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to assign users to role",
+      "ko": "사용자 할당 실패",
+      "zh": "分配用户给角色失败",
+      "vi": "Không thể phân công người dùng cho vai trò"
+    },
+    "description": {
+      "en": "Error message for user assignment failure",
+      "ko": "사용자 할당 실패 메시지",
+      "zh": "用户分配失败错误消息",
+      "vi": "Thông báo lỗi khi phân công người dùng thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-088",
+    "code": "MAPPING_PERMISSION_UPDATE_SUCCESS",
+    "category": "mapping",
+    "type": "success",
+    "message": {
+      "en": "Permission updated successfully",
+      "ko": "권한이 업데이트되었습니다",
+      "zh": "权限更新成功",
+      "vi": "Cập nhật quyền thành công"
+    },
+    "description": {
+      "en": "Success message for permission update",
+      "ko": "권한 업데이트 성공 메시지",
+      "zh": "权限更新成功消息",
+      "vi": "Thông báo thành công khi cập nhật quyền"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-089",
+    "code": "MAPPING_PERMISSION_UPDATE_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to update permission",
+      "ko": "권한 업데이트 실패",
+      "zh": "更新权限失败",
+      "vi": "Không thể cập nhật quyền"
+    },
+    "description": {
+      "en": "Error message for permission update failure",
+      "ko": "권한 업데이트 실패 메시지",
+      "zh": "更新权限失败错误消息",
+      "vi": "Thông báo lỗi khi cập nhật quyền thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-090",
+    "code": "MAPPING_DELETE_SUCCESS",
+    "category": "mapping",
+    "type": "success",
+    "message": {
+      "en": "Successfully deleted {count} mapping(s)",
+      "ko": "{count}개의 매핑이 삭제되었습니다",
+      "zh": "成功删除 {count} 个映射",
+      "vi": "Đã xóa thành công {count} ánh xạ"
+    },
+    "description": {
+      "en": "Success message for mapping deletion",
+      "ko": "매핑 삭제 성공 메시지",
+      "zh": "映射删除成功消息",
+      "vi": "Thông báo thành công khi xóa ánh xạ"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-091",
+    "code": "MAPPING_DELETE_FAIL",
+    "category": "mapping",
+    "type": "error",
+    "message": {
+      "en": "Failed to delete mappings",
+      "ko": "매핑 삭제 실패",
+      "zh": "删除映射失败",
+      "vi": "Không thể xóa ánh xạ"
+    },
+    "description": {
+      "en": "Error message for mapping deletion failure",
+      "ko": "매핑 삭제 실패 메시지",
+      "zh": "删除映射失败错误消息",
+      "vi": "Thông báo lỗi khi xóa ánh xạ thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-092",
+    "code": "VALIDATION_FILE_TYPE_INVALID",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "Unsupported file type",
+      "ko": "지원하지 않는 파일 형식입니다",
+      "zh": "不支持的文件类型",
+      "vi": "Loại tệp không được hỗ trợ"
+    },
+    "description": {
+      "en": "Validation error for unsupported file type",
+      "ko": "지원하지 않는 파일 형식 검증 오류",
+      "zh": "不支持的文件类型验证错误",
+      "vi": "Lỗi xác thực cho loại tệp không được hỗ trợ"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-093",
+    "code": "VALIDATION_FILE_SIZE_EXCEEDED",
+    "category": "validation",
+    "type": "error",
+    "message": {
+      "en": "File size cannot exceed 10MB",
+      "ko": "파일 크기는 10MB를 초과할 수 없습니다",
+      "zh": "文件大小不能超过 10MB",
+      "vi": "Kích thước tệp không được vượt quá 10MB"
+    },
+    "description": {
+      "en": "Validation error for file size limit",
+      "ko": "파일 크기 제한 검증 오류",
+      "zh": "文件大小限制验证错误",
+      "vi": "Lỗi xác thực giới hạn kích thước tệp"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-094",
+    "code": "SETTINGS_AVATAR_UPLOAD_SUCCESS",
+    "category": "settings",
+    "type": "success",
+    "message": {
+      "en": "Avatar uploaded successfully",
+      "ko": "아바타가 업로드되었습니다",
+      "zh": "头像上传成功",
+      "vi": "Tải lên ảnh đại diện thành công"
+    },
+    "description": {
+      "en": "Success message for avatar upload",
+      "ko": "아바타 업로드 성공 메시지",
+      "zh": "头像上传成功消息",
+      "vi": "Thông báo thành công khi tải lên ảnh đại diện"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-095",
+    "code": "SETTINGS_AVATAR_UPLOAD_FAIL",
+    "category": "settings",
+    "type": "error",
+    "message": {
+      "en": "Failed to upload avatar",
+      "ko": "아바타 업로드 실패",
+      "zh": "上传头像失败",
+      "vi": "Không thể tải lên ảnh đại diện"
+    },
+    "description": {
+      "en": "Error message for avatar upload failure",
+      "ko": "아바타 업로드 실패 메시지",
+      "zh": "上传头像失败错误消息",
+      "vi": "Thông báo lỗi khi tải lên ảnh đại diện thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-096",
+    "code": "SETTINGS_PROFILE_UPDATE_SUCCESS",
+    "category": "settings",
+    "type": "success",
+    "message": {
+      "en": "Profile updated successfully",
+      "ko": "프로필이 업데이트되었습니다",
+      "zh": "个人资料更新成功",
+      "vi": "Cập nhật hồ sơ thành công"
+    },
+    "description": {
+      "en": "Success message for profile update",
+      "ko": "프로필 업데이트 성공 메시지",
+      "zh": "个人资料更新成功消息",
+      "vi": "Thông báo thành công khi cập nhật hồ sơ"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-097",
+    "code": "SETTINGS_PROFILE_UPDATE_FAIL",
+    "category": "settings",
+    "type": "error",
+    "message": {
+      "en": "Failed to update profile",
+      "ko": "프로필 업데이트 실패",
+      "zh": "更新个人资料失败",
+      "vi": "Không thể cập nhật hồ sơ"
+    },
+    "description": {
+      "en": "Error message for profile update failure",
+      "ko": "프로필 업데이트 실패 메시지",
+      "zh": "更新个人资料失败错误消息",
+      "vi": "Thông báo lỗi khi cập nhật hồ sơ thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-098",
+    "code": "SETTINGS_PASSWORD_CHANGE_SUCCESS",
+    "category": "settings",
+    "type": "success",
+    "message": {
+      "en": "Password changed successfully",
+      "ko": "비밀번호가 변경되었습니다",
+      "zh": "密码更改成功",
+      "vi": "Đổi mật khẩu thành công"
+    },
+    "description": {
+      "en": "Success message for password change",
+      "ko": "비밀번호 변경 성공 메시지",
+      "zh": "密码更改成功消息",
+      "vi": "Thông báo thành công khi đổi mật khẩu"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-099",
+    "code": "SETTINGS_PASSWORD_CHANGE_FAIL",
+    "category": "settings",
+    "type": "error",
+    "message": {
+      "en": "Failed to change password",
+      "ko": "비밀번호 변경 실패",
+      "zh": "更改密码失败",
+      "vi": "Không thể đổi mật khẩu"
+    },
+    "description": {
+      "en": "Error message for password change failure",
+      "ko": "비밀번호 변경 실패 메시지",
+      "zh": "更改密码失败错误消息",
+      "vi": "Thông báo lỗi khi đổi mật khẩu thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-100",
+    "code": "SETTINGS_MFA_TOGGLE_SUCCESS",
+    "category": "settings",
+    "type": "success",
+    "message": {
+      "en": "MFA {status} successfully",
+      "ko": "MFA가 {status}되었습니다",
+      "zh": "MFA {status}成功",
+      "vi": "MFA {status} thành công"
+    },
+    "description": {
+      "en": "Success message for MFA toggle",
+      "ko": "MFA 토글 성공 메시지",
+      "zh": "MFA切换成功消息",
+      "vi": "Thông báo thành công khi chuyển đổi MFA"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-101",
+    "code": "SETTINGS_MFA_TOGGLE_FAIL",
+    "category": "settings",
+    "type": "error",
+    "message": {
+      "en": "Failed to toggle MFA",
+      "ko": "MFA 설정 변경 실패",
+      "zh": "切换MFA失败",
+      "vi": "Không thể chuyển đổi MFA"
+    },
+    "description": {
+      "en": "Error message for MFA toggle failure",
+      "ko": "MFA 토글 실패 메시지",
+      "zh": "切换MFA失败错误消息",
+      "vi": "Thông báo lỗi khi chuyển đổi MFA thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-102",
+    "code": "SETTINGS_PREFERENCES_SAVE_SUCCESS",
+    "category": "settings",
+    "type": "success",
+    "message": {
+      "en": "Preferences saved successfully",
+      "ko": "설정이 저장되었습니다",
+      "zh": "偏好设置保存成功",
+      "vi": "Lưu tùy chọn thành công"
+    },
+    "description": {
+      "en": "Success message for preferences save",
+      "ko": "설정 저장 성공 메시지",
+      "zh": "偏好设置保存成功消息",
+      "vi": "Thông báo thành công khi lưu tùy chọn"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-103",
+    "code": "SETTINGS_PREFERENCES_SAVE_FAIL",
+    "category": "settings",
+    "type": "error",
+    "message": {
+      "en": "Failed to save preferences",
+      "ko": "설정 저장 실패",
+      "zh": "保存偏好设置失败",
+      "vi": "Không thể lưu tùy chọn"
+    },
+    "description": {
+      "en": "Error message for preferences save failure",
+      "ko": "설정 저장 실패 메시지",
+      "zh": "保存偏好设置失败错误消息",
+      "vi": "Thông báo lỗi khi lưu tùy chọn thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "msg-104",
+    "code": "COMMON_LOAD_ROLES_FAIL",
+    "category": "common",
+    "type": "error",
+    "message": {
+      "en": "Failed to load roles",
+      "ko": "역할 목록 로드 실패",
+      "zh": "加载角色失败",
+      "vi": "Không thể tải danh sách vai trò"
+    },
+    "description": {
+      "en": "Error message for roles loading failure",
+      "ko": "역할 로드 실패 메시지",
+      "zh": "加载角色失败错误消息",
+      "vi": "Thông báo lỗi khi tải danh sách vai trò thất bại"
+    },
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
   }
 ]

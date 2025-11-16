@@ -139,6 +139,154 @@ router.get('/all', authenticateToken, async (req, res) => {
 });
 
 /**
+ * POST /api/menu - Create a new menu
+ */
+router.post('/', authenticateToken, async (req, res) => {
+  try {
+    // Only admin can create menus
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden - Admin only' });
+    }
+
+    const menus = await readJSON(MENUS_FILE);
+    const { code, name, path, icon, order, parentId, level, programId, description } = req.body;
+
+    // Validate required fields
+    if (!code || !name || !path || order === undefined || level === undefined) {
+      return res.status(400).json({ error: 'Missing required fields: code, name, path, order, level' });
+    }
+
+    // Check if menu code already exists
+    if (menus.some(m => m.code === code)) {
+      return res.status(409).json({ error: 'Menu code already exists' });
+    }
+
+    // Check if menu path already exists
+    if (menus.some(m => m.path === path)) {
+      return res.status(409).json({ error: 'Menu path already exists' });
+    }
+
+    // Generate new menu ID
+    const maxId = menus.reduce((max, m) => {
+      const num = parseInt(m.id.replace('menu-', ''));
+      return num > max ? num : max;
+    }, 0);
+    const newId = `menu-${String(maxId + 1).padStart(3, '0')}`;
+
+    const newMenu = {
+      id: newId,
+      code,
+      name,
+      path,
+      icon: icon || 'Article',
+      order,
+      parentId: parentId || null,
+      level,
+      programId: programId || null,
+      description: description || { en: '', ko: '', zh: '', vi: '' }
+    };
+
+    menus.push(newMenu);
+    await writeJSON(MENUS_FILE, menus);
+
+    res.status(201).json({ menu: newMenu });
+  } catch (error) {
+    console.error('Error creating menu:', error);
+    res.status(500).json({ error: 'Failed to create menu' });
+  }
+});
+
+/**
+ * PUT /api/menu/:id - Update an existing menu
+ */
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    // Only admin can update menus
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden - Admin only' });
+    }
+
+    const menus = await readJSON(MENUS_FILE);
+    const index = menus.findIndex(m => m.id === req.params.id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: 'Menu not found' });
+    }
+
+    const { code, name, path, icon, order, parentId, level, programId, description } = req.body;
+
+    // Check if new code conflicts with existing menus
+    if (code && code !== menus[index].code) {
+      if (menus.some(m => m.code === code && m.id !== req.params.id)) {
+        return res.status(409).json({ error: 'Menu code already exists' });
+      }
+    }
+
+    // Check if new path conflicts with existing menus
+    if (path && path !== menus[index].path) {
+      if (menus.some(m => m.path === path && m.id !== req.params.id)) {
+        return res.status(409).json({ error: 'Menu path already exists' });
+      }
+    }
+
+    const updatedMenu = {
+      ...menus[index],
+      code: code || menus[index].code,
+      name: name || menus[index].name,
+      path: path || menus[index].path,
+      icon: icon !== undefined ? icon : menus[index].icon,
+      order: order !== undefined ? order : menus[index].order,
+      parentId: parentId !== undefined ? parentId : menus[index].parentId,
+      level: level !== undefined ? level : menus[index].level,
+      programId: programId !== undefined ? programId : menus[index].programId,
+      description: description || menus[index].description
+    };
+
+    menus[index] = updatedMenu;
+    await writeJSON(MENUS_FILE, menus);
+
+    res.json({ menu: updatedMenu });
+  } catch (error) {
+    console.error('Error updating menu:', error);
+    res.status(500).json({ error: 'Failed to update menu' });
+  }
+});
+
+/**
+ * DELETE /api/menu/:id - Delete a menu
+ */
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    // Only admin can delete menus
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden - Admin only' });
+    }
+
+    const menus = await readJSON(MENUS_FILE);
+    const index = menus.findIndex(m => m.id === req.params.id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: 'Menu not found' });
+    }
+
+    // Check if menu has children
+    const hasChildren = menus.some(m => m.parentId === req.params.id);
+    if (hasChildren) {
+      return res.status(400).json({ error: 'Cannot delete menu with children. Delete child menus first.' });
+    }
+
+    const deletedMenu = menus[index];
+    menus.splice(index, 1);
+    await writeJSON(MENUS_FILE, menus);
+
+    res.json({ message: 'Menu deleted successfully', menu: deletedMenu });
+  } catch (error) {
+    console.error('Error deleting menu:', error);
+    res.status(500).json({ error: 'Failed to delete menu' });
+  }
+});
+
+/**
  * Helper: Build menu tree from flat array
  */
 function buildMenuTree(menus) {

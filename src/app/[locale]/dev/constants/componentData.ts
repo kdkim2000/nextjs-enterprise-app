@@ -263,6 +263,12 @@ export const componentCategories = [
         description: 'Notification dropdown with badge, list, and actions',
         path: '/dev/components/ui-components',
         tags: ['Notification', 'Bell', 'Alerts']
+      },
+      {
+        title: 'Unified Message System',
+        description: 'Centralized message management with code-based messages, multi-language support, and dynamic parameters',
+        path: '/dev/components/message-system',
+        tags: ['Message', 'i18n', 'Hook', 'System']
       }
     ]
   },

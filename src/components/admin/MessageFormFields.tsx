@@ -15,10 +15,14 @@ export interface MessageFormData {
   message: {
     en: string;
     ko: string;
+    zh: string;
+    vi: string;
   };
   description: {
     en: string;
     ko: string;
+    zh: string;
+    vi: string;
   };
   status: 'active' | 'inactive';
 }
@@ -101,6 +105,24 @@ export default function MessageFormFields({
 
       <TextField
         fullWidth
+        label={locale === 'ko' ? '메시지 (중국어)' : locale === 'zh' ? '消息（中文）' : locale === 'vi' ? 'Tin nhắn (Tiếng Trung)' : 'Message (Chinese)'}
+        value={data.message.zh}
+        onChange={(e) => handleChange('message.zh', e.target.value)}
+        required
+        placeholder="保存成功"
+      />
+
+      <TextField
+        fullWidth
+        label={locale === 'ko' ? '메시지 (베트남어)' : locale === 'zh' ? '消息（越南语）' : locale === 'vi' ? 'Tin nhắn (Tiếng Việt)' : 'Message (Vietnamese)'}
+        value={data.message.vi}
+        onChange={(e) => handleChange('message.vi', e.target.value)}
+        required
+        placeholder="Đã lưu thành công"
+      />
+
+      <TextField
+        fullWidth
         multiline
         rows={2}
         label={locale === 'ko' ? '설명 (영문)' : 'Description (English)'}
@@ -116,6 +138,26 @@ export default function MessageFormFields({
         label={locale === 'ko' ? '설명 (한글)' : 'Description (Korean)'}
         value={data.description.ko}
         onChange={(e) => handleChange('description.ko', e.target.value)}
+        required
+      />
+
+      <TextField
+        fullWidth
+        multiline
+        rows={2}
+        label={locale === 'ko' ? '설명 (중국어)' : locale === 'zh' ? '描述（中文）' : locale === 'vi' ? 'Mô tả (Tiếng Trung)' : 'Description (Chinese)'}
+        value={data.description.zh}
+        onChange={(e) => handleChange('description.zh', e.target.value)}
+        required
+      />
+
+      <TextField
+        fullWidth
+        multiline
+        rows={2}
+        label={locale === 'ko' ? '설명 (베트남어)' : locale === 'zh' ? '描述（越南语）' : locale === 'vi' ? 'Mô tả (Tiếng Việt)' : 'Description (Vietnamese)'}
+        value={data.description.vi}
+        onChange={(e) => handleChange('description.vi', e.target.value)}
         required
       />
 

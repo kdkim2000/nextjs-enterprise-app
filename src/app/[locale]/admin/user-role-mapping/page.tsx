@@ -14,7 +14,7 @@ import RoleList from './components/RoleList';
 import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
@@ -23,7 +23,12 @@ import { Role, UserRoleMapping, SearchCriteria } from './types';
 export default function UserRoleMappingPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale: currentLocale });
 
   // Permission control
   const gridPermissions = useDataGridPermissions('PROG-USER-ROLE-MAP');
@@ -69,9 +74,9 @@ export default function UserRoleMappingPage() {
       setAllMappings(mappingsResponse.mappings || []);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
-      showError('Failed to load roles');
+      await showErrorMessage('COMMON_LOAD_ROLES_FAIL');
     }
-  }, [showError]);
+  }, [showErrorMessage]);
 
   // Fetch mappings for selected role
   const fetchMappings = useCallback(async () => {
@@ -100,13 +105,13 @@ export default function UserRoleMappingPage() {
       setFilteredMappings(initialFiltered);
     } catch (error) {
       console.error('Failed to fetch mappings:', error);
-      showError('Failed to load user role mappings');
+      await showErrorMessage('MAPPING_USER_LOAD_FAIL');
       setMappings([]);
       setFilteredMappings([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedRole, showError, fetchRoles]);
+  }, [selectedRole, showErrorMessage, fetchRoles]);
 
   // Initial load
   useEffect(() => {
@@ -134,13 +139,13 @@ export default function UserRoleMappingPage() {
   // Mapping handlers
   const handleAddMapping = useCallback(() => {
     if (!selectedRole) {
-      showError('Please select a role first');
+      void showErrorMessage('MAPPING_SELECT_ROLE_REQUIRED');
       return;
     }
 
     // Open the new bulk assign dialog
     setAddUsersDialogOpen(true);
-  }, [selectedRole, showError]);
+  }, [selectedRole, showErrorMessage]);
 
   const handleAddUsersSuccess = useCallback(async (users: User[]) => {
     try {
@@ -156,12 +161,12 @@ export default function UserRoleMappingPage() {
       }
 
       const count = users.length;
-      showSuccess(`Successfully assigned ${count} user${count > 1 ? 's' : ''} to role`);
+      await showSuccessMessage('MAPPING_USER_ASSIGN_SUCCESS', { count });
       void fetchMappings();
     } catch (err: any) {
-      showError(err.response?.data?.error || 'Failed to assign users to role');
+      await showErrorMessage('MAPPING_USER_ASSIGN_FAIL');
     }
-  }, [selectedRole, fetchMappings, showSuccess, showError]);
+  }, [selectedRole, fetchMappings, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteMappings = useCallback((ids: (string | number)[]) => {
     setSelectedMappingsForDelete(ids);
@@ -176,16 +181,16 @@ export default function UserRoleMappingPage() {
       }
 
       const count = selectedMappingsForDelete.length;
-      showSuccess(`Successfully deleted ${count} mapping${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('MAPPING_DELETE_SUCCESS', { count });
       setMappingDeleteConfirmOpen(false);
       setSelectedMappingsForDelete([]);
       await fetchMappings();
     } catch (err: any) {
-      showError(err.response?.data?.error || 'Failed to delete mappings');
+      await showErrorMessage('MAPPING_DELETE_FAIL');
     } finally {
       setDeleting(false);
     }
-  }, [selectedMappingsForDelete, fetchMappings, showSuccess, showError]);
+  }, [selectedMappingsForDelete, fetchMappings, showSuccessMessage, showErrorMessage]);
 
   // Memoized values
   const columns = useMemo(

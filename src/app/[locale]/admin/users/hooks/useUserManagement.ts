@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { User, SearchCriteria } from '../types';
 
 interface UseUserManagementOptions {
@@ -39,8 +40,14 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     }
   });
 
-  // Use auto-hide message hook
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
 
   // Local states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -129,14 +136,14 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      showError(err.response?.data?.error || 'Failed to load users');
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_USER_LOAD_FAIL');
       console.error('Failed to fetch users:', error);
       setUsers([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria, setUsers, setRowCount, showError]);
+  }, [quickSearch, searchCriteria, setUsers, setRowCount, showErrorMessage]);
 
   // User CRUD operations
   const handleAdd = useCallback(() => {
@@ -171,24 +178,24 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
         // Add new user
         const response = await api.post('/user', editingUser);
         setUsers([...users, response.user]);
-        showSuccess('User created successfully');
+        await showSuccessMessage('CRUD_USER_CREATE_SUCCESS');
       } else {
         // Update existing user
         const response = await api.put(`/user/${editingUser.id}`, editingUser);
         setUsers(users.map((u) => (u.id === editingUser.id ? response.user : u)));
-        showSuccess('User updated successfully');
+        await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
       }
 
       setDialogOpen(false);
       setEditingUser(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to save user');
+      await showErrorMessage('CRUD_USER_SAVE_FAIL');
       console.error('Failed to save user:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [editingUser, users, setUsers, showSuccess, showError]);
+  }, [editingUser, users, setUsers, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteClick = useCallback((ids: (string | number)[]) => {
     setSelectedForDelete(ids);
@@ -209,19 +216,19 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
       // Show success message
       const count = selectedForDelete.length;
-      showSuccess(`Successfully deleted ${count} user${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_USER_DELETE_SUCCESS', { count });
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to delete users');
+      await showErrorMessage('CRUD_USER_DELETE_FAIL');
       console.error('Failed to delete users:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, users, setUsers, showSuccess, showError]);
+  }, [selectedForDelete, users, setUsers, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -245,17 +252,20 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       await api.post(`/user/${resetPasswordUser.id}/reset-password`, { newPassword });
 
       const resetMethod = useDefault ? 'to default password' : 'successfully';
-      showSuccess(`Password reset ${resetMethod} for user: ${resetPasswordUser.username}`);
+      await showSuccessMessage('USER_PASSWORD_RESET_SUCCESS', {
+        resetMethod,
+        username: resetPasswordUser.username
+      });
       setResetPasswordDialogOpen(false);
       setResetPasswordUser(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to reset password');
+      await showErrorMessage('USER_PASSWORD_RESET_FAIL');
       console.error('Failed to reset password:', err);
     } finally {
       setResetPasswordLoading(false);
     }
-  }, [resetPasswordUser, showSuccess, showError]);
+  }, [resetPasswordUser, showSuccessMessage, showErrorMessage]);
 
   const handleResetPasswordCancel = useCallback(() => {
     setResetPasswordDialogOpen(false);
@@ -342,7 +352,6 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
     resetPasswordDialogOpen,
     resetPasswordUser,
     resetPasswordLoading,
