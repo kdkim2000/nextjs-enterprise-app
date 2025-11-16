@@ -1,0 +1,26 @@
+{
+  "name": "enterprise-app-migration",
+  "version": "1.0.0",
+  "description": "PostgreSQL migration tool for enterprise application",
+  "main": "migrate.js",
+  "scripts": {
+    "migrate": "node migrate.js",
+    "migrate:dry": "node migrate.js --dry-run",
+    "migrate:verbose": "node migrate.js --verbose",
+    "migrate:test": "node migrate.js --dry-run --verbose"
+  },
+  "keywords": [
+    "migration",
+    "postgresql",
+    "database"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

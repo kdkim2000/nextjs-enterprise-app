@@ -44,6 +44,28 @@ next-env.d.ts
 backend/data/logs.json
 backend/data/userPreferences.json
 backend/data/users.json
+backend/data/userRoleMappings.json
+backend/data/tokenBlacklist.json
+backend/data/mfaCodes.json
+
+# migration sensitive data
+migration/migrate.config.json
+migration/node_modules/
+migration/*.log
+migration/test-connection.js
+migration/.env
+migration/.env.*
+
+# database backups
+migration/*.dump
+migration/*.sql.backup
+*.backup
+backup/
+
+# PostgreSQL
+.pgpass
+pgdata/
 
 # claude settings
 .claude/settings.local.json
+migration/.claude/
