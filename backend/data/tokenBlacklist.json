@@ -1,12 +1,1 @@
-[
-  {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTAwMiIsInVzZXJuYW1lIjoiam9obi5kb2UiLCJyb2xlIjoidXNlciIsImlhdCI6MTc2MzIzMzI1NSwiZXhwIjoxNzYzMjM2ODU1fQ.urCBN-rEIeJguD-2woY3e-My-Tpqo6n0IrkMQYa9whE",
-    "expiresAt": 1763236855000,
-    "blacklistedAt": 1763234211021
-  },
-  {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTAwMSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjMyMzQyMjUsImV4cCI6MTc2MzIzNzgyNX0.W6n5kuzeJsU_9KOjC72OGdRn831zPQs-oYiOUZbCMBA",
-    "expiresAt": 1763237825000,
-    "blacklistedAt": 1763234314707
-  }
-]
+[]

@@ -4,11 +4,15 @@
     "code": "IT",
     "name": {
       "en": "Information Technology",
-      "ko": "정보기술부"
+      "ko": "정보기술부",
+      "zh": "信息技术",
+      "vi": "Công nghệ thông tin"
     },
     "description": {
       "en": "Responsible for IT infrastructure, software development, and technical support",
-      "ko": "IT 인프라, 소프트웨어 개발 및 기술 지원 담당"
+      "ko": "IT 인프라, 소프트웨어 개발 및 기술 지원 담당",
+      "zh": "负责IT基础设施、软件开发和技术支持",
+      "vi": "Chịu trách nhiệm về cơ sở hạ tầng IT, phát triển phần mềm và hỗ trợ kỹ thuật"
     },
     "parentId": null,
     "managerId": "user-001",
@@ -26,11 +30,15 @@
     "code": "IT-DEV",
     "name": {
       "en": "Development Team",
-      "ko": "개발팀"
+      "ko": "개발팀",
+      "zh": "开发团队",
+      "vi": "Đội phát triển"
     },
     "description": {
       "en": "Software development and engineering",
-      "ko": "소프트웨어 개발 및 엔지니어링"
+      "ko": "소프트웨어 개발 및 엔지니어링",
+      "zh": "软件开发和工程",
+      "vi": "Phát triển phần mềm và kỹ thuật"
     },
     "parentId": "dept-001",
     "managerId": "user-002",
@@ -48,11 +56,15 @@
     "code": "IT-OPS",
     "name": {
       "en": "Operations Team",
-      "ko": "운영팀"
+      "ko": "운영팀",
+      "zh": "运营团队",
+      "vi": "Đội vận hành"
     },
     "description": {
       "en": "System operations and infrastructure management",
-      "ko": "시스템 운영 및 인프라 관리"
+      "ko": "시스템 운영 및 인프라 관리",
+      "zh": "系统运营和基础设施管理",
+      "vi": "Vận hành hệ thống và quản lý cơ sở hạ tầng"
     },
     "parentId": "dept-001",
     "managerId": "user-003",
@@ -70,11 +82,15 @@
     "code": "HR",
     "name": {
       "en": "Human Resources",
-      "ko": "인사부"
+      "ko": "인사부",
+      "zh": "人力资源",
+      "vi": "Nhân sự"
     },
     "description": {
       "en": "Employee management, recruitment, and HR operations",
-      "ko": "직원 관리, 채용 및 인사 운영"
+      "ko": "직원 관리, 채용 및 인사 운영",
+      "zh": "员工管理、招聘和人力资源运营",
+      "vi": "Quản lý nhân viên, tuyển dụng và vận hành nhân sự"
     },
     "parentId": null,
     "managerId": "user-004",
@@ -92,11 +108,15 @@
     "code": "FIN",
     "name": {
       "en": "Finance",
-      "ko": "재무부"
+      "ko": "재무부",
+      "zh": "财务",
+      "vi": "Tài chính"
     },
     "description": {
       "en": "Financial management, accounting, and budgeting",
-      "ko": "재무 관리, 회계 및 예산 편성"
+      "ko": "재무 관리, 회계 및 예산 편성",
+      "zh": "财务管理、会计和预算",
+      "vi": "Quản lý tài chính, kế toán và ngân sách"
     },
     "parentId": null,
     "managerId": "user-005",
@@ -114,11 +134,15 @@
     "code": "SALES",
     "name": {
       "en": "Sales",
-      "ko": "영업부"
+      "ko": "영업부",
+      "zh": "销售",
+      "vi": "Bán hàng"
     },
     "description": {
       "en": "Sales and customer relationship management",
-      "ko": "영업 및 고객 관계 관리"
+      "ko": "영업 및 고객 관계 관리",
+      "zh": "销售和客户关系管理",
+      "vi": "Bán hàng và quản lý quan hệ khách hàng"
     },
     "parentId": null,
     "managerId": "user-006",
@@ -136,11 +160,15 @@
     "code": "MKT",
     "name": {
       "en": "Marketing",
-      "ko": "마케팅부"
+      "ko": "마케팅부",
+      "zh": "市场营销",
+      "vi": "Marketing"
     },
     "description": {
       "en": "Marketing, branding, and promotion",
-      "ko": "마케팅, 브랜딩 및 프로모션"
+      "ko": "마케팅, 브랜딩 및 프로모션",
+      "zh": "营销、品牌和推广",
+      "vi": "Marketing, xây dựng thương hiệu và quảng bá"
     },
     "parentId": null,
     "managerId": "user-007",
@@ -158,11 +186,15 @@
     "code": "CS",
     "name": {
       "en": "Customer Service",
-      "ko": "고객서비스부"
+      "ko": "고객서비스부",
+      "zh": "客户服务",
+      "vi": "Dịch vụ khách hàng"
     },
     "description": {
       "en": "Customer support and service operations",
-      "ko": "고객 지원 및 서비스 운영"
+      "ko": "고객 지원 및 서비스 운영",
+      "zh": "客户支持和服务运营",
+      "vi": "Hỗ trợ khách hàng và vận hành dịch vụ"
     },
     "parentId": null,
     "managerId": "user-008",
@@ -180,11 +212,15 @@
     "code": "R&D",
     "name": {
       "en": "Research & Development",
-      "ko": "연구개발부"
+      "ko": "연구개발부",
+      "zh": "研发",
+      "vi": "Nghiên cứu & Phát triển"
     },
     "description": {
       "en": "Research, innovation, and product development",
-      "ko": "연구, 혁신 및 제품 개발"
+      "ko": "연구, 혁신 및 제품 개발",
+      "zh": "研究、创新和产品开发",
+      "vi": "Nghiên cứu, đổi mới và phát triển sản phẩm"
     },
     "parentId": null,
     "managerId": "user-009",
@@ -202,11 +238,15 @@
     "code": "ADMIN",
     "name": {
       "en": "Administration",
-      "ko": "총무부"
+      "ko": "총무부",
+      "zh": "行政",
+      "vi": "Hành chính"
     },
     "description": {
       "en": "General administration and facilities management",
-      "ko": "총무 및 시설 관리"
+      "ko": "총무 및 시설 관리",
+      "zh": "综合管理和设施管理",
+      "vi": "Quản lý hành chính và cơ sở vật chất"
     },
     "parentId": null,
     "managerId": "user-010",

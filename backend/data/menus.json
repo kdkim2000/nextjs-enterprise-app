@@ -4,7 +4,9 @@
     "code": "dashboard",
     "name": {
       "en": "Dashboard",
-      "ko": "대시보드"
+      "ko": "대시보드",
+      "zh": "仪表板",
+      "vi": "Bảng điều khiển"
     },
     "path": "/dashboard",
     "icon": "Dashboard",
@@ -14,7 +16,9 @@
     "programId": "PROG-DASHBOARD",
     "description": {
       "en": "Main dashboard overview",
-      "ko": "메인 대시보드 개요"
+      "ko": "메인 대시보드 개요",
+      "zh": "主仪表板概述",
+      "vi": "Tổng quan bảng điều khiển chính"
     }
   },
   {
@@ -22,7 +26,9 @@
     "code": "admin",
     "name": {
       "en": "Administration",
-      "ko": "관리자"
+      "ko": "관리자",
+      "zh": "管理",
+      "vi": "Quản trị"
     },
     "path": "/admin",
     "icon": "AdminPanelSettings",
@@ -32,7 +38,9 @@
     "programId": null,
     "description": {
       "en": "Administration and system management",
-      "ko": "관리자 및 시스템 관리"
+      "ko": "관리자 및 시스템 관리",
+      "zh": "管理和系统管理",
+      "vi": "Quản trị và quản lý hệ thống"
     }
   },
   {
@@ -40,7 +48,9 @@
     "code": "user-management",
     "name": {
       "en": "User Management",
-      "ko": "사용자 관리"
+      "ko": "사용자 관리",
+      "zh": "用户管理",
+      "vi": "Quản lý người dùng"
     },
     "path": "/admin/users",
     "icon": "People",
@@ -50,7 +60,9 @@
     "programId": "PROG-USER-LIST",
     "description": {
       "en": "View and manage users",
-      "ko": "사용자 조회 및 관리"
+      "ko": "사용자 조회 및 관리",
+      "zh": "查看和管理用户",
+      "vi": "Xem và quản lý người dùng"
     }
   },
   {
@@ -58,7 +70,9 @@
     "code": "department-management",
     "name": {
       "en": "Department Management",
-      "ko": "부서 관리"
+      "ko": "부서 관리",
+      "zh": "部门管理",
+      "vi": "Quản lý phòng ban"
     },
     "path": "/admin/departments",
     "icon": "AccountTree",
@@ -68,7 +82,9 @@
     "programId": "PROG-DEPT-MGMT",
     "description": {
       "en": "Manage organizational departments and structure",
-      "ko": "조직 부서 및 구조 관리"
+      "ko": "조직 부서 및 구조 관리",
+      "zh": "管理组织部门和结构",
+      "vi": "Quản lý phòng ban và cấu trúc tổ chức"
     }
   },
   {
@@ -76,7 +92,9 @@
     "code": "menu-management",
     "name": {
       "en": "Menu Management",
-      "ko": "메뉴 관리"
+      "ko": "메뉴 관리",
+      "zh": "菜单管理",
+      "vi": "Quản lý menu"
     },
     "path": "/admin/menus",
     "icon": "Menu",
@@ -86,7 +104,9 @@
     "programId": "PROG-MENU-MGMT",
     "description": {
       "en": "Manage application menu structure and permissions",
-      "ko": "애플리케이션 메뉴 구조 및 권한 관리"
+      "ko": "애플리케이션 메뉴 구조 및 권한 관리",
+      "zh": "管理应用程序菜单结构和权限",
+      "vi": "Quản lý cấu trúc menu và quyền ứng dụng"
     }
   },
   {
@@ -94,7 +114,9 @@
     "code": "role-management",
     "name": {
       "en": "Role Management",
-      "ko": "역할 관리"
+      "ko": "역할 관리",
+      "zh": "角色管理",
+      "vi": "Quản lý vai trò"
     },
     "path": "/admin/roles",
     "icon": "Security",
@@ -104,7 +126,9 @@
     "programId": "PROG-ROLE-MGMT",
     "description": {
       "en": "Manage user roles and permissions",
-      "ko": "사용자 역할 및 권한 관리"
+      "ko": "사용자 역할 및 권한 관리",
+      "zh": "管理用户角色和权限",
+      "vi": "Quản lý vai trò và quyền người dùng"
     }
   },
   {
@@ -112,7 +136,9 @@
     "code": "code-management",
     "name": {
       "en": "Code Management",
-      "ko": "코드 관리"
+      "ko": "코드 관리",
+      "zh": "代码管理",
+      "vi": "Quản lý mã"
     },
     "path": "/admin/codes",
     "icon": "Code",
@@ -122,7 +148,9 @@
     "programId": "PROG-CODE-MGMT",
     "description": {
       "en": "Manage system codes and code types",
-      "ko": "시스템 코드 및 코드 타입 관리"
+      "ko": "시스템 코드 및 코드 타입 관리",
+      "zh": "管理系统代码和代码类型",
+      "vi": "Quản lý mã hệ thống và loại mã"
     }
   },
   {
@@ -130,7 +158,9 @@
     "code": "message-management",
     "name": {
       "en": "Message Management",
-      "ko": "메시지 관리"
+      "ko": "메시지 관리",
+      "zh": "消息管理",
+      "vi": "Quản lý tin nhắn"
     },
     "path": "/admin/messages",
     "icon": "Message",
@@ -140,7 +170,9 @@
     "programId": "PROG-MESSAGE-MGMT",
     "description": {
       "en": "Manage application messages",
-      "ko": "어플리케이션 메시지 관리"
+      "ko": "어플리케이션 메시지 관리",
+      "zh": "管理应用程序消息",
+      "vi": "Quản lý tin nhắn ứng dụng"
     }
   },
   {
@@ -148,7 +180,9 @@
     "code": "help-management",
     "name": {
       "en": "Help Management",
-      "ko": "도움말 관리"
+      "ko": "도움말 관리",
+      "zh": "帮助管理",
+      "vi": "Quản lý trợ giúp"
     },
     "path": "/admin/help",
     "icon": "Help",
@@ -158,7 +192,9 @@
     "programId": "PROG-HELP-MGMT",
     "description": {
       "en": "Manage help content for all pages",
-      "ko": "모든 페이지의 도움말 컨텐츠 관리"
+      "ko": "모든 페이지의 도움말 컨텐츠 관리",
+      "zh": "管理所有页面的帮助内容",
+      "vi": "Quản lý nội dung trợ giúp cho tất cả các trang"
     }
   },
   {
@@ -166,7 +202,9 @@
     "code": "user-role-mapping",
     "name": {
       "en": "User-Role Mapping",
-      "ko": "사용자-역할 매핑"
+      "ko": "사용자-역할 매핑",
+      "zh": "用户角色映射",
+      "vi": "Ánh xạ người dùng-vai trò"
     },
     "path": "/admin/user-role-mapping",
     "icon": "Link",
@@ -176,7 +214,9 @@
     "programId": "PROG-USER-ROLE-MAP",
     "description": {
       "en": "Manage user-role assignments",
-      "ko": "사용자-역할 할당 관리"
+      "ko": "사용자-역할 할당 관리",
+      "zh": "管理用户角色分配",
+      "vi": "Quản lý phân công vai trò người dùng"
     }
   },
   {
@@ -184,7 +224,9 @@
     "code": "role-menu-mapping",
     "name": {
       "en": "Role-Menu Mapping",
-      "ko": "역할-메뉴 매핑"
+      "ko": "역할-메뉴 매핑",
+      "zh": "角色菜单映射",
+      "vi": "Ánh xạ vai trò-menu"
     },
     "path": "/admin/role-menu-mapping",
     "icon": "Link",
@@ -194,7 +236,9 @@
     "programId": "PROG-ROLE-MENU-MAP",
     "description": {
       "en": "Manage role-menu permissions",
-      "ko": "역할-메뉴 권한 관리"
+      "ko": "역할-메뉴 권한 관리",
+      "zh": "管理角色菜单权限",
+      "vi": "Quản lý quyền vai trò-menu"
     }
   },
   {
@@ -202,7 +246,9 @@
     "code": "program-management",
     "name": {
       "en": "Program Management",
-      "ko": "프로그램 관리"
+      "ko": "프로그램 관리",
+      "zh": "程序管理",
+      "vi": "Quản lý chương trình"
     },
     "path": "/admin/programs",
     "icon": "Code",
@@ -212,7 +258,9 @@
     "programId": "PROG-PROGRAM-MGMT",
     "description": {
       "en": "Manage application programs and permissions",
-      "ko": "애플리케이션 프로그램 및 권한 관리"
+      "ko": "애플리케이션 프로그램 및 권한 관리",
+      "zh": "管理应用程序和权限",
+      "vi": "Quản lý chương trình và quyền ứng dụng"
     }
   },
   {
@@ -220,7 +268,9 @@
     "code": "logs",
     "name": {
       "en": "System Logs",
-      "ko": "시스템 로그"
+      "ko": "시스템 로그",
+      "zh": "系统日志",
+      "vi": "Nhật ký hệ thống"
     },
     "path": "/admin/logs",
     "icon": "Description",
@@ -230,7 +280,9 @@
     "programId": "PROG-LOGS",
     "description": {
       "en": "View and analyze system logs",
-      "ko": "시스템 로그 조회 및 분석"
+      "ko": "시스템 로그 조회 및 분석",
+      "zh": "查看和分析系统日志",
+      "vi": "Xem và phân tích nhật ký hệ thống"
     }
   },
   {
@@ -238,7 +290,9 @@
     "code": "reports",
     "name": {
       "en": "Reports",
-      "ko": "보고서"
+      "ko": "보고서",
+      "zh": "报告",
+      "vi": "Báo cáo"
     },
     "path": null,
     "icon": "Assessment",
@@ -248,7 +302,9 @@
     "programId": null,
     "description": {
       "en": "Reporting module",
-      "ko": "보고서 모듈"
+      "ko": "보고서 모듈",
+      "zh": "报告模块",
+      "vi": "Mô-đun báo cáo"
     }
   },
   {
@@ -256,7 +312,9 @@
     "code": "sales-report",
     "name": {
       "en": "Sales Report",
-      "ko": "판매 보고서"
+      "ko": "판매 보고서",
+      "zh": "销售报告",
+      "vi": "Báo cáo bán hàng"
     },
     "path": "/reports/sales-report",
     "icon": "TrendingUp",
@@ -266,7 +324,9 @@
     "programId": "PROG-SALES-RPT",
     "description": {
       "en": "Sales analysis and reporting",
-      "ko": "판매 분석 및 보고서"
+      "ko": "판매 분석 및 보고서",
+      "zh": "销售分析和报告",
+      "vi": "Phân tích và báo cáo bán hàng"
     }
   },
   {
@@ -274,7 +334,9 @@
     "code": "settings",
     "name": {
       "en": "Settings",
-      "ko": "설정"
+      "ko": "설정",
+      "zh": "设置",
+      "vi": "Cài đặt"
     },
     "path": "/dashboard/settings",
     "icon": "Settings",
@@ -284,7 +346,9 @@
     "programId": "PROG-SETTINGS",
     "description": {
       "en": "Application settings",
-      "ko": "애플리케이션 설정"
+      "ko": "애플리케이션 설정",
+      "zh": "应用程序设置",
+      "vi": "Cài đặt ứng dụng"
     }
   },
   {
@@ -292,7 +356,9 @@
     "code": "dev-support",
     "name": {
       "en": "Dev Support",
-      "ko": "개발지원"
+      "ko": "개발지원",
+      "zh": "开发支持",
+      "vi": "Hỗ trợ phát triển"
     },
     "path": "/dev",
     "icon": "Code",
@@ -302,7 +368,9 @@
     "programId": null,
     "description": {
       "en": "Development support and tools",
-      "ko": "개발 지원 및 도구"
+      "ko": "개발 지원 및 도구",
+      "zh": "开发支持和工具",
+      "vi": "Hỗ trợ và công cụ phát triển"
     }
   },
   {
@@ -310,7 +378,9 @@
     "code": "components",
     "name": {
       "en": "Component Library",
-      "ko": "컴포넌트 라이브러리"
+      "ko": "컴포넌트 라이브러리",
+      "zh": "组件库",
+      "vi": "Thư viện thành phần"
     },
     "path": "/dev/components",
     "icon": "Widgets",
@@ -320,7 +390,9 @@
     "programId": "PROG-COMPONENTS",
     "description": {
       "en": "Browse all reusable UI components with examples and documentation",
-      "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색"
+      "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색",
+      "zh": "浏览所有可重用的UI组件及示例和文档",
+      "vi": "Duyệt qua tất cả các thành phần UI có thể tái sử dụng với ví dụ và tài liệu"
     }
   },
   {
@@ -328,7 +400,9 @@
     "code": "theme-demo",
     "name": {
       "en": "Theme System Demo",
-      "ko": "테마 시스템 데모"
+      "ko": "테마 시스템 데모",
+      "zh": "主题系统演示",
+      "vi": "Demo hệ thống chủ đề"
     },
     "path": "/dev/theme-demo",
     "icon": "Palette",
@@ -338,7 +412,9 @@
     "programId": "PROG-THEME-DEMO",
     "description": {
       "en": "Comprehensive demonstration of MUI theme system with custom colors and styles",
-      "ko": "커스텀 색상 및 스타일이 적용된 MUI 테마 시스템의 종합 데모"
+      "ko": "커스텀 색상 및 스타일이 적용된 MUI 테마 시스템의 종합 데모",
+      "zh": "MUI主题系统的全面演示，包含自定义颜色和样式",
+      "vi": "Trình diễn toàn diện hệ thống chủ đề MUI với màu sắc và kiểu tùy chỉnh"
     }
   },
   {
@@ -346,7 +422,9 @@
     "code": "react-study",
     "name": {
       "en": "React Study Group",
-      "ko": "React 연구회"
+      "ko": "React 연구회",
+      "zh": "React学习小组",
+      "vi": "Nhóm học React"
     },
     "path": "/dev/react-study",
     "icon": "School",
@@ -356,7 +434,9 @@
     "programId": "PROG-REACT-STUDY",
     "description": {
       "en": "React learning materials and study resources",
-      "ko": "React 학습 교재 및 연구 자료"
+      "ko": "React 학습 교재 및 연구 자료",
+      "zh": "React学习资料和研究资源",
+      "vi": "Tài liệu học tập và tài nguyên nghiên cứu React"
     }
   }
 ]
