@@ -3,14 +3,11 @@
 import React from 'react';
 import {
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Divider
 } from '@mui/material';
 import AvatarUpload from '@/components/common/AvatarUpload';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface UserFormData {
   id?: string;
@@ -30,21 +27,14 @@ export interface UserFormFieldsProps {
   onError?: (error: string) => void;
   usernameLabel?: string;
   emailLabel?: string;
-  departments?: string[];
 }
-
-const DEFAULT_DEPARTMENTS = [
-  'Admin', 'Design', 'Engineering', 'Finance', 'HR', 'IT',
-  'Legal', 'Marketing', 'Operations', 'Product', 'Sales', 'Support'
-];
 
 export default function UserFormFields({
   user,
   onChange,
   onError,
   usernameLabel = 'Username',
-  emailLabel = 'Email',
-  departments = DEFAULT_DEPARTMENTS
+  emailLabel = 'Email'
 }: UserFormFieldsProps) {
   if (!user) return null;
 
@@ -108,50 +98,32 @@ export default function UserFormFields({
       />
 
       {/* Role */}
-      <FormControl fullWidth>
-        <InputLabel>Role</InputLabel>
-        <Select
-          value={user.role || 'user'}
-          label="Role"
-          onChange={(e) => handleChange('role', e.target.value)}
-        >
-          <MenuItem value="admin">Admin</MenuItem>
-          <MenuItem value="manager">Manager</MenuItem>
-          <MenuItem value="user">User</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="USER_ROLE"
+        value={user.role || 'user'}
+        onChange={(value) => handleChange('role', value)}
+        label="Role"
+        required
+      />
 
       {/* Department */}
-      <FormControl fullWidth>
-        <InputLabel>Department</InputLabel>
-        <Select
-          value={user.department || ''}
-          label="Department"
-          onChange={(e) => handleChange('department', e.target.value)}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {departments.map((dept) => (
-            <MenuItem key={dept} value={dept}>
-              {dept}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="DEPARTMENT"
+        value={user.department || ''}
+        onChange={(value) => handleChange('department', value)}
+        label="Department"
+        showEmpty
+        emptyLabel="None"
+      />
 
       {/* Status */}
-      <FormControl fullWidth>
-        <InputLabel>Status</InputLabel>
-        <Select
-          value={user.status || 'active'}
-          label="Status"
-          onChange={(e) => handleChange('status', e.target.value)}
-        >
-          <MenuItem value="active">Active</MenuItem>
-          <MenuItem value="inactive">Inactive</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="COMMON_STATUS"
+        value={user.status || 'active'}
+        onChange={(value) => handleChange('status', value)}
+        label="Status"
+        required
+      />
 
       {/* Role Assignment Section */}
       <Divider sx={{ my: 2 }} />

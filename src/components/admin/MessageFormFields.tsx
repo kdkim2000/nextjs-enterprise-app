@@ -3,13 +3,9 @@
 import React from 'react';
 import {
   TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
   Stack
 } from '@mui/material';
-import { MESSAGE_CATEGORIES, MESSAGE_TYPES } from '@/app/[locale]/admin/messages/types';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface MessageFormData {
   id?: string;
@@ -67,35 +63,23 @@ export default function MessageFormFields({
         placeholder="COMMON_SAVE_SUCCESS"
       />
 
-      <FormControl fullWidth required>
-        <InputLabel>{locale === 'ko' ? '카테고리' : 'Category'}</InputLabel>
-        <Select
-          value={data.category}
-          onChange={(e) => handleChange('category', e.target.value)}
-          label={locale === 'ko' ? '카테고리' : 'Category'}
-        >
-          {MESSAGE_CATEGORIES.map((cat) => (
-            <MenuItem key={cat.value} value={cat.value}>
-              {locale === 'ko' ? cat.label.ko : cat.label.en}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="MESSAGE_CATEGORY"
+        value={data.category}
+        onChange={(value) => handleChange('category', value)}
+        label={locale === 'ko' ? '카테고리' : 'Category'}
+        required
+        locale={locale}
+      />
 
-      <FormControl fullWidth required>
-        <InputLabel>{locale === 'ko' ? '타입' : 'Type'}</InputLabel>
-        <Select
-          value={data.type}
-          onChange={(e) => handleChange('type', e.target.value)}
-          label={locale === 'ko' ? '타입' : 'Type'}
-        >
-          {MESSAGE_TYPES.map((type) => (
-            <MenuItem key={type.value} value={type.value}>
-              {locale === 'ko' ? type.label.ko : type.label.en}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="MESSAGE_TYPE"
+        value={data.type}
+        onChange={(value) => handleChange('type', value)}
+        label={locale === 'ko' ? '타입' : 'Type'}
+        required
+        locale={locale}
+      />
 
       <TextField
         fullWidth
@@ -135,17 +119,14 @@ export default function MessageFormFields({
         required
       />
 
-      <FormControl fullWidth required>
-        <InputLabel>{locale === 'ko' ? '상태' : 'Status'}</InputLabel>
-        <Select
-          value={data.status}
-          onChange={(e) => handleChange('status', e.target.value)}
-          label={locale === 'ko' ? '상태' : 'Status'}
-        >
-          <MenuItem value="active">{locale === 'ko' ? '활성' : 'Active'}</MenuItem>
-          <MenuItem value="inactive">{locale === 'ko' ? '비활성' : 'Inactive'}</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="COMMON_STATUS"
+        value={data.status}
+        onChange={(value) => handleChange('status', value)}
+        label={locale === 'ko' ? '상태' : 'Status'}
+        required
+        locale={locale}
+      />
     </Stack>
   );
 }

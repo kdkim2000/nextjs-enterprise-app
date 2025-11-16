@@ -2,12 +2,9 @@
 
 import React from 'react';
 import {
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  TextField
 } from '@mui/material';
+import CodeSelect from '@/components/common/CodeSelect';
 
 export interface CodeFormData {
   id?: string;
@@ -184,17 +181,14 @@ export default function CodeFormFields({
       />
 
       {/* Status */}
-      <FormControl fullWidth>
-        <InputLabel>{labels.status || 'Status'}</InputLabel>
-        <Select
-          value={code.status || 'active'}
-          label={labels.status || 'Status'}
-          onChange={(e) => handleChange('status', e.target.value as 'active' | 'inactive')}
-        >
-          <MenuItem value="active">{locale === 'ko' ? '활성' : 'Active'}</MenuItem>
-          <MenuItem value="inactive">{locale === 'ko' ? '비활성' : 'Inactive'}</MenuItem>
-        </Select>
-      </FormControl>
+      <CodeSelect
+        codeType="COMMON_STATUS"
+        value={code.status || 'active'}
+        onChange={(value) => handleChange('status', value as 'active' | 'inactive')}
+        label={labels.status || 'Status'}
+        required
+        locale={locale}
+      />
 
       {/* Parent Code */}
       <TextField

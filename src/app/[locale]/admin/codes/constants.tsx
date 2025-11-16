@@ -5,17 +5,14 @@ import { Chip } from '@mui/material';
 import ActionsCell from '@/components/common/ActionsCell';
 import { Code } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
-
-export const STATUS_OPTIONS = [
-  { value: 'active', labelEn: 'Active', labelKo: '활성' },
-  { value: 'inactive', labelEn: 'Inactive', labelKo: '비활성' }
-];
+import { CodeOption } from '@/hooks/useCodeOptions';
 
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
   handleEdit: (id: string | number) => void,
-  canUpdate: boolean = true
+  canUpdate: boolean = true,
+  statusOptions: CodeOption[] = []
 ): GridColDef[] => {
   const locale = t('common.appName') === '엔터프라이즈 앱' ? 'ko' : 'en';
 
@@ -69,12 +66,12 @@ export const createColumns = (
       width: 100,
       sortable: true,
       type: 'singleSelect',
-      valueOptions: ['active', 'inactive'],
+      valueOptions: statusOptions.map(opt => opt.value),
       renderCell: (params) => {
         const status = params.value as string;
         const color = status === 'active' ? 'success' : 'default';
-        const label = STATUS_OPTIONS.find(opt => opt.value === status);
-        const labelText = label ? getLocalizedValue({ en: label.labelEn, ko: label.labelKo, zh: label.labelEn, vi: label.labelEn }, locale) : status;
+        const statusOption = statusOptions.find(opt => opt.value === status);
+        const labelText = statusOption ? statusOption.label : status;
         return (
           <Chip
             label={labelText}
