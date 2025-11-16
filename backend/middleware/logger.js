@@ -117,10 +117,29 @@ async function appendLog(logEntry) {
 }
 
 /**
- * Get logs with filtering
+ * Get logs with filtering - Optimized for large datasets
  */
 async function getLogs(filters = {}) {
   try {
+    // Check if log file exists
+    try {
+      await fs.access(LOG_FILE);
+    } catch {
+      return [];
+    }
+
+    // Get file size to determine loading strategy
+    const stats = await fs.stat(LOG_FILE);
+    const fileSizeInMB = stats.size / (1024 * 1024);
+
+    console.log(`[Logger] Reading log file (${fileSizeInMB.toFixed(2)} MB)`);
+
+    // For files larger than 50MB, use streaming approach
+    if (fileSizeInMB > 50) {
+      return await getLogsStreaming(filters);
+    }
+
+    // For smaller files, use the fast in-memory approach
     const data = await fs.readFile(LOG_FILE, 'utf8');
     let logs = JSON.parse(data);
 
@@ -129,34 +148,146 @@ async function getLogs(filters = {}) {
       return [];
     }
 
-    // Apply filters
-    if (filters.userId) {
-      logs = logs.filter(log => log.userId === filters.userId);
-    }
-    if (filters.path) {
-      logs = logs.filter(log => log.path && log.path.includes(filters.path));
-    }
-    if (filters.method) {
-      logs = logs.filter(log => log.method === filters.method);
-    }
-    if (filters.programId) {
-      logs = logs.filter(log => log.programId === filters.programId);
-    }
-    if (filters.statusCode) {
-      logs = logs.filter(log => log.statusCode === parseInt(filters.statusCode));
-    }
-    if (filters.startDate) {
-      logs = logs.filter(log => new Date(log.timestamp) >= new Date(filters.startDate));
-    }
-    if (filters.endDate) {
-      logs = logs.filter(log => new Date(log.timestamp) <= new Date(filters.endDate));
-    }
+    console.log(`[Logger] Total logs before filtering: ${logs.length}`);
 
+    // Apply filters efficiently
+    logs = logs.filter(log => {
+      // userId filter
+      if (filters.userId && log.userId !== filters.userId) {
+        return false;
+      }
+
+      // path filter (partial match)
+      if (filters.path && (!log.path || !log.path.includes(filters.path))) {
+        return false;
+      }
+
+      // method filter (can be array or single value)
+      if (filters.method) {
+        const methods = Array.isArray(filters.method) ? filters.method : [filters.method];
+        if (methods.length > 0 && !methods.includes(log.method)) {
+          return false;
+        }
+      }
+
+      // programId filter
+      if (filters.programId && log.programId !== filters.programId) {
+        return false;
+      }
+
+      // statusCode filter
+      if (filters.statusCode && log.statusCode !== parseInt(filters.statusCode)) {
+        return false;
+      }
+
+      // startDate filter
+      if (filters.startDate) {
+        const logDate = new Date(log.timestamp);
+        const startDate = new Date(filters.startDate);
+        if (logDate < startDate) {
+          return false;
+        }
+      }
+
+      // endDate filter
+      if (filters.endDate) {
+        const logDate = new Date(log.timestamp);
+        const endDate = new Date(filters.endDate);
+        // Set end date to end of day
+        endDate.setHours(23, 59, 59, 999);
+        if (logDate > endDate) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    console.log(`[Logger] Total logs after filtering: ${logs.length}`);
     return logs;
   } catch (error) {
     console.error('Error reading logs:', error);
     return [];
   }
+}
+
+/**
+ * Stream-based log reading for very large files
+ * Uses readline to read file line by line without loading entire file into memory
+ */
+async function getLogsStreaming(filters = {}) {
+  const readline = require('readline');
+  const fsStream = require('fs');
+
+  return new Promise((resolve, reject) => {
+    const logs = [];
+    let buffer = '';
+    let isFirstLine = true;
+
+    const stream = fsStream.createReadStream(LOG_FILE, { encoding: 'utf8' });
+    const rl = readline.createInterface({
+      input: stream,
+      crlfDelay: Infinity
+    });
+
+    rl.on('line', (line) => {
+      buffer += line;
+
+      // Skip the opening bracket of JSON array
+      if (isFirstLine && line.trim() === '[') {
+        isFirstLine = false;
+        buffer = '';
+        return;
+      }
+
+      // Try to parse a complete JSON object
+      try {
+        // Remove trailing comma if present
+        const cleanLine = buffer.trim().replace(/,$/, '');
+        if (cleanLine && cleanLine !== ']') {
+          const log = JSON.parse(cleanLine);
+
+          // Apply filters
+          let matches = true;
+
+          if (filters.userId && log.userId !== filters.userId) matches = false;
+          if (filters.path && (!log.path || !log.path.includes(filters.path))) matches = false;
+
+          if (filters.method) {
+            const methods = Array.isArray(filters.method) ? filters.method : [filters.method];
+            if (methods.length > 0 && !methods.includes(log.method)) matches = false;
+          }
+
+          if (filters.programId && log.programId !== filters.programId) matches = false;
+          if (filters.statusCode && log.statusCode !== parseInt(filters.statusCode)) matches = false;
+
+          if (filters.startDate && new Date(log.timestamp) < new Date(filters.startDate)) matches = false;
+          if (filters.endDate) {
+            const endDate = new Date(filters.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            if (new Date(log.timestamp) > endDate) matches = false;
+          }
+
+          if (matches) {
+            logs.push(log);
+          }
+        }
+        buffer = '';
+      } catch (e) {
+        // Line is not complete JSON, continue buffering
+      }
+    });
+
+    rl.on('close', () => {
+      console.log(`[Logger] Streaming completed. Found ${logs.length} matching logs`);
+      resolve(logs);
+    });
+
+    rl.on('error', (error) => {
+      console.error('Error streaming logs:', error);
+      reject(error);
+    });
+  });
 }
 
 module.exports = {

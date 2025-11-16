@@ -31,7 +31,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
-import { toast } from 'react-toastify';
+import { useMessage } from '@/hooks/useMessage';
 import PageHeader from '@/components/common/PageHeader';
 import { getAvatarUrl } from '@/lib/config';
 import RouteGuard from '@/components/auth/RouteGuard';
@@ -62,6 +62,10 @@ export default function SettingsPage() {
   const { user, updateUser } = useAuth();
   const locale = useCurrentLocale();
   const changeLocale = useChangeLocale();
+  const {
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
   const [currentTab, setCurrentTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -127,13 +131,13 @@ export default function SettingsPage() {
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      toast.error(locale === 'ko' ? '지원하지 않는 파일 형식입니다' : 'Unsupported file type');
+      await showErrorMessage('VALIDATION_FILE_TYPE_INVALID');
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error(locale === 'ko' ? '파일 크기는 10MB를 초과할 수 없습니다' : 'File size cannot exceed 10MB');
+      await showErrorMessage('VALIDATION_FILE_SIZE_EXCEEDED');
       return;
     }
 
@@ -149,10 +153,10 @@ export default function SettingsPage() {
       });
       const avatarUrl = response.file.path; // Returns /uploads/filename
       setProfileData({ ...profileData, avatarUrl });
-      toast.success(locale === 'ko' ? '아바타가 업로드되었습니다' : 'Avatar uploaded successfully');
+      await showSuccessMessage('SETTINGS_AVATAR_UPLOAD_SUCCESS');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err.response?.data?.error || 'Failed to upload avatar');
+      await showErrorMessage('SETTINGS_AVATAR_UPLOAD_FAIL');
     } finally {
       setUploadingAvatar(false);
     }
@@ -170,10 +174,10 @@ export default function SettingsPage() {
       if (response.user && updateUser) {
         updateUser(response.user);
       }
-      toast.success(locale === 'ko' ? '프로필이 업데이트되었습니다' : 'Profile updated successfully');
+      await showSuccessMessage('SETTINGS_PROFILE_UPDATE_SUCCESS');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err.response?.data?.error || 'Failed to update profile');
+      await showErrorMessage('SETTINGS_PROFILE_UPDATE_FAIL');
     } finally {
       setLoading(false);
     }
@@ -181,12 +185,12 @@ export default function SettingsPage() {
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error(locale === 'ko' ? '비밀번호가 일치하지 않습니다' : 'Passwords do not match');
+      await showErrorMessage('VALIDATION_PASSWORD_MISMATCH');
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      toast.error(locale === 'ko' ? '비밀번호는 8자 이상이어야 합니다' : 'Password must be at least 8 characters');
+      await showErrorMessage('VALIDATION_PASSWORD_LENGTH');
       return;
     }
 
@@ -196,11 +200,11 @@ export default function SettingsPage() {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
-      toast.success(locale === 'ko' ? '비밀번호가 변경되었습니다' : 'Password changed successfully');
+      await showSuccessMessage('SETTINGS_PASSWORD_CHANGE_SUCCESS');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err.response?.data?.error || 'Failed to change password');
+      await showErrorMessage('SETTINGS_PASSWORD_CHANGE_FAIL');
     } finally {
       setLoading(false);
     }
@@ -211,14 +215,11 @@ export default function SettingsPage() {
     try {
       await api.post('/user/mfa-toggle', { enabled });
       setMfaEnabled(enabled);
-      toast.success(
-        enabled
-          ? locale === 'ko' ? 'MFA가 활성화되었습니다' : 'MFA enabled'
-          : locale === 'ko' ? 'MFA가 비활성화되었습니다' : 'MFA disabled'
-      );
+      const status = enabled ? 'enabled' : 'disabled';
+      await showSuccessMessage('SETTINGS_MFA_TOGGLE_SUCCESS', { status });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err.response?.data?.error || 'Failed to toggle MFA');
+      await showErrorMessage('SETTINGS_MFA_TOGGLE_FAIL');
     } finally {
       setLoading(false);
     }
@@ -234,10 +235,10 @@ export default function SettingsPage() {
         changeLocale(preferences.language);
       }
 
-      toast.success(locale === 'ko' ? '설정이 저장되었습니다' : 'Preferences saved successfully');
+      await showSuccessMessage('SETTINGS_PREFERENCES_SAVE_SUCCESS');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err.response?.data?.error || 'Failed to save preferences');
+      await showErrorMessage('SETTINGS_PREFERENCES_SAVE_FAIL');
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { Code, SearchCriteria } from '../types';
 import { CodeFormData } from '@/components/admin/CodeFormFields';
 import {
@@ -42,8 +43,14 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
     }
   });
 
-  // Use auto-hide message hook
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
 
   // Local states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -122,14 +129,14 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      showError(err.response?.data?.error || 'Failed to load codes');
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_CODE_LOAD_FAIL');
       console.error('Failed to fetch codes:', error);
       setCodes([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria, setCodes, setRowCount, showError]);
+  }, [quickSearch, searchCriteria, setCodes, setRowCount, showErrorMessage]);
 
   // Code CRUD operations
   const handleAdd = useCallback(() => {
@@ -176,7 +183,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       try {
         attributes = JSON.parse(editingCode.attributes || '{}');
       } catch (e) {
-        showError('Invalid JSON format in attributes');
+        await showErrorMessage('VALIDATION_JSON_INVALID');
         return;
       }
 
@@ -197,24 +204,24 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
         // Add new code
         const response = await api.post('/code', payload);
         setCodes([...codes, response.code]);
-        showSuccess('Code created successfully');
+        await showSuccessMessage('CRUD_CODE_CREATE_SUCCESS');
       } else {
         // Update existing code
         const response = await api.put(`/code/${editingCode.id}`, payload);
         setCodes(codes.map((c) => (c.id === editingCode.id ? response.code : c)));
-        showSuccess('Code updated successfully');
+        await showSuccessMessage('CRUD_CODE_UPDATE_SUCCESS');
       }
 
       setDialogOpen(false);
       setEditingCode(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to save code');
+      await showErrorMessage('CRUD_CODE_SAVE_FAIL');
       console.error('Failed to save code:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [editingCode, codes, setCodes, showSuccess, showError]);
+  }, [editingCode, codes, setCodes, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteClick = useCallback((ids: (string | number)[]) => {
     setSelectedForDelete(ids);
@@ -235,19 +242,19 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
       // Show success message
       const count = selectedForDelete.length;
-      showSuccess(`Successfully deleted ${count} code${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_CODE_DELETE_SUCCESS', { count });
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to delete codes');
+      await showErrorMessage('CRUD_CODE_DELETE_FAIL');
       console.error('Failed to delete codes:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, codes, setCodes, showSuccess, showError]);
+  }, [selectedForDelete, codes, setCodes, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -322,7 +329,6 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
 
     // Handlers
     handleAdd,

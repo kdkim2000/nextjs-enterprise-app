@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
-import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
+import { useMessage } from '@/hooks/useMessage';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import { Department, SearchCriteria } from '../types';
 import { DepartmentFormData } from '@/components/admin/DepartmentFormFields';
 import {
@@ -45,8 +46,14 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     }
   });
 
-  // Use auto-hide message hook
-  const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+  // Use unified message system
+  const locale = useCurrentLocale();
+  const {
+    successMessage,
+    errorMessage,
+    showSuccessMessage,
+    showErrorMessage
+  } = useMessage({ locale });
 
   // Local states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -149,14 +156,14 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
-      showError(err.response?.data?.error || 'Failed to load departments');
+      await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_DEPARTMENT_LOAD_FAIL');
       console.error('Failed to fetch departments:', error);
       setDepartments([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [quickSearch, searchCriteria, setDepartments, setRowCount, showError]);
+  }, [quickSearch, searchCriteria, setDepartments, setRowCount, showErrorMessage]);
 
   // Department CRUD operations
   const handleAdd = useCallback(() => {
@@ -221,24 +228,24 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
         // Add new department
         const response = await api.post('/department', payload);
         setDepartments([...departments, response.department]);
-        showSuccess('Department created successfully');
+        await showSuccessMessage('CRUD_DEPARTMENT_CREATE_SUCCESS');
       } else {
         // Update existing department
         const response = await api.put(`/department/${editingDepartment.id}`, payload);
         setDepartments(departments.map((d) => (d.id === editingDepartment.id ? response.department : d)));
-        showSuccess('Department updated successfully');
+        await showSuccessMessage('CRUD_DEPARTMENT_UPDATE_SUCCESS');
       }
 
       setDialogOpen(false);
       setEditingDepartment(null);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to save department');
+      await showErrorMessage('CRUD_DEPARTMENT_SAVE_FAIL');
       console.error('Failed to save department:', err);
     } finally {
       setSaveLoading(false);
     }
-  }, [editingDepartment, departments, setDepartments, showSuccess, showError]);
+  }, [editingDepartment, departments, setDepartments, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteClick = useCallback((ids: (string | number)[]) => {
     setSelectedForDelete(ids);
@@ -259,19 +266,19 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
 
       // Show success message
       const count = selectedForDelete.length;
-      showSuccess(`Successfully deleted ${count} department${count > 1 ? 's' : ''}`);
+      await showSuccessMessage('CRUD_DEPARTMENT_DELETE_SUCCESS', { count });
 
       // Close dialog
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      showError(error.response?.data?.error || 'Failed to delete departments');
+      await showErrorMessage('CRUD_DEPARTMENT_DELETE_FAIL');
       console.error('Failed to delete departments:', err);
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, departments, setDepartments, showSuccess, showError]);
+  }, [selectedForDelete, departments, setDepartments, showSuccessMessage, showErrorMessage]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);
@@ -359,7 +366,6 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
 
     // Handlers
     handleAdd,
