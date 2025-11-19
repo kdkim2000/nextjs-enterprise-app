@@ -45,18 +45,30 @@ export default function UserAutocomplete({
     if (value && !selectedUser) {
       const fetchUserById = async () => {
         try {
-          const response = await api.get(`/user/${value}`);
-          if (response.user) {
+          // Use search endpoint instead of direct ID lookup to avoid 403
+          const response = await api.get(`/user?id=${value}&page=1&limit=1`);
+          if (response.users && response.users.length > 0) {
             const user: User = {
-              id: response.user.id,
-              username: response.user.username,
-              name: response.user.name
+              id: response.users[0].id,
+              username: response.users[0].username,
+              name: response.users[0].name
             };
             setSelectedUser(user);
             setOptions([user]);
           }
         } catch (error) {
           console.error('Failed to fetch user by ID:', error);
+          // Silently fail - user might not have permission
+          // Set a placeholder to prevent infinite loading
+          if (value) {
+            const placeholderUser: User = {
+              id: value,
+              username: `User ${value}`,
+              name: 'Loading...'
+            };
+            setSelectedUser(placeholderUser);
+            setOptions([placeholderUser]);
+          }
         }
       };
       fetchUserById();
