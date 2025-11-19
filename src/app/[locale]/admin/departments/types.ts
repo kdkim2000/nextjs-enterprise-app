@@ -10,9 +10,6 @@ export interface Department {
   level: number;
   order: number;
   status: 'active' | 'inactive';
-  email: string;
-  phone: string;
-  location: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,7 +20,6 @@ export interface SearchCriteria {
   parentId: string;
   managerId: string;
   status: string;
-  location: string;
   [key: string]: string | string[];
 }
 
@@ -40,8 +36,5 @@ export interface DepartmentFormData {
   parentId: string;
   managerId: string;
   status: 'active' | 'inactive';
-  email: string;
-  phone: string;
-  location: string;
   order: number;
 }

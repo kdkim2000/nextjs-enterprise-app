@@ -16,6 +16,7 @@ import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { Department } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useHelp } from '@/hooks/useHelp';
 
 export default function DepartmentsPage() {
   const t = useI18n();
@@ -23,6 +24,17 @@ export default function DepartmentsPage() {
 
   // Permission control
   const gridPermissions = useDataGridPermissions('PROG-DEPT-MGMT');
+
+  // Use common help hook
+  const {
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    canManageHelp,
+    navigateToHelpEdit,
+    language
+  } = useHelp({ programId: 'PROG-DEPT-MGMT' });
 
   // Use custom hook for all business logic
   const {
@@ -45,13 +57,8 @@ export default function DepartmentsPage() {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
-    showError,
     // Handlers
     handleAdd,
     handleEdit,
@@ -120,7 +127,7 @@ export default function DepartmentsPage() {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by code, name, email, or location..."
+      quickSearchPlaceholder="Search by code or name..."
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
@@ -145,7 +152,9 @@ export default function DepartmentsPage() {
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
       helpExists={helpExists}
-      language={currentLocale}
+      canManageHelp={canManageHelp}
+      onHelpEdit={navigateToHelpEdit}
+      language={language}
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
@@ -193,9 +202,7 @@ export default function DepartmentsPage() {
         <DepartmentFormFields
           department={editingDepartment as DepartmentFormData}
           onChange={(dept) => setEditingDepartment(dept as DepartmentFormData)}
-          onError={(err) => showError(err)}
           departments={departments}
-          users={allUsers}
           locale={currentLocale}
           labels={{
             code: t('fields.code'),
@@ -206,9 +213,6 @@ export default function DepartmentsPage() {
             parentDepartment: t('fields.parentDepartment'),
             manager: t('fields.manager'),
             status: t('fields.status'),
-            email: t('fields.email'),
-            phone: t('fields.phone'),
-            location: t('fields.location'),
             order: t('fields.order'),
             none: t('fields.none')
           }}

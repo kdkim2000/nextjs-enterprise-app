@@ -8,6 +8,7 @@ import {
 import AvatarUpload from '@/components/common/AvatarUpload';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
 import CodeSelect from '@/components/common/CodeSelect';
+import DepartmentTreeSelect from '@/components/common/DepartmentTreeSelect';
 
 export interface UserFormData {
   id?: string;
@@ -27,6 +28,9 @@ export interface UserFormFieldsProps {
   onError?: (error: string) => void;
   usernameLabel?: string;
   emailLabel?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  departments?: any[];
+  locale?: string;
 }
 
 export default function UserFormFields({
@@ -34,7 +38,9 @@ export default function UserFormFields({
   onChange,
   onError,
   usernameLabel = 'Username',
-  emailLabel = 'Email'
+  emailLabel = 'Email',
+  departments = [],
+  locale = 'en'
 }: UserFormFieldsProps) {
   if (!user) return null;
 
@@ -107,13 +113,12 @@ export default function UserFormFields({
       />
 
       {/* Department */}
-      <CodeSelect
-        codeType="DEPARTMENT"
+      <DepartmentTreeSelect
         value={user.department || ''}
         onChange={(value) => handleChange('department', value)}
+        departments={departments}
+        locale={locale}
         label="Department"
-        showEmpty
-        emptyLabel="None"
       />
 
       {/* Status */}

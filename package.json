@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --turbo\" \"node  --max-old-space-size=8192 backend/server.js\"",
+    "dev": "concurrently \"next dev --turbo\" \"node backend/server.js\"",
     "dev:frontend": "next dev --turbo",
     "dev:backend": "node backend/server.js",
     "build": "next build",
@@ -22,6 +22,7 @@
     "@mui/x-data-grid": "^7.18.0",
     "@mui/x-data-grid-premium": "^7.18.0",
     "@mui/x-date-pickers": "^8.17.0",
+    "@mui/x-tree-view": "^8.18.0",
     "@tiptap/extension-image": "^2.8.0",
     "@tiptap/extension-link": "^2.8.0",
     "@tiptap/extension-table": "^2.8.0",

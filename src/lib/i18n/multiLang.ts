@@ -162,9 +162,12 @@ export const formDataToMultiLang = (
  * ```
  */
 export const getLocalizedValue = (
-  multiLangField: MultiLangField | PartialMultiLangField,
+  multiLangField: MultiLangField | PartialMultiLangField | undefined | null,
   locale: string
 ): string => {
+  if (!multiLangField) {
+    return '';
+  }
   const supportedLocale = LANGUAGE_CODES[locale] || (locale as SupportedLanguage);
   return multiLangField[supportedLocale] || multiLangField.en || '';
 };

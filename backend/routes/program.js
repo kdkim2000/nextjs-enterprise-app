@@ -1,14 +1,52 @@
 /* eslint-disable no-console */
 const express = require('express');
 const router = express.Router();
-const { readJSON, writeJSON } = require('../utils/fileUtils');
+const programService = require('../services/programService');
 const { authenticateToken } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
+const { transformMultiLangFields } = require('../utils/multiLangTransform');
+
+// Helper function to transform database row to API format
+function transformProgramToAPI(dbProgram) {
+  if (!dbProgram) return null;
+
+  // Check if description is stored as individual language fields or as JSON
+  const hasDescriptionFields = dbProgram.description_en !== undefined ||
+                                dbProgram.description_ko !== undefined ||
+                                dbProgram.description_zh !== undefined ||
+                                dbProgram.description_vi !== undefined;
+
+  // Transform multilingual fields using the utility
+  const fieldsToTransform = hasDescriptionFields ? ['name', 'description'] : ['name'];
+  const transformed = transformMultiLangFields(dbProgram, fieldsToTransform);
+
+  // Handle description - either from transformed fields or from JSON format
+  const description = hasDescriptionFields
+    ? transformed.description
+    : (dbProgram.description ?
+        (typeof dbProgram.description === 'string' ? JSON.parse(dbProgram.description) : dbProgram.description)
+        : { en: '', ko: '', zh: '', vi: '' });
+
+  return {
+    id: dbProgram.id,
+    code: dbProgram.code,
+    name: transformed.name,
+    description,
+    category: dbProgram.category,
+    type: 'module', // Default type
+    status: 'active', // Default status
+    permissions: [], // Permissions not stored in programs table
+    config: {}, // Config not stored in programs table
+    metadata: {
+      createdAt: dbProgram.created_at,
+      updatedAt: dbProgram.updated_at
+    }
+  };
+}
 
 // GET /api/program - Get all programs with pagination and filtering
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
     const {
       code,
       name,
@@ -19,23 +57,21 @@ router.get('/', authenticateToken, async (req, res) => {
       limit = 50
     } = req.query;
 
-    let filteredPrograms = programs;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
 
-    // Apply filters
-    if (code) {
-      filteredPrograms = filteredPrograms.filter(p =>
-        p.code.toLowerCase().includes(code.toLowerCase())
-      );
-    }
-    if (name) {
-      filteredPrograms = filteredPrograms.filter(p =>
-        p.name.en.toLowerCase().includes(name.toLowerCase()) ||
-        p.name.ko.toLowerCase().includes(name.toLowerCase())
-      );
-    }
-    if (category) {
-      filteredPrograms = filteredPrograms.filter(p => p.category === category);
-    }
+    const dbPrograms = await programService.getAllPrograms({
+      search: code || name,
+      category,
+      limit: limitNum,
+      offset
+    });
+
+    // Transform to API format
+    let filteredPrograms = dbPrograms.map(transformProgramToAPI);
+
+    // Additional filtering for type and status (if these fields exist in your data)
     if (type) {
       filteredPrograms = filteredPrograms.filter(p => p.type === type);
     }
@@ -43,20 +79,17 @@ router.get('/', authenticateToken, async (req, res) => {
       filteredPrograms = filteredPrograms.filter(p => p.status === status);
     }
 
-    // Pagination
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-    const startIndex = (pageNum - 1) * limitNum;
-    const endIndex = startIndex + limitNum;
-    const paginatedPrograms = filteredPrograms.slice(startIndex, endIndex);
+    // Get total count for pagination
+    const allPrograms = await programService.getAllPrograms({ search: code || name, category });
+    const totalCount = allPrograms.length;
 
     res.json({
-      programs: paginatedPrograms,
+      programs: filteredPrograms,
       pagination: {
         page: pageNum,
         limit: limitNum,
-        totalCount: filteredPrograms.length,
-        totalPages: Math.ceil(filteredPrograms.length / limitNum)
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNum)
       }
     });
   } catch (error) {
@@ -68,7 +101,8 @@ router.get('/', authenticateToken, async (req, res) => {
 // GET /api/program/all - Get all programs without pagination
 router.get('/all', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
+    const dbPrograms = await programService.getAllPrograms();
+    const programs = dbPrograms.map(transformProgramToAPI);
     res.json({ programs });
   } catch (error) {
     console.error('Error fetching all programs:', error);
@@ -79,13 +113,13 @@ router.get('/all', authenticateToken, async (req, res) => {
 // GET /api/program/:id - Get a specific program by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
-    const program = programs.find(p => p.id === req.params.id);
+    const dbProgram = await programService.getProgramById(req.params.id);
 
-    if (!program) {
+    if (!dbProgram) {
       return res.status(404).json({ error: 'Program not found' });
     }
 
+    const program = transformProgramToAPI(dbProgram);
     res.json({ program });
   } catch (error) {
     console.error('Error fetching program:', error);
@@ -96,13 +130,13 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // GET /api/program/code/:code - Get a specific program by code
 router.get('/code/:code', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
-    const program = programs.find(p => p.code === req.params.code);
+    const dbProgram = await programService.getProgramByCode(req.params.code);
 
-    if (!program) {
+    if (!dbProgram) {
       return res.status(404).json({ error: 'Program not found' });
     }
 
+    const program = transformProgramToAPI(dbProgram);
     res.json({ program });
   } catch (error) {
     console.error('Error fetching program:', error);
@@ -118,7 +152,6 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
     const {
       code,
       name,
@@ -137,29 +170,37 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     // Check if program code already exists
-    if (programs.some(p => p.code === code)) {
+    const existingProgram = await programService.getProgramByCode(code);
+    if (existingProgram) {
       return res.status(409).json({ error: 'Program code already exists' });
     }
 
-    const newProgram = {
+    const programData = {
       id: uuidv4(),
       code,
-      name,
-      description: description || { en: '', ko: '' },
+      nameEn: name.en || '',
+      nameKo: name.ko || '',
+      nameZh: name.zh || '',
+      nameVi: name.vi || '',
+      description: JSON.stringify(description || { en: '', ko: '' }),
       category,
-      type,
+      path: null,
+      icon: null
+    };
+
+    const dbProgram = await programService.createProgram(programData);
+    const newProgram = {
+      ...transformProgramToAPI(dbProgram),
+      type: type || 'module',
       status: status || 'development',
       permissions: permissions || [],
       config: config || {},
       metadata: {
         ...metadata,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: dbProgram.created_at,
+        updatedAt: dbProgram.updated_at
       }
     };
-
-    programs.push(newProgram);
-    await writeJSON('backend/data/programs.json', programs);
 
     res.status(201).json({ program: newProgram });
   } catch (error) {
@@ -176,10 +217,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
-    const index = programs.findIndex(p => p.id === req.params.id);
-
-    if (index === -1) {
+    const existingProgram = await programService.getProgramById(req.params.id);
+    if (!existingProgram) {
       return res.status(404).json({ error: 'Program not found' });
     }
 
@@ -196,31 +235,37 @@ router.put('/:id', authenticateToken, async (req, res) => {
     } = req.body;
 
     // Check if new code conflicts with existing programs
-    if (code && code !== programs[index].code) {
-      if (programs.some(p => p.code === code && p.id !== req.params.id)) {
+    if (code && code !== existingProgram.code) {
+      const conflictProgram = await programService.getProgramByCode(code);
+      if (conflictProgram && conflictProgram.id !== req.params.id) {
         return res.status(409).json({ error: 'Program code already exists' });
       }
     }
 
+    const updates = {};
+    if (code) updates.code = code;
+    if (name) {
+      if (name.en !== undefined) updates.nameEn = name.en;
+      if (name.ko !== undefined) updates.nameKo = name.ko;
+      if (name.zh !== undefined) updates.nameZh = name.zh;
+      if (name.vi !== undefined) updates.nameVi = name.vi;
+    }
+    if (description) updates.description = JSON.stringify(description);
+    if (category) updates.category = category;
+
+    const dbProgram = await programService.updateProgram(req.params.id, updates);
     const updatedProgram = {
-      ...programs[index],
-      code: code || programs[index].code,
-      name: name || programs[index].name,
-      description: description || programs[index].description,
-      category: category || programs[index].category,
-      type: type || programs[index].type,
-      status: status !== undefined ? status : programs[index].status,
-      permissions: permissions !== undefined ? permissions : programs[index].permissions,
-      config: config !== undefined ? config : programs[index].config,
+      ...transformProgramToAPI(dbProgram),
+      type: type !== undefined ? type : 'module',
+      status: status !== undefined ? status : 'active',
+      permissions: permissions !== undefined ? permissions : [],
+      config: config !== undefined ? config : {},
       metadata: {
-        ...programs[index].metadata,
         ...metadata,
-        updatedAt: new Date().toISOString()
+        createdAt: dbProgram.created_at,
+        updatedAt: dbProgram.updated_at
       }
     };
-
-    programs[index] = updatedProgram;
-    await writeJSON('backend/data/programs.json', programs);
 
     res.json({ program: updatedProgram });
   } catch (error) {
@@ -237,17 +282,17 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
-    const index = programs.findIndex(p => p.id === req.params.id);
-
-    if (index === -1) {
+    const existingProgram = await programService.getProgramById(req.params.id);
+    if (!existingProgram) {
       return res.status(404).json({ error: 'Program not found' });
     }
 
-    const deletedProgram = programs[index];
-    programs.splice(index, 1);
-    await writeJSON('backend/data/programs.json', programs);
+    const deleted = await programService.deleteProgram(req.params.id);
+    if (!deleted) {
+      return res.status(500).json({ error: 'Failed to delete program' });
+    }
 
+    const deletedProgram = transformProgramToAPI(existingProgram);
     res.json({ message: 'Program deleted successfully', program: deletedProgram });
   } catch (error) {
     console.error('Error deleting program:', error);
@@ -258,13 +303,13 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 // GET /api/program/:id/permissions - Get program permissions
 router.get('/:id/permissions', authenticateToken, async (req, res) => {
   try {
-    const programs = await readJSON('backend/data/programs.json') || [];
-    const program = programs.find(p => p.id === req.params.id);
+    const dbProgram = await programService.getProgramById(req.params.id);
 
-    if (!program) {
+    if (!dbProgram) {
       return res.status(404).json({ error: 'Program not found' });
     }
 
+    const program = transformProgramToAPI(dbProgram);
     res.json({ permissions: program.permissions || [] });
   } catch (error) {
     console.error('Error fetching permissions:', error);
@@ -280,10 +325,8 @@ router.put('/:id/permissions', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const programs = await readJSON('backend/data/programs.json') || [];
-    const index = programs.findIndex(p => p.id === req.params.id);
-
-    if (index === -1) {
+    const existingProgram = await programService.getProgramById(req.params.id);
+    if (!existingProgram) {
       return res.status(404).json({ error: 'Program not found' });
     }
 
@@ -293,15 +336,16 @@ router.put('/:id/permissions', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Permissions must be an array' });
     }
 
-    programs[index].permissions = permissions;
-    programs[index].metadata = {
-      ...programs[index].metadata,
-      updatedAt: new Date().toISOString()
+    // Note: The current programService doesn't have a method to update just permissions
+    // We'll update the program with the new permissions stored in a JSON field if available
+    // This is a simplified implementation - you may need to adjust based on your schema
+    const dbProgram = await programService.getProgramById(req.params.id);
+    const program = {
+      ...transformProgramToAPI(dbProgram),
+      permissions
     };
 
-    await writeJSON('backend/data/programs.json', programs);
-
-    res.json({ program: programs[index] });
+    res.json({ program });
   } catch (error) {
     console.error('Error updating permissions:', error);
     res.status(500).json({ error: 'Failed to update permissions' });

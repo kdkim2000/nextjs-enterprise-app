@@ -16,6 +16,8 @@ export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
   locale: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  allDepartments: any[],
   handleEdit: (id: string | number) => void,
   handleResetPassword?: (id: string | number) => void,
   canUpdate: boolean = true
@@ -70,7 +72,12 @@ export const createColumns = (
     {
       field: 'department',
       headerName: getLocalizedValue({ en: 'Department', ko: '부서', zh: '部门', vi: 'Phòng ban' }, locale),
-      width: 130
+      width: 200,
+      valueGetter: (_value, row) => {
+        if (!row.department) return '-';
+        const dept = allDepartments.find(d => d.id === row.department);
+        return dept ? getLocalizedValue(dept.name, locale) : row.department;
+      }
     },
     {
       field: 'status',

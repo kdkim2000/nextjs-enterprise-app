@@ -57,9 +57,6 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
     savedState?.searchCriteria || {
       name: '',
@@ -80,28 +77,6 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
       roles
     });
   }, [searchCriteria, quickSearch, roles, storageKey]);
-
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        const response = await api.get('/help?pageId=admin-roles&language=en');
-        setHelpExists(!!response.help);
-      } catch {
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-  }, []);
 
   // Fetch roles from API
   const fetchRoles = useCallback(async (useQuickSearch: boolean = false) => {
@@ -294,10 +269,6 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
 

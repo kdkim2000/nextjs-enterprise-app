@@ -33,6 +33,7 @@ import CodeSelect from '@/components/common/CodeSelect';
 import RouteGuard from '@/components/auth/RouteGuard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { useHelp } from '@/hooks/useHelp';
 import { Role } from '@/types/role';
 import { useRoleManagement } from './hooks/useRoleManagement';
 import { createColumns } from './constants';
@@ -42,6 +43,17 @@ export default function RoleManagementPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
   const gridPermissions = useDataGridPermissions('PROG-ROLE-MGMT');
+
+  // Use help hook
+  const {
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    canManageHelp,
+    navigateToHelpEdit,
+    language
+  } = useHelp({ programId: 'PROG-ROLE-MGMT' });
 
   // User search dialog state
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -68,10 +80,6 @@ export default function RoleManagementPage() {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
     // Handlers
@@ -477,7 +485,7 @@ export default function RoleManagementPage() {
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
         programId="PROG-ROLE-MGMT"
-        language="en"
+        language={language as 'en' | 'ko'}
         isAdmin={isAdmin}
       />
 

@@ -63,36 +63,6 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        try {
-          const response = await api.get('/help?programId=PROG-PROGRAM-LIST&language=en');
-          setHelpExists(!!response.help);
-        } catch {
-          setHelpExists(false);
-        }
-      } catch (error) {
-        console.error('Error checking help and role:', error);
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-  }, []);
 
   // Fetch programs from API
   const fetchPrograms = useCallback(async (
@@ -366,10 +336,6 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
 
