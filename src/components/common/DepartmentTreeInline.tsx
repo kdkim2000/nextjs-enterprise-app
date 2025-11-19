@@ -4,19 +4,17 @@ import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
-  IconButton,
   Paper,
   FormLabel,
-  Chip
+  Chip,
+  Button
 } from '@mui/material';
 import {
-  ExpandMore as ExpandMoreIcon,
-  ChevronRight as ChevronRightIcon,
   FolderOpen as FolderOpenIcon,
-  Folder as FolderIcon,
-  RadioButtonUnchecked as RadioButtonUncheckedIcon,
-  RadioButtonChecked as RadioButtonCheckedIcon
+  Folder as FolderIcon
 } from '@mui/icons-material';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export interface Department {
@@ -48,7 +46,7 @@ interface DepartmentTreeInlineProps {
   helperText?: string;
   allowNone?: boolean;
   noneLabel?: string;
-  currentDepartmentId?: string; // To prevent selecting self or descendants as parent
+  currentDepartmentId?: string;
 }
 
 export default function DepartmentTreeInline({
@@ -65,7 +63,7 @@ export default function DepartmentTreeInline({
   noneLabel = 'None (Top Level)',
   currentDepartmentId
 }: DepartmentTreeInlineProps) {
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Build tree structure from flat department list
   const departmentTree = useMemo(() => {
@@ -104,7 +102,7 @@ export default function DepartmentTreeInline({
     return rootNodes;
   }, [departments]);
 
-  // Get all descendant IDs of current department (to prevent circular reference)
+  // Get all descendant IDs of current department
   const disabledIds = useMemo(() => {
     if (!currentDepartmentId) return new Set<string>();
 
@@ -123,136 +121,96 @@ export default function DepartmentTreeInline({
     return descendants;
   }, [departments, currentDepartmentId]);
 
-  const handleToggleExpand = (nodeId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    setExpandedNodes(prev => {
-      const next = new Set(prev);
-      if (next.has(nodeId)) {
-        next.delete(nodeId);
-      } else {
-        next.add(nodeId);
-      }
-      return next;
-    });
-  };
-
-  const handleSelect = (deptId: string) => {
-    if (disabled || disabledIds.has(deptId)) return;
-    onChange(deptId === value ? '' : deptId);
+  const handleSelect = (_event: React.SyntheticEvent, itemId: string | null) => {
+    if (itemId && !disabled && !disabledIds.has(itemId)) {
+      onChange(itemId === value ? '' : itemId);
+    }
   };
 
   const handleSelectNone = () => {
-    if (disabled) return;
-    onChange('');
+    if (!disabled) {
+      onChange('');
+    }
   };
 
-  const renderTreeNode = (node: DepartmentTreeNode, depth: number = 0) => {
-    const isExpanded = expandedNodes.has(node.id);
-    const isSelected = value === node.id;
-    const hasChildren = node.children.length > 0;
-    const isDisabled = disabledIds.has(node.id);
-    const indent = depth * 24;
+  const isItemDisabled = (itemId: string): boolean => {
+    return disabledIds.has(itemId);
+  };
 
-    return (
-      <Box key={node.id}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            py: 0.75,
-            px: 1,
-            pl: `${indent + 8}px`,
-            cursor: isDisabled || disabled ? 'not-allowed' : 'pointer',
-            bgcolor: isSelected ? 'primary.light' : 'transparent',
-            opacity: isDisabled ? 0.4 : 1,
-            '&:hover': {
-              bgcolor: isDisabled || disabled ? 'transparent' : isSelected ? 'primary.light' : 'action.hover'
-            },
-            borderRadius: 1,
-            transition: 'background-color 0.2s'
-          }}
-          onClick={() => !isDisabled && handleSelect(node.id)}
-        >
-          {hasChildren ? (
-            <IconButton
-              size="small"
-              onClick={(e) => handleToggleExpand(node.id, e)}
-              sx={{ mr: 0.5, p: 0.5 }}
-              disabled={disabled}
-            >
-              {isExpanded ? (
-                <ExpandMoreIcon fontSize="small" />
+  const renderTreeItems = (nodes: DepartmentTreeNode[]) => {
+    return nodes.map((node) => {
+      const isDisabled = isItemDisabled(node.id);
+      const isSelected = value === node.id;
+
+      return (
+        <TreeItem
+          key={node.id}
+          itemId={node.id}
+          disabled={isDisabled}
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
+              {node.children.length > 0 ? (
+                <FolderOpenIcon
+                  fontSize="small"
+                  sx={{ mr: 1, color: 'primary.main' }}
+                />
               ) : (
-                <ChevronRightIcon fontSize="small" />
+                <FolderIcon
+                  fontSize="small"
+                  sx={{ mr: 1, color: 'action.active' }}
+                />
               )}
-            </IconButton>
-          ) : (
-            <Box sx={{ width: 28, mr: 0.5 }} />
-          )}
-
-          {isExpanded && hasChildren ? (
-            <FolderOpenIcon
-              fontSize="small"
-              sx={{ mr: 1, color: 'primary.main' }}
-            />
-          ) : (
-            <FolderIcon
-              fontSize="small"
-              sx={{ mr: 1, color: 'action.active' }}
-            />
-          )}
-
-          {isSelected ? (
-            <RadioButtonCheckedIcon
-              fontSize="small"
-              color="primary"
-              sx={{ mr: 1 }}
-            />
-          ) : (
-            <RadioButtonUncheckedIcon
-              fontSize="small"
-              sx={{ mr: 1, color: 'action.active' }}
-            />
-          )}
-
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{
-                fontWeight: isSelected ? 600 : 400,
-                color: isDisabled ? 'text.disabled' : 'text.primary'
-              }}
-            >
-              {getLocalizedValue(node.name, locale)}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{ fontSize: '0.7rem' }}
-            >
-              {node.code}
-            </Typography>
-          </Box>
-
-          {isDisabled && currentDepartmentId && (
-            <Chip
-              label="Cannot select"
-              size="small"
-              color="warning"
-              sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
-            />
-          )}
-        </Box>
-
-        {hasChildren && isExpanded && (
-          <Box>
-            {node.children.map(child => renderTreeNode(child, depth + 1))}
-          </Box>
-        )}
-      </Box>
-    );
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: isSelected ? 600 : 400,
+                    color: isDisabled ? 'text.disabled' : 'text.primary'
+                  }}
+                >
+                  {getLocalizedValue(node.name, locale)}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontSize: '0.7rem' }}
+                >
+                  {node.code}
+                </Typography>
+              </Box>
+              {isDisabled && currentDepartmentId && (
+                <Chip
+                  label="Cannot select"
+                  size="small"
+                  color="warning"
+                  sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+                />
+              )}
+            </Box>
+          }
+          sx={{
+            '& .MuiTreeItem-content': {
+              borderRadius: 1,
+              my: 0.25,
+              '&.Mui-selected': {
+                bgcolor: 'primary.light',
+                '&:hover': {
+                  bgcolor: 'primary.light'
+                }
+              },
+              '&:hover': {
+                bgcolor: isDisabled ? 'transparent' : 'action.hover'
+              },
+              '&.Mui-disabled': {
+                opacity: 0.4
+              }
+            }
+          }}
+        >
+          {node.children.length > 0 && renderTreeItems(node.children)}
+        </TreeItem>
+      );
+    });
   };
 
   return (
@@ -291,59 +249,36 @@ export default function DepartmentTreeInline({
         }}
       >
         {allowNone && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              py: 0.75,
-              px: 1,
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              bgcolor: value === '' ? 'primary.light' : 'transparent',
-              '&:hover': {
-                bgcolor: disabled ? 'transparent' : value === '' ? 'primary.light' : 'action.hover'
-              },
-              borderRadius: 1,
-              mb: 1,
-              transition: 'background-color 0.2s'
-            }}
+          <Button
+            fullWidth
+            variant={value === '' ? 'contained' : 'outlined'}
+            size="small"
             onClick={handleSelectNone}
+            disabled={disabled}
+            startIcon={<FolderIcon />}
+            sx={{
+              justifyContent: 'flex-start',
+              mb: 1,
+              textTransform: 'none',
+              fontStyle: 'italic'
+            }}
           >
-            <Box sx={{ width: 28, mr: 0.5 }} />
-
-            <FolderIcon
-              fontSize="small"
-              sx={{ mr: 1, color: 'action.active' }}
-            />
-
-            {value === '' ? (
-              <RadioButtonCheckedIcon
-                fontSize="small"
-                color="primary"
-                sx={{ mr: 1 }}
-              />
-            ) : (
-              <RadioButtonUncheckedIcon
-                fontSize="small"
-                sx={{ mr: 1, color: 'action.active' }}
-              />
-            )}
-
-            <Typography
-              variant="body2"
-              sx={{
-                fontStyle: 'italic',
-                fontWeight: value === '' ? 600 : 400,
-                color: 'text.secondary'
-              }}
-            >
-              {noneLabel}
-            </Typography>
-          </Box>
+            {noneLabel}
+          </Button>
         )}
 
-        <Box>
-          {departmentTree.map(node => renderTreeNode(node))}
-        </Box>
+        <SimpleTreeView
+          selectedItems={value || null}
+          onSelectedItemsChange={handleSelect}
+          expandedItems={expandedItems}
+          onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
+          sx={{
+            flexGrow: 1,
+            overflowY: 'auto'
+          }}
+        >
+          {renderTreeItems(departmentTree)}
+        </SimpleTreeView>
       </Paper>
 
       {helperText && (
