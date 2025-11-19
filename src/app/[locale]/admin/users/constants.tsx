@@ -46,22 +46,55 @@ export const createColumns = (
           >
             <Avatar
               src={getAvatarUrl(user.avatarUrl)}
-              alt={user.name}
+              alt={user.name_ko || user.name || ''}
               sx={{ width: 32, height: 32 }}
             >
-              {!user.avatarUrl && user.name?.substring(0, 2).toUpperCase()}
+              {!user.avatarUrl && (user.name_ko || user.name || '')?.substring(0, 2).toUpperCase()}
             </Avatar>
           </Box>
         );
       }
     },
-    { field: 'username', headerName: t('auth.username'), width: 130 },
     {
-      field: 'name',
-      headerName: getLocalizedValue({ en: 'Name', ko: '이름', zh: '姓名', vi: 'Tên' }, locale),
-      width: 150
+      field: 'loginid',
+      headerName: getLocalizedValue({ en: 'Login ID', ko: '로그인 ID', zh: '登录ID', vi: 'ID đăng nhập' }, locale),
+      width: 130,
+      valueGetter: (_value, row) => row.loginid || row.username // backward compatibility
+    },
+    {
+      field: 'employee_number',
+      headerName: getLocalizedValue({ en: 'Employee #', ko: '사번', zh: '员工号', vi: 'Mã NV' }, locale),
+      width: 120
+    },
+    {
+      field: 'name_ko',
+      headerName: getLocalizedValue({ en: 'Name (KR)', ko: '이름 (한글)', zh: '姓名 (韩)', vi: 'Tên (Hàn)' }, locale),
+      width: 130,
+      valueGetter: (_value, row) => row.name_ko || row.name // backward compatibility
+    },
+    {
+      field: 'name_en',
+      headerName: getLocalizedValue({ en: 'Name (EN)', ko: '이름 (영문)', zh: '姓名 (英)', vi: 'Tên (Anh)' }, locale),
+      width: 130
     },
     { field: 'email', headerName: t('auth.email'), width: 200 },
+    {
+      field: 'phone_number',
+      headerName: getLocalizedValue({ en: 'Phone', ko: '전화번호', zh: '电话', vi: 'Điện thoại' }, locale),
+      width: 130
+    },
+    {
+      field: 'mobile_number',
+      headerName: getLocalizedValue({ en: 'Mobile', ko: '휴대전화', zh: '手机', vi: 'Di động' }, locale),
+      width: 130
+    },
+    {
+      field: 'user_category',
+      headerName: getLocalizedValue({ en: 'Category', ko: '사용자구분', zh: '类别', vi: 'Loại' }, locale),
+      width: 110,
+      type: 'singleSelect',
+      valueOptions: ['regular', 'contractor', 'temporary', 'external', 'admin']
+    },
     {
       field: 'role',
       headerName: getLocalizedValue({ en: 'Role', ko: '역할', zh: '角色', vi: 'Vai trò' }, locale),
@@ -96,7 +129,7 @@ export const createColumns = (
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        console.log('[UserManagement] Rendering actions for user:', params.row.username, 'hasResetPassword:', !!handleResetPassword);
+        console.log('[UserManagement] Rendering actions for user:', params.row.loginid || params.row.username, 'hasResetPassword:', !!handleResetPassword);
         return (
           <ActionsCell
             onEdit={() => handleEdit(params.row.id)}
