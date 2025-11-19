@@ -37,8 +37,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       name: '',
       parentId: '',
       managerId: '',
-      status: '',
-      location: ''
+      status: ''
     },
     initialPaginationModel: {
       page: 0,
@@ -64,43 +63,14 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [allUsers, setAllUsers] = useState<any[]>([]);
-
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        try {
-          const response = await api.get('/help?programId=PROG-DEPT-MGMT&language=en');
-          setHelpExists(!!response.help);
-        } catch {
-          setHelpExists(false);
-        }
-      } catch (error) {
-        console.error('Error checking help and role:', error);
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-  }, []);
 
   // Fetch all users for manager dropdown
   const fetchUsers = useCallback(async () => {
     try {
-      const response = await api.get('/user');
+      // Fetch all users using the simplified endpoint (no pagination)
+      const response = await api.get('/user/all');
       setAllUsers(response.users || []);
     } catch (error: any) {
       // If user doesn't have permission to view users (403), silently set empty array
@@ -127,11 +97,9 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       const params = new URLSearchParams();
 
       if (useQuickSearch && quickSearch) {
-        // Quick search: search in code, name, email, location
+        // Quick search: search in code and name
         params.append('code', quickSearch);
         params.append('name', quickSearch);
-        params.append('email', quickSearch);
-        params.append('location', quickSearch);
       } else {
         // Advanced search: use specific criteria
         if (searchCriteria.code) params.append('code', searchCriteria.code);
@@ -139,7 +107,6 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
         if (searchCriteria.parentId) params.append('parentId', searchCriteria.parentId);
         if (searchCriteria.managerId) params.append('managerId', searchCriteria.managerId);
         if (searchCriteria.status) params.append('status', searchCriteria.status);
-        if (searchCriteria.location) params.append('location', searchCriteria.location);
       }
 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
@@ -174,9 +141,6 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       parentId: '',
       managerId: '',
       status: 'active',
-      email: '',
-      phone: '',
-      location: '',
       order: 1
     } as any);
     setDialogOpen(true);
@@ -194,9 +158,6 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
         parentId: department.parentId || '',
         managerId: department.managerId || '',
         status: department.status,
-        email: department.email || '',
-        phone: department.phone || '',
-        location: department.location || '',
         order: department.order
       } as any);
       setDialogOpen(true);
@@ -218,9 +179,6 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
         parentId: editingDepartment.parentId || null,
         managerId: editingDepartment.managerId || null,
         status: editingDepartment.status,
-        email: editingDepartment.email,
-        phone: editingDepartment.phone,
-        location: editingDepartment.location,
         order: editingDepartment.order
       };
 
@@ -319,8 +277,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       name: '',
       parentId: '',
       managerId: '',
-      status: '',
-      location: ''
+      status: ''
     });
     sessionStorage.removeItem(storageKey);
   }, [setSearchCriteria, storageKey]);
@@ -360,10 +317,6 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
 

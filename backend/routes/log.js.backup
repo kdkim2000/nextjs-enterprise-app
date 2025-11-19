@@ -1,8 +1,45 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
 const { getLogs } = require('../middleware/logger');
+const fs = require('fs').promises;
+const path = require('path');
 
 const router = express.Router();
+
+const USERS_FILE = path.join(__dirname, '../data/users.json');
+
+/**
+ * Helper function to enrich logs with user names
+ */
+async function enrichLogsWithUserNames(logs) {
+  try {
+    const usersData = await fs.readFile(USERS_FILE, 'utf8');
+    const users = JSON.parse(usersData);
+    const usersArray = Array.isArray(users) ? users : [];
+
+    // Create a map for efficient lookup
+    const userMap = new Map();
+    usersArray.forEach(user => {
+      userMap.set(user.id, user.name || user.username);
+    });
+
+    // Enrich logs with user names
+    return logs.map(log => {
+      const userName = userMap.get(log.userId);
+      return {
+        ...log,
+        userName: userName || (log.userId === 'anonymous' ? 'Anonymous' : log.userId)
+      };
+    });
+  } catch (error) {
+    console.error('Error enriching logs with user names:', error);
+    // Return logs without enrichment if error occurs
+    return logs.map(log => ({
+      ...log,
+      userName: log.userId === 'anonymous' ? 'Anonymous' : log.userId
+    }));
+  }
+}
 
 /**
  * Get logs with filters
@@ -18,6 +55,8 @@ router.get('/', authenticateToken, async (req, res) => {
       userId: req.query.userId,
       path: req.query.path,
       method: req.query.method,
+      programId: req.query.programId,
+      statusCode: req.query.statusCode,
       startDate: req.query.startDate,
       endDate: req.query.endDate
     };
@@ -35,8 +74,11 @@ router.get('/', authenticateToken, async (req, res) => {
 
     const paginatedLogs = logs.slice(startIndex, endIndex);
 
+    // Enrich with user names
+    const enrichedLogs = await enrichLogsWithUserNames(paginatedLogs);
+
     res.json({
-      logs: paginatedLogs,
+      logs: enrichedLogs,
       pagination: {
         total: logs.length,
         page,
@@ -70,8 +112,11 @@ router.get('/my-logs', authenticateToken, async (req, res) => {
 
     const paginatedLogs = logs.slice(startIndex, endIndex);
 
+    // Enrich with user names
+    const enrichedLogs = await enrichLogsWithUserNames(paginatedLogs);
+
     res.json({
-      logs: paginatedLogs,
+      logs: enrichedLogs,
       pagination: {
         total: logs.length,
         page,
@@ -85,4 +130,4 @@ router.get('/my-logs', authenticateToken, async (req, res) => {
   }
 });
 
-undefined
+module.exports = router;

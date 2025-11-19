@@ -13,6 +13,7 @@ import MenuFormFields from '@/components/admin/MenuFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { useHelp } from '@/hooks/useHelp';
 import { useMenuManagement } from './hooks/useMenuManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -22,6 +23,17 @@ export default function MenuManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const gridPermissions = useDataGridPermissions('PROG-MENU-MGMT');
+
+  // Use help hook
+  const {
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    canManageHelp,
+    navigateToHelpEdit,
+    language
+  } = useHelp({ programId: 'PROG-MENU-MGMT' });
 
   // Use custom hook for all business logic
   const {
@@ -42,13 +54,8 @@ export default function MenuManagementPage() {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
-    showError,
     // Handlers
     handleAdd,
     handleEdit,
@@ -134,7 +141,9 @@ export default function MenuManagementPage() {
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
       helpExists={helpExists}
-      language={currentLocale}
+      canManageHelp={canManageHelp}
+      onHelpEdit={navigateToHelpEdit}
+      language={language}
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>

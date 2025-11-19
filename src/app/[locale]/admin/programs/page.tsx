@@ -13,6 +13,7 @@ import ProgramFormFields, { ProgramFormData } from '@/components/admin/ProgramFo
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { useHelp } from '@/hooks/useHelp';
 import { useProgramManagement } from './hooks/useProgramManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -22,6 +23,17 @@ export default function ProgramManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const gridPermissions = useDataGridPermissions('PROG-PROGRAM-MGMT');
+
+  // Use help hook
+  const {
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    canManageHelp,
+    navigateToHelpEdit,
+    language
+  } = useHelp({ programId: 'PROG-PROGRAM-MGMT' });
 
   // Use custom hook for all business logic
   const {
@@ -43,10 +55,6 @@ export default function ProgramManagementPage() {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
     // Handlers
@@ -126,7 +134,9 @@ export default function ProgramManagementPage() {
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
       helpExists={helpExists}
-      language={currentLocale}
+      canManageHelp={canManageHelp}
+      onHelpEdit={navigateToHelpEdit}
+      language={language}
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>

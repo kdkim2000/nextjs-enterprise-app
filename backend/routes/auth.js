@@ -1,16 +1,13 @@
 const express = require('express');
+const { v4: uuidv4 } = require('uuid');
 const { generateToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { generateMFACode, sendMFACode } = require('../utils/email');
-const { readJSON, writeJSON } = require('../utils/fileUtils');
 const { comparePassword } = require('../utils/password');
 const { authLimiter, mfaLimiter } = require('../middleware/rateLimiter');
-const { addToBlacklist } = require('../utils/tokenBlacklist');
-const path = require('path');
+const userService = require('../services/userService');
+const authService = require('../services/authService');
 
 const router = express.Router();
-
-const USERS_FILE = path.join(__dirname, '../data/users.json');
-const MFA_CODES_FILE = path.join(__dirname, '../data/mfaCodes.json');
 
 /**
  * Login endpoint
@@ -23,8 +20,7 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Username and password required' });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.username === username);
+    const user = await userService.getUserByUsername(username);
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -41,22 +37,16 @@ router.post('/login', authLimiter, async (req, res) => {
     }
 
     // Check if MFA is enabled
-    if (user.mfaEnabled) {
+    if (user.mfa_enabled) {
       // Generate and send MFA code
       const mfaCode = generateMFACode();
-      const mfaCodes = await readJSON(MFA_CODES_FILE) || [];
 
-      // Remove old codes for this user
-      const filteredCodes = mfaCodes.filter(c => c.userId !== user.id);
+      // Delete old codes for this user
+      await authService.deleteMFACodesForUser(user.id);
 
-      // Add new code
-      filteredCodes.push({
-        userId: user.id,
-        code: mfaCode,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() // 5 minutes
-      });
-
-      await writeJSON(MFA_CODES_FILE, filteredCodes);
+      // Create new MFA code
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+      await authService.createMFACode(user.id, mfaCode, expiresAt);
 
       const emailResult = await sendMFACode(user.email, mfaCode);
 
@@ -80,8 +70,7 @@ router.post('/login', authLimiter, async (req, res) => {
     });
 
     // Update last login
-    user.lastLogin = new Date().toISOString();
-    await writeJSON(USERS_FILE, users);
+    await userService.updateLastLogin(user.id);
 
     res.json({
       token,
@@ -89,9 +78,9 @@ router.post('/login', authLimiter, async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        name: user.name,
+        firstName: user.first_name,
+        lastName: user.last_name,
         email: user.email,
-        role: user.role,
         department: user.department
       }
     });
@@ -112,24 +101,14 @@ router.post('/verify-mfa', mfaLimiter, async (req, res) => {
       return res.status(400).json({ error: 'UserId and code required' });
     }
 
-    const mfaCodes = await readJSON(MFA_CODES_FILE) || [];
-    const mfaEntry = mfaCodes.find(c => c.userId === userId);
+    const mfaEntry = await authService.verifyMFACode(userId, code);
 
     if (!mfaEntry) {
-      return res.status(404).json({ error: 'MFA code not found' });
-    }
-
-    if (new Date(mfaEntry.expiresAt) < new Date()) {
-      return res.status(400).json({ error: 'MFA code expired' });
-    }
-
-    if (mfaEntry.code !== code) {
-      return res.status(401).json({ error: 'Invalid MFA code' });
+      return res.status(401).json({ error: 'Invalid or expired MFA code' });
     }
 
     // Get user
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.id === userId);
+    const user = await userService.getUserById(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -147,12 +126,10 @@ router.post('/verify-mfa', mfaLimiter, async (req, res) => {
     });
 
     // Update last login
-    user.lastLogin = new Date().toISOString();
-    await writeJSON(USERS_FILE, users);
+    await userService.updateLastLogin(user.id);
 
-    // Remove used MFA code
-    const filteredCodes = mfaCodes.filter(c => c.userId !== userId);
-    await writeJSON(MFA_CODES_FILE, filteredCodes);
+    // Mark MFA code as used
+    await authService.markMFACodeAsUsed(mfaEntry.id);
 
     res.json({
       token,
@@ -160,9 +137,9 @@ router.post('/verify-mfa', mfaLimiter, async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        name: user.name,
+        firstName: user.first_name,
+        lastName: user.last_name,
         email: user.email,
-        role: user.role,
         department: user.department
       }
     });
@@ -183,8 +160,7 @@ router.post('/resend-mfa', mfaLimiter, async (req, res) => {
       return res.status(400).json({ error: 'UserId required' });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.id === userId);
+    const user = await userService.getUserById(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -192,19 +168,13 @@ router.post('/resend-mfa', mfaLimiter, async (req, res) => {
 
     // Generate new code
     const mfaCode = generateMFACode();
-    const mfaCodes = await readJSON(MFA_CODES_FILE) || [];
 
-    // Remove old codes
-    const filteredCodes = mfaCodes.filter(c => c.userId !== userId);
+    // Delete old codes
+    await authService.deleteMFACodesForUser(userId);
 
-    // Add new code
-    filteredCodes.push({
-      userId: user.id,
-      code: mfaCode,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString()
-    });
-
-    await writeJSON(MFA_CODES_FILE, filteredCodes);
+    // Create new MFA code
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    await authService.createMFACode(userId, mfaCode, expiresAt);
 
     const emailResult = await sendMFACode(user.email, mfaCode);
 
@@ -229,16 +199,16 @@ router.post('/sso', async (req, res) => {
     const mockUser = {
       id: 'sso-user-001',
       username: 'sso.user',
-      name: 'SSO User',
+      firstName: 'SSO',
+      lastName: 'User',
       email: 'sso.user@example.com',
-      role: 'user',
       department: 'IT'
     };
 
     const token = generateToken({
       userId: mockUser.id,
       username: mockUser.username,
-      role: mockUser.role
+      role: 'user'
     });
 
     const refreshToken = generateRefreshToken({
@@ -270,8 +240,7 @@ router.post('/refresh', async (req, res) => {
 
     const decoded = verifyRefreshToken(refreshToken);
 
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.id === decoded.userId);
+    const user = await userService.getUserById(decoded.userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -301,14 +270,14 @@ router.post('/logout', async (req, res) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      // Decode token to get expiration time
+      // Decode token to get expiration time and user ID
       const jwt = require('jsonwebtoken');
       try {
         const decoded = jwt.decode(token);
         if (decoded && decoded.exp) {
           // Add token to blacklist with expiration time
-          const expiresAt = decoded.exp * 1000; // Convert to milliseconds
-          await addToBlacklist(token, expiresAt);
+          const expiresAt = new Date(decoded.exp * 1000); // Convert to milliseconds
+          await authService.addToBlacklist(token, decoded.userId, expiresAt);
           console.log('Token blacklisted on logout');
         }
       } catch (decodeError) {

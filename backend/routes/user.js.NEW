@@ -1,0 +1,657 @@
+const express = require('express');
+const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
+const { authenticateToken } = require('../middleware/auth');
+const { requireProgramAccess, requirePermission } = require('../middleware/permissionMiddleware');
+const userService = require('../services/userService');
+const preferencesService = require('../services/preferencesService');
+const menuService = require('../services/menuService');
+
+const router = express.Router();
+
+/**
+ * Get all users with search and pagination
+ */
+router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
+  try {
+    const {
+      username,
+      name,
+      email,
+      role,
+      status,
+      page = 1,
+      limit = 50
+    } = req.query;
+
+    // Handle department as array
+    const departments = req.query.department
+      ? (Array.isArray(req.query.department) ? req.query.department : [req.query.department])
+      : [];
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // Build search string (username, name, or email)
+    const search = username || name || email;
+
+    // Get users from database
+    const users = await userService.getAllUsers({
+      search,
+      status,
+      department: departments[0], // Service supports single department filter
+      limit: limitNum,
+      offset
+    });
+
+    // Get total count for pagination
+    const totalCount = await userService.getUserCount({
+      search,
+      status,
+      department: departments[0]
+    });
+
+    const totalPages = Math.ceil(totalCount / limitNum);
+
+    // Remove password field and convert snake_case to camelCase for response
+    const safeUsers = users.map(({ password, first_name, last_name, mfa_enabled, profile_image, last_login, created_at, updated_at, ...rest }) => ({
+      ...rest,
+      firstName: first_name,
+      lastName: last_name,
+      name: `${first_name} ${last_name}`.trim(),
+      mfaEnabled: mfa_enabled,
+      profileImage: profile_image,
+      lastLogin: last_login,
+      createdAt: created_at,
+      updatedAt: updated_at
+    }));
+
+    res.json({
+      users: safeUsers,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalCount,
+        totalPages,
+        hasMore: pageNum < totalPages
+      }
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+/**
+ * Get user preferences
+ */
+router.get('/preferences', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Get preferences from database
+    let preferences = await preferencesService.getUserPreferences(userId);
+
+    // Get user's MFA status
+    const user = await userService.getUserById(userId);
+
+    if (!preferences) {
+      return res.json({
+        preferences: {
+          favoriteMenus: [],
+          recentMenus: [],
+          language: 'en',
+          theme: 'light',
+          rowsPerPage: 10,
+          emailNotifications: true,
+          systemNotifications: true,
+          sessionTimeout: 30,
+          mfaEnabled: user?.mfa_enabled || false
+        }
+      });
+    }
+
+    // Convert DB format to API format
+    const apiPreferences = {
+      favoriteMenus: preferences.settings?.favoriteMenus || [],
+      recentMenus: preferences.settings?.recentMenus || [],
+      language: preferences.language,
+      theme: preferences.theme,
+      rowsPerPage: preferences.settings?.rowsPerPage || 10,
+      emailNotifications: preferences.notifications !== false,
+      systemNotifications: preferences.settings?.systemNotifications !== false,
+      sessionTimeout: preferences.settings?.sessionTimeout || 30,
+      mfaEnabled: user?.mfa_enabled || false
+    };
+
+    res.json({ preferences: apiPreferences });
+  } catch (error) {
+    console.error('Get preferences error:', error);
+    res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
+});
+
+/**
+ * Get favorite menus with details
+ */
+router.get('/favorite-menus', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const preferences = await preferencesService.getUserPreferences(userId);
+
+    const favoriteMenuIds = preferences?.settings?.favoriteMenus || [];
+
+    if (!favoriteMenuIds.length) {
+      return res.json({ menus: [] });
+    }
+
+    // Get all menus and filter favorites
+    const allMenus = await menuService.getAllMenus();
+    const favoriteMenus = allMenus.filter(m => favoriteMenuIds.includes(m.id));
+
+    res.json({ menus: favoriteMenus });
+  } catch (error) {
+    console.error('Get favorite menus error:', error);
+    res.status(500).json({ error: 'Failed to fetch favorite menus' });
+  }
+});
+
+/**
+ * Get recent menus with details
+ */
+router.get('/recent-menus', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const preferences = await preferencesService.getUserPreferences(userId);
+
+    const recentMenuIds = preferences?.settings?.recentMenus || [];
+
+    if (!recentMenuIds.length) {
+      return res.json({ menus: [] });
+    }
+
+    // Get all menus and filter recents
+    const allMenus = await menuService.getAllMenus();
+    const recentMenus = allMenus.filter(m => recentMenuIds.includes(m.id));
+
+    res.json({ menus: recentMenus });
+  } catch (error) {
+    console.error('Get recent menus error:', error);
+    res.status(500).json({ error: 'Failed to fetch recent menus' });
+  }
+});
+
+/**
+ * Get user's program permissions
+ */
+router.get('/permissions', authenticateToken, async (req, res) => {
+  try {
+    const { getUserAccessiblePrograms } = require('../middleware/permissionMiddleware');
+
+    const userId = req.user.userId;
+    const accessiblePrograms = getUserAccessiblePrograms(userId);
+
+    const permissions = accessiblePrograms.map(program => ({
+      programCode: program.code,
+      programId: program.id,
+      programName: program.name,
+      canView: program.permissions.canView,
+      canCreate: program.permissions.canCreate,
+      canUpdate: program.permissions.canUpdate,
+      canDelete: program.permissions.canDelete
+    }));
+
+    res.json({ permissions });
+  } catch (error) {
+    console.error('Get permissions error:', error);
+    res.status(500).json({ error: 'Failed to get permissions' });
+  }
+});
+
+/**
+ * Get single user by ID
+ */
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Users can view their own profile without permission check
+    if (req.user.userId !== id) {
+      const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
+      const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
+      if (!permissions.hasAccess) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    }
+
+    const user = await userService.getUserById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Convert DB format to API format
+    const { password, first_name, last_name, mfa_enabled, profile_image, last_login, created_at, updated_at, ...rest } = user;
+    const safeUser = {
+      ...rest,
+      firstName: first_name,
+      lastName: last_name,
+      name: `${first_name} ${last_name}`.trim(),
+      mfaEnabled: mfa_enabled,
+      profileImage: profile_image,
+      lastLogin: last_login,
+      createdAt: created_at,
+      updatedAt: updated_at
+    };
+
+    res.json({ user: safeUser });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+/**
+ * Create new user
+ */
+router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'), async (req, res) => {
+  try {
+    const { username, password, name, email, role, department, status, avatarUrl } = req.body;
+
+    if (!username || !password || !name || !email) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Check if username or email already exists
+    if (await userService.usernameExists(username)) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+    if (await userService.emailExists(email)) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Split name into first and last name
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const newUser = await userService.createUser({
+      id: uuidv4(),
+      username,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      email,
+      department: department || '',
+      status: status || 'active',
+      mfaEnabled: false,
+      profileImage: avatarUrl
+    });
+
+    // Convert to API format
+    const { password: _, first_name, last_name, mfa_enabled, profile_image, ...rest } = newUser;
+    const safeUser = {
+      ...rest,
+      firstName: first_name,
+      lastName: last_name,
+      name: `${first_name} ${last_name}`.trim(),
+      mfaEnabled: mfa_enabled,
+      profileImage: profile_image
+    };
+
+    res.status(201).json({ user: safeUser });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+/**
+ * Update user preferences
+ */
+router.put('/preferences', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const {
+      language,
+      theme,
+      rowsPerPage,
+      emailNotifications,
+      systemNotifications,
+      sessionTimeout
+    } = req.body;
+
+    // Get existing preferences
+    let preferences = await preferencesService.getUserPreferences(userId);
+    const existingSettings = preferences?.settings || {};
+
+    // Update preferences
+    const updates = {
+      language,
+      theme,
+      notifications: emailNotifications,
+      settings: {
+        ...existingSettings,
+        rowsPerPage,
+        systemNotifications,
+        sessionTimeout
+      }
+    };
+
+    const updated = await preferencesService.createUserPreferences({
+      userId,
+      ...updates
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error('Update preferences error:', error);
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
+/**
+ * Update user
+ */
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const isSelf = req.user.userId === id;
+
+    if (!isSelf) {
+      const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
+      const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
+      if (!permissions.canUpdate) {
+        return res.status(403).json({ error: 'Update permission required' });
+      }
+    }
+
+    const { name, email, role, department, status, avatarUrl } = req.body;
+
+    // Check email uniqueness
+    if (email) {
+      if (await userService.emailExists(email, id)) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+    }
+
+    // Prepare updates
+    const updates = {};
+    if (name) {
+      const nameParts = name.trim().split(' ');
+      updates.firstName = nameParts[0];
+      updates.lastName = nameParts.slice(1).join(' ') || '';
+    }
+    if (email) updates.email = email;
+    if (department !== undefined) updates.department = department;
+    if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
+
+    // Only admins can change role and status
+    if (!isSelf) {
+      if (role) updates.role = role;
+      if (status) updates.status = status;
+    }
+
+    const updatedUser = await userService.updateUser(id, updates);
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Convert to API format
+    const { password, first_name, last_name, mfa_enabled, profile_image, ...rest } = updatedUser;
+    const safeUser = {
+      ...rest,
+      firstName: first_name,
+      lastName: last_name,
+      name: `${first_name} ${last_name}`.trim(),
+      mfaEnabled: mfa_enabled,
+      profileImage: profile_image
+    };
+
+    res.json({ user: safeUser });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+/**
+ * Delete user
+ */
+router.delete('/:id', authenticateToken, requirePermission('PROG-USER-LIST', 'delete'), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.userId === id) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    const deleted = await userService.deleteUser(id);
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+/**
+ * Add menu to favorites
+ */
+router.post('/favorite-menus', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { menuId } = req.body;
+
+    if (!menuId) {
+      return res.status(400).json({ error: 'Menu ID required' });
+    }
+
+    let preferences = await preferencesService.getUserPreferences(userId);
+    const settings = preferences?.settings || {};
+    const favoriteMenus = settings.favoriteMenus || [];
+
+    if (!favoriteMenus.includes(menuId)) {
+      favoriteMenus.push(menuId);
+      await preferencesService.createUserPreferences({
+        userId,
+        language: preferences?.language || 'en',
+        theme: preferences?.theme || 'light',
+        settings: { ...settings, favoriteMenus }
+      });
+    }
+
+    res.json({ message: 'Menu added to favorites', favoriteMenus });
+  } catch (error) {
+    console.error('Add favorite menu error:', error);
+    res.status(500).json({ error: 'Failed to add favorite menu' });
+  }
+});
+
+/**
+ * Remove menu from favorites
+ */
+router.delete('/favorite-menus/:menuId', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { menuId } = req.params;
+
+    const preferences = await preferencesService.getUserPreferences(userId);
+    if (!preferences) {
+      return res.status(404).json({ error: 'Preferences not found' });
+    }
+
+    const settings = preferences.settings || {};
+    const favoriteMenus = (settings.favoriteMenus || []).filter(id => id !== menuId);
+
+    await preferencesService.createUserPreferences({
+      userId,
+      language: preferences.language,
+      theme: preferences.theme,
+      settings: { ...settings, favoriteMenus }
+    });
+
+    res.json({ message: 'Menu removed from favorites', favoriteMenus });
+  } catch (error) {
+    console.error('Remove favorite menu error:', error);
+    res.status(500).json({ error: 'Failed to remove favorite menu' });
+  }
+});
+
+/**
+ * Update user profile
+ */
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { name, email, department, avatarUrl } = req.body;
+
+    if (email && await userService.emailExists(email, userId)) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    const updates = {};
+    if (name) {
+      const nameParts = name.trim().split(' ');
+      updates.firstName = nameParts[0];
+      updates.lastName = nameParts.slice(1).join(' ') || '';
+    }
+    if (email) updates.email = email;
+    if (department) updates.department = department;
+    if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
+
+    const updatedUser = await userService.updateUser(userId, updates);
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        name: `${updatedUser.first_name} ${updatedUser.last_name}`.trim(),
+        email: updatedUser.email,
+        role: updatedUser.role,
+        department: updatedUser.department,
+        avatarUrl: updatedUser.profile_image
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+/**
+ * Change password
+ */
+router.post('/change-password', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new password required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const user = await userService.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify current password
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash and update new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userService.updateUser(userId, { password: hashedPassword });
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
+/**
+ * Toggle MFA
+ */
+router.post('/mfa-toggle', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { enabled } = req.body;
+
+    if (enabled === undefined) {
+      return res.status(400).json({ error: 'Enabled flag required' });
+    }
+
+    await userService.updateUser(userId, { mfaEnabled: enabled });
+
+    res.json({
+      message: enabled ? 'MFA enabled' : 'MFA disabled',
+      mfaEnabled: enabled
+    });
+  } catch (error) {
+    console.error('Toggle MFA error:', error);
+    res.status(500).json({ error: 'Failed to toggle MFA' });
+  }
+});
+
+/**
+ * Reset user password (Admin only)
+ */
+router.post('/:id/reset-password', authenticateToken, requirePermission('PROG-USER-LIST', 'update'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (req.user.userId === id) {
+      return res.status(400).json({ error: 'Cannot reset your own password. Use change-password endpoint instead.' });
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const user = await userService.getUserById(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userService.updateUser(id, { password: hashedPassword });
+
+    res.json({
+      message: 'Password reset successfully',
+      user: {
+        id: user.id,
+        username: user.username,
+        name: `${user.first_name} ${user.last_name}`.trim(),
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+module.exports = router;

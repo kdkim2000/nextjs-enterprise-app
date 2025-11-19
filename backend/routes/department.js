@@ -1,32 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs').promises;
-const path = require('path');
 const { authenticateToken } = require('../middleware/auth');
 const { requireProgramAccess, requirePermission } = require('../middleware/permissionMiddleware');
+const departmentService = require('../services/departmentService');
+const { transformToAPI } = require('../utils/multiLangTransform');
 
-const DEPARTMENTS_FILE = path.join(__dirname, '../data/departments.json');
+// Helper function to transform database row to API format
+function transformDepartmentToAPI(dbDept) {
+  if (!dbDept) return null;
 
-// Helper function to read departments
-async function readDepartments() {
-  try {
-    const data = await fs.readFile(DEPARTMENTS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading departments:', error);
-    return [];
-  }
-}
+  // Use transformToAPI to handle multilingual fields (name, description) and snake_case to camelCase conversion
+  const transformed = transformToAPI(dbDept, ['name', 'description']);
 
-// Helper function to write departments
-async function writeDepartments(departments) {
-  try {
-    await fs.writeFile(DEPARTMENTS_FILE, JSON.stringify(departments, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Error writing departments:', error);
-    return false;
-  }
+  // Apply default values for optional fields
+  return {
+    ...transformed,
+    level: transformed.level || 0,
+    order: transformed.order || 1,
+    status: transformed.status || 'active'
+  };
 }
 
 // Helper function to flatten department tree
@@ -65,12 +57,60 @@ function buildDepartmentTree(departments) {
   return roots;
 }
 
-// GET /api/department - Get all departments (flat list)
+// GET /api/department - Get all departments (flat list) with search and pagination
 router.get('/', authenticateToken, requireProgramAccess('PROG-DEPT-MGMT'), async (req, res) => {
   try {
-    const departments = await readDepartments();
-    const flattened = flattenDepartments(departments);
-    res.json({ departments: flattened });
+    const { code, name, parentId, managerId, status, page, limit } = req.query;
+
+    // Get all departments first
+    const dbDepartments = await departmentService.getAllDepartments();
+    let departments = dbDepartments.map(transformDepartmentToAPI);
+    let flattened = flattenDepartments(departments);
+
+    // Apply filters
+    if (code || name || parentId || managerId || status) {
+      flattened = flattened.filter(dept => {
+        // Quick search: if same value in multiple fields, it's a quick search
+        const isQuickSearch = (code === name);
+
+        if (isQuickSearch && code) {
+          const searchTerm = code.toLowerCase();
+          return (
+            dept.code?.toLowerCase().includes(searchTerm) ||
+            dept.name?.en?.toLowerCase().includes(searchTerm) ||
+            dept.name?.ko?.toLowerCase().includes(searchTerm)
+          );
+        }
+
+        // Advanced search: check each field individually
+        if (code && !dept.code?.toLowerCase().includes(code.toLowerCase())) return false;
+        if (name && !dept.name?.en?.toLowerCase().includes(name.toLowerCase()) &&
+            !dept.name?.ko?.toLowerCase().includes(name.toLowerCase())) return false;
+        if (parentId && dept.parentId !== parentId) return false;
+        if (managerId && dept.managerId !== managerId) return false;
+        if (status && dept.status !== status) return false;
+
+        return true;
+      });
+    }
+
+    // Apply pagination
+    const totalCount = flattened.length;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || totalCount;
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+    const paginatedDepartments = flattened.slice(startIndex, endIndex);
+
+    res.json({
+      departments: paginatedDepartments,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNum)
+      }
+    });
   } catch (error) {
     console.error('Error fetching departments:', error);
     res.status(500).json({ error: 'Failed to fetch departments' });
@@ -80,7 +120,8 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-DEPT-MGMT'), async
 // GET /api/department/tree - Get departments as tree structure
 router.get('/tree', async (req, res) => {
   try {
-    const departments = await readDepartments();
+    const dbDepartments = await departmentService.getAllDepartments();
+    const departments = dbDepartments.map(transformDepartmentToAPI);
     const tree = buildDepartmentTree(departments);
     res.json({ departments: tree });
   } catch (error) {
@@ -92,13 +133,13 @@ router.get('/tree', async (req, res) => {
 // GET /api/department/:id - Get a single department
 router.get('/:id', async (req, res) => {
   try {
-    const departments = await readDepartments();
-    const department = departments.find(d => d.id === req.params.id);
+    const dbDepartment = await departmentService.getDepartmentById(req.params.id);
 
-    if (!department) {
+    if (!dbDepartment) {
       return res.status(404).json({ error: 'Department not found' });
     }
 
+    const department = transformDepartmentToAPI(dbDepartment);
     res.json({ department });
   } catch (error) {
     console.error('Error fetching department:', error);
@@ -109,8 +150,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/department - Create a new department
 router.post('/', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'create'), async (req, res) => {
   try {
-    const departments = await readDepartments();
-    const { code, name, description, parentId, managerId, status, email, phone, location } = req.body;
+    const { code, name, description, parentId, managerId, status } = req.body;
 
     // Validate required fields
     if (!code || !name || !name.en || !name.ko) {
@@ -118,47 +158,43 @@ router.post('/', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'create'
     }
 
     // Check if code already exists
-    if (departments.some(d => d.code === code)) {
+    const existingDept = await departmentService.getDepartmentByCode(code);
+    if (existingDept) {
       return res.status(400).json({ error: 'Department code already exists' });
     }
 
     // Calculate level based on parent
     let level = 0;
-    let order = departments.filter(d => d.parentId === parentId).length + 1;
-
     if (parentId) {
-      const parent = departments.find(d => d.id === parentId);
+      const parent = await departmentService.getDepartmentById(parentId);
       if (parent) {
-        level = parent.level + 1;
+        level = (parent.level || 0) + 1;
       }
     }
 
-    // Generate new ID
-    const maxId = departments.reduce((max, dept) => {
-      const num = parseInt(dept.id.split('-')[1]);
-      return num > max ? num : max;
-    }, 0);
-    const newId = `dept-${String(maxId + 1).padStart(3, '0')}`;
+    // Calculate order
+    const siblings = await departmentService.getDepartmentsByParentId(parentId);
+    const order = siblings.length + 1;
 
-    const newDepartment = {
-      id: newId,
+    const departmentData = {
       code,
-      name,
-      description: description || { en: '', ko: '' },
+      nameEn: name.en,
+      nameKo: name.ko,
+      nameZh: name.zh || '',
+      nameVi: name.vi || '',
+      descriptionEn: description?.en || '',
+      descriptionKo: description?.ko || '',
+      descriptionZh: description?.zh || '',
+      descriptionVi: description?.vi || '',
       parentId: parentId || null,
       managerId: managerId || null,
       level,
       order,
-      status: status || 'active',
-      email: email || '',
-      phone: phone || '',
-      location: location || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      status: status || 'active'
     };
 
-    departments.push(newDepartment);
-    await writeDepartments(departments);
+    const dbDepartment = await departmentService.createDepartment(departmentData);
+    const newDepartment = transformDepartmentToAPI(dbDepartment);
 
     res.status(201).json({ department: newDepartment });
   } catch (error) {
@@ -170,57 +206,60 @@ router.post('/', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'create'
 // PUT /api/department/:id - Update a department
 router.put('/:id', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'update'), async (req, res) => {
   try {
-    const departments = await readDepartments();
-    const index = departments.findIndex(d => d.id === req.params.id);
-
-    if (index === -1) {
+    const existingDept = await departmentService.getDepartmentById(req.params.id);
+    if (!existingDept) {
       return res.status(404).json({ error: 'Department not found' });
     }
 
-    const { code, name, description, parentId, managerId, status, email, phone, location, order } = req.body;
+    const { code, name, description, parentId, managerId, status, order } = req.body;
 
     // Check if code is being changed and already exists
-    if (code && code !== departments[index].code) {
-      if (departments.some(d => d.code === code && d.id !== req.params.id)) {
+    if (code && code !== existingDept.code) {
+      const conflictDept = await departmentService.getDepartmentByCode(code);
+      if (conflictDept && conflictDept.id !== req.params.id) {
         return res.status(400).json({ error: 'Department code already exists' });
       }
     }
 
     // Calculate level based on parent
-    let level = departments[index].level;
+    let level = existingDept.level || 0;
     if (parentId !== undefined) {
       if (parentId === req.params.id) {
         return res.status(400).json({ error: 'Department cannot be its own parent' });
       }
 
       if (parentId) {
-        const parent = departments.find(d => d.id === parentId);
+        const parent = await departmentService.getDepartmentById(parentId);
         if (parent) {
-          level = parent.level + 1;
+          level = (parent.level || 0) + 1;
         }
       } else {
         level = 0;
       }
     }
 
-    const updatedDepartment = {
-      ...departments[index],
-      code: code || departments[index].code,
-      name: name || departments[index].name,
-      description: description || departments[index].description,
-      parentId: parentId !== undefined ? parentId : departments[index].parentId,
-      managerId: managerId !== undefined ? managerId : departments[index].managerId,
-      level,
-      order: order !== undefined ? order : departments[index].order,
-      status: status || departments[index].status,
-      email: email !== undefined ? email : departments[index].email,
-      phone: phone !== undefined ? phone : departments[index].phone,
-      location: location !== undefined ? location : departments[index].location,
-      updatedAt: new Date().toISOString()
-    };
+    const updates = {};
+    if (code) updates.code = code;
+    if (name) {
+      if (name.en !== undefined) updates.nameEn = name.en;
+      if (name.ko !== undefined) updates.nameKo = name.ko;
+      if (name.zh !== undefined) updates.nameZh = name.zh;
+      if (name.vi !== undefined) updates.nameVi = name.vi;
+    }
+    if (description) {
+      if (description.en !== undefined) updates.descriptionEn = description.en;
+      if (description.ko !== undefined) updates.descriptionKo = description.ko;
+      if (description.zh !== undefined) updates.descriptionZh = description.zh;
+      if (description.vi !== undefined) updates.descriptionVi = description.vi;
+    }
+    if (parentId !== undefined) updates.parentId = parentId;
+    if (managerId !== undefined) updates.managerId = managerId;
+    if (status) updates.status = status;
+    if (order !== undefined) updates.order = order;
+    updates.level = level;
 
-    departments[index] = updatedDepartment;
-    await writeDepartments(departments);
+    const dbDepartment = await departmentService.updateDepartment(req.params.id, updates);
+    const updatedDepartment = transformDepartmentToAPI(dbDepartment);
 
     res.json({ department: updatedDepartment });
   } catch (error) {
@@ -232,21 +271,18 @@ router.put('/:id', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'updat
 // DELETE /api/department/:id - Delete a department
 router.delete('/:id', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'delete'), async (req, res) => {
   try {
-    const departments = await readDepartments();
-    const index = departments.findIndex(d => d.id === req.params.id);
-
-    if (index === -1) {
+    const existingDept = await departmentService.getDepartmentById(req.params.id);
+    if (!existingDept) {
       return res.status(404).json({ error: 'Department not found' });
     }
 
     // Check if department has children
-    const hasChildren = departments.some(d => d.parentId === req.params.id);
-    if (hasChildren) {
+    const children = await departmentService.getDepartmentsByParentId(req.params.id);
+    if (children.length > 0) {
       return res.status(400).json({ error: 'Cannot delete department with sub-departments' });
     }
 
-    departments.splice(index, 1);
-    await writeDepartments(departments);
+    await departmentService.deleteDepartment(req.params.id);
 
     res.json({ message: 'Department deleted successfully' });
   } catch (error) {
@@ -264,24 +300,29 @@ router.delete('/', authenticateToken, requirePermission('PROG-DEPT-MGMT', 'delet
       return res.status(400).json({ error: 'Department IDs are required' });
     }
 
-    let departments = await readDepartments();
-
     // Check if any department has children
     for (const id of ids) {
-      const hasChildren = departments.some(d => d.parentId === id);
-      if (hasChildren) {
-        const dept = departments.find(d => d.id === id);
+      const children = await departmentService.getDepartmentsByParentId(id);
+      if (children.length > 0) {
+        const dept = await departmentService.getDepartmentById(id);
         return res.status(400).json({
-          error: `Cannot delete department "${dept?.name?.en || id}" with sub-departments`
+          error: `Cannot delete department "${dept?.name_en || id}" with sub-departments`
         });
       }
     }
 
-    // Filter out the departments to be deleted
-    departments = departments.filter(d => !ids.includes(d.id));
-    await writeDepartments(departments);
+    // Delete all departments
+    let deletedCount = 0;
+    for (const id of ids) {
+      try {
+        await departmentService.deleteDepartment(id);
+        deletedCount++;
+      } catch (error) {
+        console.error(`Failed to delete department ${id}:`, error);
+      }
+    }
 
-    res.json({ message: `${ids.length} department(s) deleted successfully` });
+    res.json({ message: `${deletedCount} department(s) deleted successfully` });
   } catch (error) {
     console.error('Error deleting departments:', error);
     res.status(500).json({ error: 'Failed to delete departments' });

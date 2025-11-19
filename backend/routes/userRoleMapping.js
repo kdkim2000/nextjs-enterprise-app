@@ -1,125 +1,57 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const fs = require('fs').promises;
-const path = require('path');
-
-const DATA_DIR = path.join(__dirname, '../data');
-
-// Helper function to read JSON file
-async function readJSON(filename) {
-  const filePath = path.join(DATA_DIR, filename);
-  const data = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(data);
-}
-
-// Helper function to write JSON file
-async function writeJSON(filename, data) {
-  const filePath = path.join(DATA_DIR, filename);
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
-}
+const mappingService = require('../services/mappingService');
+const userService = require('../services/userService');
+const roleService = require('../services/roleService');
 
 // Helper function to enrich mapping with user and role details
-// Optimized version: accepts pre-loaded users and roles to avoid repeated file reads
-async function enrichMappingWithDetails(mapping, users = null, roles = null) {
+async function enrichMappingWithDetails(mapping) {
   try {
-    // Only load data if not provided (for single mapping case)
-    if (!users || !roles) {
-      const usersData = await readJSON('users.json');
-      const rolesData = await readJSON('roles.json');
-      // users.json is an array, roles.json is an object with 'roles' property
-      users = Array.isArray(usersData) ? usersData : (usersData.users || []);
-      roles = rolesData.roles || [];
-    }
-
-    const user = users.find((u) => u.id === mapping.userId);
-    const role = roles.find((r) => r.id === mapping.roleId);
+    const user = mapping.user_id ? await userService.getUserById(mapping.user_id) : null;
+    const role = mapping.role_id ? await roleService.getRoleById(mapping.role_id) : null;
 
     return {
-      ...mapping,
-      userName: user?.name || user?.username,
+      id: mapping.id,
+      userId: mapping.user_id,
+      roleId: mapping.role_id,
+      assignedBy: mapping.assigned_by,
+      assignedAt: mapping.assigned_at,
+      expiresAt: mapping.expires_at,
+      isActive: mapping.is_active,
+      updatedAt: mapping.updated_at,
+      updatedBy: mapping.updated_by,
+      userName: user?.username || user?.name,
       userEmail: user?.email,
       userDepartment: user?.department,
       roleName: role?.name,
-      roleDisplayName: role?.displayName
+      roleDisplayName: role?.display_name
     };
   } catch (error) {
     console.error('Error enriching mapping:', error);
-    return mapping;
-  }
-}
-
-// Helper function to enrich multiple mappings efficiently
-async function enrichMappingsWithDetails(mappings) {
-  try {
-    // Load users and roles ONCE
-    const usersData = await readJSON('users.json');
-    const rolesData = await readJSON('roles.json');
-    const mappingsData = await readJSON('userRoleMappings.json');
-
-    // users.json is an array, roles.json is an object with 'roles' property
-    const users = Array.isArray(usersData) ? usersData : (usersData.users || []);
-    const roles = rolesData.roles || [];
-    const allMappings = mappingsData.userRoleMappings || [];
-
-    // Create lookup maps for O(1) access instead of O(n) find
-    const userMap = new Map(users.map(u => [u.id, u]));
-    const roleMap = new Map(roles.map(r => [r.id, r]));
-
-    // Create a map of user's other active roles
-    const userRolesMap = new Map();
-    allMappings.forEach(m => {
-      if (m.isActive) {
-        if (!userRolesMap.has(m.userId)) {
-          userRolesMap.set(m.userId, []);
-        }
-        userRolesMap.get(m.userId).push({
-          roleId: m.roleId,
-          roleName: roleMap.get(m.roleId)?.name,
-          roleDisplayName: roleMap.get(m.roleId)?.displayName
-        });
-      }
-    });
-
-    // Enrich all mappings with the cached data
-    return mappings.map(mapping => {
-      const user = userMap.get(mapping.userId);
-      const role = roleMap.get(mapping.roleId);
-
-      // Get user's other roles (excluding current role)
-      const userRoles = userRolesMap.get(mapping.userId) || [];
-      const otherRoles = userRoles.filter(r => r.roleId !== mapping.roleId);
-
-      return {
-        ...mapping,
-        userName: user?.name || user?.username,
-        userEmail: user?.email,
-        userDepartment: user?.department,
-        roleName: role?.name,
-        roleDisplayName: role?.displayName,
-        otherRoles: otherRoles, // Array of other active roles
-        totalRoleCount: userRoles.length // Total number of active roles for this user
-      };
-    });
-  } catch (error) {
-    console.error('Error enriching mappings:', error);
-    return mappings;
+    // Return basic mapping if enrichment fails
+    return {
+      id: mapping.id,
+      userId: mapping.user_id,
+      roleId: mapping.role_id,
+      assignedBy: mapping.assigned_by,
+      assignedAt: mapping.assigned_at,
+      expiresAt: mapping.expires_at,
+      isActive: mapping.is_active,
+      updatedAt: mapping.updated_at,
+      updatedBy: mapping.updated_by
+    };
   }
 }
 
 // GET /api/user-role-mapping
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const data = await readJSON('userRoleMappings.json');
-    const mappings = data?.userRoleMappings || [];
-
     const { id, userId, roleId, isActive, includeDetails } = req.query;
-
-    let filteredMappings = mappings;
 
     // Filter by ID
     if (id) {
-      const mapping = mappings.find((m) => m.id === id);
+      const mapping = await mappingService.getUserRoleMappingById(id);
       if (!mapping) {
         return res.status(404).json({ error: 'Mapping not found' });
       }
@@ -129,38 +61,72 @@ router.get('/', authenticateToken, async (req, res) => {
         return res.json({ mapping: enrichedMapping });
       }
 
-      return res.json({ mapping });
+      return res.json({
+        mapping: {
+          id: mapping.id,
+          userId: mapping.user_id,
+          roleId: mapping.role_id,
+          assignedBy: mapping.assigned_by,
+          assignedAt: mapping.assigned_at,
+          expiresAt: mapping.expires_at,
+          isActive: mapping.is_active,
+          updatedAt: mapping.updated_at,
+          updatedBy: mapping.updated_by
+        }
+      });
     }
 
-    // Filter by userId
+    // Get filtered mappings
+    let mappings;
+    const shouldIncludeDetails = includeDetails === 'true';
     if (userId) {
-      filteredMappings = filteredMappings.filter((m) => m.userId === userId);
-    }
-
-    // Filter by roleId
-    if (roleId) {
-      filteredMappings = filteredMappings.filter((m) => m.roleId === roleId);
+      mappings = await mappingService.getUserRoleMappingsByUserId(userId, shouldIncludeDetails);
+    } else if (roleId) {
+      mappings = await mappingService.getUserRoleMappingsByRoleId(roleId, shouldIncludeDetails);
+    } else {
+      mappings = await mappingService.getAllUserRoleMappings();
     }
 
     // Filter by active status
     if (isActive !== undefined) {
       const activeStatus = isActive === 'true';
-      filteredMappings = filteredMappings.filter((m) => m.isActive === activeStatus);
+      mappings = mappings.filter((m) => m.is_active === activeStatus);
     }
 
-    // Enrich with user and role details if requested
-    if (includeDetails === 'true') {
-      // Use optimized batch enrichment function
-      const enrichedMappings = await enrichMappingsWithDetails(filteredMappings);
-      return res.json({
-        mappings: enrichedMappings,
-        total: enrichedMappings.length
-      });
-    }
+    // Format mappings
+    const formattedMappings = mappings.map(m => {
+      const baseMapping = {
+        id: m.id,
+        userId: m.user_id,
+        roleId: m.role_id,
+        assignedBy: m.assigned_by,
+        assignedAt: m.assigned_at,
+        expiresAt: m.expires_at,
+        isActive: m.is_active,
+        updatedAt: m.updated_at,
+        updatedBy: m.updated_by
+      };
+
+      // If includeDetails was requested, the service already joined user and role data
+      if (shouldIncludeDetails) {
+        return {
+          ...baseMapping,
+          userName: m.username,
+          userEmail: m.email,
+          userFullName: m.user_name,
+          userDepartment: m.user_department,
+          roleName: m.role_name,
+          roleDisplayName: m.role_display_name,
+          roleDescription: m.role_description
+        };
+      }
+
+      return baseMapping;
+    });
 
     res.json({
-      mappings: filteredMappings,
-      total: filteredMappings.length
+      mappings: formattedMappings,
+      total: formattedMappings.length
     });
   } catch (error) {
     console.error('Get user-role mappings error:', error);
@@ -181,57 +147,42 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'User ID and Role ID are required' });
     }
 
-    const data = await readJSON('userRoleMappings.json');
-    const mappings = data.userRoleMappings || [];
-
-    // Check if mapping already exists
-    const existingMapping = mappings.find((m) =>
-      m.userId === userId && m.roleId === roleId && m.isActive
+    // Check if active mapping already exists
+    const existingMappings = await mappingService.getUserRoleMappingsByUserId(userId);
+    const activeMapping = existingMappings.find((m) =>
+      m.role_id === roleId && m.is_active
     );
-    if (existingMapping) {
+
+    if (activeMapping) {
       return res.status(400).json({
         error: 'Active mapping already exists for this user and role'
       });
     }
 
     // Verify user exists
-    const usersData = await readJSON('users.json');
-    const users = Array.isArray(usersData) ? usersData : (usersData.users || []);
-    const userExists = users.find((u) => u.id === userId);
+    const userExists = await userService.getUserById(userId);
     if (!userExists) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Verify role exists
-    const rolesData = await readJSON('roles.json');
-    const roles = rolesData.roles || [];
-    const roleExists = roles.find((r) => r.id === roleId);
+    const roleExists = await roleService.getRoleById(roleId);
     if (!roleExists) {
       return res.status(404).json({ error: 'Role not found' });
     }
 
-    // Generate new mapping ID
-    const maxId = mappings.reduce((max, m) => {
-      const num = parseInt(m.id.replace('urm-', ''));
-      return num > max ? num : max;
-    }, 0);
-    const newId = `urm-${String(maxId + 1).padStart(3, '0')}`;
-
     // Create new mapping
-    const newMapping = {
-      id: newId,
+    const mappingData = {
       userId,
       roleId,
       assignedBy: req.user.username,
-      assignedAt: new Date().toISOString(),
       expiresAt: expiresAt || null,
       isActive: true
     };
 
-    mappings.push(newMapping);
-    await writeJSON('userRoleMappings.json', { ...data, userRoleMappings: mappings });
-
+    const newMapping = await mappingService.createUserRoleMapping(mappingData);
     const enrichedMapping = await enrichMappingWithDetails(newMapping);
+
     res.status(201).json({ mapping: enrichedMapping });
   } catch (error) {
     console.error('Create user-role mapping error:', error);
@@ -252,28 +203,20 @@ router.put('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Mapping ID is required' });
     }
 
-    const data = await readJSON('userRoleMappings.json');
-    const mappings = data.userRoleMappings || [];
-
-    const mappingIndex = mappings.findIndex((m) => m.id === id);
-    if (mappingIndex === -1) {
+    const existingMapping = await mappingService.getUserRoleMappingById(id);
+    if (!existingMapping) {
       return res.status(404).json({ error: 'Mapping not found' });
     }
 
-    const existingMapping = mappings[mappingIndex];
-
-    const updatedMapping = {
-      ...existingMapping,
-      expiresAt: expiresAt !== undefined ? expiresAt : existingMapping.expiresAt,
-      isActive: isActive !== undefined ? isActive : existingMapping.isActive,
-      updatedAt: new Date().toISOString(),
+    const updates = {
+      expiresAt: expiresAt !== undefined ? expiresAt : existingMapping.expires_at,
+      isActive: isActive !== undefined ? isActive : existingMapping.is_active,
       updatedBy: req.user.username
     };
 
-    mappings[mappingIndex] = updatedMapping;
-    await writeJSON('userRoleMappings.json', { ...data, userRoleMappings: mappings });
-
+    const updatedMapping = await mappingService.updateUserRoleMapping(id, updates);
     const enrichedMapping = await enrichMappingWithDetails(updatedMapping);
+
     res.json({ mapping: enrichedMapping });
   } catch (error) {
     console.error('Update user-role mapping error:', error);
@@ -294,20 +237,20 @@ router.delete('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Mapping ID is required' });
     }
 
-    const data = await readJSON('userRoleMappings.json');
-    const mappings = data.userRoleMappings || [];
-
-    const mapping = mappings.find((m) => m.id === id);
+    const mapping = await mappingService.getUserRoleMappingById(id);
     if (!mapping) {
       return res.status(404).json({ error: 'Mapping not found' });
     }
 
-    const filteredMappings = mappings.filter((m) => m.id !== id);
-    await writeJSON('userRoleMappings.json', { ...data, userRoleMappings: filteredMappings });
+    await mappingService.deleteUserRoleMapping(id);
 
     res.json({
       message: 'User-role mapping deleted successfully',
-      deletedMapping: mapping
+      deletedMapping: {
+        id: mapping.id,
+        userId: mapping.user_id,
+        roleId: mapping.role_id
+      }
     });
   } catch (error) {
     console.error('Delete user-role mapping error:', error);
