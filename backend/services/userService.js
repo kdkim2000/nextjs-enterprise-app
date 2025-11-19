@@ -12,7 +12,7 @@ const db = require('../config/database');
  * @param {Object} options - Query options
  * @param {number} options.limit - Number of records to return
  * @param {number} options.offset - Number of records to skip
- * @param {string} options.search - Search term for username, email, name
+ * @param {string} options.search - Search term for loginid, email, name_ko, name_en, employee_number
  * @param {string} options.status - Filter by status (active, inactive, locked)
  * @param {string} options.department - Filter by department
  * @param {string} options.role - Filter by role
@@ -32,9 +32,9 @@ async function getAllUsers(options = {}) {
   const params = [];
   let paramIndex = 1;
 
-  // Search filter
+  // Search filter - updated to search new fields
   if (search) {
-    query += ` AND (username ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name ILIKE $${paramIndex})`;
+    query += ` AND (loginid ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR employee_number ILIKE $${paramIndex})`;
     params.push(`%${search}%`);
     paramIndex++;
   }
@@ -86,7 +86,7 @@ async function getUserCount(filters = {}) {
   let paramIndex = 1;
 
   if (search) {
-    query += ` AND (username ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name ILIKE $${paramIndex})`;
+    query += ` AND (loginid ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR employee_number ILIKE $${paramIndex})`;
     params.push(`%${search}%`);
     paramIndex++;
   }
@@ -119,14 +119,24 @@ async function getUserById(userId) {
 }
 
 /**
- * Get a user by username
- * @param {string} username - Username
+ * Get a user by loginid
+ * @param {string} loginid - Login ID
  * @returns {Promise<Object|null>} User object or null if not found
  */
-async function getUserByUsername(username) {
-  const query = 'SELECT * FROM users WHERE username = $1';
-  const result = await db.query(query, [username]);
+async function getUserByLoginId(loginid) {
+  const query = 'SELECT * FROM users WHERE loginid = $1';
+  const result = await db.query(query, [loginid]);
   return result.rows[0] || null;
+}
+
+/**
+ * Get a user by username (backward compatibility)
+ * @param {string} username - Username (treated as loginid)
+ * @returns {Promise<Object|null>} User object or null if not found
+ * @deprecated Use getUserByLoginId instead
+ */
+async function getUserByUsername(username) {
+  return getUserByLoginId(username);
 }
 
 /**
@@ -148,12 +158,20 @@ async function getUserByEmail(email) {
 async function createUser(userData) {
   const {
     id,
-    username,
+    loginid,
+    username, // backward compatibility
     email,
     password,
-    name,
+    name_ko,
+    name_en,
+    name, // backward compatibility
     firstName,
     lastName,
+    employee_number,
+    system_key,
+    phone_number,
+    mobile_number,
+    user_category = 'regular',
     department,
     status = 'active',
     mfaEnabled = false,
@@ -161,25 +179,41 @@ async function createUser(userData) {
     phone,
   } = userData;
 
-  // If name is not provided but firstName/lastName are, combine them
-  const fullName = name || (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || '');
+  // Backward compatibility: use username if loginid not provided
+  const finalLoginId = loginid || username;
+
+  // Backward compatibility: if name_ko is not provided, use name
+  const finalNameKo = name_ko || name || (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || '');
+
+  // Generate system_key if not provided
+  const finalSystemKey = system_key || `USR-${id}`;
+
+  // Use phone as fallback for phone_number if provided
+  const finalPhoneNumber = phone_number || phone;
 
   const query = `
     INSERT INTO users (
-      id, username, email, password, name,
-      department, status, mfa_enabled, avatar_url,
-      created_at
+      id, loginid, email, password, name_ko, name_en,
+      employee_number, system_key, phone_number, mobile_number,
+      user_category, department, status, mfa_enabled, avatar_url,
+      last_password_changed, created_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
     RETURNING *
   `;
 
   const params = [
     id,
-    username,
+    finalLoginId,
     email,
     password,
-    fullName,
+    finalNameKo,
+    name_en,
+    employee_number,
+    finalSystemKey,
+    finalPhoneNumber,
+    mobile_number,
+    user_category,
     department,
     status,
     mfaEnabled,
@@ -198,10 +232,18 @@ async function createUser(userData) {
  */
 async function updateUser(userId, updates) {
   const allowedFields = [
-    'username',
+    'loginid',
+    'username', // backward compatibility, will be mapped to loginid
     'email',
     'password',
-    'name',
+    'name_ko',
+    'name_en',
+    'name', // backward compatibility, will be mapped to name_ko
+    'employee_number',
+    'system_key',
+    'phone_number',
+    'mobile_number',
+    'user_category',
     'department',
     'status',
     'role',
@@ -209,20 +251,40 @@ async function updateUser(userId, updates) {
     'sso_enabled',
     'avatar_url',
     'last_login',
+    'last_password_changed',
   ];
 
   const setClause = [];
   const params = [];
   let paramIndex = 1;
 
-  // Handle firstName/lastName to name conversion
+  // Handle backward compatibility and field conversions
   const processedUpdates = { ...updates };
+
+  // username -> loginid
+  if (updates.username && !updates.loginid) {
+    processedUpdates.loginid = updates.username;
+    delete processedUpdates.username;
+  }
+
+  // name -> name_ko
+  if (updates.name && !updates.name_ko) {
+    processedUpdates.name_ko = updates.name;
+    delete processedUpdates.name;
+  }
+
+  // firstName/lastName to name_ko
   if (updates.firstName || updates.lastName) {
-    processedUpdates.name = updates.name ||
+    processedUpdates.name_ko = updates.name_ko ||
       (updates.firstName && updates.lastName ? `${updates.firstName} ${updates.lastName}` :
        updates.firstName || updates.lastName);
     delete processedUpdates.firstName;
     delete processedUpdates.lastName;
+  }
+
+  // Update last_password_changed when password is changed
+  if (updates.password) {
+    processedUpdates.last_password_changed = new Date().toISOString();
   }
 
   // Build SET clause dynamically
@@ -230,7 +292,7 @@ async function updateUser(userId, updates) {
     // Convert camelCase to snake_case
     const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
 
-    if (allowedFields.includes(dbField)) {
+    if (allowedFields.includes(key) || allowedFields.includes(dbField)) {
       setClause.push(`${dbField} = $${paramIndex}`);
       params.push(value);
       paramIndex++;
@@ -346,14 +408,14 @@ async function lockUser(userId) {
 }
 
 /**
- * Check if username exists
- * @param {string} username - Username to check
+ * Check if loginid exists
+ * @param {string} loginid - Login ID to check
  * @param {string} excludeUserId - User ID to exclude from check (for updates)
- * @returns {Promise<boolean>} True if username exists
+ * @returns {Promise<boolean>} True if loginid exists
  */
-async function usernameExists(username, excludeUserId = null) {
-  let query = 'SELECT COUNT(*) FROM users WHERE username = $1';
-  const params = [username];
+async function loginidExists(loginid, excludeUserId = null) {
+  let query = 'SELECT COUNT(*) FROM users WHERE loginid = $1';
+  const params = [loginid];
 
   if (excludeUserId) {
     query += ' AND id != $2';
@@ -362,6 +424,17 @@ async function usernameExists(username, excludeUserId = null) {
 
   const result = await db.query(query, params);
   return parseInt(result.rows[0].count, 10) > 0;
+}
+
+/**
+ * Check if username exists (backward compatibility)
+ * @param {string} username - Username to check
+ * @param {string} excludeUserId - User ID to exclude from check (for updates)
+ * @returns {Promise<boolean>} True if username exists
+ * @deprecated Use loginidExists instead
+ */
+async function usernameExists(username, excludeUserId = null) {
+  return loginidExists(username, excludeUserId);
 }
 
 /**
@@ -404,7 +477,8 @@ module.exports = {
   getAllUsers,
   getUserCount,
   getUserById,
-  getUserByUsername,
+  getUserByLoginId,
+  getUserByUsername, // backward compatibility
   getUserByEmail,
   getUsersByIds,
   createUser,
@@ -415,6 +489,7 @@ module.exports = {
   incrementFailedAttempts,
   resetFailedAttempts,
   lockUser,
-  usernameExists,
+  loginidExists,
+  usernameExists, // backward compatibility
   emailExists,
 };

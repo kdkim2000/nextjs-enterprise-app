@@ -1,7 +1,10 @@
 export interface User {
   id: string;
-  username: string;
-  name: string;
+  loginid: string;
+  username?: string; // backward compatibility
+  name_ko: string;
+  name_en?: string;
+  name?: string; // backward compatibility
   email: string;
   role: 'admin' | 'manager' | 'user';
   department: string;
