@@ -6,17 +6,25 @@ const path = require('path');
 /**
  * Middleware to verify JWT token
  */
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
+    console.log(`[Auth] No token provided for ${req.method} ${req.path}`);
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  // Check if token is blacklisted
-  if (isBlacklisted(token)) {
-    return res.status(401).json({ error: 'Token has been revoked' });
+  // Check if token is blacklisted (async)
+  try {
+    const blacklisted = await isBlacklisted(token);
+    if (blacklisted) {
+      console.log(`[Auth] Blacklisted token for ${req.method} ${req.path}`);
+      return res.status(401).json({ error: 'Token has been revoked' });
+    }
+  } catch (error) {
+    console.error(`[Auth] Error checking blacklist:`, error);
+    // Continue - fail open for availability
   }
 
   try {
@@ -26,6 +34,7 @@ function authenticateToken(req, res, next) {
   } catch (error) {
     // Return 401 for invalid/expired tokens (not 403)
     // 401 = authentication failed, 403 = insufficient permissions
+    console.log(`[Auth] Invalid/expired token for ${req.method} ${req.path}:`, error.message);
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }

@@ -19,6 +19,7 @@ import { api } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useCodeOptions } from '@/hooks/useCodeOptions';
+import { useHelp } from '@/hooks/useHelp';
 import { createColumns } from './constants';
 import {
   createFilterFields,
@@ -37,6 +38,17 @@ export default function CodesPage() {
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
   const gridPermissions = useDataGridPermissions('PROG-CODE-MGMT');
 
+  // Use help hook
+  const {
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    canManageHelp,
+    navigateToHelpEdit,
+    language
+  } = useHelp({ programId: 'PROG-CODE-MGMT' });
+
   // Fetch status options from code management system
   const { codes: statusOptions } = useCodeOptions('COMMON_STATUS', locale);
 
@@ -53,9 +65,6 @@ export default function CodesPage() {
     status: ''
   });
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-
-  // Help
-  const [helpOpen, setHelpOpen] = useState(false);
 
   // Code Type Dialog
   const [codeTypeDialogOpen, setCodeTypeDialogOpen] = useState(false);
@@ -398,9 +407,11 @@ export default function CodesPage() {
       programId="PROG-CODE-MGMT"
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
-      isAdmin={true}
-      helpExists={true}
-      language={locale}
+      isAdmin={isAdmin}
+      helpExists={helpExists}
+      canManageHelp={canManageHelp}
+      onHelpEdit={navigateToHelpEdit}
+      language={language}
     >
       <MasterDetailLayout
         masterSize={30}

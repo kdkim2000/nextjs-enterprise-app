@@ -1,15 +1,35 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { readJSON, writeJSON } = require('../utils/fileUtils');
 const { appendLog } = require('../middleware/logger');
-const { getUserAccessiblePrograms } = require('../middleware/permissionMiddleware');
-const path = require('path');
+const { getUserAccessibleProgramsAsync } = require('../middleware/permissionMiddleware');
+const menuService = require('../services/menuService');
+const preferencesService = require('../services/preferencesService');
+const logService = require('../services/logService');
+const { transformMultiLangFields } = require('../utils/multiLangTransform');
+const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 
-const MENUS_FILE = path.join(__dirname, '../data/menus.json');
-const PERMISSIONS_FILE = path.join(__dirname, '../data/permissions.json');
-const PREFERENCES_FILE = path.join(__dirname, '../data/userPreferences.json');
+// Helper function to transform database menu to API format
+function transformMenuToAPI(dbMenu) {
+  if (!dbMenu) return null;
+
+  // Transform multilingual fields
+  const transformed = transformMultiLangFields(dbMenu, ['name', 'description']);
+
+  return {
+    id: transformed.id,
+    code: transformed.code,
+    name: transformed.name,
+    path: transformed.path,
+    icon: transformed.icon,
+    order: transformed.order || 0,
+    parentId: transformed.parent_id,
+    level: transformed.level || 0,
+    programId: transformed.program_id,
+    description: transformed.description
+  };
+}
 
 /**
  * Get user's accessible menus based on program permissions
@@ -18,10 +38,12 @@ router.get('/user-menus', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const menus = await readJSON(MENUS_FILE);
+    // Get all menus from database
+    const dbMenus = await menuService.getAllMenus();
+    const menus = dbMenus.map(transformMenuToAPI);
 
     // Get user's accessible programs with permissions
-    const accessiblePrograms = getUserAccessiblePrograms(userId);
+    const accessiblePrograms = await getUserAccessibleProgramsAsync(userId);
 
     // Create a map of programCode -> permissions for efficient lookup
     const programPermissionsMap = new Map();
@@ -83,21 +105,22 @@ router.get('/by-path', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Path required' });
     }
 
-    const menus = await readJSON(MENUS_FILE);
-    const menu = menus.find(m => m.path === menuPath);
+    const dbMenu = await menuService.getMenuByPath(menuPath);
 
     // If menu not found, return null instead of 404
     // This allows pages without menus to still render
-    if (!menu) {
+    if (!dbMenu) {
       return res.json({ menu: null });
     }
+
+    const menu = transformMenuToAPI(dbMenu);
 
     // Check if user has access to the program
     const userId = req.user.userId;
 
     // If menu has programId, check program permissions
     if (menu.programId) {
-      const accessiblePrograms = getUserAccessiblePrograms(userId);
+      const accessiblePrograms = await getUserAccessibleProgramsAsync(userId);
       const hasAccess = accessiblePrograms.some(p => p.code === menu.programId);
 
       if (!hasAccess) {
@@ -108,7 +131,7 @@ router.get('/by-path', authenticateToken, async (req, res) => {
     }
 
     // Log menu access
-    await logMenuAccess(userId, menu.id, menuPath);
+    await logMenuAccess(userId, menu.id, menuPath, menu.programId);
 
     // Update recent menus
     await updateRecentMenus(userId, menu.id);
@@ -130,7 +153,8 @@ router.get('/all', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Admin or manager access required' });
     }
 
-    const menus = await readJSON(MENUS_FILE);
+    const dbMenus = await menuService.getAllMenus();
+    const menus = dbMenus.map(transformMenuToAPI);
     res.json({ menus: buildMenuTree(menus) });
   } catch (error) {
     console.error('Get all menus error:', error);
@@ -148,7 +172,6 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const menus = await readJSON(MENUS_FILE);
     const { code, name, path, icon, order, parentId, level, programId, description } = req.body;
 
     // Validate required fields
@@ -157,37 +180,34 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     // Check if menu code already exists
-    if (menus.some(m => m.code === code)) {
+    const existingCodeMenu = await menuService.getMenuByCode(code);
+    if (existingCodeMenu) {
       return res.status(409).json({ error: 'Menu code already exists' });
     }
 
     // Check if menu path already exists
-    if (menus.some(m => m.path === path)) {
+    const existingPathMenu = await menuService.getMenuByPath(path);
+    if (existingPathMenu) {
       return res.status(409).json({ error: 'Menu path already exists' });
     }
 
-    // Generate new menu ID
-    const maxId = menus.reduce((max, m) => {
-      const num = parseInt(m.id.replace('menu-', ''));
-      return num > max ? num : max;
-    }, 0);
-    const newId = `menu-${String(maxId + 1).padStart(3, '0')}`;
-
-    const newMenu = {
-      id: newId,
+    const menuData = {
       code,
-      name,
+      nameEn: typeof name === 'string' ? name : name.en || '',
+      nameKo: typeof name === 'object' ? name.ko || '' : '',
+      nameZh: typeof name === 'object' ? name.zh || '' : '',
+      nameVi: typeof name === 'object' ? name.vi || '' : '',
       path,
       icon: icon || 'Article',
       order,
       parentId: parentId || null,
       level,
       programId: programId || null,
-      description: description || { en: '', ko: '', zh: '', vi: '' }
+      description: JSON.stringify(description || { en: '', ko: '', zh: '', vi: '' })
     };
 
-    menus.push(newMenu);
-    await writeJSON(MENUS_FILE, menus);
+    const dbMenu = await menuService.createMenu(menuData);
+    const newMenu = transformMenuToAPI(dbMenu);
 
     res.status(201).json({ menu: newMenu });
   } catch (error) {
@@ -206,44 +226,51 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const menus = await readJSON(MENUS_FILE);
-    const index = menus.findIndex(m => m.id === req.params.id);
-
-    if (index === -1) {
+    const existingMenu = await menuService.getMenuById(req.params.id);
+    if (!existingMenu) {
       return res.status(404).json({ error: 'Menu not found' });
     }
 
     const { code, name, path, icon, order, parentId, level, programId, description } = req.body;
 
     // Check if new code conflicts with existing menus
-    if (code && code !== menus[index].code) {
-      if (menus.some(m => m.code === code && m.id !== req.params.id)) {
+    if (code && code !== existingMenu.code) {
+      const conflictMenu = await menuService.getMenuByCode(code);
+      if (conflictMenu && conflictMenu.id !== req.params.id) {
         return res.status(409).json({ error: 'Menu code already exists' });
       }
     }
 
     // Check if new path conflicts with existing menus
-    if (path && path !== menus[index].path) {
-      if (menus.some(m => m.path === path && m.id !== req.params.id)) {
+    if (path && path !== existingMenu.path) {
+      const conflictMenu = await menuService.getMenuByPath(path);
+      if (conflictMenu && conflictMenu.id !== req.params.id) {
         return res.status(409).json({ error: 'Menu path already exists' });
       }
     }
 
-    const updatedMenu = {
-      ...menus[index],
-      code: code || menus[index].code,
-      name: name || menus[index].name,
-      path: path || menus[index].path,
-      icon: icon !== undefined ? icon : menus[index].icon,
-      order: order !== undefined ? order : menus[index].order,
-      parentId: parentId !== undefined ? parentId : menus[index].parentId,
-      level: level !== undefined ? level : menus[index].level,
-      programId: programId !== undefined ? programId : menus[index].programId,
-      description: description || menus[index].description
-    };
+    const updates = {};
+    if (code) updates.code = code;
+    if (name) {
+      if (typeof name === 'string') {
+        updates.nameEn = name;
+      } else {
+        if (name.en !== undefined) updates.nameEn = name.en;
+        if (name.ko !== undefined) updates.nameKo = name.ko;
+        if (name.zh !== undefined) updates.nameZh = name.zh;
+        if (name.vi !== undefined) updates.nameVi = name.vi;
+      }
+    }
+    if (path) updates.path = path;
+    if (icon !== undefined) updates.icon = icon;
+    if (order !== undefined) updates.order = order;
+    if (parentId !== undefined) updates.parentId = parentId;
+    if (level !== undefined) updates.level = level;
+    if (programId !== undefined) updates.programId = programId;
+    if (description) updates.description = JSON.stringify(description);
 
-    menus[index] = updatedMenu;
-    await writeJSON(MENUS_FILE, menus);
+    const dbMenu = await menuService.updateMenu(req.params.id, updates);
+    const updatedMenu = transformMenuToAPI(dbMenu);
 
     res.json({ menu: updatedMenu });
   } catch (error) {
@@ -262,23 +289,21 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden - Admin only' });
     }
 
-    const menus = await readJSON(MENUS_FILE);
-    const index = menus.findIndex(m => m.id === req.params.id);
-
-    if (index === -1) {
+    const existingMenu = await menuService.getMenuById(req.params.id);
+    if (!existingMenu) {
       return res.status(404).json({ error: 'Menu not found' });
     }
 
     // Check if menu has children
-    const hasChildren = menus.some(m => m.parentId === req.params.id);
+    const allMenus = await menuService.getAllMenus();
+    const hasChildren = allMenus.some(m => m.parent_id === req.params.id);
     if (hasChildren) {
       return res.status(400).json({ error: 'Cannot delete menu with children. Delete child menus first.' });
     }
 
-    const deletedMenu = menus[index];
-    menus.splice(index, 1);
-    await writeJSON(MENUS_FILE, menus);
+    await menuService.deleteMenu(req.params.id);
 
+    const deletedMenu = transformMenuToAPI(existingMenu);
     res.json({ message: 'Menu deleted successfully', menu: deletedMenu });
   } catch (error) {
     console.error('Error deleting menu:', error);
@@ -377,59 +402,72 @@ function filterEmptyParents(menusWithParents, allMenus) {
 }
 
 /**
- * Helper: Log menu access
+ * Helper: Log menu access using logService
  */
-async function logMenuAccess(userId, menuId, menuPath) {
-  const { v4: uuidv4 } = require('uuid');
+async function logMenuAccess(userId, menuId, menuPath, programId) {
+  try {
+    const logEntry = {
+      method: 'MENU',
+      path: menuPath,
+      statusCode: 200,
+      duration: '0ms',
+      userId: userId,
+      programId: programId || 'PROG-SYSTEM',
+      ip: '',
+      userAgent: ''
+    };
 
-  // Get program ID from menuId
-  const menus = await readJSON(MENUS_FILE);
-  const menu = menus.find(m => m.id === menuId);
-  const programId = menu?.programId || 'PROG-SYSTEM';
-
-  // Create unified log entry
-  const logEntry = {
-    id: uuidv4(),
-    timestamp: new Date().toISOString(),
-    method: 'MENU',
-    path: menuPath,
-    statusCode: 200,
-    duration: '0ms',
-    userId: userId,
-    programId: programId,
-    ip: '',
-    userAgent: ''
-  };
-
-  await appendLog(logEntry);
+    await logService.createLog(logEntry);
+  } catch (error) {
+    console.error('Error logging menu access:', error);
+    // Don't throw - logging errors shouldn't break the main flow
+  }
 }
 
 /**
- * Helper: Update recent menus
+ * Helper: Update recent menus using preferencesService
  */
 async function updateRecentMenus(userId, menuId) {
-  const preferences = await readJSON(PREFERENCES_FILE) || [];
-  let userPref = preferences.find(p => p.userId === userId);
+  try {
+    let userPrefs = await preferencesService.getUserPreferences(userId);
 
-  if (!userPref) {
-    userPref = {
-      userId,
-      favoriteMenus: [],
-      recentMenus: [],
-      language: 'en',
-      theme: 'light',
-      updatedAt: new Date().toISOString()
+    if (!userPrefs) {
+      // Create default preferences if not exist
+      const defaultPrefs = {
+        favoriteMenus: [menuId],
+        recentMenus: [menuId],
+        language: 'en',
+        theme: 'light'
+      };
+      await preferencesService.createUserPreferences({
+        userId,
+        preferences: defaultPrefs
+      });
+      return;
+    }
+
+    // Get current preferences
+    const currentPrefs = userPrefs.preferences || {};
+    const recentMenus = currentPrefs.recentMenus || [];
+
+    // Add to recent menus (keep last 10)
+    const updatedRecentMenus = recentMenus.filter(id => id !== menuId);
+    updatedRecentMenus.unshift(menuId);
+    const finalRecentMenus = updatedRecentMenus.slice(0, 10);
+
+    // Update preferences
+    const updatedPrefs = {
+      ...currentPrefs,
+      recentMenus: finalRecentMenus
     };
-    preferences.push(userPref);
+
+    await preferencesService.updateUserPreferences(userId, {
+      preferences: updatedPrefs
+    });
+  } catch (error) {
+    console.error('Error updating recent menus:', error);
+    // Don't throw - preference errors shouldn't break the main flow
   }
-
-  // Add to recent menus (keep last 10)
-  userPref.recentMenus = userPref.recentMenus.filter(id => id !== menuId);
-  userPref.recentMenus.unshift(menuId);
-  userPref.recentMenus = userPref.recentMenus.slice(0, 10);
-  userPref.updatedAt = new Date().toISOString();
-
-  await writeJSON(PREFERENCES_FILE, preferences);
 }
 
 module.exports = router;

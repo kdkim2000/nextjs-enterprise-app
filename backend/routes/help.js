@@ -1,55 +1,50 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const { readJSON, writeJSON } = require('../utils/fileUtils');
-
-const HELP_FILE = path.join(__dirname, '../data/help.json');
+const helpService = require('../services/helpService');
 
 // GET /api/help - Get help content(s)
 router.get('/', async (req, res) => {
   try {
     const { programId, language, page = 1, limit = 50, includeAll } = req.query;
 
-    let helps = await readJSON(HELP_FILE);
-
     // If programId is provided, return single help content
     if (programId) {
       // For single help query, only return published content unless includeAll is true (for admin)
-      let filteredHelps = helps.filter(h => h.programId === programId && h.language === (language || 'en'));
+      const includeUnpublished = includeAll === 'true';
 
-      // Filter by published status unless includeAll is explicitly true
-      if (includeAll !== 'true') {
-        filteredHelps = filteredHelps.filter(h => h.status === 'published');
-      }
+      const help = await helpService.getHelpByProgram(
+        programId,
+        language || 'en',
+        includeUnpublished
+      );
 
-      // Return the first match (should be only one for a given programId + language)
-      const help = filteredHelps.length > 0 ? filteredHelps[0] : null;
       return res.json({ help });
     }
 
     // Otherwise, return list of helps with filtering
-    let filteredHelps = helps;
-
-    // Apply filters
-    if (language) {
-      filteredHelps = filteredHelps.filter(h => h.language === language);
-    }
-
-    // Pagination
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
-    const startIndex = (pageNum - 1) * limitNum;
-    const endIndex = startIndex + limitNum;
+    const offset = (pageNum - 1) * limitNum;
 
-    const paginatedHelps = filteredHelps.slice(startIndex, endIndex);
+    const { search, status } = req.query;
+
+    const helps = await helpService.getAllHelp({
+      search,
+      language,
+      status,
+      limit: limitNum,
+      offset
+    });
+
+    const totalCount = await helpService.getHelpCount({ search, language, status });
 
     res.json({
-      helps: paginatedHelps,
+      helps,
       pagination: {
         page: pageNum,
         limit: limitNum,
-        total: filteredHelps.length,
-        totalPages: Math.ceil(filteredHelps.length / limitNum)
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limitNum)
       }
     });
   } catch (error) {
@@ -61,18 +56,16 @@ router.get('/', async (req, res) => {
 // POST /api/help - Create new help content
 router.post('/', async (req, res) => {
   try {
-    const helps = await readJSON(HELP_FILE);
-
-    const newHelp = {
-      id: `help-${Date.now()}`,
-      ...req.body,
-      version: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+    const helpData = {
+      programId: req.body.programId,
+      language: req.body.language,
+      title: req.body.title,
+      content: req.body.content,
+      status: req.body.status || 'draft',
+      version: 1
     };
 
-    helps.push(newHelp);
-    await writeJSON(HELP_FILE, helps);
+    const newHelp = await helpService.createHelp(helpData);
 
     res.json({ help: newHelp });
   } catch (error) {
@@ -84,23 +77,27 @@ router.post('/', async (req, res) => {
 // PUT /api/help - Update help content
 router.put('/', async (req, res) => {
   try {
-    const helps = await readJSON(HELP_FILE);
     const { id } = req.body;
 
-    const index = helps.findIndex(h => h.id === id);
-    if (index === -1) {
+    if (!id) {
+      return res.status(400).json({ error: 'Help ID is required' });
+    }
+
+    const existingHelp = await helpService.getHelpById(id);
+    if (!existingHelp) {
       return res.status(404).json({ error: 'Help content not found' });
     }
 
-    const updatedHelp = {
-      ...helps[index],
-      ...req.body,
-      version: (helps[index].version || 1) + 1,
-      updatedAt: new Date().toISOString()
+    const updates = {
+      programId: req.body.programId,
+      language: req.body.language,
+      title: req.body.title,
+      content: req.body.content,
+      status: req.body.status,
+      version: (existingHelp.version || 1) + 1
     };
 
-    helps[index] = updatedHelp;
-    await writeJSON(HELP_FILE, helps);
+    const updatedHelp = await helpService.updateHelp(id, updates);
 
     res.json({ help: updatedHelp });
   } catch (error) {
@@ -113,15 +110,17 @@ router.put('/', async (req, res) => {
 router.delete('/', async (req, res) => {
   try {
     const { id } = req.query;
-    const helps = await readJSON(HELP_FILE);
 
-    const filteredHelps = helps.filter(h => h.id !== id);
+    if (!id) {
+      return res.status(400).json({ error: 'Help ID is required' });
+    }
 
-    if (filteredHelps.length === helps.length) {
+    const existingHelp = await helpService.getHelpById(id);
+    if (!existingHelp) {
       return res.status(404).json({ error: 'Help content not found' });
     }
 
-    await writeJSON(HELP_FILE, filteredHelps);
+    await helpService.deleteHelp(id);
 
     res.json({ success: true });
   } catch (error) {

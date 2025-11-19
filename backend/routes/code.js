@@ -1,12 +1,10 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { readJSON, writeJSON } = require('../utils/fileUtils');
+const codeService = require('../services/codeService');
+const { transformMultiLangFields } = require('../utils/multiLangTransform');
 const { v4: uuidv4 } = require('uuid');
-const path = require('path');
 
 const router = express.Router();
-
-const CODES_FILE = path.join(__dirname, '../data/codes.json');
 
 /**
  * Get all codes or filter by codeType
@@ -16,43 +14,36 @@ router.get('/', authenticateToken, async (req, res) => {
   try {
     const { codeType, code, status, page = 1, limit = 50 } = req.query;
 
-    let codes = await readJSON(CODES_FILE);
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
 
-    // Apply filters
-    if (codeType) {
-      codes = codes.filter(c =>
-        c.codeType.toLowerCase().includes(codeType.toLowerCase())
-      );
-    }
-    if (code) {
-      codes = codes.filter(c =>
-        c.code.toLowerCase().includes(code.toLowerCase())
-      );
-    }
-    if (status) {
-      codes = codes.filter(c => c.status === status);
-    }
-
-    // Sort by codeType, then by order
-    codes.sort((a, b) => {
-      if (a.codeType !== b.codeType) {
-        return a.codeType.localeCompare(b.codeType);
-      }
-      return a.order - b.order;
+    const codes = await codeService.getAllCodes({
+      codeType,
+      code,
+      status,
+      limit: limitNum,
+      offset
     });
 
-    // Pagination
-    const startIndex = (parseInt(page) - 1) * parseInt(limit);
-    const endIndex = startIndex + parseInt(limit);
-    const paginatedCodes = codes.slice(startIndex, endIndex);
+    const totalCount = await codeService.getCodeCount({
+      codeType,
+      code,
+      status
+    });
+
+    // Transform multilingual fields for all codes
+    const transformedCodes = codes.map(code =>
+      transformMultiLangFields(code, ['name', 'description'])
+    );
 
     res.json({
-      codes: paginatedCodes,
+      codes: transformedCodes,
       pagination: {
-        currentPage: parseInt(page),
-        pageSize: parseInt(limit),
-        totalCount: codes.length,
-        totalPages: Math.ceil(codes.length / parseInt(limit))
+        currentPage: pageNum,
+        pageSize: limitNum,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNum)
       }
     });
   } catch (error) {
@@ -68,14 +59,16 @@ router.get('/', authenticateToken, async (req, res) => {
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const codes = await readJSON(CODES_FILE);
-    const code = codes.find(c => c.id === id);
+    const code = await codeService.getCodeById(id);
 
     if (!code) {
       return res.status(404).json({ error: 'Code not found' });
     }
 
-    res.json({ code });
+    // Transform multilingual fields
+    const transformedCode = transformMultiLangFields(code, ['name', 'description']);
+
+    res.json({ code: transformedCode });
   } catch (error) {
     console.error('Get code error:', error);
     res.status(500).json({ error: 'Failed to fetch code' });
@@ -88,9 +81,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.get('/types/list', authenticateToken, async (req, res) => {
   try {
-    const codes = await readJSON(CODES_FILE);
-    const codeTypes = [...new Set(codes.map(c => c.codeType))].sort();
-
+    const codeTypes = await codeService.getDistinctCodeTypes();
     res.json({ codeTypes });
   } catch (error) {
     console.error('Get code types error:', error);
@@ -105,13 +96,14 @@ router.get('/types/list', authenticateToken, async (req, res) => {
 router.get('/type/:codeType', authenticateToken, async (req, res) => {
   try {
     const { codeType } = req.params;
-    const codes = await readJSON(CODES_FILE);
+    const codes = await codeService.getCodesByType(codeType);
 
-    const filteredCodes = codes
-      .filter(c => c.codeType === codeType)
-      .sort((a, b) => a.order - b.order);
+    // Transform multilingual fields for all codes
+    const transformedCodes = codes.map(code =>
+      transformMultiLangFields(code, ['name', 'description'])
+    );
 
-    res.json({ codes: filteredCodes });
+    res.json({ codes: transformedCodes });
   } catch (error) {
     console.error('Get codes by type error:', error);
     res.status(500).json({ error: 'Failed to fetch codes by type' });
@@ -124,37 +116,46 @@ router.get('/type/:codeType', authenticateToken, async (req, res) => {
  */
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const codes = await readJSON(CODES_FILE);
-
     // Check if code already exists in the same codeType
-    const exists = codes.some(c =>
-      c.codeType === req.body.codeType && c.code === req.body.code
+    const existingCode = await codeService.getCodeByTypeAndCode(
+      req.body.codeType,
+      req.body.code
     );
 
-    if (exists) {
+    if (existingCode) {
       return res.status(400).json({
         error: 'Code already exists in this code type'
       });
     }
 
-    const newCode = {
+    // Extract multilingual fields from request body
+    const name = req.body.name || {};
+    const description = req.body.description || {};
+
+    const codeData = {
       id: uuidv4(),
       codeType: req.body.codeType,
       code: req.body.code,
-      name: req.body.name,
-      description: req.body.description || { en: '', ko: '' },
+      nameEn: name.en || '',
+      nameKo: name.ko || '',
+      nameZh: name.zh || '',
+      nameVi: name.vi || '',
+      descriptionEn: description.en || '',
+      descriptionKo: description.ko || '',
+      descriptionZh: description.zh || '',
+      descriptionVi: description.vi || '',
       order: req.body.order || 1,
       status: req.body.status || 'active',
       parentCode: req.body.parentCode || null,
-      attributes: req.body.attributes || {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      attributes: req.body.attributes || {}
     };
 
-    codes.push(newCode);
-    await writeJSON(CODES_FILE, codes);
+    const newCode = await codeService.createCode(codeData);
 
-    res.status(201).json({ code: newCode });
+    // Transform multilingual fields
+    const transformedCode = transformMultiLangFields(newCode, ['name', 'description']);
+
+    res.status(201).json({ code: transformedCode });
   } catch (error) {
     console.error('Create code error:', error);
     res.status(500).json({ error: 'Failed to create code' });
@@ -168,43 +169,53 @@ router.post('/', authenticateToken, async (req, res) => {
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const codes = await readJSON(CODES_FILE);
-    const index = codes.findIndex(c => c.id === id);
 
-    if (index === -1) {
+    const existingCode = await codeService.getCodeById(id);
+    if (!existingCode) {
       return res.status(404).json({ error: 'Code not found' });
     }
 
     // Check if code already exists in the same codeType (excluding current code)
-    const exists = codes.some(c =>
-      c.id !== id &&
-      c.codeType === req.body.codeType &&
-      c.code === req.body.code
-    );
+    if (req.body.codeType && req.body.code) {
+      const duplicateCode = await codeService.getCodeByTypeAndCode(
+        req.body.codeType,
+        req.body.code
+      );
 
-    if (exists) {
-      return res.status(400).json({
-        error: 'Code already exists in this code type'
-      });
+      if (duplicateCode && duplicateCode.id !== id) {
+        return res.status(400).json({
+          error: 'Code already exists in this code type'
+        });
+      }
     }
 
-    const updatedCode = {
-      ...codes[index],
+    // Extract multilingual fields from request body
+    const name = req.body.name || {};
+    const description = req.body.description || {};
+
+    const updates = {
       codeType: req.body.codeType,
       code: req.body.code,
-      name: req.body.name,
-      description: req.body.description,
+      nameEn: name.en,
+      nameKo: name.ko,
+      nameZh: name.zh,
+      nameVi: name.vi,
+      descriptionEn: description.en,
+      descriptionKo: description.ko,
+      descriptionZh: description.zh,
+      descriptionVi: description.vi,
       order: req.body.order,
       status: req.body.status,
       parentCode: req.body.parentCode,
-      attributes: req.body.attributes || {},
-      updatedAt: new Date().toISOString()
+      attributes: req.body.attributes || {}
     };
 
-    codes[index] = updatedCode;
-    await writeJSON(CODES_FILE, codes);
+    const updatedCode = await codeService.updateCode(id, updates);
 
-    res.json({ code: updatedCode });
+    // Transform multilingual fields
+    const transformedCode = transformMultiLangFields(updatedCode, ['name', 'description']);
+
+    res.json({ code: transformedCode });
   } catch (error) {
     console.error('Update code error:', error);
     res.status(500).json({ error: 'Failed to update code' });
@@ -218,14 +229,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const codes = await readJSON(CODES_FILE);
-    const filteredCodes = codes.filter(c => c.id !== id);
 
-    if (codes.length === filteredCodes.length) {
+    const existingCode = await codeService.getCodeById(id);
+    if (!existingCode) {
       return res.status(404).json({ error: 'Code not found' });
     }
 
-    await writeJSON(CODES_FILE, filteredCodes);
+    await codeService.deleteCode(id);
+
     res.json({ message: 'Code deleted successfully' });
   } catch (error) {
     console.error('Delete code error:', error);
@@ -245,13 +256,18 @@ router.delete('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid ids array' });
     }
 
-    const codes = await readJSON(CODES_FILE);
-    const filteredCodes = codes.filter(c => !ids.includes(c.id));
-
-    await writeJSON(CODES_FILE, filteredCodes);
+    let deletedCount = 0;
+    for (const id of ids) {
+      try {
+        await codeService.deleteCode(id);
+        deletedCount++;
+      } catch (error) {
+        console.error(`Failed to delete code ${id}:`, error);
+      }
+    }
 
     res.json({
-      message: `Successfully deleted ${codes.length - filteredCodes.length} code(s)`
+      message: `Successfully deleted ${deletedCount} code(s)`
     });
   } catch (error) {
     console.error('Bulk delete codes error:', error);
