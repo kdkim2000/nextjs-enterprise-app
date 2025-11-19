@@ -10,17 +10,15 @@ import {
   TextField,
   Box,
   Typography,
-  Chip,
   InputAdornment,
   IconButton
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  Clear as ClearIcon,
-  ExpandMore as ExpandMoreIcon,
-  ChevronRight as ChevronRightIcon,
-  Business as BusinessIcon
+  Clear as ClearIcon
 } from '@mui/icons-material';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export interface Department {
@@ -65,8 +63,8 @@ export default function DepartmentTreeSelect({
 }: DepartmentTreeSelectProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [selectedId, setSelectedId] = useState<string>(value);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Build tree structure from flat department list
   const departmentTree = useMemo(() => {
@@ -90,7 +88,6 @@ export default function DepartmentTreeSelect({
         if (parent) {
           parent.children.push(node);
         } else {
-          // If parent not found, add to root
           rootNodes.push(node);
         }
       }
@@ -157,9 +154,11 @@ export default function DepartmentTreeSelect({
   // Auto-expand nodes when searching
   useEffect(() => {
     if (searchQuery.trim()) {
-      const expanded = new Set<string>();
+      const expanded: string[] = [];
       const addNodeAndAncestors = (nodeId: string) => {
-        expanded.add(nodeId);
+        if (!expanded.includes(nodeId)) {
+          expanded.push(nodeId);
+        }
         const dept = departments.find(d => d.id === nodeId);
         if (dept?.parent_id) {
           addNodeAndAncestors(dept.parent_id);
@@ -174,25 +173,16 @@ export default function DepartmentTreeSelect({
         addAllNodes(node);
       });
 
-      setExpandedNodes(expanded);
+      setExpandedItems(expanded);
+    } else {
+      setExpandedItems([]);
     }
   }, [searchQuery, filteredTree, departments]);
 
-  const handleToggleExpand = (nodeId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    setExpandedNodes(prev => {
-      const next = new Set(prev);
-      if (next.has(nodeId)) {
-        next.delete(nodeId);
-      } else {
-        next.add(nodeId);
-      }
-      return next;
-    });
-  };
-
-  const handleSelect = (dept: Department) => {
-    setSelectedId(dept.id);
+  const handleSelect = (_event: React.SyntheticEvent, itemId: string | null) => {
+    if (itemId) {
+      setSelectedId(itemId);
+    }
   };
 
   const handleConfirm = () => {
@@ -210,82 +200,41 @@ export default function DepartmentTreeSelect({
     setSelectedId('');
   };
 
-  const renderTreeNode = (node: DepartmentTreeNode, depth: number = 0) => {
-    const isExpanded = expandedNodes.has(node.id);
-    const isSelected = selectedId === node.id;
-    const hasChildren = node.children.length > 0;
-    const indent = depth * 24;
-
-    return (
-      <Box key={node.id}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            py: 0.75,
-            px: 1,
-            pl: `${indent + 8}px`,
-            cursor: 'pointer',
-            bgcolor: isSelected ? 'action.selected' : 'transparent',
-            '&:hover': {
-              bgcolor: isSelected ? 'action.selected' : 'action.hover'
+  const renderTreeItems = (nodes: DepartmentTreeNode[]) => {
+    return nodes.map((node) => (
+      <TreeItem
+        key={node.id}
+        itemId={node.id}
+        label={
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body2">
+                {getLocalizedValue(node.name, locale)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                {node.code}
+              </Typography>
+            </Box>
+          </Box>
+        }
+        sx={{
+          '& .MuiTreeItem-content': {
+            borderRadius: 1,
+            '&.Mui-selected': {
+              bgcolor: 'primary.light',
+              '&:hover': {
+                bgcolor: 'primary.light'
+              }
             },
-            borderRadius: 1
-          }}
-          onClick={() => handleSelect(node)}
-        >
-          {hasChildren ? (
-            <IconButton
-              size="small"
-              onClick={(e) => handleToggleExpand(node.id, e)}
-              sx={{ mr: 0.5, p: 0.5 }}
-            >
-              {isExpanded ? (
-                <ExpandMoreIcon fontSize="small" />
-              ) : (
-                <ChevronRightIcon fontSize="small" />
-              )}
-            </IconButton>
-          ) : (
-            <Box sx={{ width: 28, mr: 0.5 }} />
-          )}
-
-          <BusinessIcon
-            fontSize="small"
-            sx={{ mr: 1, color: 'action.active', opacity: 0.6 }}
-          />
-
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="body2" noWrap>
-              {getLocalizedValue(node.name, locale)}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{ fontSize: '0.7rem' }}
-            >
-              {node.code}
-            </Typography>
-          </Box>
-
-          {isSelected && (
-            <Chip
-              label="Selected"
-              size="small"
-              color="primary"
-              sx={{ ml: 1, height: 20 }}
-            />
-          )}
-        </Box>
-
-        {hasChildren && isExpanded && (
-          <Box>
-            {node.children.map(child => renderTreeNode(child, depth + 1))}
-          </Box>
-        )}
-      </Box>
-    );
+            '&:hover': {
+              bgcolor: 'action.hover'
+            }
+          }
+        }}
+      >
+        {node.children.length > 0 && renderTreeItems(node.children)}
+      </TreeItem>
+    ));
   };
 
   return (
@@ -363,7 +312,7 @@ export default function DepartmentTreeSelect({
           />
         </DialogTitle>
 
-        <DialogContent dividers sx={{ p: 1 }}>
+        <DialogContent dividers sx={{ p: 2 }}>
           {filteredTree.length === 0 ? (
             <Box
               sx={{
@@ -381,9 +330,18 @@ export default function DepartmentTreeSelect({
               </Typography>
             </Box>
           ) : (
-            <Box>
-              {filteredTree.map(node => renderTreeNode(node))}
-            </Box>
+            <SimpleTreeView
+              selectedItems={selectedId}
+              onSelectedItemsChange={handleSelect}
+              expandedItems={expandedItems}
+              onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
+              sx={{
+                flexGrow: 1,
+                overflowY: 'auto'
+              }}
+            >
+              {renderTreeItems(filteredTree)}
+            </SimpleTreeView>
           )}
         </DialogContent>
 
