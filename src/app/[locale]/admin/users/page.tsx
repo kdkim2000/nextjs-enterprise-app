@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Box, Paper } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
@@ -42,6 +42,7 @@ export default function UserManagementPage() {
     // State
     users,
     setUsers,
+    allDepartments,
     searchCriteria,
     quickSearch,
     setQuickSearch,
@@ -79,14 +80,20 @@ export default function UserManagementPage() {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
-    setDialogOpen
+    setDialogOpen,
+    fetchDepartments
   } = useUserManagement();
+
+  // Load departments on mount
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
 
   // Memoized computed values
   const columns = useMemo(() => {
     console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
-    return createColumns(t, currentLocale, handleEdit, handleResetPasswordClick, gridPermissions.editable);
-  }, [t, currentLocale, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
+    return createColumns(t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable);
+  }, [t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -197,6 +204,8 @@ export default function UserManagementPage() {
           onChange={(user) => setEditingUser(user as User)}
           usernameLabel={t('auth.username')}
           emailLabel={t('auth.email')}
+          departments={allDepartments}
+          locale={currentLocale}
         />
       </EditDrawer>
 

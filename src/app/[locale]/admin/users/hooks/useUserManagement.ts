@@ -58,38 +58,21 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [allDepartments, setAllDepartments] = useState<any[]>([]);
 
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        try {
-          const response = await api.get('/help?programId=PROG-USER-LIST&language=en');
-          setHelpExists(!!response.help);
-        } catch {
-          setHelpExists(false);
-        }
-      } catch (error) {
-        console.error('Error checking help and role:', error);
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
+  // Fetch all departments for dropdown
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await api.get('/department?page=1&limit=1000');
+      setAllDepartments(response.departments || []);
+    } catch (error: any) {
+      console.error('Failed to fetch departments:', error);
+      setAllDepartments([]);
+    }
   }, []);
 
   // Fetch users from API
@@ -331,6 +314,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     // State
     users,
     setUsers,
+    allDepartments,
     searchCriteria,
     quickSearch,
     setQuickSearch,
@@ -346,10 +330,6 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
     resetPasswordDialogOpen,
@@ -375,6 +355,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
-    setDialogOpen
+    setDialogOpen,
+    fetchDepartments
   };
 };

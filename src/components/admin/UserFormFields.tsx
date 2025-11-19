@@ -3,11 +3,16 @@
 import React from 'react';
 import {
   TextField,
-  Divider
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import AvatarUpload from '@/components/common/AvatarUpload';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
 import CodeSelect from '@/components/common/CodeSelect';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export interface UserFormData {
   id?: string;
@@ -27,6 +32,9 @@ export interface UserFormFieldsProps {
   onError?: (error: string) => void;
   usernameLabel?: string;
   emailLabel?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  departments?: any[];
+  locale?: string;
 }
 
 export default function UserFormFields({
@@ -34,7 +42,9 @@ export default function UserFormFields({
   onChange,
   onError,
   usernameLabel = 'Username',
-  emailLabel = 'Email'
+  emailLabel = 'Email',
+  departments = [],
+  locale = 'en'
 }: UserFormFieldsProps) {
   if (!user) return null;
 
@@ -107,14 +117,23 @@ export default function UserFormFields({
       />
 
       {/* Department */}
-      <CodeSelect
-        codeType="DEPARTMENT"
-        value={user.department || ''}
-        onChange={(value) => handleChange('department', value)}
-        label="Department"
-        showEmpty
-        emptyLabel="None"
-      />
+      <FormControl fullWidth>
+        <InputLabel>Department</InputLabel>
+        <Select
+          value={user.department || ''}
+          label="Department"
+          onChange={(e) => handleChange('department', e.target.value)}
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {departments.map((dept: any) => (
+            <MenuItem key={dept.id} value={dept.id}>
+              {getLocalizedValue(dept.name, locale)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       {/* Status */}
       <CodeSelect
