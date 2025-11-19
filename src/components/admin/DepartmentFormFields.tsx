@@ -2,14 +2,11 @@
 
 import React from 'react';
 import {
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  TextField
 } from '@mui/material';
 import CodeSelect from '@/components/common/CodeSelect';
 import UserAutocomplete from '@/components/common/UserAutocomplete';
+import DepartmentTreeInline from '@/components/common/DepartmentTreeInline';
 
 export interface DepartmentFormData {
   id?: string;
@@ -64,9 +61,6 @@ export default function DepartmentFormFields({
   const handleChange = (field: keyof DepartmentFormData, value: string | number) => {
     onChange({ ...department, [field]: value });
   };
-
-  // Filter departments to show only top-level (level 0) as parent options
-  const topLevelDepartments = departments.filter((d: any) => d.level === 0);
 
   return (
     <>
@@ -158,23 +152,16 @@ export default function DepartmentFormFields({
       />
 
       {/* Parent Department */}
-      <FormControl fullWidth>
-        <InputLabel>{labels.parentDepartment || 'Parent Department'}</InputLabel>
-        <Select
-          value={department.parentId || ''}
-          label={labels.parentDepartment || 'Parent Department'}
-          onChange={(e) => handleChange('parentId', e.target.value)}
-        >
-          <MenuItem value="">
-            <em>{labels.none || 'None'}</em>
-          </MenuItem>
-          {topLevelDepartments.map((dept: any) => (
-            <MenuItem key={dept.id} value={dept.id}>
-              {dept.name?.[locale as 'en' | 'ko' | 'zh' | 'vi'] || dept.name?.en}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <DepartmentTreeInline
+        value={department.parentId || ''}
+        onChange={(value) => handleChange('parentId', value)}
+        departments={departments}
+        locale={locale}
+        label={labels.parentDepartment || 'Parent Department'}
+        allowNone={true}
+        noneLabel={labels.none || 'None (Top Level)'}
+        currentDepartmentId={department.id}
+      />
 
       {/* Manager */}
       <UserAutocomplete
