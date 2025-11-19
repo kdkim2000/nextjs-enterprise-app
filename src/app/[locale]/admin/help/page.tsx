@@ -50,7 +50,6 @@ export default function HelpManagementPage() {
     isAdmin,
     successMessage,
     errorMessage,
-    showError,
     // Handlers
     handleAdd,
     handleEdit,
@@ -177,7 +176,6 @@ export default function HelpManagementPage() {
         <HelpFormFields
           help={editingHelp}
           onChange={(help) => setEditingHelp(help)}
-          onError={(err) => showError(err)}
         />
       </EditDrawer>
 

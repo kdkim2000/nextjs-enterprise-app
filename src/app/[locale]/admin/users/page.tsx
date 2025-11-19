@@ -17,6 +17,7 @@ import { createColumns, DEPARTMENTS } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { User } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useHelp } from '@/hooks/useHelp';
 
 export default function UserManagementPage() {
   const t = useI18n();
@@ -24,6 +25,17 @@ export default function UserManagementPage() {
 
   // Permission control
   const gridPermissions = useDataGridPermissions('PROG-USER-LIST');
+
+  // Use common help hook
+  const {
+    helpOpen,
+    setHelpOpen,
+    helpExists,
+    isAdmin,
+    canManageHelp,
+    navigateToHelpEdit,
+    language
+  } = useHelp({ programId: 'PROG-USER-LIST' });
 
   // Use custom hook for all business logic
   const {
@@ -45,13 +57,8 @@ export default function UserManagementPage() {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
-    showError,
     resetPasswordDialogOpen,
     resetPasswordUser,
     resetPasswordLoading,
@@ -138,7 +145,9 @@ export default function UserManagementPage() {
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
       helpExists={helpExists}
-      language={currentLocale}
+      canManageHelp={canManageHelp}
+      onHelpEdit={navigateToHelpEdit}
+      language={language}
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
@@ -186,10 +195,8 @@ export default function UserManagementPage() {
         <UserFormFields
           user={editingUser as UserFormData}
           onChange={(user) => setEditingUser(user as User)}
-          onError={(err) => showError(err)}
           usernameLabel={t('auth.username')}
           emailLabel={t('auth.email')}
-          departments={DEPARTMENTS}
         />
       </EditDrawer>
 
