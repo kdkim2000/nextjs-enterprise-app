@@ -62,36 +62,6 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        try {
-          const response = await api.get('/help?programId=PROG-MENU-LIST&language=en');
-          setHelpExists(!!response.help);
-        } catch {
-          setHelpExists(false);
-        }
-      } catch (error) {
-        console.error('Error checking help and role:', error);
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-  }, []);
 
   // Flatten menu structure for DataGrid (not using useCallback to avoid dependency issues)
   const flattenMenus = (items: MenuItemType[]): Menu[] => {
@@ -389,10 +359,6 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
 

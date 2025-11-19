@@ -26,9 +26,6 @@ export function useMessageManagement() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<GridRowSelectionModel>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpExists, setHelpExists] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10
@@ -44,33 +41,6 @@ export function useMessageManagement() {
     showErrorMessage,
     clearMessages
   } = useMessage({ locale });
-
-  // Check user role and help content availability on mount
-  useEffect(() => {
-    const checkHelpAndRole = async () => {
-      try {
-        // Check if user is admin
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setIsAdmin(user.role === 'admin');
-        }
-
-        // Check if help content exists for this page
-        try {
-          const response = await api.get('/help?programId=PROG-MESSAGE-MGMT&language=en');
-          setHelpExists(!!response.help);
-        } catch {
-          setHelpExists(false);
-        }
-      } catch (error) {
-        console.error('Error checking help and role:', error);
-        setHelpExists(false);
-      }
-    };
-
-    checkHelpAndRole();
-  }, []);
 
   // Fetch messages
   const fetchMessages = useCallback(async (search?: string, criteria?: SearchCriteria) => {
@@ -95,8 +65,8 @@ export function useMessageManagement() {
           }
           if (criteria.messageText) {
             const searchText = criteria.messageText.toLowerCase();
-            if (!message.message.en.toLowerCase().includes(searchText) &&
-                !message.message.ko.toLowerCase().includes(searchText)) {
+            if (!message.message?.en?.toLowerCase().includes(searchText) &&
+                !message.message?.ko?.toLowerCase().includes(searchText)) {
               return false;
             }
           }
@@ -114,10 +84,10 @@ export function useMessageManagement() {
           message.code.toLowerCase().includes(lowercaseSearch) ||
           message.category.toLowerCase().includes(lowercaseSearch) ||
           message.type.toLowerCase().includes(lowercaseSearch) ||
-          message.message.en.toLowerCase().includes(lowercaseSearch) ||
-          message.message.ko.toLowerCase().includes(lowercaseSearch) ||
-          message.description.en.toLowerCase().includes(lowercaseSearch) ||
-          message.description.ko.toLowerCase().includes(lowercaseSearch)
+          message.message?.en?.toLowerCase().includes(lowercaseSearch) ||
+          message.message?.ko?.toLowerCase().includes(lowercaseSearch) ||
+          message.description?.en?.toLowerCase().includes(lowercaseSearch) ||
+          message.description?.ko?.toLowerCase().includes(lowercaseSearch)
         );
       }
 
@@ -189,16 +159,16 @@ export function useMessageManagement() {
         category: message.category,
         type: message.type,
         message: {
-          en: message.message.en || '',
-          ko: message.message.ko || '',
-          zh: message.message.zh || '',
-          vi: message.message.vi || ''
+          en: message.message?.en || '',
+          ko: message.message?.ko || '',
+          zh: message.message?.zh || '',
+          vi: message.message?.vi || ''
         },
         description: {
-          en: message.description.en || '',
-          ko: message.description.ko || '',
-          zh: message.description.zh || '',
-          vi: message.description.vi || ''
+          en: message.description?.en || '',
+          ko: message.description?.ko || '',
+          zh: message.description?.zh || '',
+          vi: message.description?.vi || ''
         },
         status: message.status
       });
@@ -306,10 +276,6 @@ export function useMessageManagement() {
     deleteConfirmOpen,
     selectedForDelete,
     deleteLoading,
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
     successMessage,
     errorMessage,
     // Handlers

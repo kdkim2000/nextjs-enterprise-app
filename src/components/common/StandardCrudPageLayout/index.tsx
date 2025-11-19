@@ -50,6 +50,8 @@ export interface StandardCrudPageLayoutProps {
   isAdmin?: boolean;
   helpExists?: boolean;
   language?: string;
+  canManageHelp?: boolean;
+  onHelpEdit?: () => void;
 
   // Main Content
   children: ReactNode;
@@ -139,6 +141,8 @@ export default function StandardCrudPageLayout({
   isAdmin = false,
   helpExists = false,
   language = 'en',
+  canManageHelp = false,
+  onHelpEdit,
 
   // Main Content
   children,
@@ -146,13 +150,38 @@ export default function StandardCrudPageLayout({
   // Container Props
   containerSx = {}
 }: StandardCrudPageLayoutProps) {
+  // Determine if help button should be shown
+  const shouldShowHelpButton = programId && onHelpOpenChange && (isAdmin || canManageHelp || helpExists);
+
+  // Handle help button click
+  const handleHelpClick = () => {
+    // If help exists, open the viewer
+    if (helpExists) {
+      onHelpOpenChange?.(true);
+    }
+    // If help doesn't exist but user can manage help, navigate to edit page
+    else if ((isAdmin || canManageHelp) && onHelpEdit) {
+      onHelpEdit();
+    }
+    // Fallback: just open the viewer (which will show empty state)
+    else {
+      onHelpOpenChange?.(true);
+    }
+  };
+
   // Build header actions with help button if applicable
   const finalHeaderActions = (
     <>
       {headerActions}
-      {programId && (isAdmin || helpExists) && onHelpOpenChange && (
-        <Tooltip title={isAdmin ? 'Help (Admin: Click to edit)' : 'Help'}>
-          <IconButton onClick={() => onHelpOpenChange(true)} color="primary" sx={{ ml: 1 }}>
+      {shouldShowHelpButton && (
+        <Tooltip
+          title={
+            helpExists
+              ? (isAdmin || canManageHelp ? 'Help (Click to view/edit)' : 'Help')
+              : 'Create Help Content'
+          }
+        >
+          <IconButton onClick={handleHelpClick} color="primary" sx={{ ml: 1 }}>
             <HelpOutline />
           </IconButton>
         </Tooltip>
