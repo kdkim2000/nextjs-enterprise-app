@@ -3,16 +3,12 @@
 import React from 'react';
 import {
   TextField,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  Divider
 } from '@mui/material';
 import AvatarUpload from '@/components/common/AvatarUpload';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
 import CodeSelect from '@/components/common/CodeSelect';
-import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import DepartmentTreeSelect from '@/components/common/DepartmentTreeSelect';
 
 export interface UserFormData {
   id?: string;
@@ -117,23 +113,13 @@ export default function UserFormFields({
       />
 
       {/* Department */}
-      <FormControl fullWidth>
-        <InputLabel>Department</InputLabel>
-        <Select
-          value={user.department || ''}
-          label="Department"
-          onChange={(e) => handleChange('department', e.target.value)}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {departments.map((dept: any) => (
-            <MenuItem key={dept.id} value={dept.id}>
-              {getLocalizedValue(dept.name, locale)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <DepartmentTreeSelect
+        value={user.department || ''}
+        onChange={(value) => handleChange('department', value)}
+        departments={departments}
+        locale={locale}
+        label="Department"
+      />
 
       {/* Status */}
       <CodeSelect
