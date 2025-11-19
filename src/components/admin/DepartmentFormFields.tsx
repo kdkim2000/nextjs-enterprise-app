@@ -9,6 +9,7 @@ import {
   MenuItem
 } from '@mui/material';
 import CodeSelect from '@/components/common/CodeSelect';
+import UserAutocomplete from '@/components/common/UserAutocomplete';
 
 export interface DepartmentFormData {
   id?: string;
@@ -24,9 +25,6 @@ export interface DepartmentFormData {
   parentId: string;
   managerId: string;
   status: 'active' | 'inactive';
-  email: string;
-  phone: string;
-  location: string;
   order: number;
 }
 
@@ -35,7 +33,6 @@ export interface DepartmentFormFieldsProps {
   onChange: (department: DepartmentFormData) => void;
   onError?: (error: string) => void;
   departments?: Array<{ id: string; name: { en: string; ko: string; zh: string; vi: string } }>;
-  users?: Array<{ id: string; name: string }>;
   locale?: string;
   labels?: {
     code?: string;
@@ -50,9 +47,6 @@ export interface DepartmentFormFieldsProps {
     parentDepartment?: string;
     manager?: string;
     status?: string;
-    email?: string;
-    phone?: string;
-    location?: string;
     order?: string;
     none?: string;
   };
@@ -62,7 +56,6 @@ export default function DepartmentFormFields({
   department,
   onChange,
   departments = [],
-  users = [],
   locale = 'en',
   labels = {}
 }: DepartmentFormFieldsProps) {
@@ -184,23 +177,13 @@ export default function DepartmentFormFields({
       </FormControl>
 
       {/* Manager */}
-      <FormControl fullWidth>
-        <InputLabel>{labels.manager || 'Manager'}</InputLabel>
-        <Select
-          value={department.managerId || ''}
-          label={labels.manager || 'Manager'}
-          onChange={(e) => handleChange('managerId', e.target.value)}
-        >
-          <MenuItem value="">
-            <em>{labels.none || 'None'}</em>
-          </MenuItem>
-          {users.map((user: any) => (
-            <MenuItem key={user.id} value={user.id}>
-              {user.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <UserAutocomplete
+        value={department.managerId || null}
+        onChange={(userId) => handleChange('managerId', userId || '')}
+        label={labels.manager || 'Manager'}
+        placeholder="Search by username or name..."
+        fullWidth
+      />
 
       {/* Status */}
       <CodeSelect
@@ -209,31 +192,6 @@ export default function DepartmentFormFields({
         onChange={(value) => handleChange('status', value as 'active' | 'inactive')}
         label={labels.status || 'Status'}
         required
-      />
-
-      {/* Email */}
-      <TextField
-        label={labels.email || 'Email'}
-        type="email"
-        fullWidth
-        value={department.email || ''}
-        onChange={(e) => handleChange('email', e.target.value)}
-      />
-
-      {/* Phone */}
-      <TextField
-        label={labels.phone || 'Phone'}
-        fullWidth
-        value={department.phone || ''}
-        onChange={(e) => handleChange('phone', e.target.value)}
-      />
-
-      {/* Location */}
-      <TextField
-        label={labels.location || 'Location'}
-        fullWidth
-        value={department.location || ''}
-        onChange={(e) => handleChange('location', e.target.value)}
       />
 
       {/* Order */}

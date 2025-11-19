@@ -101,24 +101,6 @@ export const createColumns = (
         />
       );
     }
-  },
-  {
-    field: 'location',
-    headerName: t('location'),
-    width: 150,
-    sortable: true
-  },
-  {
-    field: 'email',
-    headerName: t('email'),
-    width: 180,
-    sortable: true
-  },
-  {
-    field: 'phone',
-    headerName: t('phone'),
-    width: 130,
-    sortable: true
   }
 ];
 

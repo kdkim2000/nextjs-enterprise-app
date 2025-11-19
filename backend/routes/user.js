@@ -1,25 +1,19 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
 const { authenticateToken } = require('../middleware/auth');
 const { requireProgramAccess, requirePermission } = require('../middleware/permissionMiddleware');
-const { readJSON, writeJSON } = require('../utils/fileUtils');
-const path = require('path');
+const userService = require('../services/userService');
+const preferencesService = require('../services/preferencesService');
+const menuService = require('../services/menuService');
 
 const router = express.Router();
-
-const PREFERENCES_FILE = path.join(__dirname, '../data/userPreferences.json');
-const MENUS_FILE = path.join(__dirname, '../data/menus.json');
-const USERS_FILE = path.join(__dirname, '../data/users.json');
 
 /**
  * Get all users with search and pagination
  */
 router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
   try {
-
-    const users = await readJSON(USERS_FILE);
-
-    // Extract query parameters
     const {
       username,
       name,
@@ -30,47 +24,47 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
       limit = 50
     } = req.query;
 
-    // Handle department as array (can have multiple values)
+    // Handle department as array
     const departments = req.query.department
       ? (Array.isArray(req.query.department) ? req.query.department : [req.query.department])
       : [];
 
-    // Filter users based on search criteria
-    let filteredUsers = users.filter(user => {
-      if (username && !user.username.toLowerCase().includes(username.toLowerCase())) {
-        return false;
-      }
-      if (name && !user.name.toLowerCase().includes(name.toLowerCase())) {
-        return false;
-      }
-      if (email && !user.email.toLowerCase().includes(email.toLowerCase())) {
-        return false;
-      }
-      if (role && user.role !== role) {
-        return false;
-      }
-      // Check if user's department is in the selected departments array
-      if (departments.length > 0 && !departments.includes(user.department)) {
-        return false;
-      }
-      if (status && user.status !== status) {
-        return false;
-      }
-      return true;
-    });
-
-    const totalCount = filteredUsers.length;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // Build search string (username, name, or email)
+    const search = username || name || email;
+
+    // Get users from database
+    const users = await userService.getAllUsers({
+      search,
+      status,
+      department: departments[0], // Service supports single department filter
+      limit: limitNum,
+      offset
+    });
+
+    // Get total count for pagination
+    const totalCount = await userService.getUserCount({
+      search,
+      status,
+      department: departments[0]
+    });
+
     const totalPages = Math.ceil(totalCount / limitNum);
-    const startIndex = (pageNum - 1) * limitNum;
-    const endIndex = startIndex + limitNum;
 
-    // Apply pagination
-    const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-
-    // Remove password field from response
-    const safeUsers = paginatedUsers.map(({ password, ...user }) => user);
+    // Remove password field and convert snake_case to camelCase for response
+    const safeUsers = users.map(({ password, name, mfa_enabled, sso_enabled, avatar_url, last_login, created_at, updated_at, ...rest }) => ({
+      ...rest,
+      name,
+      mfaEnabled: mfa_enabled,
+      ssoEnabled: sso_enabled,
+      avatarUrl: avatar_url,
+      lastLogin: last_login,
+      createdAt: created_at,
+      updatedAt: updated_at
+    }));
 
     res.json({
       users: safeUsers,
@@ -89,19 +83,46 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
 });
 
 /**
+ * Get all users for dropdown (simplified list without pagination)
+ */
+router.get('/all', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
+  try {
+    // Get all users with only essential fields (id, username, name)
+    const users = await userService.getAllUsers({
+      limit: 100000,  // Large limit to get all users
+      offset: 0
+    });
+
+    // Return only essential fields for dropdown
+    const simpleUsers = users.map(({ id, username, name }) => ({
+      id,
+      username,
+      name
+    }));
+
+    res.json({
+      users: simpleUsers
+    });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ error: 'Failed to fetch all users' });
+  }
+});
+
+/**
  * Get user preferences
  */
 router.get('/preferences', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    const userPref = preferences.find(p => p.userId === userId);
+
+    // Get preferences from database
+    let preferences = await preferencesService.getUserPreferences(userId);
 
     // Get user's MFA status
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.id === userId);
+    const user = await userService.getUserById(userId);
 
-    if (!userPref) {
+    if (!preferences) {
       return res.json({
         preferences: {
           favoriteMenus: [],
@@ -112,17 +133,25 @@ router.get('/preferences', authenticateToken, async (req, res) => {
           emailNotifications: true,
           systemNotifications: true,
           sessionTimeout: 30,
-          mfaEnabled: user?.mfaEnabled || false
+          mfaEnabled: user?.mfa_enabled || false
         }
       });
     }
 
-    res.json({
-      preferences: {
-        ...userPref,
-        mfaEnabled: user?.mfaEnabled || false
-      }
-    });
+    // Convert DB format to API format
+    const apiPreferences = {
+      favoriteMenus: preferences.favorite_menus || [],
+      recentMenus: preferences.recent_menus || [],
+      language: preferences.language || 'en',
+      theme: preferences.theme || 'light',
+      rowsPerPage: preferences.rows_per_page || 10,
+      emailNotifications: preferences.email_notifications !== false,
+      systemNotifications: preferences.system_notifications !== false,
+      sessionTimeout: preferences.session_timeout || 30,
+      mfaEnabled: user?.mfa_enabled || false
+    };
+
+    res.json({ preferences: apiPreferences });
   } catch (error) {
     console.error('Get preferences error:', error);
     res.status(500).json({ error: 'Failed to fetch preferences' });
@@ -135,17 +164,17 @@ router.get('/preferences', authenticateToken, async (req, res) => {
 router.get('/favorite-menus', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    const userPref = preferences.find(p => p.userId === userId);
+    const preferences = await preferencesService.getUserPreferences(userId);
 
-    if (!userPref || !userPref.favoriteMenus.length) {
+    const favoriteMenuIds = preferences?.favorite_menus || [];
+
+    if (!favoriteMenuIds.length) {
       return res.json({ menus: [] });
     }
 
-    const menus = await readJSON(MENUS_FILE);
-    const favoriteMenus = userPref.favoriteMenus
-      .map(menuId => menus.find(m => m.id === menuId))
-      .filter(m => m !== undefined);
+    // Get all menus and filter favorites
+    const allMenus = await menuService.getAllMenus();
+    const favoriteMenus = allMenus.filter(m => favoriteMenuIds.includes(m.id));
 
     res.json({ menus: favoriteMenus });
   } catch (error) {
@@ -160,17 +189,17 @@ router.get('/favorite-menus', authenticateToken, async (req, res) => {
 router.get('/recent-menus', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    const userPref = preferences.find(p => p.userId === userId);
+    const preferences = await preferencesService.getUserPreferences(userId);
 
-    if (!userPref || !userPref.recentMenus.length) {
+    const recentMenuIds = preferences?.recent_menus || [];
+
+    if (!recentMenuIds.length) {
       return res.json({ menus: [] });
     }
 
-    const menus = await readJSON(MENUS_FILE);
-    const recentMenus = userPref.recentMenus
-      .map(menuId => menus.find(m => m.id === menuId))
-      .filter(m => m !== undefined);
+    // Get all menus and filter recents
+    const allMenus = await menuService.getAllMenus();
+    const recentMenus = allMenus.filter(m => recentMenuIds.includes(m.id));
 
     res.json({ menus: recentMenus });
   } catch (error) {
@@ -184,12 +213,11 @@ router.get('/recent-menus', authenticateToken, async (req, res) => {
  */
 router.get('/permissions', authenticateToken, async (req, res) => {
   try {
-    const { getUserAccessiblePrograms } = require('../middleware/permissionMiddleware');
+    const { getUserAccessibleProgramsAsync } = require('../middleware/permissionMiddleware');
 
     const userId = req.user.userId;
-    const accessiblePrograms = getUserAccessiblePrograms(userId);
+    const accessiblePrograms = await getUserAccessibleProgramsAsync(userId);
 
-    // Transform to the format expected by frontend
     const permissions = accessiblePrograms.map(program => ({
       programCode: program.code,
       programId: program.id,
@@ -215,7 +243,6 @@ router.get('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     // Users can view their own profile without permission check
-    // For viewing other users, require view permission
     if (req.user.userId !== id) {
       const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
       const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
@@ -224,15 +251,25 @@ router.get('/:id', authenticateToken, async (req, res) => {
       }
     }
 
-    const users = await readJSON(USERS_FILE);
-    const user = users.find(u => u.id === id);
+    const user = await userService.getUserById(id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Remove password field
-    const { password, ...safeUser } = user;
+    // Convert DB format to API format
+    const { password, name, mfa_enabled, sso_enabled, avatar_url, last_login, created_at, updated_at, ...rest } = user;
+    const safeUser = {
+      ...rest,
+      name,
+      mfaEnabled: mfa_enabled,
+      ssoEnabled: sso_enabled,
+      avatarUrl: avatar_url,
+      lastLogin: last_login,
+      createdAt: created_at,
+      updatedAt: updated_at
+    };
+
     res.json({ user: safeUser });
   } catch (error) {
     console.error('Get user error:', error);
@@ -245,50 +282,51 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'), async (req, res) => {
   try {
-
     const { username, password, name, email, role, department, status, avatarUrl } = req.body;
 
     if (!username || !password || !name || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const users = await readJSON(USERS_FILE);
-
     // Check if username or email already exists
-    if (users.some(u => u.username === username)) {
+    if (await userService.usernameExists(username)) {
       return res.status(400).json({ error: 'Username already exists' });
     }
-    if (users.some(u => u.email === email)) {
+    if (await userService.emailExists(email)) {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate new user ID
-    const newId = `user-${String(users.length + 1).padStart(3, '0')}`;
+    // Split name into first and last name
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
 
-    const newUser = {
-      id: newId,
+    const newUser = await userService.createUser({
+      id: uuidv4(),
       username,
       password: hashedPassword,
-      name,
+      firstName,
+      lastName,
       email,
-      role: role || 'user',
       department: department || '',
-      mfaEnabled: false,
-      ssoEnabled: false,
       status: status || 'active',
-      createdAt: new Date().toISOString(),
-      lastLogin: null,
-      ...(avatarUrl && { avatarUrl })
+      mfaEnabled: false,
+      profileImage: avatarUrl
+    });
+
+    // Convert to API format
+    const { password: _, name: userName, mfa_enabled, sso_enabled, avatar_url, ...rest } = newUser;
+    const safeUser = {
+      ...rest,
+      name: userName,
+      mfaEnabled: mfa_enabled,
+      ssoEnabled: sso_enabled,
+      avatarUrl: avatar_url
     };
 
-    users.push(newUser);
-    await writeJSON(USERS_FILE, users);
-
-    // Remove password from response
-    const { password: _, ...safeUser } = newUser;
     res.status(201).json({ user: safeUser });
   } catch (error) {
     console.error('Create user error:', error);
@@ -308,38 +346,32 @@ router.put('/preferences', authenticateToken, async (req, res) => {
       rowsPerPage,
       emailNotifications,
       systemNotifications,
-      sessionTimeout
+      sessionTimeout,
+      favoriteMenus,
+      recentMenus
     } = req.body;
 
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    let userPref = preferences.find(p => p.userId === userId);
+    // Get existing preferences
+    let preferences = await preferencesService.getUserPreferences(userId);
 
-    if (!userPref) {
-      userPref = {
-        userId,
-        favoriteMenus: [],
-        recentMenus: [],
-        language: 'en',
-        theme: 'light',
-        rowsPerPage: 10,
-        emailNotifications: true,
-        systemNotifications: true,
-        sessionTimeout: 30
-      };
-      preferences.push(userPref);
-    }
+    // Prepare update data - only include fields that are provided
+    const updateData = {
+      userId
+    };
 
-    if (language !== undefined) userPref.language = language;
-    if (theme !== undefined) userPref.theme = theme;
-    if (rowsPerPage !== undefined) userPref.rowsPerPage = rowsPerPage;
-    if (emailNotifications !== undefined) userPref.emailNotifications = emailNotifications;
-    if (systemNotifications !== undefined) userPref.systemNotifications = systemNotifications;
-    if (sessionTimeout !== undefined) userPref.sessionTimeout = sessionTimeout;
-    userPref.updatedAt = new Date().toISOString();
+    if (language !== undefined) updateData.language = language;
+    if (theme !== undefined) updateData.theme = theme;
+    if (rowsPerPage !== undefined) updateData.rowsPerPage = rowsPerPage;
+    if (emailNotifications !== undefined) updateData.emailNotifications = emailNotifications;
+    if (systemNotifications !== undefined) updateData.systemNotifications = systemNotifications;
+    if (sessionTimeout !== undefined) updateData.sessionTimeout = sessionTimeout;
+    if (favoriteMenus !== undefined) updateData.favoriteMenus = favoriteMenus;
+    if (recentMenus !== undefined) updateData.recentMenus = recentMenus;
 
-    await writeJSON(PREFERENCES_FILE, preferences);
+    // Update preferences
+    const updated = await preferencesService.createUserPreferences(updateData);
 
-    res.json(userPref);
+    res.json(updated);
   } catch (error) {
     console.error('Update preferences error:', error);
     res.status(500).json({ error: 'Failed to update preferences' });
@@ -347,14 +379,11 @@ router.put('/preferences', authenticateToken, async (req, res) => {
 });
 
 /**
- * Update user (or user updating their own profile)
+ * Update user
  */
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Users can update their own profile (limited fields)
-    // For updating other users, require update permission
     const isSelf = req.user.userId === id;
 
     if (!isSelf) {
@@ -366,36 +395,47 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     const { name, email, role, department, status, avatarUrl } = req.body;
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === id);
-
-    if (userIndex === -1) {
-      return res.status(404).json({ error: 'User not found' });
-    }
 
     // Check email uniqueness
-    if (email && email !== users[userIndex].email) {
-      if (users.some(u => u.email === email && u.id !== id)) {
+    if (email) {
+      if (await userService.emailExists(email, id)) {
         return res.status(400).json({ error: 'Email already in use' });
       }
     }
 
-    // Update fields
-    if (name) users[userIndex].name = name;
-    if (email) users[userIndex].email = email;
-    if (department !== undefined) users[userIndex].department = department;
-    if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
+    // Prepare updates
+    const updates = {};
+    if (name) {
+      const nameParts = name.trim().split(' ');
+      updates.firstName = nameParts[0];
+      updates.lastName = nameParts.slice(1).join(' ') || '';
+    }
+    if (email) updates.email = email;
+    if (department !== undefined) updates.department = department;
+    if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
 
-    // Only users with update permission can change role and status (not when updating own profile)
+    // Only admins can change role and status
     if (!isSelf) {
-      if (role) users[userIndex].role = role;
-      if (status) users[userIndex].status = status;
+      if (role) updates.role = role;
+      if (status) updates.status = status;
     }
 
-    await writeJSON(USERS_FILE, users);
+    const updatedUser = await userService.updateUser(id, updates);
 
-    // Remove password from response
-    const { password, ...safeUser } = users[userIndex];
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Convert to API format
+    const { password, name: userName, mfa_enabled, sso_enabled, avatar_url, ...rest } = updatedUser;
+    const safeUser = {
+      ...rest,
+      name: userName,
+      mfaEnabled: mfa_enabled,
+      ssoEnabled: sso_enabled,
+      avatarUrl: avatar_url
+    };
+
     res.json({ user: safeUser });
   } catch (error) {
     console.error('Update user error:', error);
@@ -408,23 +448,17 @@ router.put('/:id', authenticateToken, async (req, res) => {
  */
 router.delete('/:id', authenticateToken, requirePermission('PROG-USER-LIST', 'delete'), async (req, res) => {
   try {
-
     const { id } = req.params;
 
-    // Prevent deleting self
     if (req.user.userId === id) {
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === id);
+    const deleted = await userService.deleteUser(id);
 
-    if (userIndex === -1) {
+    if (!deleted) {
       return res.status(404).json({ error: 'User not found' });
     }
-
-    users.splice(userIndex, 1);
-    await writeJSON(USERS_FILE, users);
 
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
@@ -445,27 +479,18 @@ router.post('/favorite-menus', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Menu ID required' });
     }
 
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    let userPref = preferences.find(p => p.userId === userId);
+    let preferences = await preferencesService.getUserPreferences(userId);
+    const favoriteMenus = preferences?.favorite_menus || [];
 
-    if (!userPref) {
-      userPref = {
+    if (!favoriteMenus.includes(menuId)) {
+      favoriteMenus.push(menuId);
+      await preferencesService.createUserPreferences({
         userId,
-        favoriteMenus: [],
-        recentMenus: [],
-        language: 'en',
-        theme: 'light'
-      };
-      preferences.push(userPref);
+        favoriteMenus
+      });
     }
 
-    if (!userPref.favoriteMenus.includes(menuId)) {
-      userPref.favoriteMenus.push(menuId);
-      userPref.updatedAt = new Date().toISOString();
-      await writeJSON(PREFERENCES_FILE, preferences);
-    }
-
-    res.json({ message: 'Menu added to favorites', favoriteMenus: userPref.favoriteMenus });
+    res.json({ message: 'Menu added to favorites', favoriteMenus });
   } catch (error) {
     console.error('Add favorite menu error:', error);
     res.status(500).json({ error: 'Failed to add favorite menu' });
@@ -480,19 +505,19 @@ router.delete('/favorite-menus/:menuId', authenticateToken, async (req, res) => 
     const userId = req.user.userId;
     const { menuId } = req.params;
 
-    const preferences = await readJSON(PREFERENCES_FILE) || [];
-    const userPref = preferences.find(p => p.userId === userId);
-
-    if (!userPref) {
+    const preferences = await preferencesService.getUserPreferences(userId);
+    if (!preferences) {
       return res.status(404).json({ error: 'Preferences not found' });
     }
 
-    userPref.favoriteMenus = userPref.favoriteMenus.filter(id => id !== menuId);
-    userPref.updatedAt = new Date().toISOString();
+    const favoriteMenus = (preferences.favorite_menus || []).filter(id => id !== menuId);
 
-    await writeJSON(PREFERENCES_FILE, preferences);
+    await preferencesService.createUserPreferences({
+      userId,
+      favoriteMenus
+    });
 
-    res.json({ message: 'Menu removed from favorites', favoriteMenus: userPref.favoriteMenus });
+    res.json({ message: 'Menu removed from favorites', favoriteMenus });
   } catch (error) {
     console.error('Remove favorite menu error:', error);
     res.status(500).json({ error: 'Failed to remove favorite menu' });
@@ -507,38 +532,36 @@ router.put('/profile', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const { name, email, department, avatarUrl } = req.body;
 
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === userId);
+    if (email && await userService.emailExists(email, userId)) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
 
-    if (userIndex === -1) {
+    const updates = {};
+    if (name) {
+      const nameParts = name.trim().split(' ');
+      updates.firstName = nameParts[0];
+      updates.lastName = nameParts.slice(1).join(' ') || '';
+    }
+    if (email) updates.email = email;
+    if (department) updates.department = department;
+    if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
+
+    const updatedUser = await userService.updateUser(userId, updates);
+
+    if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }
-
-    // Check if email is already used by another user
-    if (email && email !== users[userIndex].email) {
-      const emailExists = users.some(u => u.email === email && u.id !== userId);
-      if (emailExists) {
-        return res.status(400).json({ error: 'Email already in use' });
-      }
-    }
-
-    if (name) users[userIndex].name = name;
-    if (email) users[userIndex].email = email;
-    if (department) users[userIndex].department = department;
-    if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
-
-    await writeJSON(USERS_FILE, users);
 
     res.json({
       message: 'Profile updated successfully',
       user: {
-        id: users[userIndex].id,
-        username: users[userIndex].username,
-        name: users[userIndex].name,
-        email: users[userIndex].email,
-        role: users[userIndex].role,
-        department: users[userIndex].department,
-        avatarUrl: users[userIndex].avatarUrl
+        id: updatedUser.id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        department: updatedUser.department,
+        avatarUrl: updatedUser.avatar_url
       }
     });
   } catch (error) {
@@ -563,24 +586,20 @@ router.post('/change-password', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === userId);
-
-    if (userIndex === -1) {
+    const user = await userService.getUserById(userId);
+    if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Verify current password
-    const isValid = await bcrypt.compare(currentPassword, users[userIndex].password);
+    const isValid = await bcrypt.compare(currentPassword, user.password);
     if (!isValid) {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
-    // Hash new password
+    // Hash and update new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    users[userIndex].password = hashedPassword;
-
-    await writeJSON(USERS_FILE, users);
+    await userService.updateUser(userId, { password: hashedPassword });
 
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
@@ -601,16 +620,7 @@ router.post('/mfa-toggle', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Enabled flag required' });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === userId);
-
-    if (userIndex === -1) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    users[userIndex].mfaEnabled = enabled;
-
-    await writeJSON(USERS_FILE, users);
+    await userService.updateUser(userId, { mfaEnabled: enabled });
 
     res.json({
       message: enabled ? 'MFA enabled' : 'MFA disabled',
@@ -630,40 +640,40 @@ router.post('/:id/reset-password', authenticateToken, requirePermission('PROG-US
     const { id } = req.params;
     const { newPassword } = req.body;
 
-    // Prevent resetting own password through this endpoint
+    console.log('[Reset Password] Request:', {
+      requestUserId: req.user?.userId,
+      targetUserId: id,
+      requestUserType: typeof req.user?.userId,
+      targetUserType: typeof id,
+      hasNewPassword: !!newPassword,
+      newPasswordLength: newPassword?.length
+    });
+
     if (req.user.userId === id) {
+      console.log('[Reset Password] Rejected: Cannot reset own password');
       return res.status(400).json({ error: 'Cannot reset your own password. Use change-password endpoint instead.' });
     }
 
-    // Validate new password
-    if (!newPassword) {
-      return res.status(400).json({ error: 'New password is required' });
-    }
-
-    if (newPassword.length < 8) {
+    if (!newPassword || newPassword.length < 8) {
+      console.log('[Reset Password] Rejected: Password too short or missing');
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const users = await readJSON(USERS_FILE);
-    const userIndex = users.findIndex(u => u.id === id);
-
-    if (userIndex === -1) {
+    const user = await userService.getUserById(id);
+    if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    users[userIndex].password = hashedPassword;
-
-    await writeJSON(USERS_FILE, users);
+    await userService.updateUser(id, { password: hashedPassword });
 
     res.json({
       message: 'Password reset successfully',
       user: {
-        id: users[userIndex].id,
-        username: users[userIndex].username,
-        name: users[userIndex].name,
-        email: users[userIndex].email
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email
       }
     });
   } catch (error) {

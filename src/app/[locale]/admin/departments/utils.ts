@@ -60,12 +60,6 @@ export const createFilterFields = (
         label: currentLocale === 'ko' ? opt.labelKo : opt.labelEn
       }))
     ]
-  },
-  {
-    name: 'location',
-    label: t('location'),
-    type: 'text',
-    placeholder: t('enterLocation') || 'Enter location...'
   }
 ];
 
