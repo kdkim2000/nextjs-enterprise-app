@@ -4,21 +4,35 @@ const { authenticateToken } = require('../middleware/auth');
 const roleService = require('../services/roleService');
 const userService = require('../services/userService');
 
-// Helper function to enrich role with user names
+// Helper function to transform snake_case to camelCase
+function toCamelCase(obj) {
+  if (!obj) return obj;
+
+  const transformed = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    transformed[camelKey] = value;
+  }
+  return transformed;
+}
+
+// Helper function to enrich role with user names and transform to camelCase
 async function enrichRoleWithUserNames(role, users) {
-  const enrichedRole = { ...role };
+  // First transform snake_case to camelCase
+  const camelRole = toCamelCase(role);
 
-  if (role.manager) {
-    const managerUser = users.find(u => u.id === role.manager);
-    enrichedRole.manager_name = managerUser ? managerUser.name : null;
+  // Then enrich with user names
+  if (camelRole.manager) {
+    const managerUser = users.find(u => u.id === camelRole.manager);
+    camelRole.managerName = managerUser ? (managerUser.name_ko || managerUser.name_en || managerUser.loginid) : null;
   }
 
-  if (role.representative) {
-    const repUser = users.find(u => u.id === role.representative);
-    enrichedRole.representative_name = repUser ? repUser.name : null;
+  if (camelRole.representative) {
+    const repUser = users.find(u => u.id === camelRole.representative);
+    camelRole.representativeName = repUser ? (repUser.name_ko || repUser.name_en || repUser.loginid) : null;
   }
 
-  return enrichedRole;
+  return camelRole;
 }
 
 // GET /api/role - Get all roles or filter by query params
@@ -81,7 +95,7 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
-    const { name, displayName, description, roleType, manager, representative, isActive } = req.body;
+    const { name, displayName, description, roleType, manager, representative, isActive, isSystem } = req.body;
 
     // Validate required fields
     if (!name || !displayName) {
@@ -119,14 +133,17 @@ router.post('/', authenticateToken, async (req, res) => {
       role_type: roleType || 'general',
       manager: manager || null,
       representative: representative || null,
-      is_system: false,
+      is_system: isSystem !== undefined ? isSystem : false,
       is_active: isActive !== undefined ? isActive : true,
       created_by: req.user.username
     };
 
     const newRole = await roleService.createRole(roleData);
 
-    res.status(201).json({ role: newRole });
+    // Transform response to camelCase
+    const camelRole = toCamelCase(newRole);
+
+    res.status(201).json({ role: camelRole });
   } catch (error) {
     console.error('Create role error:', error);
     res.status(500).json({ error: error.message || 'Failed to create role' });
@@ -141,7 +158,7 @@ router.put('/', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
-    const { id, name, displayName, description, roleType, manager, representative, isActive } = req.body;
+    const { id, name, displayName, description, roleType, manager, representative, isActive, isSystem } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: 'Role ID is required' });
@@ -183,11 +200,15 @@ router.put('/', authenticateToken, async (req, res) => {
     if (manager !== undefined) updates.manager = manager;
     if (representative !== undefined) updates.representative = representative;
     if (isActive !== undefined) updates.is_active = isActive;
+    if (isSystem !== undefined) updates.is_system = isSystem;
     updates.updated_by = req.user.username;
 
     const updatedRole = await roleService.updateRole(id, updates);
 
-    res.json({ role: updatedRole });
+    // Transform response to camelCase
+    const camelRole = toCamelCase(updatedRole);
+
+    res.json({ role: camelRole });
   } catch (error) {
     console.error('Update role error:', error);
     res.status(500).json({ error: error.message || 'Failed to update role' });
