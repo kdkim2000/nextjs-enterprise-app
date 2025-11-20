@@ -25,11 +25,13 @@ export interface UserFormData {
   phone_number?: string;
   mobile_number?: string;
   user_category?: string;
+  position?: string;
   role: string;
   department: string;
   status: string;
   password?: string;
   avatarUrl?: string;
+  avatar_image?: string; // Base64 encoded image
   lastPasswordChanged?: string;
 }
 
@@ -69,9 +71,12 @@ export default function UserFormFields({
       {/* Avatar Upload */}
       <AvatarUpload
         avatarUrl={user.avatarUrl}
+        avatarImage={user.avatar_image}
         name={user.name_ko || user.name || ''}
         onAvatarChange={(avatarUrl) => handleChange('avatarUrl', avatarUrl)}
+        onAvatarImageChange={(base64Image) => handleChange('avatar_image', base64Image)}
         onError={onError}
+        useBase64={true}
       />
 
       <Divider sx={{ my: 2 }} />
@@ -186,6 +191,17 @@ export default function UserFormFields({
             onChange={(value) => handleChange('user_category', value)}
             label="User Category (사용자구분)"
             required
+          />
+        </Grid>
+
+        {/* Position */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Position (직급)"
+            fullWidth
+            value={user.position || ''}
+            onChange={(e) => handleChange('position', e.target.value)}
+            helperText="Job position/title"
           />
         </Grid>
 

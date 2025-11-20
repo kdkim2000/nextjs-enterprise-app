@@ -433,36 +433,37 @@ async function updateRecentMenus(userId, menuId) {
 
     if (!userPrefs) {
       // Create default preferences if not exist
-      const defaultPrefs = {
-        favoriteMenus: [menuId],
+      await preferencesService.createUserPreferences({
+        userId,
+        favoriteMenus: [],
         recentMenus: [menuId],
         language: 'en',
         theme: 'light'
-      };
-      await preferencesService.createUserPreferences({
-        userId,
-        preferences: defaultPrefs
       });
       return;
     }
 
-    // Get current preferences
-    const currentPrefs = userPrefs.preferences || {};
-    const recentMenus = currentPrefs.recentMenus || [];
+    // Get current recent menus from database
+    // recent_menus is stored as JSONB in database
+    let recentMenus = [];
+    try {
+      recentMenus = userPrefs.recent_menus ?
+        (typeof userPrefs.recent_menus === 'string' ?
+          JSON.parse(userPrefs.recent_menus) :
+          userPrefs.recent_menus) : [];
+    } catch (e) {
+      console.error('Error parsing recent_menus:', e);
+      recentMenus = [];
+    }
 
     // Add to recent menus (keep last 10)
     const updatedRecentMenus = recentMenus.filter(id => id !== menuId);
     updatedRecentMenus.unshift(menuId);
     const finalRecentMenus = updatedRecentMenus.slice(0, 10);
 
-    // Update preferences
-    const updatedPrefs = {
-      ...currentPrefs,
-      recentMenus: finalRecentMenus
-    };
-
+    // Update preferences with camelCase field name
     await preferencesService.updateUserPreferences(userId, {
-      preferences: updatedPrefs
+      recentMenus: finalRecentMenus
     });
   } catch (error) {
     console.error('Error updating recent menus:', error);
