@@ -108,14 +108,32 @@ async function getAllUserRoleMappings(options = {}) {
 }
 
 async function createUserRoleMapping(data) {
-  const { id, userId, roleId, assignedBy } = data;
+  const { userId, roleId, assignedBy, expiresAt, isActive } = data;
+
+  // Generate unique ID for the mapping
+  const mappingId = `URM-${userId}-${roleId}-${Date.now()}`;
+
   const query = `
-    INSERT INTO user_role_mappings (id, user_id, role_id, assigned_by, assigned_at)
-    VALUES ($1, $2, $3, $4, NOW())
-    ON CONFLICT (user_id, role_id) DO NOTHING
+    INSERT INTO user_role_mappings (
+      id, user_id, role_id, assigned_by, assigned_at, expires_at, is_active, updated_at
+    )
+    VALUES ($1, $2, $3, $4, NOW(), $5, $6, NOW())
+    ON CONFLICT (user_id, role_id) DO UPDATE
+    SET
+      is_active = EXCLUDED.is_active,
+      expires_at = EXCLUDED.expires_at,
+      updated_at = NOW(),
+      updated_by = EXCLUDED.assigned_by
     RETURNING *
   `;
-  const result = await db.query(query, [id, userId, roleId, assignedBy]);
+  const result = await db.query(query, [
+    mappingId,
+    userId,
+    roleId,
+    assignedBy,
+    expiresAt || null,
+    isActive !== undefined ? isActive : true
+  ]);
   return result.rows[0];
 }
 
