@@ -15,15 +15,21 @@ async function getUserRoleMappings(userId) {
   return result.rows;
 }
 
+async function getUserRoleMappingById(id) {
+  const query = 'SELECT * FROM user_role_mappings WHERE id = $1';
+  const result = await db.query(query, [id]);
+  return result.rows[0] || null;
+}
+
 // Alias for backward compatibility
 async function getUserRoleMappingsByUserId(userId, includeDetails = false) {
   if (includeDetails) {
     const query = `
       SELECT
         urm.*,
-        u.username,
+        u.loginid as username,
         u.email,
-        u.name as user_name,
+        COALESCE(u.name_ko, u.name_en, u.loginid) as user_name,
         u.department as user_department,
         r.name as role_name,
         r.display_name as role_display_name,
@@ -45,9 +51,9 @@ async function getUserRoleMappingsByRoleId(roleId, includeDetails = false) {
     const query = `
       SELECT
         urm.*,
-        u.username,
+        u.loginid as username,
         u.email,
-        u.name as user_name,
+        COALESCE(u.name_ko, u.name_en, u.loginid) as user_name,
         u.department as user_department,
         r.name as role_name,
         r.display_name as role_display_name,
@@ -111,6 +117,30 @@ async function createUserRoleMapping(data) {
   `;
   const result = await db.query(query, [id, userId, roleId, assignedBy]);
   return result.rows[0];
+}
+
+async function updateUserRoleMapping(id, updates) {
+  const allowedFields = ['expires_at', 'is_active', 'updated_by'];
+  const setClause = [];
+  const params = [];
+  let paramIndex = 1;
+
+  for (const [key, value] of Object.entries(updates)) {
+    const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    if (allowedFields.includes(dbField)) {
+      setClause.push(`${dbField} = $${paramIndex}`);
+      params.push(value);
+      paramIndex++;
+    }
+  }
+
+  if (setClause.length === 0) throw new Error('No valid fields to update');
+  setClause.push(`updated_at = NOW()`);
+  params.push(id);
+
+  const query = `UPDATE user_role_mappings SET ${setClause.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+  const result = await db.query(query, params);
+  return result.rows[0] || null;
 }
 
 async function deleteUserRoleMapping(id) {
@@ -257,10 +287,12 @@ async function deleteRoleProgramMappingByRoleAndProgram(roleId, programId) {
 module.exports = {
   // User-Role Mappings
   getUserRoleMappings,
+  getUserRoleMappingById,
   getUserRoleMappingsByUserId,
   getUserRoleMappingsByRoleId,
   getAllUserRoleMappings,
   createUserRoleMapping,
+  updateUserRoleMapping,
   deleteUserRoleMapping,
   deleteUserRoleMappingByUserAndRole,
 
