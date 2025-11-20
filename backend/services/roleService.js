@@ -134,6 +134,7 @@ async function updateRole(roleId, updates) {
     'role_type',
     'manager',
     'representative',
+    'is_system',
     'is_active',
     'updated_by'
   ];
