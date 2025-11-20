@@ -13,9 +13,12 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  Stack
+  Stack,
+  OutlinedInput,
+  Checkbox,
+  ListItemText
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { api } from '@/lib/axios';
 
 interface Role {
@@ -39,16 +42,18 @@ interface UserRoleAssignmentProps {
   userId?: string;
   onRolesChange?: (roleIds: string[]) => void;
   disabled?: boolean;
+  mode?: 'realtime' | 'batch'; // realtime: 실시간 저장, batch: 일괄 저장
 }
 
 export default function UserRoleAssignment({
   userId,
   onRolesChange,
-  disabled = false
+  disabled = false,
+  mode = 'realtime'
 }: UserRoleAssignmentProps) {
   const [allRoles, setAllRoles] = useState<Role[]>([]);
   const [userRoles, setUserRoles] = useState<UserRoleMapping[]>([]);
-  const [selectedRoleId, setSelectedRoleId] = useState('');
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]); // Multiple selection
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -101,12 +106,16 @@ export default function UserRoleAssignment({
     }
   }, [userRoles, onRolesChange]);
 
-  const handleAddRole = async () => {
-    if (!selectedRoleId || !userId) return;
+  const handleAddRoles = async () => {
+    if (selectedRoleIds.length === 0 || !userId) return;
 
-    // Check if role already assigned
-    if (userRoles.some(ur => ur.roleId === selectedRoleId)) {
-      setError('This role is already assigned');
+    // Filter out already assigned roles
+    const newRoleIds = selectedRoleIds.filter(
+      roleId => !userRoles.some(ur => ur.roleId === roleId)
+    );
+
+    if (newRoleIds.length === 0) {
+      setError('All selected roles are already assigned');
       setTimeout(() => setError(null), 3000);
       return;
     }
@@ -115,11 +124,16 @@ export default function UserRoleAssignment({
       setLoading(true);
       setError(null);
 
-      await api.post('/user-role-mapping', {
-        userId,
-        roleId: selectedRoleId,
-        isActive: true
-      });
+      // Add multiple roles
+      await Promise.all(
+        newRoleIds.map(roleId =>
+          api.post('/user-role-mapping', {
+            userId,
+            roleId,
+            isActive: true
+          })
+        )
+      );
 
       // Refresh user roles
       const data = await api.get<{ mappings: UserRoleMapping[] }>('/user-role-mapping', {
@@ -128,11 +142,11 @@ export default function UserRoleAssignment({
       const activeMappings = (data.mappings || []).filter(m => m.isActive);
       setUserRoles(activeMappings);
 
-      setSelectedRoleId('');
-      setSuccessMessage('Role assigned successfully');
+      setSelectedRoleIds([]);
+      setSuccessMessage(`${newRoleIds.length} role(s) assigned successfully`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to assign role');
+      setError(err.response?.data?.error || 'Failed to assign roles');
       setTimeout(() => setError(null), 3000);
     } finally {
       setLoading(false);
@@ -181,35 +195,46 @@ export default function UserRoleAssignment({
 
   return (
     <Box>
-      <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-        Role Assignment
-      </Typography>
-
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
       {successMessage && (
-        <Alert severity="success" sx={{ mb: 2 }}>
+        <Alert
+          severity="success"
+          sx={{ mb: 2 }}
+          onClose={() => setSuccessMessage(null)}
+          icon={<CheckCircleIcon />}
+        >
           {successMessage}
         </Alert>
       )}
 
       {/* Current Roles */}
-      <Paper sx={{ p: 2, mb: 2, bgcolor: 'background.default' }}>
-        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
-          Current Roles:
-        </Typography>
+      <Paper sx={{ p: 2, mb: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+          <Typography variant="subtitle2" fontWeight={600}>
+            Assigned Roles
+          </Typography>
+          {userRoles.length > 0 && (
+            <Chip
+              label={`${userRoles.length} role${userRoles.length > 1 ? 's' : ''}`}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          )}
+        </Box>
 
         {loading && userRoles.length === 0 ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
             <CircularProgress size={24} />
           </Box>
         ) : userRoles.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
-            No roles assigned yet
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+            No roles assigned yet. Add roles using the selector below.
           </Typography>
         ) : (
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -219,7 +244,6 @@ export default function UserRoleAssignment({
                 label={ur.roleDisplayName || ur.roleName || ur.roleId}
                 onDelete={disabled ? undefined : () => handleRemoveRole(ur.id, ur.roleDisplayName || ur.roleName || '')}
                 color="primary"
-                variant="outlined"
                 disabled={loading}
               />
             ))}
@@ -227,23 +251,54 @@ export default function UserRoleAssignment({
         )}
       </Paper>
 
-      {/* Add New Role */}
+      {/* Add New Roles - MultiSelect */}
       {!disabled && availableRoles.length > 0 && (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        <Paper sx={{ p: 2, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
+            Add New Roles
+          </Typography>
+
           <FormControl fullWidth size="small">
-            <InputLabel>Add Role</InputLabel>
+            <InputLabel id="add-roles-label">Select roles to add (multiple selection)</InputLabel>
             <Select
-              value={selectedRoleId}
-              label="Add Role"
-              onChange={(e) => setSelectedRoleId(e.target.value)}
+              labelId="add-roles-label"
+              multiple
+              value={selectedRoleIds}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedRoleIds(typeof value === 'string' ? value.split(',') : value);
+              }}
+              input={<OutlinedInput label="Select roles to add (multiple selection)" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                      No roles selected
+                    </Typography>
+                  ) : (
+                    selected.map((roleId) => {
+                      const role = availableRoles.find(r => r.id === roleId);
+                      return (
+                        <Chip
+                          key={roleId}
+                          label={role?.displayName || roleId}
+                          size="small"
+                          color="secondary"
+                        />
+                      );
+                    })
+                  )}
+                </Box>
+              )}
               disabled={loading}
             >
-              <MenuItem value="">
-                <em>Select a role...</em>
-              </MenuItem>
               {availableRoles.map((role) => (
                 <MenuItem key={role.id} value={role.id}>
-                  {role.displayName} ({role.name})
+                  <Checkbox checked={selectedRoleIds.indexOf(role.id) > -1} />
+                  <ListItemText
+                    primary={role.displayName}
+                    secondary={role.name}
+                  />
                 </MenuItem>
               ))}
             </Select>
@@ -252,13 +307,16 @@ export default function UserRoleAssignment({
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={handleAddRole}
-            disabled={!selectedRoleId || loading}
-            sx={{ minWidth: 100 }}
+            onClick={handleAddRoles}
+            disabled={selectedRoleIds.length === 0 || loading}
+            sx={{ mt: 2, minWidth: 120 }}
+            fullWidth
           >
-            Add
+            {selectedRoleIds.length === 0
+              ? 'Select roles to add'
+              : `Add ${selectedRoleIds.length} Role${selectedRoleIds.length > 1 ? 's' : ''}`}
           </Button>
-        </Box>
+        </Paper>
       )}
 
       {!disabled && availableRoles.length === 0 && userRoles.length > 0 && (
