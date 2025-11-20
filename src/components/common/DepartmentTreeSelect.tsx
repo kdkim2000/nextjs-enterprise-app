@@ -206,15 +206,13 @@ export default function DepartmentTreeSelect({
         key={node.id}
         itemId={node.id}
         label={
-          <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="body2">
-                {getLocalizedValue(node.name, locale)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                {node.code}
-              </Typography>
-            </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 0.5, gap: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', minWidth: '80px', flexShrink: 0 }}>
+              {node.code}
+            </Typography>
+            <Typography variant="body2" sx={{ flex: 1 }}>
+              {getLocalizedValue(node.name, locale)}
+            </Typography>
           </Box>
         }
         sx={{
