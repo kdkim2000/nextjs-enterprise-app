@@ -13,6 +13,15 @@ const db = require('../config/database');
  * @param {number} options.limit - Number of records to return
  * @param {number} options.offset - Number of records to skip
  * @param {string} options.search - Search term for loginid, email, name_ko, name_en, employee_number
+ * @param {string} options.loginid - Filter by loginid
+ * @param {string} options.name_ko - Filter by Korean name
+ * @param {string} options.name_en - Filter by English name
+ * @param {string} options.email - Filter by email
+ * @param {string} options.employee_number - Filter by employee number
+ * @param {string} options.phone_number - Filter by phone number
+ * @param {string} options.mobile_number - Filter by mobile number
+ * @param {string} options.user_category - Filter by user category
+ * @param {string} options.position - Filter by position
  * @param {string} options.status - Filter by status (active, inactive, locked)
  * @param {string} options.department - Filter by department
  * @param {string} options.role - Filter by role
@@ -23,6 +32,15 @@ async function getAllUsers(options = {}) {
     limit,
     offset,
     search,
+    loginid,
+    name_ko,
+    name_en,
+    email,
+    employee_number,
+    phone_number,
+    mobile_number,
+    user_category,
+    position,
     status,
     department,
     role,
@@ -32,10 +50,71 @@ async function getAllUsers(options = {}) {
   const params = [];
   let paramIndex = 1;
 
-  // Search filter - updated to search new fields
+  // General search filter - searches across multiple fields
   if (search) {
     query += ` AND (loginid ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR employee_number ILIKE $${paramIndex})`;
     params.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  // Specific field filters
+  if (loginid) {
+    query += ` AND loginid ILIKE $${paramIndex}`;
+    params.push(`%${loginid}%`);
+    paramIndex++;
+  }
+
+  if (name_ko) {
+    query += ` AND name_ko ILIKE $${paramIndex}`;
+    params.push(`%${name_ko}%`);
+    paramIndex++;
+  }
+
+  if (name_en) {
+    query += ` AND name_en ILIKE $${paramIndex}`;
+    params.push(`%${name_en}%`);
+    paramIndex++;
+  }
+
+  if (email) {
+    query += ` AND email ILIKE $${paramIndex}`;
+    params.push(`%${email}%`);
+    paramIndex++;
+  }
+
+  if (employee_number) {
+    query += ` AND employee_number ILIKE $${paramIndex}`;
+    params.push(`%${employee_number}%`);
+    paramIndex++;
+  }
+
+  if (phone_number) {
+    query += ` AND phone_number ILIKE $${paramIndex}`;
+    params.push(`%${phone_number}%`);
+    paramIndex++;
+  }
+
+  if (mobile_number) {
+    query += ` AND mobile_number ILIKE $${paramIndex}`;
+    params.push(`%${mobile_number}%`);
+    paramIndex++;
+  }
+
+  if (user_category) {
+    query += ` AND user_category = $${paramIndex}`;
+    params.push(user_category);
+    paramIndex++;
+  }
+
+  if (position) {
+    query += ` AND position ILIKE $${paramIndex}`;
+    params.push(`%${position}%`);
+    paramIndex++;
+  }
+
+  if (role) {
+    query += ` AND role = $${paramIndex}`;
+    params.push(role);
     paramIndex++;
   }
 
@@ -79,15 +158,91 @@ async function getAllUsers(options = {}) {
  * @returns {Promise<number>} Total count
  */
 async function getUserCount(filters = {}) {
-  const { search, status, department } = filters;
+  const {
+    search,
+    loginid,
+    name_ko,
+    name_en,
+    email,
+    employee_number,
+    phone_number,
+    mobile_number,
+    user_category,
+    position,
+    role,
+    status,
+    department
+  } = filters;
 
   let query = 'SELECT COUNT(*) FROM users WHERE 1=1';
   const params = [];
   let paramIndex = 1;
 
+  // General search filter
   if (search) {
     query += ` AND (loginid ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR employee_number ILIKE $${paramIndex})`;
     params.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  // Specific field filters
+  if (loginid) {
+    query += ` AND loginid ILIKE $${paramIndex}`;
+    params.push(`%${loginid}%`);
+    paramIndex++;
+  }
+
+  if (name_ko) {
+    query += ` AND name_ko ILIKE $${paramIndex}`;
+    params.push(`%${name_ko}%`);
+    paramIndex++;
+  }
+
+  if (name_en) {
+    query += ` AND name_en ILIKE $${paramIndex}`;
+    params.push(`%${name_en}%`);
+    paramIndex++;
+  }
+
+  if (email) {
+    query += ` AND email ILIKE $${paramIndex}`;
+    params.push(`%${email}%`);
+    paramIndex++;
+  }
+
+  if (employee_number) {
+    query += ` AND employee_number ILIKE $${paramIndex}`;
+    params.push(`%${employee_number}%`);
+    paramIndex++;
+  }
+
+  if (phone_number) {
+    query += ` AND phone_number ILIKE $${paramIndex}`;
+    params.push(`%${phone_number}%`);
+    paramIndex++;
+  }
+
+  if (mobile_number) {
+    query += ` AND mobile_number ILIKE $${paramIndex}`;
+    params.push(`%${mobile_number}%`);
+    paramIndex++;
+  }
+
+  if (user_category) {
+    query += ` AND user_category = $${paramIndex}`;
+    params.push(user_category);
+    paramIndex++;
+  }
+
+  if (position) {
+    query += ` AND position ILIKE $${paramIndex}`;
+    params.push(`%${position}%`);
+    paramIndex++;
+  }
+
+  if (role) {
+    query += ` AND role = $${paramIndex}`;
+    params.push(role);
     paramIndex++;
   }
 
@@ -172,6 +327,7 @@ async function createUser(userData) {
     phone_number,
     mobile_number,
     user_category = 'regular',
+    position,
     department,
     status = 'active',
     mfaEnabled = false,
@@ -195,10 +351,10 @@ async function createUser(userData) {
     INSERT INTO users (
       id, loginid, email, password, name_ko, name_en,
       employee_number, system_key, phone_number, mobile_number,
-      user_category, department, status, mfa_enabled, avatar_url,
+      user_category, position, department, status, mfa_enabled, avatar_url, avatar_image,
       last_password_changed, created_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
     RETURNING *
   `;
 
@@ -214,10 +370,12 @@ async function createUser(userData) {
     finalPhoneNumber,
     mobile_number,
     user_category,
+    position,
     department,
     status,
     mfaEnabled,
     profileImage,
+    userData.avatar_image || null, // Base64 encoded image
   ];
 
   const result = await db.query(query, params);
@@ -244,12 +402,14 @@ async function updateUser(userId, updates) {
     'phone_number',
     'mobile_number',
     'user_category',
+    'position',
     'department',
     'status',
     'role',
     'mfa_enabled',
     'sso_enabled',
     'avatar_url',
+    'avatar_image', // Base64 encoded image
     'last_login',
     'last_password_changed',
   ];

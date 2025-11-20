@@ -115,15 +115,24 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       const params = new URLSearchParams();
 
       if (useQuickSearch && quickSearch) {
-        // Quick search: search in username, name, and email
-        params.append('username', quickSearch);
-        params.append('name', quickSearch);
+        // Quick search: search across most relevant fields
+        // Using the general 'search' parameter that searches multiple fields at once
+        params.append('loginid', quickSearch);
+        params.append('name_ko', quickSearch);
+        params.append('name_en', quickSearch);
         params.append('email', quickSearch);
+        params.append('employee_number', quickSearch);
       } else {
         // Advanced search: use specific criteria
-        if (searchCriteria.username) params.append('username', searchCriteria.username);
-        if (searchCriteria.name) params.append('name', searchCriteria.name);
+        if (searchCriteria.loginid) params.append('loginid', searchCriteria.loginid);
+        if (searchCriteria.name_ko) params.append('name_ko', searchCriteria.name_ko);
+        if (searchCriteria.name_en) params.append('name_en', searchCriteria.name_en);
         if (searchCriteria.email) params.append('email', searchCriteria.email);
+        if (searchCriteria.employee_number) params.append('employee_number', searchCriteria.employee_number);
+        if (searchCriteria.phone_number) params.append('phone_number', searchCriteria.phone_number);
+        if (searchCriteria.mobile_number) params.append('mobile_number', searchCriteria.mobile_number);
+        if (searchCriteria.user_category) params.append('user_category', searchCriteria.user_category);
+        if (searchCriteria.position) params.append('position', searchCriteria.position);
         if (searchCriteria.role) params.append('role', searchCriteria.role);
         // Handle department as array
         if (Array.isArray(searchCriteria.department) && searchCriteria.department.length > 0) {
@@ -312,9 +321,17 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
   const handleAdvancedSearchClear = useCallback(() => {
     setSearchCriteria({
+      loginid: '',
       username: '',
+      name_ko: '',
+      name_en: '',
       name: '',
       email: '',
+      employee_number: '',
+      phone_number: '',
+      mobile_number: '',
+      user_category: '',
+      position: '',
       role: '',
       department: [],
       status: ''
