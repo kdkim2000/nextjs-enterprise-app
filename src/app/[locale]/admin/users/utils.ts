@@ -79,14 +79,9 @@ export const createFilterFields = (t: any, locale: string, allDepartments: any[]
   {
     name: 'department',
     label: getLocalizedValue({ en: 'Department', ko: '부서', zh: '部门', vi: 'Phòng ban' }, locale),
-    type: 'multi-select',
-    options: allDepartments.map(dept => ({
-      value: dept.id,
-      label: typeof dept.name === 'object' && dept.name !== null
-        ? getLocalizedValue(dept.name, locale)
-        : dept.name_ko || dept.name_en || dept.name || dept.code
-    })),
-    allLabel: getLocalizedValue({ en: 'All Departments', ko: '전체 부서', zh: '所有部门', vi: 'Tất cả phòng ban' }, locale)
+    type: 'department-select',
+    departments: allDepartments,
+    placeholder: getLocalizedValue({ en: 'Select department...', ko: '부서 선택...', zh: '选择部门...', vi: 'Chọn phòng ban...' }, locale)
   },
   {
     name: 'status',

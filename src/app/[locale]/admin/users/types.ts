@@ -11,6 +11,7 @@ export interface User {
   phone_number?: string;
   mobile_number?: string;
   user_category?: 'regular' | 'contractor' | 'temporary' | 'external' | 'admin';
+  position?: string;
   role: string;
   department: string;
   status: string;
@@ -20,6 +21,7 @@ export interface User {
   lastLogin?: string | null;
   lastPasswordChanged?: string | null;
   avatarUrl?: string;
+  avatar_image?: string; // Base64 encoded image from DB
   password?: string;
 }
 
@@ -31,8 +33,11 @@ export interface SearchCriteria {
   name?: string; // backward compatibility
   email: string;
   employee_number: string;
+  phone_number?: string;
+  mobile_number?: string;
+  position: string;
   role: string;
-  department: string[];
+  department: string; // Single department selection
   status: string;
   user_category: string;
   [key: string]: string | string[];

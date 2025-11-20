@@ -13,7 +13,7 @@ import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields'
 import ResetPasswordDialog from '@/components/admin/ResetPasswordDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useUserManagement } from './hooks/useUserManagement';
-import { createColumns, DEPARTMENTS } from './constants';
+import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { User } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
@@ -135,6 +135,7 @@ export default function UserManagementPage() {
           values={searchCriteria}
           onChange={handleSearchChange}
           onEnter={handleAdvancedFilterApply}
+          locale={currentLocale}
         />
       }
       onFilterApply={handleAdvancedFilterApply}
