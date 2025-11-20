@@ -80,14 +80,8 @@ export default function UserManagementPage() {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
-    setDialogOpen,
-    fetchDepartments
+    setDialogOpen
   } = useUserManagement();
-
-  // Load departments on mount
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
 
   // Memoized computed values
   const columns = useMemo(() => {
@@ -198,6 +192,7 @@ export default function UserManagementPage() {
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <UserFormFields
           user={editingUser as UserFormData}
