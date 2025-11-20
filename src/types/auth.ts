@@ -9,6 +9,12 @@ export interface User {
   role: 'admin' | 'manager' | 'user';
   department: string;
   avatarUrl?: string;
+  avatar_image?: string;
+  employee_number?: string;
+  phone_number?: string;
+  mobile_number?: string;
+  user_category?: 'regular' | 'contractor' | 'temporary' | 'external' | 'admin';
+  position?: string;
 }
 
 export interface LoginRequest {

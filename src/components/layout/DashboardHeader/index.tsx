@@ -19,7 +19,6 @@ import {
   Logout,
   Settings,
   Person,
-  Language,
   Check,
   Policy
 } from '@mui/icons-material';
@@ -92,13 +91,35 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   // Get user initials for avatar
   const getUserInitials = () => {
-    if (!user?.name) return '?';
-    const names = user.name.split(' ');
-    if (names.length >= 2) {
-      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    // Try name_ko first, then name_en, then name
+    const displayName = user?.name_ko || user?.name_en || user?.name || '';
+    if (!displayName) return '?';
+
+    // Check if name contains Korean characters
+    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(displayName);
+
+    if (hasKorean) {
+      // For Korean names, take 1 character (usually the last name)
+      return displayName.substring(0, 1);
+    } else {
+      // For English/other names, take 2 characters
+      return displayName.substring(0, 2).toUpperCase();
     }
-    return user.name.substring(0, 2).toUpperCase();
   };
+
+  // Get avatar source with priority: avatar_image > avatar_url > initials
+  const getAvatarSrc = () => {
+    if (user?.avatar_image) {
+      return user.avatar_image;
+    }
+    if (user?.avatarUrl) {
+      return getAvatarUrl(user.avatarUrl);
+    }
+    return undefined;
+  };
+
+  const avatarSrc = getAvatarSrc();
+  const displayName = user?.name_ko || user?.name_en || user?.name || '';
 
   return (
     <AppBar position="static" elevation={1} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, flexShrink: 0 }}>
@@ -133,8 +154,8 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           }}
         >
           <Avatar
-            src={getAvatarUrl(user?.avatarUrl)}
-            alt={user?.name}
+            src={avatarSrc}
+            alt={displayName}
             sx={{
               width: 32,
               height: 32,
@@ -143,10 +164,10 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               fontWeight: 600
             }}
           >
-            {!user?.avatarUrl && getUserInitials()}
+            {!avatarSrc && getUserInitials()}
           </Avatar>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {user?.name}
+            {displayName}
           </Typography>
         </Box>
 
@@ -171,7 +192,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         >
           <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover' }}>
             <Typography variant="subtitle2" fontWeight={600}>
-              {user?.name}
+              {displayName}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {user?.email}
