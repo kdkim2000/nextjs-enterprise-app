@@ -64,9 +64,10 @@ export default function UserRoleAssignment({
       try {
         const data = await api.get<{ roles: Role[] }>('/role');
         const activeRoles = (data.roles || []).filter(r => r.isActive);
+        console.log('[UserRoleAssignment] Fetched roles:', activeRoles.length);
         setAllRoles(activeRoles);
       } catch (err) {
-        console.error('Failed to fetch roles:', err);
+        console.error('[UserRoleAssignment] Failed to fetch roles:', err);
         setError('Failed to load roles');
       }
     };
@@ -182,6 +183,12 @@ export default function UserRoleAssignment({
     role => !userRoles.some(ur => ur.roleId === role.id)
   );
 
+  // Debug logging
+  console.log('[UserRoleAssignment] allRoles:', allRoles.length);
+  console.log('[UserRoleAssignment] userRoles:', userRoles.length);
+  console.log('[UserRoleAssignment] availableRoles:', availableRoles.length);
+  console.log('[UserRoleAssignment] userId:', userId);
+
   // For new users (no userId yet)
   if (!userId) {
     return (
@@ -252,77 +259,96 @@ export default function UserRoleAssignment({
       </Paper>
 
       {/* Add New Roles - MultiSelect */}
-      {!disabled && availableRoles.length > 0 && (
+      {!disabled && (
         <Paper sx={{ p: 2, bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
-            Add New Roles
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="subtitle2" fontWeight={600}>
+              Add New Roles
+            </Typography>
+            {availableRoles.length > 0 && (
+              <Chip
+                label={`${availableRoles.length} available`}
+                size="small"
+                color="success"
+                variant="outlined"
+              />
+            )}
+          </Box>
 
-          <FormControl fullWidth size="small">
-            <InputLabel id="add-roles-label">Select roles to add (multiple selection)</InputLabel>
-            <Select
-              labelId="add-roles-label"
-              multiple
-              value={selectedRoleIds}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSelectedRoleIds(typeof value === 'string' ? value.split(',') : value);
-              }}
-              input={<OutlinedInput label="Select roles to add (multiple selection)" />}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                      No roles selected
-                    </Typography>
-                  ) : (
-                    selected.map((roleId) => {
-                      const role = availableRoles.find(r => r.id === roleId);
-                      return (
-                        <Chip
-                          key={roleId}
-                          label={role?.displayName || roleId}
-                          size="small"
-                          color="secondary"
-                        />
-                      );
-                    })
+          {availableRoles.length === 0 ? (
+            <Alert severity="info" icon={<CheckCircleIcon />}>
+              All available roles have been assigned to this user. ({allRoles.length} total roles)
+            </Alert>
+          ) : (
+            <>
+              <FormControl fullWidth size="small">
+                <InputLabel id="add-roles-label">Select roles to add (multiple selection)</InputLabel>
+                <Select
+                  labelId="add-roles-label"
+                  multiple
+                  value={selectedRoleIds}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSelectedRoleIds(typeof value === 'string' ? value.split(',') : value);
+                  }}
+                  input={<OutlinedInput label="Select roles to add (multiple selection)" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.length === 0 ? (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                          No roles selected
+                        </Typography>
+                      ) : (
+                        selected.map((roleId) => {
+                          const role = availableRoles.find(r => r.id === roleId);
+                          return (
+                            <Chip
+                              key={roleId}
+                              label={role?.displayName || roleId}
+                              size="small"
+                              color="secondary"
+                            />
+                          );
+                        })
+                      )}
+                    </Box>
                   )}
-                </Box>
-              )}
-              disabled={loading}
-            >
-              {availableRoles.map((role) => (
-                <MenuItem key={role.id} value={role.id}>
-                  <Checkbox checked={selectedRoleIds.indexOf(role.id) > -1} />
-                  <ListItemText
-                    primary={role.displayName}
-                    secondary={role.name}
-                  />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  disabled={loading}
+                >
+                  {availableRoles.map((role) => (
+                    <MenuItem key={role.id} value={role.id}>
+                      <Checkbox checked={selectedRoleIds.indexOf(role.id) > -1} />
+                      <ListItemText
+                        primary={role.displayName}
+                        secondary={role.name}
+                      />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddRoles}
-            disabled={selectedRoleIds.length === 0 || loading}
-            sx={{ mt: 2, minWidth: 120 }}
-            fullWidth
-          >
-            {selectedRoleIds.length === 0
-              ? 'Select roles to add'
-              : `Add ${selectedRoleIds.length} Role${selectedRoleIds.length > 1 ? 's' : ''}`}
-          </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddRoles}
+                disabled={selectedRoleIds.length === 0 || loading}
+                sx={{ mt: 2, minWidth: 120 }}
+                fullWidth
+              >
+                {loading ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={20} color="inherit" />
+                    Adding...
+                  </Box>
+                ) : selectedRoleIds.length === 0 ? (
+                  'Select roles to add'
+                ) : (
+                  `Add ${selectedRoleIds.length} Role${selectedRoleIds.length > 1 ? 's' : ''}`
+                )}
+              </Button>
+            </>
+          )}
         </Paper>
-      )}
-
-      {!disabled && availableRoles.length === 0 && userRoles.length > 0 && (
-        <Typography variant="caption" color="text.secondary">
-          All available roles have been assigned
-        </Typography>
       )}
     </Box>
   );
