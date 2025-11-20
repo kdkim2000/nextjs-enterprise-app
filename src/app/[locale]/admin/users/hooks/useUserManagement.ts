@@ -36,7 +36,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       employee_number: '',
       position: '',
       role: '',
-      department: [],
+      department: '', // Single department string
       status: '',
       user_category: ''
     },
@@ -134,9 +134,9 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
         if (searchCriteria.user_category) params.append('user_category', searchCriteria.user_category);
         if (searchCriteria.position) params.append('position', searchCriteria.position);
         if (searchCriteria.role) params.append('role', searchCriteria.role);
-        // Handle department as array
-        if (Array.isArray(searchCriteria.department) && searchCriteria.department.length > 0) {
-          searchCriteria.department.forEach(dept => params.append('department', dept));
+        // Handle department as single value
+        if (searchCriteria.department) {
+          params.append('department', searchCriteria.department);
         }
         if (searchCriteria.status) params.append('status', searchCriteria.status);
       }
@@ -333,7 +333,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       user_category: '',
       position: '',
       role: '',
-      department: [],
+      department: '',
       status: ''
     });
     sessionStorage.removeItem(storageKey);

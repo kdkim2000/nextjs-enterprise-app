@@ -6,11 +6,12 @@ import Grid from '@mui/material/Grid2';
 import UserSelector from '@/components/common/UserSelector';
 import DateRangePicker from '@/components/common/DateRangePicker';
 import MultiSelect from '@/components/common/MultiSelect';
+import DepartmentTreeSelect from '@/components/common/DepartmentTreeSelect';
 
 export interface FilterFieldConfig {
   name: string;
   label: string;
-  type?: 'text' | 'select' | 'multi-select' | 'number' | 'userSelector' | 'date-range' | 'datetime-local';
+  type?: 'text' | 'select' | 'multi-select' | 'number' | 'userSelector' | 'date-range' | 'datetime-local' | 'department-select';
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
   gridSize?: { xs?: number; sm?: number; md?: number };
@@ -35,6 +36,11 @@ export interface FilterFieldConfig {
    * Default: 'All'
    */
   allLabel?: string;
+  /**
+   * For department-select type: department list
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  departments?: any[];
 }
 
 interface SearchFilterFieldsProps {
@@ -43,6 +49,7 @@ interface SearchFilterFieldsProps {
   onChange: (name: string, value: string | string[]) => void;
   onEnter?: () => void;
   disabled?: boolean;
+  locale?: string;
 }
 
 /**
@@ -72,7 +79,8 @@ export default function SearchFilterFields({
   values,
   onChange,
   onEnter,
-  disabled = false
+  disabled = false,
+  locale = 'en'
 }: SearchFilterFieldsProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && onEnter) {
@@ -84,6 +92,22 @@ export default function SearchFilterFields({
     <Grid container spacing={2}>
       {fields.map((field) => {
         const gridSize = field.gridSize || { xs: 12, sm: 6, md: 4 };
+
+        if (field.type === 'department-select') {
+          return (
+            <Grid key={field.name} size={gridSize}>
+              <DepartmentTreeSelect
+                label={field.label}
+                value={(Array.isArray(values[field.name]) ? values[field.name][0] : values[field.name]) as string || ''}
+                onChange={(value) => onChange(field.name, value || '')}
+                departments={field.departments || []}
+                locale={locale}
+                disabled={disabled}
+                helperText={field.placeholder}
+              />
+            </Grid>
+          );
+        }
 
         if (field.type === 'select') {
           return (
