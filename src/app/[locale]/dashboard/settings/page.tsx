@@ -17,24 +17,28 @@ import {
   FormControl,
   InputLabel,
   Stack,
-  Avatar,
-  IconButton,
-  CircularProgress
+  CircularProgress,
+  Grid,
+  Autocomplete,
+  InputAdornment
 } from '@mui/material';
 import {
   Person,
   Security,
   Palette,
-  PhotoCamera,
-  Delete
+  Phone,
+  PhoneAndroid,
+  Badge,
+  Business,
+  Work
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useMessage } from '@/hooks/useMessage';
 import PageHeader from '@/components/common/PageHeader';
-import { getAvatarUrl } from '@/lib/config';
 import RouteGuard from '@/components/auth/RouteGuard';
+import AvatarUpload from '@/components/common/AvatarUpload';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,6 +62,12 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+interface Department {
+  id: string;
+  name_ko: string;
+  name_en: string;
+}
+
 export default function SettingsPage() {
   const { user, updateUser } = useAuth();
   const locale = useCurrentLocale();
@@ -68,14 +78,21 @@ export default function SettingsPage() {
   } = useMessage({ locale });
   const [currentTab, setCurrentTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
-  // Profile Settings
+  // Profile Settings - Simplified to use only avatar_image
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
+    name_ko: user?.name_ko || '',
+    name_en: user?.name_en || '',
     email: user?.email || '',
+    employee_number: user?.employee_number || '',
+    phone_number: user?.phone_number || '',
+    mobile_number: user?.mobile_number || '',
+    position: user?.position || '',
+    user_category: user?.user_category || 'regular',
     department: user?.department || '',
-    avatarUrl: user?.avatarUrl || ''
+    avatar_image: user?.avatar_image || '',
+    avatarUrl: user?.avatarUrl || '' // Keep as fallback only
   });
 
   // Security Settings
@@ -96,10 +113,39 @@ export default function SettingsPage() {
     sessionTimeout: 30
   });
 
+  // Sync profileData with user when user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name_ko: user.name_ko || '',
+        name_en: user.name_en || '',
+        email: user.email || '',
+        employee_number: user.employee_number || '',
+        phone_number: user.phone_number || '',
+        mobile_number: user.mobile_number || '',
+        position: user.position || '',
+        user_category: user.user_category || 'regular',
+        department: user.department || '',
+        avatar_image: user.avatar_image || '',
+        avatarUrl: user.avatarUrl || ''
+      });
+    }
+  }, [user]);
+
   useEffect(() => {
     loadPreferences();
+    loadDepartments();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadDepartments = async () => {
+    try {
+      const response = await api.get('/department/all');
+      setDepartments(response.departments || []);
+    } catch (error) {
+      console.error('Failed to load departments:', error);
+    }
+  };
 
   const loadPreferences = async () => {
     try {
@@ -124,46 +170,12 @@ export default function SettingsPage() {
     setCurrentTab(newValue);
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      await showErrorMessage('VALIDATION_FILE_TYPE_INVALID');
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      await showErrorMessage('VALIDATION_FILE_SIZE_EXCEEDED');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    setUploadingAvatar(true);
-    try {
-      const response = await api.post('/file/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      const avatarUrl = response.file.path; // Returns /uploads/filename
-      setProfileData({ ...profileData, avatarUrl });
-      await showSuccessMessage('SETTINGS_AVATAR_UPLOAD_SUCCESS');
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      await showErrorMessage('SETTINGS_AVATAR_UPLOAD_FAIL');
-    } finally {
-      setUploadingAvatar(false);
-    }
+  const handleAvatarChange = (base64Image: string) => {
+    setProfileData({ ...profileData, avatar_image: base64Image });
   };
 
   const handleAvatarDelete = () => {
-    setProfileData({ ...profileData, avatarUrl: '' });
+    setProfileData({ ...profileData, avatar_image: '', avatarUrl: '' });
   };
 
   const handleProfileUpdate = async () => {
@@ -244,6 +256,14 @@ export default function SettingsPage() {
     }
   };
 
+  const userCategoryOptions = [
+    { value: 'regular', label: locale === 'ko' ? '정규직' : 'Regular' },
+    { value: 'contractor', label: locale === 'ko' ? '계약직' : 'Contractor' },
+    { value: 'temporary', label: locale === 'ko' ? '임시직' : 'Temporary' },
+    { value: 'external', label: locale === 'ko' ? '외부인력' : 'External' },
+    { value: 'admin', label: locale === 'ko' ? '관리자' : 'Admin' }
+  ];
+
   return (
     <RouteGuard programCode="PROG-SETTINGS" requiredPermission="view" fallbackUrl="/dashboard">
       <Box>
@@ -266,83 +286,200 @@ export default function SettingsPage() {
           <Stack spacing={3}>
             <Typography variant="h6">{locale === 'ko' ? '프로필 정보' : 'Profile Information'}</Typography>
 
-            {/* Avatar Upload Section */}
-            <Box>
-              <Typography variant="subtitle2" gutterBottom>
-                {locale === 'ko' ? '프로필 사진' : 'Profile Picture'}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                <Avatar
-                  src={getAvatarUrl(profileData.avatarUrl)}
-                  alt={profileData.name}
-                  sx={{ width: 80, height: 80 }}
-                >
-                  {!profileData.avatarUrl && profileData.name?.substring(0, 2).toUpperCase()}
-                </Avatar>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    component="label"
-                    variant="outlined"
-                    startIcon={uploadingAvatar ? <CircularProgress size={20} /> : <PhotoCamera />}
-                    disabled={uploadingAvatar}
-                  >
-                    {locale === 'ko' ? '업로드' : 'Upload'}
-                    <input
-                      type="file"
-                      hidden
-                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                      onChange={handleAvatarUpload}
-                    />
-                  </Button>
-                  {profileData.avatarUrl && (
-                    <IconButton
-                      onClick={handleAvatarDelete}
-                      color="error"
-                      disabled={uploadingAvatar}
-                    >
-                      <Delete />
-                    </IconButton>
-                  )}
-                </Box>
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                {locale === 'ko'
-                  ? 'JPG, PNG, GIF, WEBP 형식 지원 (최대 10MB)'
-                  : 'Supports JPG, PNG, GIF, WEBP (Max 10MB)'}
-              </Typography>
-            </Box>
+            {/* Avatar Upload Section - Using Common Component */}
+            <AvatarUpload
+              avatarImage={profileData.avatar_image}
+              avatarUrl={profileData.avatarUrl}
+              name={profileData.name_ko || profileData.name_en || 'User'}
+              onAvatarImageChange={handleAvatarChange}
+              onDelete={handleAvatarDelete}
+              onError={(error) => showErrorMessage('VALIDATION_FILE_SIZE_EXCEEDED')}
+              label={locale === 'ko' ? '프로필 사진' : 'Profile Picture'}
+              uploadButtonText={locale === 'ko' ? '업로드' : 'Upload'}
+              deleteButtonText={locale === 'ko' ? '삭제' : 'Delete'}
+              maxSizeText={locale === 'ko' ? 'JPG, PNG, GIF, WEBP 형식 지원 (최대 10MB)' : 'Supports JPG, PNG, GIF, WEBP (Max 10MB)'}
+              useBase64={true}
+              showDelete={true}
+            />
 
             <Divider />
 
-            <TextField
-              label={locale === 'ko' ? '이름' : 'Name'}
-              fullWidth
-              value={profileData.name}
-              onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-            />
+            {/* Basic Information */}
+            <Typography variant="subtitle1" fontWeight={600}>
+              {locale === 'ko' ? '기본 정보' : 'Basic Information'}
+            </Typography>
 
-            <TextField
-              label={locale === 'ko' ? '이메일' : 'Email'}
-              fullWidth
-              type="email"
-              value={profileData.email}
-              onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-            />
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={locale === 'ko' ? '한글 이름' : 'Korean Name'}
+                  fullWidth
+                  value={profileData.name_ko}
+                  onChange={(e) => setProfileData({ ...profileData, name_ko: e.target.value })}
+                  placeholder={locale === 'ko' ? '홍길동' : 'Hong Gildong'}
+                />
+              </Grid>
 
-            <TextField
-              label={locale === 'ko' ? '부서' : 'Department'}
-              fullWidth
-              value={profileData.department}
-              onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
-            />
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={locale === 'ko' ? '영문 이름' : 'English Name'}
+                  fullWidth
+                  value={profileData.name_en}
+                  onChange={(e) => setProfileData({ ...profileData, name_en: e.target.value })}
+                  placeholder="Hong Gildong"
+                />
+              </Grid>
 
-            <Box>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={locale === 'ko' ? '사번' : 'Employee Number'}
+                  fullWidth
+                  value={profileData.employee_number}
+                  disabled
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Badge />
+                      </InputAdornment>
+                    )
+                  }}
+                  helperText={locale === 'ko' ? '사번은 수정할 수 없습니다' : 'Employee number cannot be changed'}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>{locale === 'ko' ? '사용자 유형' : 'User Category'}</InputLabel>
+                  <Select
+                    value={profileData.user_category}
+                    label={locale === 'ko' ? '사용자 유형' : 'User Category'}
+                    onChange={(e) => setProfileData({ ...profileData, user_category: e.target.value })}
+                  >
+                    {userCategoryOptions.map(option => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={locale === 'ko' ? '직위/직급' : 'Position'}
+                  fullWidth
+                  value={profileData.position}
+                  onChange={(e) => setProfileData({ ...profileData, position: e.target.value })}
+                  placeholder={locale === 'ko' ? '대리, 과장, 부장 등' : 'Manager, Director, etc.'}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Work />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  options={departments}
+                  getOptionLabel={(option) =>
+                    locale === 'ko'
+                      ? `${option.name_ko} (${option.id})`
+                      : `${option.name_en} (${option.id})`
+                  }
+                  value={departments.find(d => d.id === profileData.department) || null}
+                  onChange={(event, newValue) => {
+                    setProfileData({ ...profileData, department: newValue?.id || '' });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={locale === 'ko' ? '부서' : 'Department'}
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <>
+                            <InputAdornment position="start">
+                              <Business />
+                            </InputAdornment>
+                            {params.InputProps.startAdornment}
+                          </>
+                        )
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+
+            <Divider />
+
+            {/* Contact Information */}
+            <Typography variant="subtitle1" fontWeight={600}>
+              {locale === 'ko' ? '연락처 정보' : 'Contact Information'}
+            </Typography>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label={locale === 'ko' ? '이메일' : 'Email'}
+                  fullWidth
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  placeholder="example@company.com"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={locale === 'ko' ? '사무실 전화번호' : 'Office Phone'}
+                  fullWidth
+                  value={profileData.phone_number}
+                  onChange={(e) => setProfileData({ ...profileData, phone_number: e.target.value })}
+                  placeholder="02-1234-5678"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Phone />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={locale === 'ko' ? '휴대전화' : 'Mobile Phone'}
+                  fullWidth
+                  value={profileData.mobile_number}
+                  onChange={(e) => setProfileData({ ...profileData, mobile_number: e.target.value })}
+                  placeholder="010-1234-5678"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneAndroid />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            <Box sx={{ pt: 2 }}>
               <Button
                 variant="contained"
+                size="large"
                 onClick={handleProfileUpdate}
                 disabled={loading}
               >
-                {locale === 'ko' ? '저장' : 'Save Changes'}
+                {loading ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  locale === 'ko' ? '프로필 저장' : 'Save Profile'
+                )}
               </Button>
             </Box>
           </Stack>

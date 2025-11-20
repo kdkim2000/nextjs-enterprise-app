@@ -77,11 +77,23 @@ router.post('/login', authLimiter, async (req, res) => {
       refreshToken,
       user: {
         id: user.id,
-        username: user.username,
+        loginid: user.loginid,
+        username: user.username || user.loginid, // backward compatibility
         firstName: user.first_name,
         lastName: user.last_name,
+        name: user.name,
+        name_ko: user.name_ko,
+        name_en: user.name_en,
         email: user.email,
-        department: user.department
+        role: user.role,
+        department: user.department,
+        avatarUrl: user.avatar_url,
+        avatar_image: user.avatar_image,
+        employee_number: user.employee_number,
+        phone_number: user.phone_number,
+        mobile_number: user.mobile_number,
+        user_category: user.user_category,
+        position: user.position
       }
     });
   } catch (error) {
@@ -136,11 +148,23 @@ router.post('/verify-mfa', mfaLimiter, async (req, res) => {
       refreshToken,
       user: {
         id: user.id,
-        username: user.username,
+        loginid: user.loginid,
+        username: user.username || user.loginid, // backward compatibility
         firstName: user.first_name,
         lastName: user.last_name,
+        name: user.name,
+        name_ko: user.name_ko,
+        name_en: user.name_en,
         email: user.email,
-        department: user.department
+        role: user.role,
+        department: user.department,
+        avatarUrl: user.avatar_url,
+        avatar_image: user.avatar_image,
+        employee_number: user.employee_number,
+        phone_number: user.phone_number,
+        mobile_number: user.mobile_number,
+        user_category: user.user_category,
+        position: user.position
       }
     });
   } catch (error) {
