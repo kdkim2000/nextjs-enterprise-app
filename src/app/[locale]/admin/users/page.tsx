@@ -121,7 +121,7 @@ export default function UserManagementPage() {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by username, name, or email..."
+      quickSearchPlaceholder="Search by login ID, name, email, or employee #..."
       searching={searching}
       // Advanced Filter
       showAdvancedFilter

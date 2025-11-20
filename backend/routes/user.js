@@ -15,9 +15,17 @@ const router = express.Router();
 router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
   try {
     const {
+      loginid,
       username,
+      name_ko,
+      name_en,
       name,
       email,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
       role,
       status,
       page = 1,
@@ -33,12 +41,24 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
     const limitNum = parseInt(limit);
     const offset = (pageNum - 1) * limitNum;
 
-    // Build search string (username, name, or email)
-    const search = username || name || email;
+    // Build search string (backward compatible with single search field)
+    // If specific fields are provided, combine them for search
+    const searchTerms = [loginid, username, name_ko, name_en, name, email, employee_number, phone_number, mobile_number, position].filter(Boolean);
+    const search = searchTerms.length > 0 ? searchTerms[0] : null; // For now, use first non-empty term
 
     // Get users from database
     const users = await userService.getAllUsers({
       search,
+      loginid,
+      name_ko,
+      name_en,
+      email,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
+      role,
       status,
       department: departments[0], // Service supports single department filter
       limit: limitNum,
@@ -48,6 +68,16 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
     // Get total count for pagination
     const totalCount = await userService.getUserCount({
       search,
+      loginid,
+      name_ko,
+      name_en,
+      email,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
+      role,
       status,
       department: departments[0]
     });
