@@ -93,16 +93,16 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
         const term = quickSearch.toLowerCase();
         filtered = allRoles.filter(
           (role: Role) =>
-            role.id.toLowerCase().includes(term) ||
-            role.name.toLowerCase().includes(term) ||
-            role.displayName.toLowerCase().includes(term) ||
-            role.description.toLowerCase().includes(term)
+            role.id?.toLowerCase().includes(term) ||
+            role.name?.toLowerCase().includes(term) ||
+            role.displayName?.toLowerCase().includes(term) ||
+            role.description?.toLowerCase().includes(term)
         );
       } else if (Object.values(searchCriteria).some(v => v !== '')) {
         // Advanced search: only filter if there are search criteria
         filtered = allRoles.filter((role: Role) => {
-          if (searchCriteria.name && !role.name.toLowerCase().includes(searchCriteria.name.toLowerCase())) return false;
-          if (searchCriteria.displayName && !role.displayName.toLowerCase().includes(searchCriteria.displayName.toLowerCase())) return false;
+          if (searchCriteria.name && !role.name?.toLowerCase().includes(searchCriteria.name.toLowerCase())) return false;
+          if (searchCriteria.displayName && !role.displayName?.toLowerCase().includes(searchCriteria.displayName.toLowerCase())) return false;
           if (searchCriteria.roleType && role.roleType !== searchCriteria.roleType) return false;
           // Handle boolean comparison properly
           if (searchCriteria.isActive !== '') {
