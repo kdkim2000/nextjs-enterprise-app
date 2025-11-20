@@ -65,29 +65,36 @@ export const createColumns = (
       field: 'isSystem',
       headerName: getLocalizedValue({ en: 'System', ko: '시스템', zh: '系统', vi: 'Hệ thống' }, locale),
       width: 90,
-      renderCell: (params) =>
-        params.value ? (
+      valueGetter: (_value, row: Role) => row.isSystem,
+      renderCell: (params) => {
+        const isSystem = params.row.isSystem;
+        return isSystem ? (
           <Chip
             label={getLocalizedValue({ en: 'System', ko: '시스템', zh: '系统', vi: 'Hệ thống' }, locale)}
             size="small"
             color="secondary"
           />
-        ) : null
+        ) : null;
+      }
     },
     {
       field: 'isActive',
       headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       width: 90,
-      renderCell: (params) => (
-        <Chip
-          label={params.value
-            ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
-            : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
-          }
-          size="small"
-          color={params.value ? 'success' : 'default'}
-        />
-      )
+      valueGetter: (_value, row: Role) => row.isActive,
+      renderCell: (params) => {
+        const isActive = params.row.isActive;
+        return (
+          <Chip
+            label={isActive
+              ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
+              : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
+            }
+            size="small"
+            color={isActive ? 'success' : 'default'}
+          />
+        );
+      }
     }
   ];
 
