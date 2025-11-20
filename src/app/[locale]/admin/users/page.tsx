@@ -88,7 +88,7 @@ export default function UserManagementPage() {
     console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
     return createColumns(t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable);
   }, [t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
+  const filterFields = useMemo(() => createFilterFields(t, currentLocale, allDepartments), [t, currentLocale, allDepartments]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]

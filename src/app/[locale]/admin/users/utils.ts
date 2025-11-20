@@ -1,10 +1,9 @@
 import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
-import { DEPARTMENTS } from './constants';
 import { SearchCriteria } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createFilterFields = (t: any, locale: string): FilterFieldConfig[] => [
+export const createFilterFields = (t: any, locale: string, allDepartments: any[] = []): FilterFieldConfig[] => [
   {
     name: 'loginid',
     label: getLocalizedValue({ en: 'Login ID', ko: '로그인 ID', zh: '登录ID', vi: 'ID đăng nhập' }, locale),
@@ -81,7 +80,12 @@ export const createFilterFields = (t: any, locale: string): FilterFieldConfig[] 
     name: 'department',
     label: getLocalizedValue({ en: 'Department', ko: '부서', zh: '部门', vi: 'Phòng ban' }, locale),
     type: 'multi-select',
-    options: DEPARTMENTS.map(dept => ({ value: dept, label: dept })),
+    options: allDepartments.map(dept => ({
+      value: dept.id,
+      label: typeof dept.name === 'object' && dept.name !== null
+        ? getLocalizedValue(dept.name, locale)
+        : dept.name_ko || dept.name_en || dept.name || dept.code
+    })),
     allLabel: getLocalizedValue({ en: 'All Departments', ko: '전체 부서', zh: '所有部门', vi: 'Tất cả phòng ban' }, locale)
   },
   {

@@ -60,7 +60,7 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
       position,
       role,
       status,
-      department: departments[0], // Service supports single department filter
+      departments, // Pass array of department IDs
       limit: limitNum,
       offset
     });
@@ -79,7 +79,7 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
       position,
       role,
       status,
-      department: departments[0]
+      departments // Pass array of department IDs
     });
 
     const totalPages = Math.ceil(totalCount / limitNum);
