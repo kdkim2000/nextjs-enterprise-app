@@ -7,11 +7,6 @@ import ActionsCell from '@/components/common/ActionsCell';
 import { User } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-export const DEPARTMENTS = [
-  'Admin', 'Design', 'Engineering', 'Finance', 'HR', 'IT',
-  'Legal', 'Marketing', 'Operations', 'Product', 'Sales', 'Support'
-];
-
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,

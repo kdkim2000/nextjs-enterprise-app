@@ -42,7 +42,8 @@ async function getAllUsers(options = {}) {
     user_category,
     position,
     status,
-    department,
+    department, // backward compatibility - single department
+    departments, // array of department IDs
     role,
   } = options;
 
@@ -125,8 +126,15 @@ async function getAllUsers(options = {}) {
     paramIndex++;
   }
 
-  // Department filter
-  if (department) {
+  // Department filter - support both single and multiple departments
+  if (departments && Array.isArray(departments) && departments.length > 0) {
+    // Multiple departments - use IN clause with OR condition
+    const placeholders = departments.map((_, index) => `$${paramIndex + index}`).join(', ');
+    query += ` AND department IN (${placeholders})`;
+    departments.forEach(dept => params.push(dept));
+    paramIndex += departments.length;
+  } else if (department) {
+    // Single department - backward compatibility
     query += ` AND department = $${paramIndex}`;
     params.push(department);
     paramIndex++;
@@ -171,7 +179,8 @@ async function getUserCount(filters = {}) {
     position,
     role,
     status,
-    department
+    department, // backward compatibility - single department
+    departments // array of department IDs
   } = filters;
 
   let query = 'SELECT COUNT(*) FROM users WHERE 1=1';
@@ -252,7 +261,15 @@ async function getUserCount(filters = {}) {
     paramIndex++;
   }
 
-  if (department) {
+  // Department filter - support both single and multiple departments
+  if (departments && Array.isArray(departments) && departments.length > 0) {
+    // Multiple departments - use IN clause with OR condition
+    const placeholders = departments.map((_, index) => `$${paramIndex + index}`).join(', ');
+    query += ` AND department IN (${placeholders})`;
+    departments.forEach(dept => params.push(dept));
+    paramIndex += departments.length;
+  } else if (department) {
+    // Single department - backward compatibility
     query += ` AND department = $${paramIndex}`;
     params.push(department);
     paramIndex++;
