@@ -27,12 +27,18 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   } = usePageState<SearchCriteria, User>({
     storageKey,
     initialCriteria: {
+      loginid: '',
       username: '',
+      name_ko: '',
+      name_en: '',
       name: '',
       email: '',
+      employee_number: '',
+      position: '',
       role: '',
       department: [],
-      status: ''
+      status: '',
+      user_category: ''
     },
     initialPaginationModel: {
       page: 0,
@@ -67,8 +73,29 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   // Fetch all departments for dropdown
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await api.get('/department?page=1&limit=1000');
-      setAllDepartments(response.departments || []);
+      const response = await api.get('/department/all');
+      const departments = response.departments || [];
+
+      // Transform department data to include name object for multi-language support
+      const transformedDepartments = departments.map((dept: any) => ({
+        id: dept.id,
+        code: dept.code,
+        name: {
+          en: dept.name_en || dept.name || dept.code,
+          ko: dept.name_ko || dept.name || dept.code,
+          zh: dept.name_zh || dept.name || dept.code,
+          vi: dept.name_vi || dept.name || dept.code
+        },
+        name_ko: dept.name_ko,
+        name_en: dept.name_en,
+        name_zh: dept.name_zh,
+        name_vi: dept.name_vi,
+        parent_id: dept.parent_id,
+        level: dept.level,
+        status: dept.status
+      }));
+
+      setAllDepartments(transformedDepartments);
     } catch (error: any) {
       console.error('Failed to fetch departments:', error);
       setAllDepartments([]);
@@ -309,6 +336,11 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     const useQuickSearch = quickSearch.trim() !== '';
     fetchUsers(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchUsers, quickSearch, setPaginationModel]);
+
+  // Load departments on mount
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
 
   return {
     // State

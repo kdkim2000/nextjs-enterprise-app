@@ -36,6 +36,34 @@ export const createColumns = (
       filterable: false,
       renderCell: (params) => {
         const user = params.row as User;
+
+        // Determine avatar source (priority: avatar_image > avatarUrl)
+        let avatarSrc = '';
+        if (user.avatar_image) {
+          // Use base64 image directly from DB
+          avatarSrc = user.avatar_image;
+          console.log('[Avatar] Using DB image for user:', user.loginid, 'size:', user.avatar_image.length);
+        } else if (user.avatarUrl) {
+          // Fallback to avatar URL
+          avatarSrc = getAvatarUrl(user.avatarUrl);
+          console.log('[Avatar] Using URL for user:', user.loginid);
+        }
+
+        // Get avatar text based on available name fields
+        let avatarText = '';
+        if (!avatarSrc) {
+          if (user.name_ko) {
+            // For Korean names, show only 1 character (usually the family name)
+            avatarText = user.name_ko.substring(0, 1);
+          } else if (user.name_en) {
+            // For English names, show first 2 characters (initials)
+            avatarText = user.name_en.substring(0, 2).toUpperCase();
+          } else if (user.name) {
+            // Fallback to name field if exists
+            avatarText = user.name.substring(0, 1);
+          }
+        }
+
         return (
           <Box
             sx={{
@@ -45,11 +73,11 @@ export const createColumns = (
             }}
           >
             <Avatar
-              src={getAvatarUrl(user.avatarUrl)}
+              src={avatarSrc || undefined}
               alt={user.name_ko || user.name || ''}
               sx={{ width: 32, height: 32 }}
             >
-              {!user.avatarUrl && (user.name_ko || user.name || '')?.substring(0, 2).toUpperCase()}
+              {avatarText}
             </Avatar>
           </Box>
         );
@@ -96,6 +124,11 @@ export const createColumns = (
       valueOptions: ['regular', 'contractor', 'temporary', 'external', 'admin']
     },
     {
+      field: 'position',
+      headerName: getLocalizedValue({ en: 'Position', ko: '직급', zh: '职位', vi: 'Chức vụ' }, locale),
+      width: 100
+    },
+    {
       field: 'role',
       headerName: getLocalizedValue({ en: 'Role', ko: '역할', zh: '角色', vi: 'Vai trò' }, locale),
       width: 120,
@@ -108,8 +141,27 @@ export const createColumns = (
       width: 200,
       valueGetter: (_value, row) => {
         if (!row.department) return '-';
+
+        // If departments are still loading, return empty string to avoid showing codes
+        if (!allDepartments || allDepartments.length === 0) {
+          return '';
+        }
+
         const dept = allDepartments.find(d => d.id === row.department);
-        return dept ? getLocalizedValue(dept.name, locale) : row.department;
+        if (!dept) {
+          // Department not found - return empty string instead of code
+          return '';
+        }
+
+        // Check if dept.name is an object (multi-language) or string
+        if (typeof dept.name === 'object' && dept.name !== null) {
+          return getLocalizedValue(dept.name, locale);
+        } else if (typeof dept.name === 'string') {
+          return dept.name;
+        } else {
+          // Fallback: try language-specific fields
+          return dept.name_ko || dept.name_en || dept.name_zh || dept.name_vi || '';
+        }
       }
     },
     {
