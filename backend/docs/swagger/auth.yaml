@@ -1,0 +1,326 @@
+# Authentication API Documentation
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: |
+        Authenticate user with credentials and return JWT tokens.
+
+        **Features:**
+        - Rate limited: 5 attempts per 15 minutes per IP+username
+        - Returns access token (15 min expiry) and refresh token (7 days expiry)
+        - Supports MFA verification if enabled for user
+
+        **Error Codes:**
+        - `AUTH_005`: Invalid credentials
+        - `AUTH_011`: Account locked
+        - `AUTH_012`: Account inactive
+        - `RATE_002`: Too many login attempts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - loginid
+                - password
+              properties:
+                loginid:
+                  type: string
+                  example: john_doe
+                  description: User's login ID
+                password:
+                  type: string
+                  format: password
+                  example: SecurePass123
+                  description: User's password
+            examples:
+              regularUser:
+                summary: Regular user login
+                value:
+                  loginid: john_doe
+                  password: SecurePass123
+              adminUser:
+                summary: Admin user login
+                value:
+                  loginid: admin
+                  password: AdminPass123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                        description: JWT access token (15 min expiry)
+                      refreshToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                        description: JWT refresh token (7 days expiry)
+                      mfaRequired:
+                        type: boolean
+                        example: false
+                        description: True if MFA verification is required
+              examples:
+                withoutMFA:
+                  summary: Login without MFA
+                  value:
+                    success: true
+                    data:
+                      user:
+                        id: user-123
+                        loginid: john_doe
+                        email: john@example.com
+                        user_category: regular
+                        status: active
+                      token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                      refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                withMFA:
+                  summary: Login with MFA required
+                  value:
+                    success: true
+                    data:
+                      mfaRequired: true
+                      tempToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error:
+                  code: VALID_001
+                  message: Validation failed
+                  timestamp: '2025-11-21T10:30:00.000Z'
+                  details:
+                    - field: loginid
+                      message: Login ID is required
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidCredentials:
+                  summary: Invalid credentials
+                  value:
+                    success: false
+                    error:
+                      code: AUTH_005
+                      message: Invalid username or password
+                      timestamp: '2025-11-21T10:30:00.000Z'
+                accountLocked:
+                  summary: Account locked
+                  value:
+                    success: false
+                    error:
+                      code: AUTH_011
+                      message: Account is locked due to multiple failed login attempts
+                      timestamp: '2025-11-21T10:30:00.000Z'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error:
+                  code: RATE_002
+                  message: Too many login attempts. Please try again later.
+                  timestamp: '2025-11-21T10:30:00.000Z'
+                  retryAfter: 1732186200
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: |
+        Use refresh token to obtain a new access token when the current one expires.
+
+        **Note:** Refresh token is valid for 7 days.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                      refreshToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: |
+        Invalidate current access token and refresh token.
+        Tokens are added to blacklist and cannot be reused.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Logout successful
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/verify-mfa:
+    post:
+      tags:
+        - Authentication
+      summary: Verify MFA code
+      description: |
+        Verify MFA code and complete authentication.
+
+        **Features:**
+        - Rate limited: 3 attempts per 5 minutes
+        - Code expires after 10 minutes
+        - Requires temp token from login response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+                - tempToken
+              properties:
+                code:
+                  type: string
+                  example: '123456'
+                  description: 6-digit MFA code from email
+                tempToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  description: Temporary token from login response
+      responses:
+        '200':
+          description: MFA verification successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                      refreshToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Invalid or expired MFA code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many MFA attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Get authenticated user's information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
