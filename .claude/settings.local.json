@@ -64,7 +64,11 @@
       "Bash(cmd //c \"taskkill /F /PID 31032\" 2)",
       "Bash(npx eslint:*)",
       "Bash(cmd //c \"taskkill /F /PID 19492\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(cmd //c \"taskkill /F /PID 21432\")",
+      "Bash(cmd //c \"taskkill /F /PID 22268\")",
+      "Bash(cmd //c \"taskkill /F /PID 3940\")",
+      "Bash(cmd //c \"taskkill /F /PID 9344\" 2)"
     ],
     "deny": [],
     "ask": []
