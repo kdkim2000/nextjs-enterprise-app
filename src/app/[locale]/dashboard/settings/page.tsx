@@ -149,17 +149,20 @@ export default function SettingsPage() {
 
   const loadPreferences = async () => {
     try {
+      // Note: api.get() already returns response.data
       const response = await api.get('/user/preferences');
-      if (response.preferences) {
+      const { preferences } = response;
+
+      if (preferences) {
         setPreferences({
-          language: response.preferences.language || locale,
-          theme: response.preferences.theme || 'light',
-          rowsPerPage: response.preferences.rowsPerPage || 10,
-          emailNotifications: response.preferences.emailNotifications ?? true,
-          systemNotifications: response.preferences.systemNotifications ?? true,
-          sessionTimeout: response.preferences.sessionTimeout || 30
+          language: preferences.language || locale,
+          theme: preferences.theme || 'light',
+          rowsPerPage: preferences.rowsPerPage || 10,
+          emailNotifications: preferences.emailNotifications ?? true,
+          systemNotifications: preferences.systemNotifications ?? true,
+          sessionTimeout: preferences.sessionTimeout || 30
         });
-        setMfaEnabled(response.preferences.mfaEnabled || false);
+        setMfaEnabled(preferences.mfaEnabled || false);
       }
     } catch (error) {
       console.error('Failed to load preferences:', error);

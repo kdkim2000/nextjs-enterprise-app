@@ -166,18 +166,45 @@ router.get('/all', authenticateToken, requireProgramAccess('PROG-USER-LIST'), as
 /**
  * Get user preferences
  */
-router.get('/preferences', authenticateToken, async (req, res) => {
+router.get('/preferences', authenticateToken, async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    // Validate userId from JWT
+    const userId = req.user?.userId;
 
-    // Get preferences from database
-    let preferences = await preferencesService.getUserPreferences(userId);
+    if (!userId) {
+      console.error('Get preferences error: userId not found in JWT token', req.user);
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'AUTH_002',
+          message: 'Invalid access token - userId missing',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
 
     // Get user's MFA status
     const user = await userService.getUserById(userId);
 
+    if (!user) {
+      console.error('Get preferences error: user not found', { userId });
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'RES_101',
+          message: 'User not found',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // Get preferences from database
+    let preferences = await preferencesService.getUserPreferences(userId);
+
+    // Default preferences if none exist
     if (!preferences) {
       return res.json({
+        success: true,
         preferences: {
           favoriteMenus: [],
           recentMenus: [],
@@ -187,7 +214,7 @@ router.get('/preferences', authenticateToken, async (req, res) => {
           emailNotifications: true,
           systemNotifications: true,
           sessionTimeout: 30,
-          mfaEnabled: user?.mfa_enabled || false
+          mfaEnabled: user.mfa_enabled || false
         }
       });
     }
@@ -202,13 +229,20 @@ router.get('/preferences', authenticateToken, async (req, res) => {
       emailNotifications: preferences.email_notifications !== false,
       systemNotifications: preferences.system_notifications !== false,
       sessionTimeout: preferences.session_timeout || 30,
-      mfaEnabled: user?.mfa_enabled || false
+      mfaEnabled: user.mfa_enabled || false
     };
 
-    res.json({ preferences: apiPreferences });
+    res.json({
+      success: true,
+      preferences: apiPreferences
+    });
   } catch (error) {
-    console.error('Get preferences error:', error);
-    res.status(500).json({ error: 'Failed to fetch preferences' });
+    console.error('Get preferences error:', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.userId
+    });
+    next(error);
   }
 });
 

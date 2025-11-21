@@ -1,0 +1,414 @@
+# User Management API Documentation
+
+paths:
+  /api/user:
+    get:
+      tags:
+        - Users
+      summary: List users
+      description: |
+        Get a paginated list of users with optional filtering.
+
+        **Features:**
+        - Pagination support
+        - Full-text search (loginid, email, names)
+        - Filter by status, category, department
+        - Sorted by creation date (newest first)
+
+        **Permissions Required:** `user.view`
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 50
+          description: Items per page
+        - in: query
+          name: search
+          schema:
+            type: string
+            maxLength: 100
+          description: Search term (searches loginid, email, names)
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, inactive, locked]
+          description: Filter by status
+        - in: query
+          name: user_category
+          schema:
+            type: string
+            enum: [admin, regular, guest, system]
+          description: Filter by user category
+        - in: query
+          name: department
+          schema:
+            type: string
+          description: Filter by department ID
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                success: true
+                data:
+                  - id: user-123
+                    loginid: john_doe
+                    email: john@example.com
+                    name_en: John Doe
+                    user_category: regular
+                    status: active
+                    created_at: '2025-11-21T10:30:00.000Z'
+                  - id: user-124
+                    loginid: jane_smith
+                    email: jane@example.com
+                    name_en: Jane Smith
+                    user_category: admin
+                    status: active
+                    created_at: '2025-11-20T15:20:00.000Z'
+                pagination:
+                  page: 1
+                  limit: 50
+                  total: 1000
+                  totalPages: 20
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: |
+        Create a new user account.
+
+        **Features:**
+        - Input validation (Zod schema)
+        - Password strength requirements
+        - Unique constraint on loginid and email
+        - Automatic password hashing (bcrypt)
+
+        **Permissions Required:** `user.create`
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+            examples:
+              regularUser:
+                summary: Create regular user
+                value:
+                  loginid: john_doe
+                  email: john@example.com
+                  password: SecurePass123
+                  name_en: John Doe
+                  name_ko: 홍길동
+                  employee_number: EMP-001
+                  user_category: regular
+                  department: DEPT-001
+              adminUser:
+                summary: Create admin user with MFA
+                value:
+                  loginid: admin_jane
+                  email: jane@example.com
+                  password: AdminPass456
+                  name_en: Jane Smith
+                  user_category: admin
+                  mfa_enabled: true
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                validationError:
+                  summary: Validation failed
+                  value:
+                    success: false
+                    error:
+                      code: VALID_001
+                      message: Validation failed
+                      timestamp: '2025-11-21T10:30:00.000Z'
+                      details:
+                        - field: email
+                          message: Invalid email format
+                        - field: password
+                          message: Password must be at least 8 characters
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error:
+                  code: DB_005
+                  message: Duplicate entry
+                  timestamp: '2025-11-21T10:30:00.000Z'
+
+  /api/user/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: |
+        Get detailed information about a specific user.
+
+        **Permissions Required:** `user.view`
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: User ID
+          example: user-123
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error:
+                  code: RES_101
+                  message: User not found
+                  timestamp: '2025-11-21T10:30:00.000Z'
+
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: |
+        Update user information.
+
+        **Features:**
+        - Partial updates supported
+        - Password will be hashed if provided
+        - Cannot change loginid after creation
+
+        **Permissions Required:** `user.update`
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name_en:
+                  type: string
+                name_ko:
+                  type: string
+                status:
+                  type: string
+                  enum: [active, inactive, locked]
+                mfa_enabled:
+                  type: boolean
+            examples:
+              updateEmail:
+                summary: Update email
+                value:
+                  email: newemail@example.com
+              changePassword:
+                summary: Change password
+                value:
+                  password: NewSecurePass789
+              lockAccount:
+                summary: Lock user account
+                value:
+                  status: locked
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: |
+        Soft delete a user (sets status to 'deleted').
+
+        **Note:** Users are not physically deleted from database.
+        This preserves audit logs and referential integrity.
+
+        **Permissions Required:** `user.delete`
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: User ID
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: User deleted successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/user/all:
+    get:
+      tags:
+        - Users
+      summary: Get all users (no pagination)
+      description: |
+        Get all active users without pagination.
+        Returns only essential fields (id, username, name).
+
+        **Use Case:** Dropdown/autocomplete components
+
+        **Permissions Required:** `user.view`
+
+        **Note:** Limited to active users only for performance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        loginid:
+                          type: string
+                        name_en:
+                          type: string
+              example:
+                success: true
+                data:
+                  - id: user-123
+                    loginid: john_doe
+                    name_en: John Doe
+                  - id: user-124
+                    loginid: jane_smith
+                    name_en: Jane Smith

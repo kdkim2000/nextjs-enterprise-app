@@ -2,9 +2,14 @@
  * Program Service Layer
  *
  * Provides data access methods for program-related operations.
+ *
+ * Performance Optimization:
+ * - Uses Full-Text Search for general program searches
+ * - Optimized with proper indexes
  */
 
 const db = require('../config/database');
+const { buildProgramSearchCondition, cleanSearchTerm } = require('../utils/searchHelper');
 
 /**
  * Get all programs
@@ -19,9 +24,14 @@ async function getAllPrograms(options = {}) {
   let paramIndex = 1;
 
   if (search) {
-    query += ` AND (code ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex})`;
-    params.push(`%${search}%`);
-    paramIndex++;
+    const cleanedSearch = cleanSearchTerm(search);
+    const { condition, param } = buildProgramSearchCondition(cleanedSearch, paramIndex);
+
+    if (condition) {
+      query += ` AND ${condition}`;
+      params.push(param);
+      paramIndex++;
+    }
   }
 
   if (category) {

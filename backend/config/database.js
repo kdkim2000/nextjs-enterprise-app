@@ -17,16 +17,23 @@ const dbConfig = {
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD,
 
-  // Connection pool settings
-  max: 20, // Maximum number of clients in the pool
+  // Connection pool settings - optimized for performance
+  max: parseInt(process.env.DB_POOL_MAX, 10) || (process.env.NODE_ENV === 'production' ? 50 : 20),
+  min: parseInt(process.env.DB_POOL_MIN, 10) || 2, // Maintain minimum connections
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection cannot be established
+  connectionTimeoutMillis: 5000, // Reduced to 5 seconds for faster failure detection
+  acquireTimeoutMillis: 60000, // Maximum time to wait for connection acquisition
 
   // Additional PostgreSQL settings
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 
   // Client encoding
   client_encoding: 'UTF8',
+
+  // Performance tuning
+  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT, 10) || 30000, // 30 second query timeout
+  query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT, 10) || 30000, // Same as statement_timeout
+  application_name: 'enterprise_backend', // For identifying connections in pg_stat_activity
 };
 
 // Create connection pool
@@ -77,9 +84,16 @@ async function query(text, params) {
     const result = await pool.query(text, params);
     const duration = Date.now() - start;
 
-    // Log slow queries (> 1000ms)
-    if (duration > 1000) {
+    // Log slow queries (> 100ms)
+    // Production: Consider adjusting to 50ms or 200ms based on requirements
+    if (duration > 100) {
       console.warn(`⚠ Slow query detected (${duration}ms):`, text.substring(0, 100));
+    }
+
+    // Log very slow queries (> 1000ms) with full query
+    if (duration > 1000) {
+      console.error(`❌ CRITICAL: Very slow query (${duration}ms):`, text);
+      console.error('   Parameters:', params);
     }
 
     return result;
