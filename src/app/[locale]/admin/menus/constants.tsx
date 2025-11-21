@@ -6,11 +6,30 @@ import { Edit } from '@mui/icons-material';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
+// AVAILABLE_ICONS is now deprecated - use CodeSelect with codeType="ICON_TYPE" instead
+// This array is kept for reference only and synchronized with ICON_TYPE codes in database
 export const AVAILABLE_ICONS = [
-  'Dashboard', 'People', 'Assessment', 'Settings', 'List',
-  'AdminPanelSettings', 'GridOn', 'TrendingUp', 'Widgets',
-  'Description', 'Folder', 'Assignment', 'Build', 'Code',
-  'Security', 'Help', 'Link', 'AccountTree', 'School', 'Palette'
+  'AccountTree',
+  'AdminPanelSettings',
+  'Assessment',
+  'Assignment',
+  'Build',
+  'Code',
+  'Dashboard',
+  'Description',
+  'Folder',
+  'GridOn',
+  'Help',
+  'Link',
+  'List',
+  'Message',
+  'Palette',
+  'People',
+  'School',
+  'Security',
+  'Settings',
+  'TrendingUp',
+  'Widgets'
 ];
 
 export const createColumns = (

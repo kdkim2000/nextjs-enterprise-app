@@ -13,7 +13,7 @@ import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields'
 import ResetPasswordDialog from '@/components/admin/ResetPasswordDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useUserManagement } from './hooks/useUserManagement';
-import { createColumns, DEPARTMENTS } from './constants';
+import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { User } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
@@ -80,21 +80,15 @@ export default function UserManagementPage() {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
-    setDialogOpen,
-    fetchDepartments
+    setDialogOpen
   } = useUserManagement();
-
-  // Load departments on mount
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
 
   // Memoized computed values
   const columns = useMemo(() => {
     console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
     return createColumns(t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable);
   }, [t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
+  const filterFields = useMemo(() => createFilterFields(t, currentLocale, allDepartments), [t, currentLocale, allDepartments]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
@@ -127,7 +121,7 @@ export default function UserManagementPage() {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by username, name, or email..."
+      quickSearchPlaceholder="Search by login ID, name, email, or employee #..."
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
@@ -141,6 +135,7 @@ export default function UserManagementPage() {
           values={searchCriteria}
           onChange={handleSearchChange}
           onEnter={handleAdvancedFilterApply}
+          locale={currentLocale}
         />
       }
       onFilterApply={handleAdvancedFilterApply}
@@ -198,6 +193,7 @@ export default function UserManagementPage() {
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <UserFormFields
           user={editingUser as UserFormData}

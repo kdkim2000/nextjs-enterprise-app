@@ -6,8 +6,30 @@ const { requireProgramAccess, requirePermission } = require('../middleware/permi
 const userService = require('../services/userService');
 const preferencesService = require('../services/preferencesService');
 const menuService = require('../services/menuService');
+const { transformMultiLangFields } = require('../utils/multiLangTransform');
 
 const router = express.Router();
+
+// Helper function to transform database menu to API format
+function transformMenuToAPI(dbMenu) {
+  if (!dbMenu) return null;
+
+  // Transform multilingual fields
+  const transformed = transformMultiLangFields(dbMenu, ['name', 'description']);
+
+  return {
+    id: transformed.id,
+    code: transformed.code,
+    name: transformed.name,
+    path: transformed.path,
+    icon: transformed.icon,
+    order: transformed.order || 0,
+    parentId: transformed.parent_id,
+    level: transformed.level || 0,
+    programId: transformed.program_id,
+    description: transformed.description
+  };
+}
 
 /**
  * Get all users with search and pagination
@@ -15,9 +37,17 @@ const router = express.Router();
 router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
   try {
     const {
+      loginid,
       username,
+      name_ko,
+      name_en,
       name,
       email,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
       role,
       status,
       page = 1,
@@ -33,14 +63,26 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
     const limitNum = parseInt(limit);
     const offset = (pageNum - 1) * limitNum;
 
-    // Build search string (username, name, or email)
-    const search = username || name || email;
+    // Build search string (backward compatible with single search field)
+    // If specific fields are provided, combine them for search
+    const searchTerms = [loginid, username, name_ko, name_en, name, email, employee_number, phone_number, mobile_number, position].filter(Boolean);
+    const search = searchTerms.length > 0 ? searchTerms[0] : null; // For now, use first non-empty term
 
     // Get users from database
     const users = await userService.getAllUsers({
       search,
+      loginid,
+      name_ko,
+      name_en,
+      email,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
+      role,
       status,
-      department: departments[0], // Service supports single department filter
+      departments, // Pass array of department IDs
       limit: limitNum,
       offset
     });
@@ -48,19 +90,30 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
     // Get total count for pagination
     const totalCount = await userService.getUserCount({
       search,
+      loginid,
+      name_ko,
+      name_en,
+      email,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
+      role,
       status,
-      department: departments[0]
+      departments // Pass array of department IDs
     });
 
     const totalPages = Math.ceil(totalCount / limitNum);
 
     // Remove password field and convert snake_case to camelCase for response
-    const safeUsers = users.map(({ password, name, mfa_enabled, sso_enabled, avatar_url, last_login, created_at, updated_at, ...rest }) => ({
+    const safeUsers = users.map(({ password, name, mfa_enabled, sso_enabled, avatar_url, avatar_image, last_login, created_at, updated_at, ...rest }) => ({
       ...rest,
       name,
       mfaEnabled: mfa_enabled,
       ssoEnabled: sso_enabled,
       avatarUrl: avatar_url,
+      avatar_image: avatar_image, // Include base64 avatar image from DB
       lastLogin: last_login,
       createdAt: created_at,
       updatedAt: updated_at
@@ -94,10 +147,11 @@ router.get('/all', authenticateToken, requireProgramAccess('PROG-USER-LIST'), as
     });
 
     // Return only essential fields for dropdown
-    const simpleUsers = users.map(({ id, username, name }) => ({
+    // Use name_ko as default name (database has name_ko and name_en, not name)
+    const simpleUsers = users.map(({ id, username, name_ko, name_en }) => ({
       id,
       username,
-      name
+      name: name_ko || name_en || username  // Prefer Korean name, fallback to English or username
     }));
 
     res.json({
@@ -174,7 +228,9 @@ router.get('/favorite-menus', authenticateToken, async (req, res) => {
 
     // Get all menus and filter favorites
     const allMenus = await menuService.getAllMenus();
-    const favoriteMenus = allMenus.filter(m => favoriteMenuIds.includes(m.id));
+    const favoriteMenus = allMenus
+      .filter(m => favoriteMenuIds.includes(m.id))
+      .map(transformMenuToAPI); // Transform to API format with proper name structure
 
     res.json({ menus: favoriteMenus });
   } catch (error) {
@@ -199,7 +255,9 @@ router.get('/recent-menus', authenticateToken, async (req, res) => {
 
     // Get all menus and filter recents
     const allMenus = await menuService.getAllMenus();
-    const recentMenus = allMenus.filter(m => recentMenuIds.includes(m.id));
+    const recentMenus = allMenus
+      .filter(m => recentMenuIds.includes(m.id))
+      .map(transformMenuToAPI); // Transform to API format with proper name structure
 
     res.json({ menus: recentMenus });
   } catch (error) {
@@ -258,13 +316,14 @@ router.get('/:id', authenticateToken, async (req, res) => {
     }
 
     // Convert DB format to API format
-    const { password, name, mfa_enabled, sso_enabled, avatar_url, last_login, created_at, updated_at, ...rest } = user;
+    const { password, name, mfa_enabled, sso_enabled, avatar_url, avatar_image, last_login, created_at, updated_at, ...rest } = user;
     const safeUser = {
       ...rest,
       name,
       mfaEnabled: mfa_enabled,
       ssoEnabled: sso_enabled,
       avatarUrl: avatar_url,
+      avatar_image: avatar_image, // Include base64 avatar image from DB
       lastLogin: last_login,
       createdAt: created_at,
       updatedAt: updated_at
@@ -282,7 +341,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'), async (req, res) => {
   try {
-    const { username, password, name, email, role, department, status, avatarUrl } = req.body;
+    const { username, password, name, email, role, department, status, avatarUrl, avatar_image } = req.body;
 
     if (!username || !password || !name || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -314,17 +373,19 @@ router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'
       department: department || '',
       status: status || 'active',
       mfaEnabled: false,
-      profileImage: avatarUrl
+      profileImage: avatarUrl,
+      avatar_image: avatar_image
     });
 
     // Convert to API format
-    const { password: _, name: userName, mfa_enabled, sso_enabled, avatar_url, ...rest } = newUser;
+    const { password: _, name: userName, mfa_enabled, sso_enabled, avatar_url, avatar_image: dbAvatarImage, ...rest } = newUser;
     const safeUser = {
       ...rest,
       name: userName,
       mfaEnabled: mfa_enabled,
       ssoEnabled: sso_enabled,
-      avatarUrl: avatar_url
+      avatarUrl: avatar_url,
+      avatar_image: dbAvatarImage
     };
 
     res.status(201).json({ user: safeUser });
@@ -394,7 +455,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       }
     }
 
-    const { name, email, role, department, status, avatarUrl } = req.body;
+    const { name, email, role, department, status, avatarUrl, avatar_image } = req.body;
 
     // Check email uniqueness
     if (email) {
@@ -413,6 +474,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (email) updates.email = email;
     if (department !== undefined) updates.department = department;
     if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
+    if (avatar_image !== undefined) updates.avatar_image = avatar_image;
 
     // Only admins can change role and status
     if (!isSelf) {
@@ -427,13 +489,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     // Convert to API format
-    const { password, name: userName, mfa_enabled, sso_enabled, avatar_url, ...rest } = updatedUser;
+    const { password, name: userName, mfa_enabled, sso_enabled, avatar_url, avatar_image: dbAvatarImage, ...rest } = updatedUser;
     const safeUser = {
       ...rest,
       name: userName,
       mfaEnabled: mfa_enabled,
       ssoEnabled: sso_enabled,
-      avatarUrl: avatar_url
+      avatarUrl: avatar_url,
+      avatar_image: dbAvatarImage
     };
 
     res.json({ user: safeUser });
@@ -530,7 +593,20 @@ router.delete('/favorite-menus/:menuId', authenticateToken, async (req, res) => 
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { name, email, department, avatarUrl } = req.body;
+    const {
+      name,
+      email,
+      department,
+      avatarUrl,
+      name_ko,
+      name_en,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position,
+      avatar_image
+    } = req.body;
 
     if (email && await userService.emailExists(email, userId)) {
       return res.status(400).json({ error: 'Email already in use' });
@@ -542,9 +618,17 @@ router.put('/profile', authenticateToken, async (req, res) => {
       updates.firstName = nameParts[0];
       updates.lastName = nameParts.slice(1).join(' ') || '';
     }
-    if (email) updates.email = email;
-    if (department) updates.department = department;
+    if (email !== undefined) updates.email = email;
+    if (department !== undefined) updates.department = department;
     if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
+    if (name_ko !== undefined) updates.name_ko = name_ko;
+    if (name_en !== undefined) updates.name_en = name_en;
+    if (employee_number !== undefined) updates.employee_number = employee_number;
+    if (phone_number !== undefined) updates.phone_number = phone_number;
+    if (mobile_number !== undefined) updates.mobile_number = mobile_number;
+    if (user_category !== undefined) updates.user_category = user_category;
+    if (position !== undefined) updates.position = position;
+    if (avatar_image !== undefined) updates.avatar_image = avatar_image;
 
     const updatedUser = await userService.updateUser(userId, updates);
 
@@ -556,12 +640,20 @@ router.put('/profile', authenticateToken, async (req, res) => {
       message: 'Profile updated successfully',
       user: {
         id: updatedUser.id,
-        username: updatedUser.username,
+        loginid: updatedUser.loginid,
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
         department: updatedUser.department,
-        avatarUrl: updatedUser.avatar_url
+        avatarUrl: updatedUser.avatar_url,
+        name_ko: updatedUser.name_ko,
+        name_en: updatedUser.name_en,
+        employee_number: updatedUser.employee_number,
+        phone_number: updatedUser.phone_number,
+        mobile_number: updatedUser.mobile_number,
+        user_category: updatedUser.user_category,
+        position: updatedUser.position,
+        avatar_image: updatedUser.avatar_image
       }
     });
   } catch (error) {

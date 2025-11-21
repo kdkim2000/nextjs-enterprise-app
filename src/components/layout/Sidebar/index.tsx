@@ -28,7 +28,19 @@ import {
   AdminPanelSettings,
   GridOn,
   TrendingUp,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Description,
+  Folder,
+  Assignment,
+  Build,
+  Code,
+  Security,
+  Help,
+  Link,
+  AccountTree,
+  School,
+  Palette,
+  Message
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { MenuItem } from '@/types/menu';
@@ -38,18 +50,30 @@ import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 const DRAWER_WIDTH = 280;
 const DRAWER_WIDTH_COLLAPSED = 72;
 
-// Icon mapping
+// Icon mapping - synchronized with ICON_TYPE codes in database
 const iconMap: Record<string, React.ReactElement> = {
-  Dashboard: <Dashboard />,
-  People: <People />,
-  Assessment: <Assessment />,
-  Settings: <Settings />,
-  List: <ListIcon />,
+  AccountTree: <AccountTree />,
   AdminPanelSettings: <AdminPanelSettings />,
+  Assessment: <Assessment />,
+  Assignment: <Assignment />,
+  Build: <Build />,
+  Code: <Code />,
+  Dashboard: <Dashboard />,
+  Description: <Description />,
+  Folder: <Folder />,
   GridOn: <GridOn />,
+  Help: <Help />,
+  Link: <Link />,
+  List: <ListIcon />,
+  Menu: <MenuIcon />,
+  Message: <Message />,
+  Palette: <Palette />,
+  People: <People />,
+  School: <School />,
+  Security: <Security />,
+  Settings: <Settings />,
   TrendingUp: <TrendingUp />,
-  Widgets: <GridOn />,
-  Menu: <MenuIcon />
+  Widgets: <GridOn />
 };
 
 interface SidebarProps {

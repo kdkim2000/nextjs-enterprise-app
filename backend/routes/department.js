@@ -117,6 +117,28 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-DEPT-MGMT'), async
   }
 });
 
+// GET /api/department/all - Get all departments (no pagination, no auth required for basic list)
+router.get('/all', authenticateToken, async (req, res) => {
+  try {
+    const dbDepartments = await departmentService.getAllDepartments();
+    const departments = dbDepartments.map(dept => ({
+      id: dept.id,
+      code: dept.code,
+      name_ko: dept.name_ko,
+      name_en: dept.name_en,
+      name_zh: dept.name_zh,
+      name_vi: dept.name_vi,
+      parent_id: dept.parent_id,
+      level: dept.level,
+      status: dept.status
+    }));
+    res.json({ departments });
+  } catch (error) {
+    console.error('Error fetching all departments:', error);
+    res.status(500).json({ error: 'Failed to fetch departments' });
+  }
+});
+
 // GET /api/department/tree - Get departments as tree structure
 router.get('/tree', async (req, res) => {
   try {
