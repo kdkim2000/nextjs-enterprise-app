@@ -37,7 +37,10 @@ export default function LanguageLoader() {
 
       try {
         // Fetch user preferences from backend
+        // Note: api.get() already returns response.data
         const response = await api.get('/user/preferences');
+
+        // Extract preferences from response (not response.data)
         const { preferences } = response;
 
         // Check if user has a saved language preference
@@ -56,7 +59,11 @@ export default function LanguageLoader() {
           console.log('[LanguageLoader] Authentication required - user preferences not loaded');
           // Token might be expired/invalid - let axios interceptor handle refresh
         } else {
-          console.error('[LanguageLoader] Failed to load user preferences:', error);
+          console.error('[LanguageLoader] Failed to load user preferences:', {
+            error: error?.message,
+            response: error?.response?.data,
+            status: error?.response?.status
+          });
         }
         // Fail silently - don't block user experience
       }
