@@ -6,8 +6,30 @@ const { requireProgramAccess, requirePermission } = require('../middleware/permi
 const userService = require('../services/userService');
 const preferencesService = require('../services/preferencesService');
 const menuService = require('../services/menuService');
+const { transformMultiLangFields } = require('../utils/multiLangTransform');
 
 const router = express.Router();
+
+// Helper function to transform database menu to API format
+function transformMenuToAPI(dbMenu) {
+  if (!dbMenu) return null;
+
+  // Transform multilingual fields
+  const transformed = transformMultiLangFields(dbMenu, ['name', 'description']);
+
+  return {
+    id: transformed.id,
+    code: transformed.code,
+    name: transformed.name,
+    path: transformed.path,
+    icon: transformed.icon,
+    order: transformed.order || 0,
+    parentId: transformed.parent_id,
+    level: transformed.level || 0,
+    programId: transformed.program_id,
+    description: transformed.description
+  };
+}
 
 /**
  * Get all users with search and pagination
@@ -206,7 +228,9 @@ router.get('/favorite-menus', authenticateToken, async (req, res) => {
 
     // Get all menus and filter favorites
     const allMenus = await menuService.getAllMenus();
-    const favoriteMenus = allMenus.filter(m => favoriteMenuIds.includes(m.id));
+    const favoriteMenus = allMenus
+      .filter(m => favoriteMenuIds.includes(m.id))
+      .map(transformMenuToAPI); // Transform to API format with proper name structure
 
     res.json({ menus: favoriteMenus });
   } catch (error) {
@@ -231,7 +255,9 @@ router.get('/recent-menus', authenticateToken, async (req, res) => {
 
     // Get all menus and filter recents
     const allMenus = await menuService.getAllMenus();
-    const recentMenus = allMenus.filter(m => recentMenuIds.includes(m.id));
+    const recentMenus = allMenus
+      .filter(m => recentMenuIds.includes(m.id))
+      .map(transformMenuToAPI); // Transform to API format with proper name structure
 
     res.json({ menus: recentMenus });
   } catch (error) {
