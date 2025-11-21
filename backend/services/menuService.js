@@ -2,9 +2,14 @@
  * Menu Service Layer
  *
  * Provides data access methods for menu-related operations.
+ *
+ * Performance Optimization:
+ * - Uses Full-Text Search for general menu searches
+ * - Optimized with proper indexes
  */
 
 const db = require('../config/database');
+const { buildMenuSearchCondition, cleanSearchTerm } = require('../utils/searchHelper');
 
 /**
  * Get all menus
@@ -19,9 +24,14 @@ async function getAllMenus(options = {}) {
   let paramIndex = 1;
 
   if (search) {
-    query += ` AND (code ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex})`;
-    params.push(`%${search}%`);
-    paramIndex++;
+    const cleanedSearch = cleanSearchTerm(search);
+    const { condition, param } = buildMenuSearchCondition(cleanedSearch, paramIndex);
+
+    if (condition) {
+      query += ` AND ${condition}`;
+      params.push(param);
+      paramIndex++;
+    }
   }
 
   if (level !== undefined) {

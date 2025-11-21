@@ -68,7 +68,12 @@
       "Bash(cmd //c \"taskkill /F /PID 21432\")",
       "Bash(cmd //c \"taskkill /F /PID 22268\")",
       "Bash(cmd //c \"taskkill /F /PID 3940\")",
-      "Bash(cmd //c \"taskkill /F /PID 9344\" 2)"
+      "Bash(cmd //c \"taskkill /F /PID 9344\" 2)",
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(cmd //c \"taskkill /F /PID 31128\")",
+      "Bash(cmd //c \"taskkill /F /PID 17208\")",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
