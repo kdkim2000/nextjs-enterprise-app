@@ -69,6 +69,8 @@ export function MenuProvider({ children }: { children: ReactNode }) {
       setFavoriteMenus(response.menus || []);
     } catch (err: unknown) {
       console.error('Error fetching favorite menus:', err);
+      // Set empty array on error to prevent UI issues
+      setFavoriteMenus([]);
     }
   }, [isAuthenticated, user]);
 
@@ -84,6 +86,8 @@ export function MenuProvider({ children }: { children: ReactNode }) {
       setRecentMenus(response.menus || []);
     } catch (err: unknown) {
       console.error('Error fetching recent menus:', err);
+      // Set empty array on error to prevent UI issues
+      setRecentMenus([]);
     }
   }, [isAuthenticated, user]);
 

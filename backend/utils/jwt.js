@@ -36,24 +36,20 @@ function generateRefreshToken(payload) {
 
 /**
  * Verify access token
+ * Throws JsonWebTokenError or TokenExpiredError which will be caught by errorHandler
  */
 function verifyToken(token) {
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
-    throw new Error('Invalid or expired token');
-  }
+  // Let JWT errors bubble up to errorHandler
+  return jwt.verify(token, JWT_SECRET);
 }
 
 /**
  * Verify refresh token
+ * Throws JsonWebTokenError or TokenExpiredError which will be caught by errorHandler
  */
 function verifyRefreshToken(token) {
-  try {
-    return jwt.verify(token, JWT_REFRESH_SECRET);
-  } catch (error) {
-    throw new Error('Invalid or expired refresh token');
-  }
+  // Let JWT errors bubble up to errorHandler
+  return jwt.verify(token, JWT_REFRESH_SECRET);
 }
 
 module.exports = {
