@@ -26,14 +26,31 @@ const departmentRoutes = require('./routes/department');
 const codeRoutes = require('./routes/code');
 const codeTypeRoutes = require('./routes/codeType');
 const messageRoutes = require('./routes/message');
+const swaggerRoutes = require('./routes/swagger');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
+const { errorHandler, notFoundHandler, attachResponseHelpers } = require('./middleware/errorHandler');
+const {
+  securityHeaders,
+  preventNoSQLInjection,
+  xssProtection,
+  limitRequestSize,
+  hideServerInfo,
+} = require('./middleware/security');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
 // Middleware
+// 1. Security headers (first)
+app.use(hideServerInfo);
+app.use(securityHeaders);
+
+// 2. Response helpers
+app.use(attachResponseHelpers);
+
+// 3. CORS
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -50,8 +67,19 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+// 4. Request size limiting
+app.use(limitRequestSize(10)); // 10MB limit
+
+// 5. Body parsing with size limits
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// 6. Security protection middleware
+app.use(xssProtection);
+app.use(preventNoSQLInjection);
+
+// 7. Logging
 app.use(loggerMiddleware);
 
 // Serve uploaded files
@@ -74,6 +102,9 @@ app.use('/api/department', departmentRoutes);
 app.use('/api/code', codeRoutes);
 app.use('/api/code-type', codeTypeRoutes);
 app.use('/api/message', messageRoutes);
+
+// API Documentation
+app.use('/api-docs', swaggerRoutes);
 
 // Health check
 app.get('/health', async (req, res) => {
@@ -102,23 +133,11 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error',
-    timestamp: new Date().toISOString()
-  });
-});
+// 404 handler (must be before error handler)
+app.use(notFoundHandler);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    path: req.path,
-    timestamp: new Date().toISOString()
-  });
-});
+// Global error handling middleware (must be last)
+app.use(errorHandler);
 
 // Database connection test and server start
 console.log('='.repeat(70));

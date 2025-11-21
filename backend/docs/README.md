@@ -15,6 +15,7 @@ docs/
 │   ├── ERROR_HANDLING_GUIDE.md
 │   └── SECURITY_GUIDE.md
 ├── operations/           # 운영 및 배포
+│   ├── migration/        # PostgreSQL 마이그레이션
 │   ├── ENVIRONMENT_SETUP.md
 │   ├── FIXES_SUMMARY.md
 │   └── P0_OPTIMIZATION_SUMMARY.md
@@ -72,6 +73,13 @@ docs/
 - 보안 Best Practices
 
 ### 🚀 Operations (운영)
+
+#### [migration/README.md](./operations/migration/README.md)
+PostgreSQL 마이그레이션 문서
+- MongoDB → PostgreSQL 전환 과정
+- 변환 완료 보고서 (9개 문서)
+- 마이그레이션 가이드
+- 적용 및 배포 로그
 
 #### [ENVIRONMENT_SETUP.md](./operations/ENVIRONMENT_SETUP.md)
 개발 환경 설정 가이드

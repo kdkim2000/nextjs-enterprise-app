@@ -1,8 +1,13 @@
 /**
  * Department Service Layer
+ *
+ * Performance Optimization:
+ * - Uses Full-Text Search for general department searches
+ * - Optimized with proper indexes
  */
 
 const db = require('../config/database');
+const { buildDepartmentSearchCondition, cleanSearchTerm } = require('../utils/searchHelper');
 
 async function getAllDepartments(options = {}) {
   const { search } = options;
@@ -11,9 +16,14 @@ async function getAllDepartments(options = {}) {
   let paramIndex = 1;
 
   if (search) {
-    query += ` AND (code ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex})`;
-    params.push(`%${search}%`);
-    paramIndex++;
+    const cleanedSearch = cleanSearchTerm(search);
+    const { condition, param } = buildDepartmentSearchCondition(cleanedSearch, paramIndex);
+
+    if (condition) {
+      query += ` AND ${condition}`;
+      params.push(param);
+      paramIndex++;
+    }
   }
 
   query += ' ORDER BY code';
