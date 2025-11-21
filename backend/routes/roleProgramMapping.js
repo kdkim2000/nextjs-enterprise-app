@@ -26,7 +26,12 @@ async function enrichMappingWithDetails(mapping) {
       roleName: role?.name,
       roleDisplayName: role?.display_name,
       programCode: program?.code,
-      programName: program?.name_en || program?.name
+      programName: program ? {
+        en: program.name_en,
+        ko: program.name_ko,
+        zh: program.name_zh,
+        vi: program.name_vi
+      } : null
     };
   } catch (error) {
     console.error('Error enriching mapping:', error);
@@ -88,7 +93,8 @@ router.get('/', authenticateToken, async (req, res) => {
     } else if (programId) {
       mappings = await mappingService.getRoleProgramMappingsByProgramId(programId);
     } else {
-      mappings = await mappingService.getAllRoleProgramMappings();
+      const result = await mappingService.getAllRoleProgramMappings();
+      mappings = result;
     }
 
     // Format mappings

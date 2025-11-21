@@ -81,7 +81,22 @@ async function getLogs(options = {}) {
   }
 
   const result = await db.query(query, params);
-  return result.rows;
+
+  // Convert snake_case to camelCase for frontend
+  return result.rows.map(row => ({
+    id: row.id,
+    timestamp: row.timestamp,
+    method: row.method,
+    path: row.path,
+    url: row.url,
+    originalUrl: row.original_url,
+    statusCode: row.status_code,
+    duration: row.duration,
+    userId: row.user_id,
+    programId: row.program_id,
+    ip: row.ip,
+    userAgent: row.user_agent
+  }));
 }
 
 async function getLogCount(filters = {}) {
@@ -194,9 +209,16 @@ async function deleteOldLogs(daysToKeep = 90) {
   return result.rowCount;
 }
 
+async function getAllLogs(filters = {}) {
+  // Remove limit/offset from filters and get all matching logs
+  const { limit, offset, ...restFilters } = filters;
+  return getLogs({ ...restFilters, limit: 100000, offset: 0 }); // Large limit to get all logs
+}
+
 module.exports = {
   createLog,
   getLogs,
+  getAllLogs,
   getLogCount,
   getLogAnalytics,
   deleteOldLogs,
