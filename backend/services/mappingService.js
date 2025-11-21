@@ -234,6 +234,24 @@ async function getRoleProgramMappings(roleId) {
   return result.rows;
 }
 
+async function getRoleProgramMappingById(id) {
+  const query = 'SELECT * FROM role_program_mappings WHERE id = $1';
+  const result = await db.query(query, [id]);
+  return result.rows[0] || null;
+}
+
+async function getRoleProgramMappingsByRoleId(roleId) {
+  const query = 'SELECT * FROM role_program_mappings WHERE role_id = $1';
+  const result = await db.query(query, [roleId]);
+  return result.rows;
+}
+
+async function getRoleProgramMappingsByProgramId(programId) {
+  const query = 'SELECT * FROM role_program_mappings WHERE program_id = $1';
+  const result = await db.query(query, [programId]);
+  return result.rows;
+}
+
 async function getAllRoleProgramMappings(options = {}) {
   const { roleId, programId } = options;
   let query = 'SELECT * FROM role_program_mappings WHERE 1=1';
@@ -323,6 +341,9 @@ module.exports = {
 
   // Role-Program Mappings
   getRoleProgramMappings,
+  getRoleProgramMappingById,
+  getRoleProgramMappingsByRoleId,
+  getRoleProgramMappingsByProgramId,
   getAllRoleProgramMappings,
   createRoleProgramMapping,
   updateRoleProgramMapping,
