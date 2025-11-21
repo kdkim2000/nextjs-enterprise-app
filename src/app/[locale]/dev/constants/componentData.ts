@@ -101,6 +101,12 @@ export const componentCategories = [
         tags: ['User', 'Autocomplete', 'API']
       },
       {
+        title: 'User Autocomplete',
+        description: 'Lightweight user autocomplete with server-side search - optimized for performance',
+        path: '/dev/components/user-autocomplete',
+        tags: ['User', 'Autocomplete', 'Performance', 'Lightweight']
+      },
+      {
         title: 'Multi Select',
         description: 'Multiple selection dropdown with search and chips',
         path: '/dev/components/multi-select',
