@@ -53,7 +53,22 @@
       "Bash(cmd //c \"taskkill /F /PID c75a8c\")",
       "Bash(npx next dev:*)",
       "Bash(git commit:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(then grep \"DB_\" backend/.env)",
+      "Bash(cmd //c \"migration\\apply_user_upgrade.bat\")",
+      "Bash(npm start)",
+      "Bash(pip install:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(cmd //c \"taskkill /F /PID 17560\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 31032\" 2)",
+      "Bash(npx eslint:*)",
+      "Bash(cmd //c \"taskkill /F /PID 19492\")",
+      "Bash(npx tsc:*)",
+      "Bash(cmd //c \"taskkill /F /PID 21432\")",
+      "Bash(cmd //c \"taskkill /F /PID 22268\")",
+      "Bash(cmd //c \"taskkill /F /PID 3940\")",
+      "Bash(cmd //c \"taskkill /F /PID 9344\" 2)"
     ],
     "deny": [],
     "ask": []

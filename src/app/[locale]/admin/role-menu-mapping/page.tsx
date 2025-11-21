@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Paper, Typography, Collapse, IconButton, Tooltip } from '@mui/material';
-import { FolderOpen, Close, RestartAlt, Check } from '@mui/icons-material';
+import { Box, Paper, Typography } from '@mui/material';
+import { FolderOpen } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
+import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
@@ -378,99 +379,31 @@ export default function RoleMenuMappingPage() {
                 />
 
                 {/* Advanced Filter Panel */}
-                <Collapse in={advancedFilterOpen}>
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      bgcolor: 'background.default'
+                {advancedFilterOpen && (
+                  <SearchFilterPanel
+                    activeFilterCount={activeFilterCount}
+                    onApply={() => setAdvancedFilterOpen(false)}
+                    onClear={() => {
+                      setQuickSearch('');
+                      setSearchCriteria({
+                        roleName: '',
+                        roleDisplayName: '',
+                        permissions: ''
+                      });
                     }}
+                    onClose={() => setAdvancedFilterOpen(false)}
+                    mode="advanced"
+                    expanded={true}
+                    showHeader={false}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {currentLocale === 'ko' ? '상세 필터' : 'Advanced Filter'}
-                      </Typography>
-                      <IconButton size="small" onClick={() => setAdvancedFilterOpen(false)}>
-                        <Close fontSize="small" />
-                      </IconButton>
-                    </Box>
                     <SearchFilterFields
                       fields={filterFields}
                       values={searchCriteria as unknown as Record<string, string>}
                       onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value as string }))}
                       onEnter={() => setAdvancedFilterOpen(false)}
                     />
-                    <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
-                      {/* Close Button */}
-                      <Tooltip title={currentLocale === 'ko' ? '닫기' : 'Close'} arrow>
-                        <IconButton
-                          onClick={() => setAdvancedFilterOpen(false)}
-                          size="small"
-                          sx={{
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            '&:hover': {
-                              borderColor: 'action.active',
-                              bgcolor: 'action.hover'
-                            }
-                          }}
-                        >
-                          <Close fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-
-                      {/* Clear Button */}
-                      <Tooltip title={currentLocale === 'ko' ? '초기화' : 'Clear'} arrow>
-                        <span>
-                          <IconButton
-                            onClick={() => {
-                              setQuickSearch('');
-                              setSearchCriteria({
-                                roleName: '',
-                                roleDisplayName: '',
-                                permissions: ''
-                              });
-                            }}
-                            disabled={activeFilterCount === 0}
-                            size="small"
-                            sx={{
-                              border: '1px solid',
-                              borderColor: 'divider',
-                              '&:hover': {
-                                borderColor: 'warning.main',
-                                bgcolor: 'warning.50'
-                              }
-                            }}
-                          >
-                            <RestartAlt fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-
-                      {/* Apply Button */}
-                      <Tooltip title={currentLocale === 'ko' ? '적용' : 'Apply'} arrow>
-                        <IconButton
-                          onClick={() => setAdvancedFilterOpen(false)}
-                          size="small"
-                          sx={{
-                            bgcolor: 'primary.main',
-                            color: 'white',
-                            '&:hover': {
-                              bgcolor: 'primary.dark'
-                            },
-                            '&.Mui-disabled': {
-                              bgcolor: 'action.disabledBackground',
-                              color: 'action.disabled'
-                            }
-                          }}
-                        >
-                          <Check fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Paper>
-                </Collapse>
+                  </SearchFilterPanel>
+                )}
 
                 {/* Data Grid */}
                 <Box sx={{ flex: 1, minHeight: 0 }}>

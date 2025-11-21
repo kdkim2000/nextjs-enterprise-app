@@ -12,7 +12,16 @@ const db = require('../config/database');
  * @param {Object} options - Query options
  * @param {number} options.limit - Number of records to return
  * @param {number} options.offset - Number of records to skip
- * @param {string} options.search - Search term for username, email, name
+ * @param {string} options.search - Search term for loginid, email, name_ko, name_en, employee_number
+ * @param {string} options.loginid - Filter by loginid
+ * @param {string} options.name_ko - Filter by Korean name
+ * @param {string} options.name_en - Filter by English name
+ * @param {string} options.email - Filter by email
+ * @param {string} options.employee_number - Filter by employee number
+ * @param {string} options.phone_number - Filter by phone number
+ * @param {string} options.mobile_number - Filter by mobile number
+ * @param {string} options.user_category - Filter by user category
+ * @param {string} options.position - Filter by position
  * @param {string} options.status - Filter by status (active, inactive, locked)
  * @param {string} options.department - Filter by department
  * @param {string} options.role - Filter by role
@@ -23,8 +32,18 @@ async function getAllUsers(options = {}) {
     limit,
     offset,
     search,
+    loginid,
+    name_ko,
+    name_en,
+    email,
+    employee_number,
+    phone_number,
+    mobile_number,
+    user_category,
+    position,
     status,
-    department,
+    department, // backward compatibility - single department
+    departments, // array of department IDs
     role,
   } = options;
 
@@ -32,10 +51,71 @@ async function getAllUsers(options = {}) {
   const params = [];
   let paramIndex = 1;
 
-  // Search filter
+  // General search filter - searches across multiple fields
   if (search) {
-    query += ` AND (username ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name ILIKE $${paramIndex})`;
+    query += ` AND (loginid ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR employee_number ILIKE $${paramIndex})`;
     params.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  // Specific field filters
+  if (loginid) {
+    query += ` AND loginid ILIKE $${paramIndex}`;
+    params.push(`%${loginid}%`);
+    paramIndex++;
+  }
+
+  if (name_ko) {
+    query += ` AND name_ko ILIKE $${paramIndex}`;
+    params.push(`%${name_ko}%`);
+    paramIndex++;
+  }
+
+  if (name_en) {
+    query += ` AND name_en ILIKE $${paramIndex}`;
+    params.push(`%${name_en}%`);
+    paramIndex++;
+  }
+
+  if (email) {
+    query += ` AND email ILIKE $${paramIndex}`;
+    params.push(`%${email}%`);
+    paramIndex++;
+  }
+
+  if (employee_number) {
+    query += ` AND employee_number ILIKE $${paramIndex}`;
+    params.push(`%${employee_number}%`);
+    paramIndex++;
+  }
+
+  if (phone_number) {
+    query += ` AND phone_number ILIKE $${paramIndex}`;
+    params.push(`%${phone_number}%`);
+    paramIndex++;
+  }
+
+  if (mobile_number) {
+    query += ` AND mobile_number ILIKE $${paramIndex}`;
+    params.push(`%${mobile_number}%`);
+    paramIndex++;
+  }
+
+  if (user_category) {
+    query += ` AND user_category = $${paramIndex}`;
+    params.push(user_category);
+    paramIndex++;
+  }
+
+  if (position) {
+    query += ` AND position ILIKE $${paramIndex}`;
+    params.push(`%${position}%`);
+    paramIndex++;
+  }
+
+  if (role) {
+    query += ` AND role = $${paramIndex}`;
+    params.push(role);
     paramIndex++;
   }
 
@@ -46,8 +126,15 @@ async function getAllUsers(options = {}) {
     paramIndex++;
   }
 
-  // Department filter
-  if (department) {
+  // Department filter - support both single and multiple departments
+  if (departments && Array.isArray(departments) && departments.length > 0) {
+    // Multiple departments - use IN clause with OR condition
+    const placeholders = departments.map((_, index) => `$${paramIndex + index}`).join(', ');
+    query += ` AND department IN (${placeholders})`;
+    departments.forEach(dept => params.push(dept));
+    paramIndex += departments.length;
+  } else if (department) {
+    // Single department - backward compatibility
     query += ` AND department = $${paramIndex}`;
     params.push(department);
     paramIndex++;
@@ -79,15 +166,92 @@ async function getAllUsers(options = {}) {
  * @returns {Promise<number>} Total count
  */
 async function getUserCount(filters = {}) {
-  const { search, status, department } = filters;
+  const {
+    search,
+    loginid,
+    name_ko,
+    name_en,
+    email,
+    employee_number,
+    phone_number,
+    mobile_number,
+    user_category,
+    position,
+    role,
+    status,
+    department, // backward compatibility - single department
+    departments // array of department IDs
+  } = filters;
 
   let query = 'SELECT COUNT(*) FROM users WHERE 1=1';
   const params = [];
   let paramIndex = 1;
 
+  // General search filter
   if (search) {
-    query += ` AND (username ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name ILIKE $${paramIndex})`;
+    query += ` AND (loginid ILIKE $${paramIndex} OR email ILIKE $${paramIndex} OR name_ko ILIKE $${paramIndex} OR name_en ILIKE $${paramIndex} OR employee_number ILIKE $${paramIndex})`;
     params.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  // Specific field filters
+  if (loginid) {
+    query += ` AND loginid ILIKE $${paramIndex}`;
+    params.push(`%${loginid}%`);
+    paramIndex++;
+  }
+
+  if (name_ko) {
+    query += ` AND name_ko ILIKE $${paramIndex}`;
+    params.push(`%${name_ko}%`);
+    paramIndex++;
+  }
+
+  if (name_en) {
+    query += ` AND name_en ILIKE $${paramIndex}`;
+    params.push(`%${name_en}%`);
+    paramIndex++;
+  }
+
+  if (email) {
+    query += ` AND email ILIKE $${paramIndex}`;
+    params.push(`%${email}%`);
+    paramIndex++;
+  }
+
+  if (employee_number) {
+    query += ` AND employee_number ILIKE $${paramIndex}`;
+    params.push(`%${employee_number}%`);
+    paramIndex++;
+  }
+
+  if (phone_number) {
+    query += ` AND phone_number ILIKE $${paramIndex}`;
+    params.push(`%${phone_number}%`);
+    paramIndex++;
+  }
+
+  if (mobile_number) {
+    query += ` AND mobile_number ILIKE $${paramIndex}`;
+    params.push(`%${mobile_number}%`);
+    paramIndex++;
+  }
+
+  if (user_category) {
+    query += ` AND user_category = $${paramIndex}`;
+    params.push(user_category);
+    paramIndex++;
+  }
+
+  if (position) {
+    query += ` AND position ILIKE $${paramIndex}`;
+    params.push(`%${position}%`);
+    paramIndex++;
+  }
+
+  if (role) {
+    query += ` AND role = $${paramIndex}`;
+    params.push(role);
     paramIndex++;
   }
 
@@ -97,7 +261,15 @@ async function getUserCount(filters = {}) {
     paramIndex++;
   }
 
-  if (department) {
+  // Department filter - support both single and multiple departments
+  if (departments && Array.isArray(departments) && departments.length > 0) {
+    // Multiple departments - use IN clause with OR condition
+    const placeholders = departments.map((_, index) => `$${paramIndex + index}`).join(', ');
+    query += ` AND department IN (${placeholders})`;
+    departments.forEach(dept => params.push(dept));
+    paramIndex += departments.length;
+  } else if (department) {
+    // Single department - backward compatibility
     query += ` AND department = $${paramIndex}`;
     params.push(department);
     paramIndex++;
@@ -119,14 +291,24 @@ async function getUserById(userId) {
 }
 
 /**
- * Get a user by username
- * @param {string} username - Username
+ * Get a user by loginid
+ * @param {string} loginid - Login ID
  * @returns {Promise<Object|null>} User object or null if not found
  */
-async function getUserByUsername(username) {
-  const query = 'SELECT * FROM users WHERE username = $1';
-  const result = await db.query(query, [username]);
+async function getUserByLoginId(loginid) {
+  const query = 'SELECT * FROM users WHERE loginid = $1';
+  const result = await db.query(query, [loginid]);
   return result.rows[0] || null;
+}
+
+/**
+ * Get a user by username (backward compatibility)
+ * @param {string} username - Username (treated as loginid)
+ * @returns {Promise<Object|null>} User object or null if not found
+ * @deprecated Use getUserByLoginId instead
+ */
+async function getUserByUsername(username) {
+  return getUserByLoginId(username);
 }
 
 /**
@@ -148,12 +330,21 @@ async function getUserByEmail(email) {
 async function createUser(userData) {
   const {
     id,
-    username,
+    loginid,
+    username, // backward compatibility
     email,
     password,
-    name,
+    name_ko,
+    name_en,
+    name, // backward compatibility
     firstName,
     lastName,
+    employee_number,
+    system_key,
+    phone_number,
+    mobile_number,
+    user_category = 'regular',
+    position,
     department,
     status = 'active',
     mfaEnabled = false,
@@ -161,29 +352,47 @@ async function createUser(userData) {
     phone,
   } = userData;
 
-  // If name is not provided but firstName/lastName are, combine them
-  const fullName = name || (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || '');
+  // Backward compatibility: use username if loginid not provided
+  const finalLoginId = loginid || username;
+
+  // Backward compatibility: if name_ko is not provided, use name
+  const finalNameKo = name_ko || name || (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || '');
+
+  // Generate system_key if not provided
+  const finalSystemKey = system_key || `USR-${id}`;
+
+  // Use phone as fallback for phone_number if provided
+  const finalPhoneNumber = phone_number || phone;
 
   const query = `
     INSERT INTO users (
-      id, username, email, password, name,
-      department, status, mfa_enabled, avatar_url,
-      created_at
+      id, loginid, email, password, name_ko, name_en,
+      employee_number, system_key, phone_number, mobile_number,
+      user_category, position, department, status, mfa_enabled, avatar_url, avatar_image,
+      last_password_changed, created_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
     RETURNING *
   `;
 
   const params = [
     id,
-    username,
+    finalLoginId,
     email,
     password,
-    fullName,
+    finalNameKo,
+    name_en,
+    employee_number,
+    finalSystemKey,
+    finalPhoneNumber,
+    mobile_number,
+    user_category,
+    position,
     department,
     status,
     mfaEnabled,
     profileImage,
+    userData.avatar_image || null, // Base64 encoded image
   ];
 
   const result = await db.query(query, params);
@@ -198,31 +407,61 @@ async function createUser(userData) {
  */
 async function updateUser(userId, updates) {
   const allowedFields = [
-    'username',
+    'loginid',
+    'username', // backward compatibility, will be mapped to loginid
     'email',
     'password',
-    'name',
+    'name_ko',
+    'name_en',
+    'name', // backward compatibility, will be mapped to name_ko
+    'employee_number',
+    'system_key',
+    'phone_number',
+    'mobile_number',
+    'user_category',
+    'position',
     'department',
     'status',
     'role',
     'mfa_enabled',
     'sso_enabled',
     'avatar_url',
+    'avatar_image', // Base64 encoded image
     'last_login',
+    'last_password_changed',
   ];
 
   const setClause = [];
   const params = [];
   let paramIndex = 1;
 
-  // Handle firstName/lastName to name conversion
+  // Handle backward compatibility and field conversions
   const processedUpdates = { ...updates };
+
+  // username -> loginid
+  if (updates.username && !updates.loginid) {
+    processedUpdates.loginid = updates.username;
+    delete processedUpdates.username;
+  }
+
+  // name -> name_ko
+  if (updates.name && !updates.name_ko) {
+    processedUpdates.name_ko = updates.name;
+    delete processedUpdates.name;
+  }
+
+  // firstName/lastName to name_ko
   if (updates.firstName || updates.lastName) {
-    processedUpdates.name = updates.name ||
+    processedUpdates.name_ko = updates.name_ko ||
       (updates.firstName && updates.lastName ? `${updates.firstName} ${updates.lastName}` :
        updates.firstName || updates.lastName);
     delete processedUpdates.firstName;
     delete processedUpdates.lastName;
+  }
+
+  // Update last_password_changed when password is changed
+  if (updates.password) {
+    processedUpdates.last_password_changed = new Date().toISOString();
   }
 
   // Build SET clause dynamically
@@ -230,7 +469,7 @@ async function updateUser(userId, updates) {
     // Convert camelCase to snake_case
     const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
 
-    if (allowedFields.includes(dbField)) {
+    if (allowedFields.includes(key) || allowedFields.includes(dbField)) {
       setClause.push(`${dbField} = $${paramIndex}`);
       params.push(value);
       paramIndex++;
@@ -346,14 +585,14 @@ async function lockUser(userId) {
 }
 
 /**
- * Check if username exists
- * @param {string} username - Username to check
+ * Check if loginid exists
+ * @param {string} loginid - Login ID to check
  * @param {string} excludeUserId - User ID to exclude from check (for updates)
- * @returns {Promise<boolean>} True if username exists
+ * @returns {Promise<boolean>} True if loginid exists
  */
-async function usernameExists(username, excludeUserId = null) {
-  let query = 'SELECT COUNT(*) FROM users WHERE username = $1';
-  const params = [username];
+async function loginidExists(loginid, excludeUserId = null) {
+  let query = 'SELECT COUNT(*) FROM users WHERE loginid = $1';
+  const params = [loginid];
 
   if (excludeUserId) {
     query += ' AND id != $2';
@@ -362,6 +601,17 @@ async function usernameExists(username, excludeUserId = null) {
 
   const result = await db.query(query, params);
   return parseInt(result.rows[0].count, 10) > 0;
+}
+
+/**
+ * Check if username exists (backward compatibility)
+ * @param {string} username - Username to check
+ * @param {string} excludeUserId - User ID to exclude from check (for updates)
+ * @returns {Promise<boolean>} True if username exists
+ * @deprecated Use loginidExists instead
+ */
+async function usernameExists(username, excludeUserId = null) {
+  return loginidExists(username, excludeUserId);
 }
 
 /**
@@ -404,7 +654,8 @@ module.exports = {
   getAllUsers,
   getUserCount,
   getUserById,
-  getUserByUsername,
+  getUserByLoginId,
+  getUserByUsername, // backward compatibility
   getUserByEmail,
   getUsersByIds,
   createUser,
@@ -415,6 +666,7 @@ module.exports = {
   incrementFailedAttempts,
   resetFailedAttempts,
   lockUser,
-  usernameExists,
+  loginidExists,
+  usernameExists, // backward compatibility
   emailExists,
 };

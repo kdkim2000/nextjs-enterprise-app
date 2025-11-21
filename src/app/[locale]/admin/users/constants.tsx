@@ -7,11 +7,6 @@ import ActionsCell from '@/components/common/ActionsCell';
 import { User } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-export const DEPARTMENTS = [
-  'Admin', 'Design', 'Engineering', 'Finance', 'HR', 'IT',
-  'Legal', 'Marketing', 'Operations', 'Product', 'Sales', 'Support'
-];
-
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
@@ -36,6 +31,34 @@ export const createColumns = (
       filterable: false,
       renderCell: (params) => {
         const user = params.row as User;
+
+        // Determine avatar source (priority: avatar_image > avatarUrl)
+        let avatarSrc = '';
+        if (user.avatar_image) {
+          // Use base64 image directly from DB
+          avatarSrc = user.avatar_image;
+          console.log('[Avatar] Using DB image for user:', user.loginid, 'size:', user.avatar_image.length);
+        } else if (user.avatarUrl) {
+          // Fallback to avatar URL
+          avatarSrc = getAvatarUrl(user.avatarUrl);
+          console.log('[Avatar] Using URL for user:', user.loginid);
+        }
+
+        // Get avatar text based on available name fields
+        let avatarText = '';
+        if (!avatarSrc) {
+          if (user.name_ko) {
+            // For Korean names, show only 1 character (usually the family name)
+            avatarText = user.name_ko.substring(0, 1);
+          } else if (user.name_en) {
+            // For English names, show first 2 characters (initials)
+            avatarText = user.name_en.substring(0, 2).toUpperCase();
+          } else if (user.name) {
+            // Fallback to name field if exists
+            avatarText = user.name.substring(0, 1);
+          }
+        }
+
         return (
           <Box
             sx={{
@@ -45,23 +68,61 @@ export const createColumns = (
             }}
           >
             <Avatar
-              src={getAvatarUrl(user.avatarUrl)}
-              alt={user.name}
+              src={avatarSrc || undefined}
+              alt={user.name_ko || user.name || ''}
               sx={{ width: 32, height: 32 }}
             >
-              {!user.avatarUrl && user.name?.substring(0, 2).toUpperCase()}
+              {avatarText}
             </Avatar>
           </Box>
         );
       }
     },
-    { field: 'username', headerName: t('auth.username'), width: 130 },
     {
-      field: 'name',
-      headerName: getLocalizedValue({ en: 'Name', ko: '이름', zh: '姓名', vi: 'Tên' }, locale),
-      width: 150
+      field: 'loginid',
+      headerName: getLocalizedValue({ en: 'Login ID', ko: '로그인 ID', zh: '登录ID', vi: 'ID đăng nhập' }, locale),
+      width: 130,
+      valueGetter: (_value, row) => row.loginid || row.username // backward compatibility
+    },
+    {
+      field: 'employee_number',
+      headerName: getLocalizedValue({ en: 'Employee #', ko: '사번', zh: '员工号', vi: 'Mã NV' }, locale),
+      width: 120
+    },
+    {
+      field: 'name_ko',
+      headerName: getLocalizedValue({ en: 'Name (KR)', ko: '이름 (한글)', zh: '姓名 (韩)', vi: 'Tên (Hàn)' }, locale),
+      width: 130,
+      valueGetter: (_value, row) => row.name_ko || row.name // backward compatibility
+    },
+    {
+      field: 'name_en',
+      headerName: getLocalizedValue({ en: 'Name (EN)', ko: '이름 (영문)', zh: '姓名 (英)', vi: 'Tên (Anh)' }, locale),
+      width: 130
     },
     { field: 'email', headerName: t('auth.email'), width: 200 },
+    {
+      field: 'phone_number',
+      headerName: getLocalizedValue({ en: 'Phone', ko: '전화번호', zh: '电话', vi: 'Điện thoại' }, locale),
+      width: 130
+    },
+    {
+      field: 'mobile_number',
+      headerName: getLocalizedValue({ en: 'Mobile', ko: '휴대전화', zh: '手机', vi: 'Di động' }, locale),
+      width: 130
+    },
+    {
+      field: 'user_category',
+      headerName: getLocalizedValue({ en: 'Category', ko: '사용자구분', zh: '类别', vi: 'Loại' }, locale),
+      width: 110,
+      type: 'singleSelect',
+      valueOptions: ['regular', 'contractor', 'temporary', 'external', 'admin']
+    },
+    {
+      field: 'position',
+      headerName: getLocalizedValue({ en: 'Position', ko: '직급', zh: '职位', vi: 'Chức vụ' }, locale),
+      width: 100
+    },
     {
       field: 'role',
       headerName: getLocalizedValue({ en: 'Role', ko: '역할', zh: '角色', vi: 'Vai trò' }, locale),
@@ -75,8 +136,27 @@ export const createColumns = (
       width: 200,
       valueGetter: (_value, row) => {
         if (!row.department) return '-';
+
+        // If departments are still loading, return empty string to avoid showing codes
+        if (!allDepartments || allDepartments.length === 0) {
+          return '';
+        }
+
         const dept = allDepartments.find(d => d.id === row.department);
-        return dept ? getLocalizedValue(dept.name, locale) : row.department;
+        if (!dept) {
+          // Department not found - return empty string instead of code
+          return '';
+        }
+
+        // Check if dept.name is an object (multi-language) or string
+        if (typeof dept.name === 'object' && dept.name !== null) {
+          return getLocalizedValue(dept.name, locale);
+        } else if (typeof dept.name === 'string') {
+          return dept.name;
+        } else {
+          // Fallback: try language-specific fields
+          return dept.name_ko || dept.name_en || dept.name_zh || dept.name_vi || '';
+        }
       }
     },
     {
@@ -96,7 +176,7 @@ export const createColumns = (
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        console.log('[UserManagement] Rendering actions for user:', params.row.username, 'hasResetPassword:', !!handleResetPassword);
+        console.log('[UserManagement] Rendering actions for user:', params.row.loginid || params.row.username, 'hasResetPassword:', !!handleResetPassword);
         return (
           <ActionsCell
             onEdit={() => handleEdit(params.row.id)}

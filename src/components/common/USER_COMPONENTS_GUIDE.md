@@ -2,23 +2,25 @@
 
 ## 개요
 
-사용자 선택을 위한 두 가지 컴포넌트가 제공됩니다. 사용 사례에 따라 적절한 컴포넌트를 선택하세요.
+사용자 선택을 위한 세 가지 컴포넌트가 제공됩니다. 사용 사례에 따라 적절한 컴포넌트를 선택하세요.
 
 ## 컴포넌트 비교
 
-### UserSearchDialog vs UserSelector
+### UserSearchDialog vs UserSelector vs UserAutocomplete
 
-| 특성 | UserSearchDialog | UserSelector |
-|------|------------------|--------------|
-| **UI 형태** | Dialog (모달 팝업) | TextField (폼 필드) |
-| **표시 방식** | 버튼 클릭 시 열림 | 항상 화면에 표시됨 |
-| **사용 목적** | 검색 및 선택 | 폼 입력 필드 |
-| **단독 사용** | ✅ 독립 사용 가능 | ✅ 독립 사용 가능 |
-| **다중 선택** | ✅ 지원 | ❌ 단일만 |
-| **고급 검색** | ✅ 지원 | ✅ 지원 (내부적으로) |
-| **선택 결과** | 콜백 반환 후 닫힘 | TextField에 계속 표시 |
-| **유효성 검사** | ❌ 없음 | ✅ required, error 지원 |
-| **적합한 경우** | 일괄 작업, 다중 선택 | 폼 필드, 단일 선택 |
+| 특성 | UserSearchDialog | UserSelector | UserAutocomplete |
+|------|------------------|--------------|------------------|
+| **UI 형태** | Dialog (모달 팝업) | TextField (폼 필드) | Autocomplete (자동완성) |
+| **표시 방식** | 버튼 클릭 시 열림 | 항상 화면에 표시됨 | 드롭다운 자동완성 |
+| **사용 목적** | 검색 및 선택 | 폼 입력 필드 | 빠른 검색/선택 |
+| **단독 사용** | ✅ 독립 사용 가능 | ✅ 독립 사용 가능 | ✅ 독립 사용 가능 |
+| **다중 선택** | ✅ 지원 | ❌ 단일만 | ❌ 단일만 |
+| **고급 검색** | ✅ 지원 | ✅ 지원 (내부적으로) | ❌ 간단한 검색만 |
+| **선택 결과** | 콜백 반환 후 닫힘 | TextField에 계속 표시 | Autocomplete에 표시 |
+| **유효성 검사** | ❌ 없음 | ✅ required, error 지원 | ✅ required, error 지원 |
+| **성능** | 보통 | 무거움 (Dialog 포함) | 가벼움 (최적화됨) |
+| **서버 검색** | ✅ | ✅ | ✅ (Debounced) |
+| **적합한 경우** | 일괄 작업, 다중 선택 | 고급 검색 필요 | 간단한 폼 필드 |
 
 ## 언제 어떤 컴포넌트를 사용할까?
 
@@ -75,11 +77,64 @@
 />
 ```
 
+### UserAutocomplete 사용 ✅
+
+다음 경우에 UserAutocomplete를 사용하세요:
+
+#### 1. 간단한 폼 필드 (성능 중시)
+```tsx
+// ✅ 부서 관리자 선택 (간단한 검색)
+<DepartmentFormFields
+  formData={formData}
+  onChange={handleFieldChange}
+  departments={departments}
+>
+  <UserAutocomplete
+    value={formData.managerId}
+    onChange={(userId) => handleFieldChange('managerId', userId)}
+    label="Department Manager"
+    placeholder="Search by username or name..."
+    required
+    error={!!errors.managerId}
+    helperText={errors.managerId}
+  />
+</DepartmentFormFields>
+```
+
+#### 2. 대량 데이터에서 빠른 검색
+```tsx
+// ✅ 30,000명 사용자 중 검색 (서버사이드 검색)
+<UserAutocomplete
+  value={assigneeId}
+  onChange={setAssigneeId}
+  label="Assignee"
+  placeholder="Type 2+ characters to search..."
+  fullWidth
+/>
+```
+
+#### 3. 고급 검색 기능이 필요 없는 경우
+```tsx
+// ✅ 간단한 사용자 선택만 필요
+<form onSubmit={handleSubmit}>
+  <TextField label="Title" />
+
+  <UserAutocomplete
+    value={userId}
+    onChange={setUserId}
+    label="User"
+    required
+  />
+
+  <Button type="submit">Submit</Button>
+</form>
+```
+
 ### UserSelector 사용 ✅
 
 다음 경우에 UserSelector를 사용하세요:
 
-#### 1. 폼 필드로 사용
+#### 1. 고급 검색이 필요한 폼 필드
 ```tsx
 // ✅ 작업 할당 폼
 <form onSubmit={handleSubmit}>
@@ -317,21 +372,23 @@ function PermissionManagement() {
 
 ## 기능 비교 매트릭스
 
-| 기능 | UserSearchDialog | UserSelector |
-|------|------------------|--------------|
-| 빠른 검색 | ✅ | ✅ (내부적으로) |
-| 고급 검색 | ✅ | ✅ (prop 전달) |
-| 다국어 지원 | ✅ | ✅ |
-| 부서 표시 | ✅ | ✅ |
-| 단일 선택 | ✅ | ✅ |
-| 다중 선택 | ✅ | ❌ |
-| 폼 필드로 사용 | ❌ | ✅ |
-| required 속성 | ❌ | ✅ |
-| error 상태 | ❌ | ✅ |
-| helperText | ❌ | ✅ |
-| disabled 상태 | ❌ | ✅ |
-| 제외 사용자 | ✅ | ✅ (prop 전달) |
-| 자동 로드 | ❌ | ✅ |
+| 기능 | UserSearchDialog | UserSelector | UserAutocomplete |
+|------|------------------|--------------|------------------|
+| 빠른 검색 | ✅ | ✅ (내부적으로) | ✅ (Debounced) |
+| 고급 검색 | ✅ | ✅ (prop 전달) | ❌ |
+| 다국어 지원 | ✅ | ✅ | ❌ (간단) |
+| 부서 표시 | ✅ | ✅ | ❌ |
+| 단일 선택 | ✅ | ✅ | ✅ |
+| 다중 선택 | ✅ | ❌ | ❌ |
+| 폼 필드로 사용 | ❌ | ✅ | ✅ |
+| required 속성 | ❌ | ✅ | ✅ |
+| error 상태 | ❌ | ✅ | ✅ |
+| helperText | ❌ | ✅ | ✅ |
+| disabled 상태 | ❌ | ✅ | ✅ |
+| 제외 사용자 | ✅ | ✅ (prop 전달) | ❌ |
+| 자동 로드 | ❌ | ✅ | ✅ (By ID) |
+| 성능 | 보통 | 무거움 | 가벼움 |
+| 번들 크기 | 중간 | 큼 | 작음 |
 
 ## 선택 가이드 플로우차트
 
@@ -344,13 +401,21 @@ function PermissionManagement() {
   │       │
   │       └─ 아니오 → 폼 필드인가?
   │                  │
-  │                  ├─ 예 → UserSelector 사용
+  │                  ├─ 예 → 고급 검색이 필요한가?
+  │                  │       │
+  │                  │       ├─ 예 → UserSelector 사용
+  │                  │       │
+  │                  │       └─ 아니오 → 성능이 중요한가?
+  │                  │                  │
+  │                  │                  ├─ 예 → UserAutocomplete 사용
+  │                  │                  │
+  │                  │                  └─ 아니오 → UserSelector 사용
   │                  │
   │                  └─ 아니오 → 버튼 트리거인가?
   │                             │
   │                             ├─ 예 → UserSearchDialog 사용
   │                             │
-  │                             └─ 아니오 → UserSelector 사용 (기본)
+  │                             └─ 아니오 → UserAutocomplete 사용 (기본)
 ```
 
 ## 빠른 참조
@@ -362,14 +427,50 @@ function PermissionManagement() {
 
 ### UserSelector
 - **파일**: `src/components/common/UserSelector/index.tsx`
-- **용도**: 폼 필드로 사용자 선택
-- **키워드**: Form, Field, Input, Single, Required, Validation
+- **용도**: 고급 검색 지원 폼 필드
+- **키워드**: Form, Field, Advanced Search, Department, Validation
+
+### UserAutocomplete
+- **파일**: `src/components/common/UserAutocomplete.tsx`
+- **용도**: 가벼운 자동완성 폼 필드
+- **키워드**: Autocomplete, Performance, Simple, Fast, Lightweight
+
+## 컴포넌트 선택 가이드
+
+### UserAutocomplete를 선택하세요
+- ✅ 간단한 사용자 검색만 필요
+- ✅ 성능과 번들 크기가 중요
+- ✅ 고급 검색 기능 불필요
+- ✅ 빠른 자동완성이 필요
+- ✅ 대량 사용자 검색 (서버사이드)
+
+### UserSelector를 선택하세요
+- ✅ 부서별 필터가 필요
+- ✅ 고급 검색 기능이 필요
+- ✅ 다국어 표시가 중요
+- ✅ 상세한 사용자 정보 표시
+- ✅ 사용자 제외 기능 필요
+
+### UserSearchDialog를 선택하세요
+- ✅ 다중 사용자 선택
+- ✅ 버튼 트리거 방식
+- ✅ 일괄 작업
+- ✅ 화면 공간 절약
 
 ## 결론
 
-1. **두 컴포넌트는 서로 다른 역할**을 합니다
+1. **세 컴포넌트는 서로 다른 역할**을 합니다
 2. **UserSelector는 UserSearchDialog를 내부에서 사용**합니다
-3. **통합할 필요 없음** - 각자의 사용 사례에 최적화되어 있음
-4. **함께 사용**하는 것이 일반적입니다
+3. **UserAutocomplete는 가장 가벼운 옵션**입니다
+4. **통합할 필요 없음** - 각자의 사용 사례에 최적화되어 있음
+5. **함께 사용**하는 것이 일반적입니다
 
 사용 사례에 맞는 컴포넌트를 선택하면 됩니다!
+
+## 성능 비교
+
+| 컴포넌트 | 초기 로드 | 검색 속도 | 메모리 사용 | 권장 사용처 |
+|---------|---------|---------|-----------|-----------|
+| UserAutocomplete | ⚡ 빠름 | ⚡ 빠름 | 💚 낮음 | 간단한 폼 |
+| UserSelector | 🐢 느림 | 🐢 보통 | 🟡 높음 | 복잡한 폼 |
+| UserSearchDialog | 🐢 보통 | ⚡ 빠름 | 🟡 중간 | 다중 선택 |

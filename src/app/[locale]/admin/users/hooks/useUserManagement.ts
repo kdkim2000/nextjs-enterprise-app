@@ -27,12 +27,18 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   } = usePageState<SearchCriteria, User>({
     storageKey,
     initialCriteria: {
+      loginid: '',
       username: '',
+      name_ko: '',
+      name_en: '',
       name: '',
       email: '',
+      employee_number: '',
+      position: '',
       role: '',
-      department: [],
-      status: ''
+      department: '', // Single department string
+      status: '',
+      user_category: ''
     },
     initialPaginationModel: {
       page: 0,
@@ -67,8 +73,29 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   // Fetch all departments for dropdown
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await api.get('/department?page=1&limit=1000');
-      setAllDepartments(response.departments || []);
+      const response = await api.get('/department/all');
+      const departments = response.departments || [];
+
+      // Transform department data to include name object for multi-language support
+      const transformedDepartments = departments.map((dept: any) => ({
+        id: dept.id,
+        code: dept.code,
+        name: {
+          en: dept.name_en || dept.name || dept.code,
+          ko: dept.name_ko || dept.name || dept.code,
+          zh: dept.name_zh || dept.name || dept.code,
+          vi: dept.name_vi || dept.name || dept.code
+        },
+        name_ko: dept.name_ko,
+        name_en: dept.name_en,
+        name_zh: dept.name_zh,
+        name_vi: dept.name_vi,
+        parent_id: dept.parent_id,
+        level: dept.level,
+        status: dept.status
+      }));
+
+      setAllDepartments(transformedDepartments);
     } catch (error: any) {
       console.error('Failed to fetch departments:', error);
       setAllDepartments([]);
@@ -88,19 +115,28 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       const params = new URLSearchParams();
 
       if (useQuickSearch && quickSearch) {
-        // Quick search: search in username, name, and email
-        params.append('username', quickSearch);
-        params.append('name', quickSearch);
+        // Quick search: search across most relevant fields
+        // Using the general 'search' parameter that searches multiple fields at once
+        params.append('loginid', quickSearch);
+        params.append('name_ko', quickSearch);
+        params.append('name_en', quickSearch);
         params.append('email', quickSearch);
+        params.append('employee_number', quickSearch);
       } else {
         // Advanced search: use specific criteria
-        if (searchCriteria.username) params.append('username', searchCriteria.username);
-        if (searchCriteria.name) params.append('name', searchCriteria.name);
+        if (searchCriteria.loginid) params.append('loginid', searchCriteria.loginid);
+        if (searchCriteria.name_ko) params.append('name_ko', searchCriteria.name_ko);
+        if (searchCriteria.name_en) params.append('name_en', searchCriteria.name_en);
         if (searchCriteria.email) params.append('email', searchCriteria.email);
+        if (searchCriteria.employee_number) params.append('employee_number', searchCriteria.employee_number);
+        if (searchCriteria.phone_number) params.append('phone_number', searchCriteria.phone_number);
+        if (searchCriteria.mobile_number) params.append('mobile_number', searchCriteria.mobile_number);
+        if (searchCriteria.user_category) params.append('user_category', searchCriteria.user_category);
+        if (searchCriteria.position) params.append('position', searchCriteria.position);
         if (searchCriteria.role) params.append('role', searchCriteria.role);
-        // Handle department as array
-        if (Array.isArray(searchCriteria.department) && searchCriteria.department.length > 0) {
-          searchCriteria.department.forEach(dept => params.append('department', dept));
+        // Handle department as single value
+        if (searchCriteria.department) {
+          params.append('department', searchCriteria.department);
         }
         if (searchCriteria.status) params.append('status', searchCriteria.status);
       }
@@ -285,11 +321,19 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
   const handleAdvancedSearchClear = useCallback(() => {
     setSearchCriteria({
+      loginid: '',
       username: '',
+      name_ko: '',
+      name_en: '',
       name: '',
       email: '',
+      employee_number: '',
+      phone_number: '',
+      mobile_number: '',
+      user_category: '',
+      position: '',
       role: '',
-      department: [],
+      department: '',
       status: ''
     });
     sessionStorage.removeItem(storageKey);
@@ -309,6 +353,11 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     const useQuickSearch = quickSearch.trim() !== '';
     fetchUsers(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchUsers, quickSearch, setPaginationModel]);
+
+  // Load departments on mount
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
 
   return {
     // State

@@ -15,15 +15,21 @@ async function getUserRoleMappings(userId) {
   return result.rows;
 }
 
+async function getUserRoleMappingById(id) {
+  const query = 'SELECT * FROM user_role_mappings WHERE id = $1';
+  const result = await db.query(query, [id]);
+  return result.rows[0] || null;
+}
+
 // Alias for backward compatibility
 async function getUserRoleMappingsByUserId(userId, includeDetails = false) {
   if (includeDetails) {
     const query = `
       SELECT
         urm.*,
-        u.username,
+        u.loginid as username,
         u.email,
-        u.name as user_name,
+        COALESCE(u.name_ko, u.name_en, u.loginid) as user_name,
         u.department as user_department,
         r.name as role_name,
         r.display_name as role_display_name,
@@ -45,9 +51,9 @@ async function getUserRoleMappingsByRoleId(roleId, includeDetails = false) {
     const query = `
       SELECT
         urm.*,
-        u.username,
+        u.loginid as username,
         u.email,
-        u.name as user_name,
+        COALESCE(u.name_ko, u.name_en, u.loginid) as user_name,
         u.department as user_department,
         r.name as role_name,
         r.display_name as role_display_name,
@@ -102,15 +108,57 @@ async function getAllUserRoleMappings(options = {}) {
 }
 
 async function createUserRoleMapping(data) {
-  const { id, userId, roleId, assignedBy } = data;
+  const { userId, roleId, assignedBy, expiresAt, isActive } = data;
+
+  // Generate unique ID for the mapping
+  const mappingId = `URM-${userId}-${roleId}-${Date.now()}`;
+
   const query = `
-    INSERT INTO user_role_mappings (id, user_id, role_id, assigned_by, assigned_at)
-    VALUES ($1, $2, $3, $4, NOW())
-    ON CONFLICT (user_id, role_id) DO NOTHING
+    INSERT INTO user_role_mappings (
+      id, user_id, role_id, assigned_by, assigned_at, expires_at, is_active, updated_at
+    )
+    VALUES ($1, $2, $3, $4, NOW(), $5, $6, NOW())
+    ON CONFLICT (user_id, role_id) DO UPDATE
+    SET
+      is_active = EXCLUDED.is_active,
+      expires_at = EXCLUDED.expires_at,
+      updated_at = NOW(),
+      updated_by = EXCLUDED.assigned_by
     RETURNING *
   `;
-  const result = await db.query(query, [id, userId, roleId, assignedBy]);
+  const result = await db.query(query, [
+    mappingId,
+    userId,
+    roleId,
+    assignedBy,
+    expiresAt || null,
+    isActive !== undefined ? isActive : true
+  ]);
   return result.rows[0];
+}
+
+async function updateUserRoleMapping(id, updates) {
+  const allowedFields = ['expires_at', 'is_active', 'updated_by'];
+  const setClause = [];
+  const params = [];
+  let paramIndex = 1;
+
+  for (const [key, value] of Object.entries(updates)) {
+    const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    if (allowedFields.includes(dbField)) {
+      setClause.push(`${dbField} = $${paramIndex}`);
+      params.push(value);
+      paramIndex++;
+    }
+  }
+
+  if (setClause.length === 0) throw new Error('No valid fields to update');
+  setClause.push(`updated_at = NOW()`);
+  params.push(id);
+
+  const query = `UPDATE user_role_mappings SET ${setClause.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+  const result = await db.query(query, params);
+  return result.rows[0] || null;
 }
 
 async function deleteUserRoleMapping(id) {
@@ -186,6 +234,24 @@ async function getRoleProgramMappings(roleId) {
   return result.rows;
 }
 
+async function getRoleProgramMappingById(id) {
+  const query = 'SELECT * FROM role_program_mappings WHERE id = $1';
+  const result = await db.query(query, [id]);
+  return result.rows[0] || null;
+}
+
+async function getRoleProgramMappingsByRoleId(roleId) {
+  const query = 'SELECT * FROM role_program_mappings WHERE role_id = $1';
+  const result = await db.query(query, [roleId]);
+  return result.rows;
+}
+
+async function getRoleProgramMappingsByProgramId(programId) {
+  const query = 'SELECT * FROM role_program_mappings WHERE program_id = $1';
+  const result = await db.query(query, [programId]);
+  return result.rows;
+}
+
 async function getAllRoleProgramMappings(options = {}) {
   const { roleId, programId } = options;
   let query = 'SELECT * FROM role_program_mappings WHERE 1=1';
@@ -257,10 +323,12 @@ async function deleteRoleProgramMappingByRoleAndProgram(roleId, programId) {
 module.exports = {
   // User-Role Mappings
   getUserRoleMappings,
+  getUserRoleMappingById,
   getUserRoleMappingsByUserId,
   getUserRoleMappingsByRoleId,
   getAllUserRoleMappings,
   createUserRoleMapping,
+  updateUserRoleMapping,
   deleteUserRoleMapping,
   deleteUserRoleMappingByUserAndRole,
 
@@ -273,6 +341,9 @@ module.exports = {
 
   // Role-Program Mappings
   getRoleProgramMappings,
+  getRoleProgramMappingById,
+  getRoleProgramMappingsByRoleId,
+  getRoleProgramMappingsByProgramId,
   getAllRoleProgramMappings,
   createRoleProgramMapping,
   updateRoleProgramMapping,

@@ -93,19 +93,26 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
         const term = quickSearch.toLowerCase();
         filtered = allRoles.filter(
           (role: Role) =>
-            role.id.toLowerCase().includes(term) ||
-            role.name.toLowerCase().includes(term) ||
-            role.displayName.toLowerCase().includes(term) ||
-            role.description.toLowerCase().includes(term)
+            role.id?.toLowerCase().includes(term) ||
+            role.name?.toLowerCase().includes(term) ||
+            role.displayName?.toLowerCase().includes(term) ||
+            role.description?.toLowerCase().includes(term)
         );
       } else if (Object.values(searchCriteria).some(v => v !== '')) {
         // Advanced search: only filter if there are search criteria
         filtered = allRoles.filter((role: Role) => {
-          if (searchCriteria.name && !role.name.toLowerCase().includes(searchCriteria.name.toLowerCase())) return false;
-          if (searchCriteria.displayName && !role.displayName.toLowerCase().includes(searchCriteria.displayName.toLowerCase())) return false;
+          if (searchCriteria.name && !role.name?.toLowerCase().includes(searchCriteria.name.toLowerCase())) return false;
+          if (searchCriteria.displayName && !role.displayName?.toLowerCase().includes(searchCriteria.displayName.toLowerCase())) return false;
           if (searchCriteria.roleType && role.roleType !== searchCriteria.roleType) return false;
-          if (searchCriteria.isActive && String(role.isActive) !== searchCriteria.isActive) return false;
-          if (searchCriteria.isSystem && String(role.isSystem) !== searchCriteria.isSystem) return false;
+          // Handle boolean comparison properly
+          if (searchCriteria.isActive !== '') {
+            const expectedActive = searchCriteria.isActive === 'true';
+            if (role.isActive !== expectedActive) return false;
+          }
+          if (searchCriteria.isSystem !== '') {
+            const expectedSystem = searchCriteria.isSystem === 'true';
+            if (role.isSystem !== expectedSystem) return false;
+          }
           if (searchCriteria.manager && role.manager !== searchCriteria.manager) return false;
           if (searchCriteria.representative && role.representative !== searchCriteria.representative) return false;
           return true;
@@ -128,7 +135,22 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
 
   // Role CRUD operations
   const handleAdd = useCallback(() => {
-    setEditingRole(null);
+    setEditingRole({
+      id: '',
+      name: '',
+      displayName: '',
+      description: '',
+      roleType: 'general',
+      manager: null,
+      representative: null,
+      managerName: null,
+      representativeName: null,
+      isSystem: false,
+      isActive: true,
+      createdAt: '',
+      updatedAt: '',
+      createdBy: ''
+    });
     setDialogOpen(true);
   }, []);
 

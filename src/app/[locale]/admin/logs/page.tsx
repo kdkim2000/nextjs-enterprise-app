@@ -114,12 +114,15 @@ export default function LogsPage() {
     });
   }, [searchCriteria, paginationModel, quickSearch, logs, rowCount]);
 
-  // Check if there's saved state with data on mount
+  // Check if there's saved state with data on mount, otherwise fetch initial data
   useEffect(() => {
     if (savedState && (savedState.logs?.length > 0 || savedState.quickSearch ||
         Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
       // Data already loaded from savedState, no need to fetch again
       // User can click refresh if they want fresh data
+    } else {
+      // No saved state, fetch initial data (recent logs)
+      fetchLogs(0, 50, false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
