@@ -1,3 +1,30 @@
+/**
+ * RichTextEditor Component
+ *
+ * A feature-rich WYSIWYG editor built with Tiptap for creating and editing
+ * formatted content with HTML/Markdown support.
+ *
+ * Features:
+ * - Text formatting (bold, italic, underline, strikethrough)
+ * - Headings (h1-h6)
+ * - Lists (bulleted, numbered)
+ * - Text alignment (left, center, right, justify)
+ * - Blockquotes and code blocks
+ * - Links and images
+ * - Tables
+ * - Undo/Redo
+ *
+ * @example
+ * ```tsx
+ * <RichTextEditor
+ *   value={content}
+ *   onChange={setContent}
+ *   placeholder="Write your content here..."
+ *   minHeight={300}
+ * />
+ * ```
+ */
+
 'use client';
 
 import React, { useCallback } from 'react';
@@ -42,14 +69,25 @@ import {
   FormatClear
 } from '@mui/icons-material';
 
+/**
+ * Props for the RichTextEditor component
+ */
 export interface RichTextEditorProps {
+  /** Current HTML content value */
   value: string;
+  /** Callback fired when content changes */
   onChange: (value: string) => void;
+  /** Placeholder text shown when editor is empty */
   placeholder?: string;
+  /** Minimum height of the editor content area (default: 200) */
   minHeight?: number | string;
+  /** Maximum height of the editor content area (default: 600) */
   maxHeight?: number | string;
+  /** If true, editor is disabled and read-only */
   disabled?: boolean;
+  /** If true, editor shows error styling */
   error?: boolean;
+  /** Helper text displayed below the editor */
   helperText?: string;
 }
 
@@ -114,7 +152,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   });
 
-  // Set link
+  /**
+   * Handle link insertion/editing
+   * Prompts user for URL and adds/updates link at current selection
+   */
   const setLink = useCallback(() => {
     if (!editor) return;
 
@@ -131,7 +172,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
-  // Add image
+  /**
+   * Handle image insertion
+   * Prompts user for image URL and inserts image at cursor position
+   */
   const addImage = useCallback(() => {
     if (!editor) return;
 
@@ -146,6 +190,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     return null;
   }
 
+  /**
+   * Toolbar button component with tooltip and active state
+   */
   const MenuButton = ({
     onClick,
     isActive = false,
@@ -201,7 +248,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }}
         >
           <Stack direction="row" spacing={0.5} flexWrap="wrap" alignItems="center">
-            {/* Text formatting */}
+            {/* === Text Formatting === */}
             <MenuButton
               onClick={() => editor.chain().focus().toggleBold().run()}
               isActive={editor.isActive('bold')}
@@ -229,7 +276,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            {/* Lists */}
+            {/* === Lists === */}
             <MenuButton
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               isActive={editor.isActive('bulletList')}
@@ -245,7 +292,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            {/* Alignment */}
+            {/* === Text Alignment === */}
             <MenuButton
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
               isActive={editor.isActive({ textAlign: 'left' })}
@@ -273,7 +320,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            {/* Quote and Code */}
+            {/* === Blockquote & Code === */}
             <MenuButton
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
               isActive={editor.isActive('blockquote')}
@@ -289,7 +336,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            {/* Link and Image */}
+            {/* === Links & Images === */}
             <MenuButton
               onClick={setLink}
               isActive={editor.isActive('link')}
@@ -304,7 +351,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            {/* Undo/Redo */}
+            {/* === History === */}
             <MenuButton
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
@@ -320,7 +367,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            {/* Clear formatting */}
+            {/* === Clear Formatting === */}
             <MenuButton
               onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
               icon={<FormatClear fontSize="small" />}
