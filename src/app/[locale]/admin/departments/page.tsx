@@ -185,7 +185,7 @@ export default function DepartmentsPage() {
           setDialogOpen(false);
           setEditingDepartment(null);
         }}
-        title={!editingDepartment?.id ? t('crud.addNew', { item: t('menu.departments') }) : t('crud.edit', { item: t('menu.departments') })}
+        title={!editingDepartment?.id ? t('common.create') + ' Department' : t('common.edit') + ' Department'}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
@@ -216,7 +216,7 @@ export default function DepartmentsPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName={t('menu.department')}
+        itemName="Department"
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

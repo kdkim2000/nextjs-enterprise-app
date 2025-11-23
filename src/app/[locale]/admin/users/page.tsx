@@ -180,7 +180,7 @@ export default function UserManagementPage() {
           setDialogOpen(false);
           setEditingUser(null);
         }}
-        title={!editingUser?.id ? t('crud.addNew', { item: t('menu.users') }) : t('crud.edit', { item: t('menu.users') })}
+        title={!editingUser?.id ? t('common.create') + ' Users' : t('common.edit') + ' Users'}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
@@ -201,7 +201,7 @@ export default function UserManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName={t('menu.user')}
+        itemName="User"
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

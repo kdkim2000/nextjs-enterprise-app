@@ -148,6 +148,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editable: !disabled,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
+      console.log('[RichTextEditor] Generated HTML:', html.substring(0, 200) + (html.length > 200 ? '...' : ''));
       onChange(html);
     }
   });

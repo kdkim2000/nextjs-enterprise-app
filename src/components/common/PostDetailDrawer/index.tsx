@@ -17,7 +17,8 @@ import {
   ListItemAvatar,
   TextField,
   CircularProgress,
-  Alert
+  Alert,
+  Snackbar
 } from '@mui/material';
 import {
   Close,
@@ -33,33 +34,48 @@ import {
 } from '@mui/icons-material';
 import { apiClient } from '@/lib/api/client';
 import SafeHtmlRenderer from '@/components/common/SafeHtmlRenderer';
+import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
 interface Post {
   id: string;
-  board_type_id: string;
-  board_type_code: string;
-  board_type_name: string;
+  boardTypeId?: string;
+  board_type_id?: string;
+  board_type_code?: string;
+  board_type_name?: string;
   title: string;
   content: string;
-  author_id: string;
+  authorId?: string;
+  author_id?: string;
+  authorName?: string;
   author_name?: string;
+  authorUsername?: string;
   author_username?: string;
-  is_pinned: boolean;
-  is_secret: boolean;
-  view_count: number;
-  like_count: number;
-  comment_count: number;
+  isPinned?: boolean;
+  is_pinned?: boolean;
+  isSecret?: boolean;
+  is_secret?: boolean;
+  viewCount?: number;
+  view_count?: number;
+  likeCount?: number;
+  like_count?: number;
+  commentCount?: number;
+  comment_count?: number;
   tags?: string[];
-  created_at: string;
-  updated_at: string;
+  createdAt?: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
 }
 
 interface Comment {
   id: string;
+  authorName?: string;
   author_name?: string;
+  authorUsername?: string;
   author_username?: string;
   content: string;
-  created_at: string;
+  createdAt?: string;
+  created_at?: string;
   replies?: Comment[];
 }
 
@@ -77,6 +93,7 @@ export interface PostDetailDrawerProps {
   boardTypeId: string;
   onEdit?: (postId: string) => void;
   onDelete?: () => void;
+  canWrite?: boolean;
 }
 
 export default function PostDetailDrawer({
@@ -84,7 +101,8 @@ export default function PostDetailDrawer({
   onClose,
   postId,
   onEdit,
-  onDelete
+  onDelete,
+  canWrite = false
 }: PostDetailDrawerProps) {
   // State
   const [post, setPost] = useState<Post | null>(null);
@@ -95,7 +113,13 @@ export default function PostDetailDrawer({
   const [error, setError] = useState('');
   const [newComment, setNewComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [isAuthor] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   // Fetch post details
   useEffect(() => {
@@ -104,9 +128,33 @@ export default function PostDetailDrawer({
     const fetchPost = async () => {
       try {
         setLoading(true);
+
+        // Fetch post data
         const response = await apiClient.get(`/post/${postId}`);
         if (response.success && response.data) {
-          setPost(response.data.post || response.data);
+          const postData = response.data.post || response.data;
+          setPost(postData);
+
+          // Increment view count and update the view count in state
+          try {
+            const viewResponse = await apiClient.get(`/post/${postId}/view`);
+            console.log('[PostDetailDrawer] View response:', viewResponse);
+
+            if (viewResponse.success && viewResponse.data) {
+              // Update view count with the response from the server
+              setPost((prev) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  viewCount: viewResponse.data.viewCount,
+                  view_count: viewResponse.data.viewCount
+                };
+              });
+            }
+          } catch (viewError) {
+            console.error('Error recording view:', viewError);
+            // Don't fail if view count fails
+          }
         } else {
           setError(response.error || 'Failed to load post');
         }
@@ -155,18 +203,25 @@ export default function PostDetailDrawer({
   }, [postId, post, open]);
 
   const handleLike = async () => {
+    if (!post) return;
+
     try {
       const response = liked
-        ? await apiClient.post(`/post/${postId}/unlike`)
+        ? await apiClient.delete(`/post/${postId}/like`)
         : await apiClient.post(`/post/${postId}/like`);
 
       if (response.success) {
         setLiked(!liked);
+
+        // Update like count - handle both camelCase and snake_case
+        const currentLikeCount = post.likeCount ?? post.like_count ?? 0;
+
         setPost((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            like_count: prev.like_count + (liked ? -1 : 1)
+            likeCount: currentLikeCount + (liked ? -1 : 1),
+            like_count: currentLikeCount + (liked ? -1 : 1)
           };
         });
       }
@@ -210,24 +265,68 @@ export default function PostDetailDrawer({
 
   const handleEditClick = () => {
     if (onEdit && post) {
+      // Close current drawer first
+      onClose();
+      // Then trigger edit in parent
       onEdit(post.id);
     }
   };
 
-  const handleDeleteClick = async () => {
-    if (!window.confirm('Are you sure you want to delete this post?')) return;
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
 
+  const handleConfirmDelete = async () => {
     try {
+      setDeleteLoading(true);
       const response = await apiClient.delete(`/post/${postId}`);
+
       if (response.success) {
+        // Show success message
+        setSnackbar({
+          open: true,
+          message: 'Post deleted successfully!',
+          severity: 'success'
+        });
+
+        // Call onDelete callback to refresh the list
         if (onDelete) {
           onDelete();
         }
-        onClose();
+
+        // Close dialog and drawer
+        setDeleteDialogOpen(false);
+        setTimeout(() => onClose(), 500); // Delay to show snackbar
+      } else {
+        // Show error message from API
+        setSnackbar({
+          open: true,
+          message: response.error || 'Failed to delete post',
+          severity: 'error'
+        });
+        setDeleteDialogOpen(false);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Show error message
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to delete post';
+      setSnackbar({
+        open: true,
+        message: errorMsg,
+        severity: 'error'
+      });
+      setDeleteDialogOpen(false);
       console.error('Error deleting post:', error);
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -261,12 +360,12 @@ export default function PostDetailDrawer({
         >
           <Typography variant="h6">Post Details</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            {isAuthor && post && (
+            {canWrite && post && (
               <>
-                <IconButton onClick={handleEditClick} size="small" color="primary">
+                <IconButton onClick={handleEditClick} size="small" color="primary" disabled={loading}>
                   <Edit />
                 </IconButton>
-                <IconButton onClick={handleDeleteClick} size="small" color="error">
+                <IconButton onClick={handleDeleteClick} size="small" color="error" disabled={loading}>
                   <Delete />
                 </IconButton>
               </>
@@ -290,8 +389,8 @@ export default function PostDetailDrawer({
               {/* Title */}
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                  {post.is_pinned && <PushPin fontSize="small" color="primary" />}
-                  {post.is_secret && <Lock fontSize="small" color="action" />}
+                  {(post.isPinned ?? post.is_pinned) && <PushPin fontSize="small" color="primary" />}
+                  {(post.isSecret ?? post.is_secret) && <Lock fontSize="small" color="action" />}
                   <Typography variant="h5">{post.title}</Typography>
                 </Stack>
                 {post.tags && post.tags.length > 0 && (
@@ -309,24 +408,24 @@ export default function PostDetailDrawer({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography variant="body2">
-                    <strong>{post.author_name || post.author_username}</strong>
+                    <strong>{post.authorName || post.author_name || post.authorUsername || post.author_username}</strong>
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {new Date(post.created_at).toLocaleString()}
+                    {new Date(post.createdAt || post.created_at || '').toLocaleString()}
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={2}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Visibility fontSize="small" color="action" />
-                    <Typography variant="body2">{post.view_count}</Typography>
+                    <Typography variant="body2">{post.viewCount ?? post.view_count ?? 0}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <ThumbUp fontSize="small" color="action" />
-                    <Typography variant="body2">{post.like_count}</Typography>
+                    <Typography variant="body2">{post.likeCount ?? post.like_count ?? 0}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <CommentIcon fontSize="small" color="action" />
-                    <Typography variant="body2">{post.comment_count}</Typography>
+                    <Typography variant="body2">{post.commentCount ?? post.comment_count ?? 0}</Typography>
                   </Box>
                 </Stack>
               </Box>
@@ -377,7 +476,7 @@ export default function PostDetailDrawer({
                   onClick={handleLike}
                   size="large"
                 >
-                  Like ({post.like_count})
+                  Like ({post.likeCount ?? post.like_count ?? 0})
                 </Button>
               </Box>
 
@@ -416,30 +515,35 @@ export default function PostDetailDrawer({
                   </Typography>
                 ) : (
                   <List>
-                    {comments.map((comment) => (
-                      <ListItem key={comment.id} alignItems="flex-start" sx={{ px: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar>{comment.author_name?.[0] || 'U'}</Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography variant="subtitle2">
-                                {comment.author_name || comment.author_username}
+                    {comments.map((comment) => {
+                      const authorName = comment.authorName || comment.author_name || comment.authorUsername || comment.author_username || 'Unknown';
+                      const createdAt = comment.createdAt || comment.created_at || '';
+
+                      return (
+                        <ListItem key={comment.id} alignItems="flex-start" sx={{ px: 0 }}>
+                          <ListItemAvatar>
+                            <Avatar>{authorName[0]?.toUpperCase() || 'U'}</Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="subtitle2">
+                                  {authorName}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {new Date(createdAt).toLocaleString()}
+                                </Typography>
+                              </Box>
+                            }
+                            secondary={
+                              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                {comment.content}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {new Date(comment.created_at).toLocaleString()}
-                              </Typography>
-                            </Box>
-                          }
-                          secondary={
-                            <Typography variant="body2" sx={{ mt: 0.5 }}>
-                              {comment.content}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))}
+                            }
+                          />
+                        </ListItem>
+                      );
+                    })}
                   </List>
                 )}
               </Box>
@@ -447,6 +551,32 @@ export default function PostDetailDrawer({
           )}
         </Box>
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        itemCount={1}
+        itemName="post"
+        itemsList={post ? [{ id: post.id, displayName: post.title }] : []}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        loading={deleteLoading}
+        title="Confirm Delete"
+        cancelText="Cancel"
+        confirmText="Delete"
+      />
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Drawer>
   );
 }

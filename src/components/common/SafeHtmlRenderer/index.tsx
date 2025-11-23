@@ -29,9 +29,9 @@ const SafeHtmlRenderer: React.FC<SafeHtmlRendererProps> = ({ html, className, sx
   const sanitizedHtml = useMemo(() => {
     if (!html) return '';
 
-    // Configure DOMPurify for maximum security
+    // Configure DOMPurify for maximum security while preserving formatting
     const config = {
-      // Allowed tags
+      // Allowed tags - comprehensive list for rich text editing
       ALLOWED_TAGS: [
         'p', 'br', 'span', 'div',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -50,25 +50,25 @@ const SafeHtmlRenderer: React.FC<SafeHtmlRendererProps> = ({ html, className, sx
         'class', 'style',
         'align', 'colspan', 'rowspan'
       ],
-      // Allowed URI schemes
+      // Allowed URI schemes for links and images
       ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
       // Force target="_blank" for all links
       ADD_ATTR: ['target'],
-      // Remove all data attributes
-      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-      // Forbid script-like tags
-      FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
-      // Keep safe HTML entities
+      // Remove dangerous event handlers
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onmouseout', 'onmouseenter', 'onmouseleave'],
+      // Forbid dangerous tags that could execute scripts
+      FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select'],
+      // Keep safe HTML content
       KEEP_CONTENT: true,
-      // Return a DocumentFragment
+      // Return sanitized HTML string
       RETURN_DOM_FRAGMENT: false,
       RETURN_DOM: false
     };
 
-    // Sanitize and return
+    // Sanitize HTML with DOMPurify
     const clean = DOMPurify.sanitize(html, config);
 
-    // Additional security: ensure all links have rel="noopener noreferrer"
+    // Ensure all links have rel="noopener noreferrer" for security
     return clean.replace(/<a\s/g, '<a rel="noopener noreferrer" target="_blank" ');
   }, [html]);
 
