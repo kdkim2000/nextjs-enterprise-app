@@ -12,13 +12,25 @@ export const createColumns = (
   t: any,
   locale: string,
   handleView: (id: string) => void,
-  canUpdate: boolean = true
+  handleEdit: (id: string) => void,
+  canUpdate: boolean = true,
+  totalRows: number = 0,
+  currentPage: number = 0,
+  pageSize: number = 10
 ): GridColDef[] => {
   const columns: GridColDef[] = [
     {
-      field: 'id',
-      headerName: getLocalizedValue({ en: 'ID', ko: 'ID', zh: 'ID', vi: 'ID' }, locale),
-      width: 70
+      field: 'rowNumber',
+      headerName: getLocalizedValue({ en: 'No.', ko: '번호', zh: '编号', vi: 'Số' }, locale),
+      width: 70,
+      align: 'center',
+      headerAlign: 'center',
+      sortable: false,
+      filterable: false,
+      valueGetter: (_value, row, _column, apiRef) => {
+        const rowIndex = apiRef.current.getRowIndexRelativeToVisibleRows(row.id);
+        return totalRows - (currentPage * pageSize) - rowIndex;
+      }
     },
     {
       field: 'title',
@@ -28,7 +40,7 @@ export const createColumns = (
       renderCell: (params) => {
         const post = params.row as Post;
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 1, py: 1, width: '100%', height: '100%' }}>
             {post.is_pinned && <PushPin fontSize="small" color="primary" />}
             {post.is_secret && <Lock fontSize="small" color="action" />}
             <Typography variant="body2" sx={{ flex: 1 }}>
@@ -63,7 +75,7 @@ export const createColumns = (
       align: 'center',
       headerAlign: 'center',
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, width: '100%', height: '100%' }}>
           <Visibility fontSize="small" color="action" />
           <Typography variant="body2" color="text.secondary">
             {params.row.view_count || 0}
@@ -78,7 +90,7 @@ export const createColumns = (
       align: 'center',
       headerAlign: 'center',
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, width: '100%', height: '100%' }}>
           <ThumbUp fontSize="small" color="action" />
           <Typography variant="body2" color="text.secondary">
             {params.row.like_count || 0}
@@ -132,8 +144,8 @@ export const createColumns = (
       renderCell: (params) => {
         return (
           <ActionsCell
-            onEdit={() => handleView(params.row.id)}
-            editTooltip={getLocalizedValue({ en: 'View Post', ko: '게시글 보기', zh: '查看帖子', vi: 'Xem bài viết' }, locale)}
+            onEdit={() => handleEdit(params.row.id)}
+            editTooltip={getLocalizedValue({ en: 'Edit Post', ko: '게시글 수정', zh: '编辑帖子', vi: 'Chỉnh sửa bài viết' }, locale)}
             showMore={false}
           />
         );

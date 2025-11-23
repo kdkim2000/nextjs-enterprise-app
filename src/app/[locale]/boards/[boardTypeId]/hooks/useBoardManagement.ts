@@ -61,6 +61,9 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<(string | number)[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Fetch posts from API
   const fetchPosts = useCallback(async (
@@ -217,7 +220,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       showError('Please enter a title');
       return;
     }
-    if (!editingPost.content.trim() || editingPost.content === '<p></p>') {
+    if (!editingPost.content?.trim() || editingPost.content === '<p></p>') {
       showError('Please enter content');
       return;
     }
@@ -231,6 +234,10 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
         content: editingPost.content,
         tags: editingPost.tags || [],
         isSecret: editingPost.is_secret,
+        isPinned: editingPost.is_pinned,
+        showPopup: (editingPost as any).showPopup,
+        displayStartDate: (editingPost as any).displayStartDate,
+        displayEndDate: (editingPost as any).displayEndDate,
         status: 'published'
       };
 
@@ -292,6 +299,54 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     setSelectedPostId(null);
   }, []);
 
+  // Delete handler - opens confirmation dialog
+  const handleDelete = useCallback((ids: (string | number)[]) => {
+    if (!ids || ids.length === 0) return;
+    setDeleteTargetIds(ids);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  // Confirm delete - executes the deletion
+  const handleConfirmDelete = useCallback(async () => {
+    if (deleteTargetIds.length === 0) return;
+
+    try {
+      setDeleteLoading(true);
+
+      // Delete posts one by one
+      const deletePromises = deleteTargetIds.map(id => apiClient.delete(`/post/${id}`));
+      const results = await Promise.allSettled(deletePromises);
+
+      // Count successes and failures
+      const successes = results.filter(r => r.status === 'fulfilled' && (r.value as any).success).length;
+      const failures = results.length - successes;
+
+      if (successes > 0) {
+        showSuccess(`Successfully deleted ${successes} post${successes > 1 ? 's' : ''}`);
+        handleRefresh();
+      }
+
+      if (failures > 0) {
+        showError(`Failed to delete ${failures} post${failures > 1 ? 's' : ''}`);
+      }
+
+      // Close dialog
+      setDeleteDialogOpen(false);
+      setDeleteTargetIds([]);
+    } catch (error: any) {
+      console.error('Error deleting posts:', error);
+      showError('Failed to delete posts');
+    } finally {
+      setDeleteLoading(false);
+    }
+  }, [deleteTargetIds, showSuccess, showError, handleRefresh]);
+
+  // Cancel delete
+  const handleCancelDelete = useCallback(() => {
+    setDeleteDialogOpen(false);
+    setDeleteTargetIds([]);
+  }, []);
+
   // Initial fetch and refetch on criteria change
   useEffect(() => {
     if (boardType?.id) {
@@ -325,6 +380,9 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     editingPost,
     setEditingPost,
     saveLoading,
+    deleteDialogOpen,
+    deleteTargetIds,
+    deleteLoading,
 
     // Handlers
     handleRefresh,
@@ -336,6 +394,9 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     handlePaginationModelChange,
     handleAdd,
     handleSave,
+    handleDelete,
+    handleConfirmDelete,
+    handleCancelDelete,
     handlePostClick,
     handleCloseDrawer
   };

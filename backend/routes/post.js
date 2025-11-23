@@ -42,6 +42,9 @@ function transformPostToAPI(dbPost) {
     isSecret: dbPost.is_secret,
     isPinned: dbPost.is_pinned,
     pinnedUntil: dbPost.pinned_until,
+    showPopup: dbPost.show_popup,
+    displayStartDate: dbPost.display_start_date,
+    displayEndDate: dbPost.display_end_date,
     isApproved: dbPost.is_approved,
     approvedBy: dbPost.approved_by,
     approvedAt: dbPost.approved_at,
@@ -184,6 +187,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const {
       boardTypeId, title, content,
       postType, status, isSecret, isPinned, pinnedUntil,
+      showPopup, displayStartDate, displayEndDate,
       tags, metadata
     } = req.body;
 
@@ -217,6 +221,10 @@ router.post('/', authenticateToken, async (req, res) => {
     const userService = require('../services/userService');
     const user = await userService.getUserById(req.user.userId);
 
+    // Debug: Log content before saving
+    console.log('[POST /api/post] Received content length:', content?.length);
+    console.log('[POST /api/post] Content preview:', content?.substring(0, 200));
+
     const postData = {
       boardTypeId,
       title,
@@ -229,6 +237,9 @@ router.post('/', authenticateToken, async (req, res) => {
       isSecret: isSecret || false,
       isPinned: (req.user.role === 'admin' && isPinned) || false,
       pinnedUntil: (req.user.role === 'admin' && pinnedUntil) || null,
+      showPopup: (req.user.role === 'admin' && showPopup) || false,
+      displayStartDate: (req.user.role === 'admin' && displayStartDate) || null,
+      displayEndDate: (req.user.role === 'admin' && displayEndDate) || null,
       isApproved: true,
       tags,
       metadata
@@ -251,8 +262,16 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
   try {
     const {
       title, content, postType, status,
-      isSecret, isPinned, pinnedUntil, tags, metadata
+      isSecret, isPinned, pinnedUntil,
+      showPopup, displayStartDate, displayEndDate,
+      tags, metadata
     } = req.body;
+
+    // Debug: Log content before updating
+    if (content !== undefined) {
+      console.log('[PUT /api/post/:id] Received content length:', content?.length);
+      console.log('[PUT /api/post/:id] Content preview:', content?.substring(0, 200));
+    }
 
     const updates = {};
     if (title !== undefined) updates.title = title;
@@ -263,10 +282,13 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
     if (tags !== undefined) updates.tags = tags;
     if (metadata !== undefined) updates.metadata = metadata;
 
-    // Only admin can pin posts
+    // Only admin can pin posts and manage popup notifications
     if (req.user.role === 'admin') {
       if (isPinned !== undefined) updates.isPinned = isPinned;
       if (pinnedUntil !== undefined) updates.pinnedUntil = pinnedUntil;
+      if (showPopup !== undefined) updates.showPopup = showPopup;
+      if (displayStartDate !== undefined) updates.displayStartDate = displayStartDate;
+      if (displayEndDate !== undefined) updates.displayEndDate = displayEndDate;
     }
 
     const dbPost = await postService.updatePost(req.params.id, updates);
@@ -284,13 +306,23 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
  */
 router.delete('/:id', authenticateToken, checkPostEditPermission(), async (req, res) => {
   try {
-    // Soft delete by default
-    await postService.deletePost(req.params.id);
+    console.log('[DELETE /api/post/:id] Deleting post:', req.params.id);
 
-    res.json({ message: 'Post deleted successfully' });
+    // Soft delete by default
+    const result = await postService.deletePost(req.params.id);
+
+    console.log('[DELETE /api/post/:id] Delete result:', result);
+
+    res.json({
+      success: true,
+      message: 'Post deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting post:', error);
-    res.status(500).json({ error: 'Failed to delete post' });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete post'
+    });
   }
 });
 
@@ -356,28 +388,50 @@ router.post('/:id/approve', authenticateToken, checkPostApprovalPermission(), as
  */
 router.get('/:id/view', authenticateToken, async (req, res) => {
   try {
-    // Record view (check if already viewed today by this user)
     const db = require('../config/database');
     const viewId = uuidv4();
 
-    try {
+    console.log('[POST VIEW] Recording view for post:', req.params.id, 'by user:', req.user.userId);
+
+    // Check if already viewed today
+    const checkResult = await db.query(`
+      SELECT id FROM post_views
+      WHERE post_id = $1
+        AND user_id = $2
+        AND DATE(viewed_at) = CURRENT_DATE
+      LIMIT 1
+    `, [req.params.id, req.user.userId]);
+
+    if (checkResult.rows.length === 0) {
+      // Not viewed today - record new view
       await db.query(`
         INSERT INTO post_views (id, post_id, user_id, ip_address, user_agent, viewed_at)
         VALUES ($1, $2, $3, $4, $5, NOW())
-        ON CONFLICT (post_id, user_id, date(viewed_at))
-        DO NOTHING
       `, [viewId, req.params.id, req.user.userId, req.ip, req.get('user-agent')]);
 
       // Increment view count
+      console.log('[POST VIEW] New view recorded, incrementing count');
       await postService.incrementViewCount(req.params.id);
-    } catch (error) {
-      // Ignore duplicate errors
-      console.log('View already recorded today');
-    }
 
-    res.json({ success: true });
+      // Get updated post to return new view count
+      const updatedPost = await postService.getPostById(req.params.id);
+      res.json({
+        success: true,
+        viewCount: updatedPost.view_count,
+        message: 'View count incremented'
+      });
+    } else {
+      console.log('[POST VIEW] Already viewed today, not incrementing');
+      // Already viewed today, return current count without incrementing
+      const currentPost = await postService.getPostById(req.params.id);
+      res.json({
+        success: true,
+        viewCount: currentPost.view_count,
+        message: 'Already viewed today'
+      });
+    }
   } catch (error) {
-    console.error('Error recording view:', error);
+    console.error('[POST VIEW] Error recording view:', error);
     res.status(500).json({ error: 'Failed to record view' });
   }
 });
@@ -465,6 +519,46 @@ router.delete('/:id/like', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error unliking post:', error);
     res.status(500).json({ error: 'Failed to unlike post' });
+  }
+});
+
+/**
+ * GET /api/post/popup-notifications - Get active popup notifications
+ */
+router.get('/popup-notifications', authenticateToken, async (req, res) => {
+  try {
+    const now = new Date();
+
+    const query = `
+      SELECT p.*,
+        u.name_ko as author_name_ko,
+        u.name_en as author_name_en,
+        d.name_ko as department_name_ko,
+        d.name_en as department_name_en
+      FROM posts p
+      LEFT JOIN users u ON p.author_id = u.id
+      LEFT JOIN departments d ON u.department = d.id
+      WHERE p.show_popup = true
+        AND p.status = 'published'
+        AND (p.display_start_date IS NULL OR p.display_start_date <= $1)
+        AND (p.display_end_date IS NULL OR p.display_end_date >= $1)
+      ORDER BY p.created_at DESC
+      LIMIT 10
+    `;
+
+    const result = await require('../config/database').query(query, [now]);
+    const notifications = result.rows.map(transformPostToAPI);
+
+    res.json({
+      success: true,
+      notifications
+    });
+  } catch (error) {
+    console.error('Error fetching popup notifications:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch popup notifications'
+    });
   }
 });
 

@@ -142,8 +142,8 @@ async function createPost(postData) {
     boardTypeId, title, content,
     authorId, authorName, authorDepartment,
     postType, status, isAnonymous, isSecret,
-    isPinned, pinnedUntil, isApproved,
-    tags, metadata
+    isPinned, pinnedUntil, showPopup, displayStartDate, displayEndDate,
+    isApproved, tags, metadata
   } = postData;
 
   const id = uuidv4();
@@ -153,10 +153,11 @@ async function createPost(postData) {
       id, board_type_id, title, content,
       author_id, author_name, author_department, is_anonymous,
       post_type, status, is_secret, is_pinned, pinned_until,
+      show_popup, display_start_date, display_end_date,
       is_approved, tags, metadata,
       created_at, updated_at, published_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW(), NOW())
     RETURNING *
   `;
 
@@ -165,6 +166,7 @@ async function createPost(postData) {
     authorId, authorName, authorDepartment, isAnonymous || false,
     postType || 'normal', status || 'published', isSecret || false,
     isPinned || false, pinnedUntil || null,
+    showPopup || false, displayStartDate || null, displayEndDate || null,
     isApproved !== undefined ? isApproved : true,
     JSON.stringify(tags || []),
     JSON.stringify(metadata || {})
@@ -183,8 +185,9 @@ async function createPost(postData) {
 async function updatePost(postId, updates) {
   const allowedFields = [
     'title', 'content', 'post_type', 'status',
-    'is_secret', 'is_pinned', 'pinned_until', 'is_approved',
-    'approved_by', 'approved_at', 'tags', 'metadata'
+    'is_secret', 'is_pinned', 'pinned_until',
+    'show_popup', 'display_start_date', 'display_end_date',
+    'is_approved', 'approved_by', 'approved_at', 'tags', 'metadata'
   ];
 
   const setClause = [];
