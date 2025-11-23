@@ -160,11 +160,11 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
 
   const handleQuickSearchClear = useCallback(() => {
     setQuickSearch('');
-    setPosts([]);
-    setRowCount(0);
     setPaginationModel({ page: 0, pageSize: 20 });
     sessionStorage.removeItem(storageKey);
-  }, [setQuickSearch, setPosts, setRowCount, setPaginationModel, storageKey]);
+    // Fetch posts without quick search to show all posts
+    fetchPosts(0, 20, false);
+  }, [setQuickSearch, setPaginationModel, storageKey, fetchPosts]);
 
   const handleAdvancedSearch = useCallback(() => {
     setPaginationModel({ ...paginationModel, page: 0 });
