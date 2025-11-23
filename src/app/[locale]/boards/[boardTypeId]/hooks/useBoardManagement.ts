@@ -101,9 +101,9 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       const response = await apiClient.get(url);
       console.log('API Response:', response);
 
-      if (response.posts) {
+      if (response.success && response.data?.posts) {
         // Normalize field names
-        const normalizedPosts = response.posts.map((post: any) => ({
+        const normalizedPosts = response.data.posts.map((post: any) => ({
           id: post.id,
           title: post.title,
           content: post.content,
@@ -127,11 +127,15 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
         setPosts(normalizedPosts);
 
         // Update row count for DataGrid
-        if (response.pagination) {
-          setRowCount(response.pagination.totalCount || 0);
+        if (response.data.pagination) {
+          setRowCount(response.data.pagination.totalCount || 0);
         } else {
           setRowCount(normalizedPosts.length);
         }
+      } else {
+        console.log('No posts in response or request failed');
+        setPosts([]);
+        setRowCount(0);
       }
     } catch (error) {
       console.error('Failed to fetch posts:', error);
