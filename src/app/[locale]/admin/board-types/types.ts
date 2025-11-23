@@ -3,6 +3,7 @@ export interface MultiLangField {
   ko: string;
   zh?: string;
   vi?: string;
+  [key: string]: string | undefined;
 }
 
 export interface BoardType {

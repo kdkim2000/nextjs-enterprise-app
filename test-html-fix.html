@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>HTML Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .original { background: #fee; padding: 10px; margin: 10px 0; }
+        .fixed { background: #efe; padding: 10px; margin: 10px 0; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>HTML Fix Test</h1>
+
+    <h2>Original (Broken) HTML:</h2>
+    <div class="original">
+        <code>
+p&lt;h1&gt;&lt;strong&gt;Avatar Image Display Setup Guide&lt;&gt;&lt;/h1&gt;<br>
+&lt;h2&gt;&lt;strong&gt;✅ 완료된 작업&lt;&gt;&lt;/h2&gt;<br>
+&lt;h3&gt;&lt;strong&gt;1. 데이터베이스 설정&lt;&gt;&lt;/h3&gt;<br>
+&lt;ul&gt;<br>
+&lt;li&gt;&lt;strong&gt;컬럼 추가&lt;&gt;: &lt;code&gt;users&lt;&gt; 테이블에 &lt;code&gt;avatar_image TEXT&lt;&gt; 컬럼 추가&lt;&gt;<br>
+&lt;li&gt;&lt;strong&gt;인덱스&lt;&gt;: &lt;code&gt;idx_users_has_avatar_image&lt;&gt; 생성&lt;&gt;
+        </code>
+    </div>
+
+    <h2>Expected Fixed HTML:</h2>
+    <div class="fixed">
+        <h1><strong>Avatar Image Display Setup Guide</strong></h1>
+        <h2><strong>✅ 완료된 작업</strong></h2>
+        <h3><strong>1. 데이터베이스 설정</strong></h3>
+        <ul>
+            <li><strong>컬럼 추가</strong>: <code>users</code> 테이블에 <code>avatar_image TEXT</code> 컬럼 추가</li>
+            <li><strong>인덱스</strong>: <code>idx_users_has_avatar_image</code> 생성</li>
+        </ul>
+    </div>
+
+    <h2>How the fix works:</h2>
+    <ol>
+        <li><strong>p&lt;h1&gt;</strong> → <strong>&lt;p&gt;&lt;h1&gt;</strong> (adds &lt;)</li>
+        <li><strong>&lt;strong&gt;text&lt;&gt;</strong> → <strong>&lt;strong&gt;text&lt;/strong&gt;</strong> (uses tag stack)</li>
+        <li><strong>&lt;&gt;</strong> closes the most recent open tag from the stack</li>
+    </ol>
+</body>
+</html>

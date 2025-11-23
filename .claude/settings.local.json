@@ -83,7 +83,12 @@
       "Bash(cmd //c \"taskkill /F /PID 12468 /PID 21684\")",
       "Bash(cmd //c \"taskkill /F /PID 22356\")",
       "Bash(cmd //c \"scripts\\refactor-board-pages.bat\")",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(git rm:*)",
+      "Bash(tee:*)",
+      "Bash(cmd //c \"taskkill /F /PID 22356\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 31128\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 32708\")"
     ],
     "deny": [],
     "ask": []

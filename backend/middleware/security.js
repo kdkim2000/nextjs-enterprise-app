@@ -131,8 +131,23 @@ function xssProtection(req, res, next) {
   /**
    * Sanitize string to remove potentially dangerous content
    */
-  const sanitize = (value) => {
+  const sanitize = (value, fieldName = '') => {
     if (typeof value === 'string') {
+      // Don't sanitize HTML content fields (these are sanitized client-side with DOMPurify)
+      const isContentField = fieldName.toLowerCase().includes('content') ||
+                            fieldName.toLowerCase().includes('body') ||
+                            fieldName.toLowerCase().includes('html');
+
+      if (isContentField) {
+        // For content fields, only remove dangerous JavaScript but keep HTML tags
+        return value
+          .replace(/javascript:/gi, '') // Remove javascript: protocol
+          .replace(/on\w+\s*=/gi, '') // Remove event handlers (onclick=, onerror=, etc.)
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+          .trim();
+      }
+
+      // For non-content fields, apply strict sanitization
       return value
         .replace(/[<>]/g, '') // Remove angle brackets
         .replace(/javascript:/gi, '') // Remove javascript: protocol
@@ -141,7 +156,7 @@ function xssProtection(req, res, next) {
     }
 
     if (Array.isArray(value)) {
-      return value.map(sanitize);
+      return value.map((item, index) => sanitize(item, `${fieldName}[${index}]`));
     }
 
     if (value && typeof value === 'object') {
@@ -151,7 +166,7 @@ function xssProtection(req, res, next) {
         if (key.toLowerCase().includes('password')) {
           sanitized[key] = val;
         } else {
-          sanitized[key] = sanitize(val);
+          sanitized[key] = sanitize(val, key);
         }
       }
       return sanitized;

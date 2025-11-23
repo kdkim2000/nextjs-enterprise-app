@@ -158,7 +158,7 @@ export default function HelpManagementPage() {
           setDialogOpen(false);
           setEditingHelp(null);
         }}
-        title={!editingHelp?.id ? t('crud.addNew', { item: t('menu.help') }) : t('crud.edit', { item: t('menu.help') })}
+        title={!editingHelp?.id ? t('common.create') + ' Help' : t('common.edit') + ' Help'}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
@@ -175,7 +175,7 @@ export default function HelpManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName={t('menu.help')}
+        itemName="Help"
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

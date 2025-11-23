@@ -236,7 +236,7 @@ export default function RoleManagementPage() {
           {/* Header */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h6">
-              {!editingRole?.id ? t('crud.addNew', { item: t('menu.roles') }) : t('crud.edit', { item: t('menu.roles') })}
+              {!editingRole?.id ? t('common.create') + ' Roles' : t('common.edit') + ' Roles'}
             </Typography>
             <IconButton
               onClick={() => {
@@ -465,7 +465,7 @@ export default function RoleManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName={t('menu.role')}
+        itemName="Role"
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
