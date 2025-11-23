@@ -131,32 +131,24 @@ export default function HelpManagementPage() {
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {helps.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No help content loaded"
-            description="Use the search filters above to find help content"
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <ExcelDataGrid
+            rows={helps}
+            columns={columns}
+            onRowsChange={(rows) => setHelps(rows as HelpContent[])}
+            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+            onRefresh={handleRefresh}
+            checkboxSelection={gridPermissions.checkboxSelection}
+            editable={gridPermissions.editable}
+            exportFileName="help-content"
+            loading={searching}
+            paginationMode="server"
+            rowCount={rowCount}
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
           />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={helps}
-              columns={columns}
-              onRowsChange={(rows) => setHelps(rows as HelpContent[])}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="help-content"
-              loading={searching}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
-            />
-          </Box>
-        )}
+        </Box>
       </Paper>
 
       {/* Edit Drawer */}
@@ -166,12 +158,12 @@ export default function HelpManagementPage() {
           setDialogOpen(false);
           setEditingHelp(null);
         }}
-        title={!editingHelp?.id ? 'Add New Help Content' : 'Edit Help Content'}
+        title={!editingHelp?.id ? t('crud.addNew', { item: t('menu.help') }) : t('crud.edit', { item: t('menu.help') })}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
-        width={{ xs: '100%', sm: 700, md: 900, lg: 1100 }}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <HelpFormFields
           help={editingHelp}
@@ -183,7 +175,7 @@ export default function HelpManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName="help content"
+        itemName={t('menu.help')}
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

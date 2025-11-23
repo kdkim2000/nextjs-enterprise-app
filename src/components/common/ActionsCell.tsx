@@ -2,13 +2,30 @@
 
 import React from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
-import { Edit as EditIcon, MoreVert as MoreVertIcon, LockReset as LockResetIcon } from '@mui/icons-material';
+import { Edit as EditIcon, MoreVert as MoreVertIcon, LockReset as LockResetIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
+
+export interface CustomAction {
+  label: string;
+  onClick: () => void;
+  icon: React.ReactNode;
+  color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+}
 
 export interface ActionsCellProps {
+  /**
+   * The row data (for generic typing)
+   */
+  row?: any;
+
   /**
    * Callback when edit button is clicked
    */
   onEdit?: () => void;
+
+  /**
+   * Callback when view button is clicked
+   */
+  onView?: () => void;
 
   /**
    * Callback when reset password button is clicked
@@ -19,6 +36,17 @@ export interface ActionsCellProps {
    * Callback when more (⋮) button is clicked
    */
   onMore?: (event: React.MouseEvent<HTMLElement>) => void;
+
+  /**
+   * Custom action buttons
+   */
+  customActions?: CustomAction[];
+
+  /**
+   * Whether the row is editable (shows edit button)
+   * @default true
+   */
+  editable?: boolean;
 
   /**
    * Whether to show the edit button
@@ -37,6 +65,12 @@ export interface ActionsCellProps {
    * @default "Edit"
    */
   editTooltip?: string;
+
+  /**
+   * Label for view button
+   * @default "View"
+   */
+  viewLabel?: string;
 
   /**
    * Tooltip text for reset password button
@@ -59,22 +93,26 @@ export interface ActionsCellProps {
 
 /**
  * Common Actions Cell component for DataGrid
- * Provides Edit, Reset Password, and More (⋮) action buttons
+ * Provides Edit, View, Reset Password, Custom Actions, and More (⋮) action buttons
  */
 export default function ActionsCell({
   onEdit,
+  onView,
   onResetPassword,
   onMore,
+  customActions,
+  editable = true,
   showEdit = true,
   showMore = true,
   editTooltip = 'Edit',
+  viewLabel = 'View',
   resetPasswordTooltip = 'Reset Password',
   moreTooltip = 'More actions',
   disabled = false
 }: ActionsCellProps) {
   return (
     <Box sx={{ display: 'flex', gap: 0.5 }}>
-      {showEdit && onEdit && (
+      {showEdit && editable && onEdit && (
         <Tooltip title={editTooltip}>
           <span>
             <IconButton
@@ -84,6 +122,21 @@ export default function ActionsCell({
               disabled={disabled}
             >
               <EditIcon fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
+      )}
+
+      {onView && (
+        <Tooltip title={viewLabel}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={onView}
+              color="info"
+              disabled={disabled}
+            >
+              <VisibilityIcon fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
@@ -103,6 +156,21 @@ export default function ActionsCell({
           </span>
         </Tooltip>
       )}
+
+      {customActions?.map((action, index) => (
+        <Tooltip key={index} title={action.label}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={action.onClick}
+              color={action.color || 'default'}
+              disabled={disabled}
+            >
+              {action.icon}
+            </IconButton>
+          </span>
+        </Tooltip>
+      ))}
 
       {showMore && onMore && (
         <Tooltip title={moreTooltip}>

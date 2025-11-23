@@ -98,19 +98,26 @@ async function getChildMenus(parentId) {
 async function createMenu(menuData) {
   const {
     id, code, nameEn, nameKo, nameZh, nameVi, path, icon,
-    parentId, level, order, visible, programId
+    parentId, level, order, visible, programId,
+    descriptionEn, descriptionKo, descriptionZh, descriptionVi
   } = menuData;
 
   const query = `
     INSERT INTO menus (
       id, code, name_en, name_ko, name_zh, name_vi, path, icon,
-      parent_id, level, "order", visible, program_id, created_at, updated_at
+      parent_id, level, "order", visible, program_id,
+      description_en, description_ko, description_zh, description_vi,
+      created_at, updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
     RETURNING *
   `;
 
-  const params = [id, code, nameEn, nameKo, nameZh, nameVi, path, icon, parentId, level, order, visible, programId];
+  const params = [
+    id, code, nameEn, nameKo, nameZh, nameVi, path, icon,
+    parentId, level, order, visible, programId,
+    descriptionEn, descriptionKo, descriptionZh, descriptionVi
+  ];
   const result = await db.query(query, params);
   return result.rows[0];
 }
@@ -124,7 +131,8 @@ async function createMenu(menuData) {
 async function updateMenu(menuId, updates) {
   const allowedFields = [
     'code', 'name_en', 'name_ko', 'name_zh', 'name_vi', 'path', 'icon',
-    'parent_id', 'level', 'order', 'visible', 'program_id'
+    'parent_id', 'level', 'order', 'visible', 'program_id',
+    'description_en', 'description_ko', 'description_zh', 'description_vi'
   ];
 
   const setClause = [];
@@ -134,7 +142,9 @@ async function updateMenu(menuId, updates) {
   for (const [key, value] of Object.entries(updates)) {
     const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
     if (allowedFields.includes(dbField)) {
-      setClause.push(`${dbField} = $${paramIndex}`);
+      // Quote 'order' as it's a PostgreSQL reserved keyword
+      const quotedField = dbField === 'order' ? '"order"' : dbField;
+      setClause.push(`${quotedField} = $${paramIndex}`);
       params.push(value);
       paramIndex++;
     }

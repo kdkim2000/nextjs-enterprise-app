@@ -153,32 +153,24 @@ export default function UserManagementPage() {
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {users.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No users loaded"
-            description="Use the search filters above to find users"
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <ExcelDataGrid
+            rows={users}
+            columns={columns}
+            onRowsChange={(rows) => setUsers(rows as User[])}
+            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+            onRefresh={handleRefresh}
+            checkboxSelection={gridPermissions.checkboxSelection}
+            editable={gridPermissions.editable}
+            exportFileName="users"
+            loading={searching}
+            paginationMode="server"
+            rowCount={rowCount}
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
           />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={users}
-              columns={columns}
-              onRowsChange={(rows) => setUsers(rows as User[])}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="users"
-              loading={searching}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
-            />
-          </Box>
-        )}
+        </Box>
       </Paper>
 
       {/* Edit Drawer */}
@@ -188,7 +180,7 @@ export default function UserManagementPage() {
           setDialogOpen(false);
           setEditingUser(null);
         }}
-        title={!editingUser?.id ? 'Add New User' : 'Edit User'}
+        title={!editingUser?.id ? t('crud.addNew', { item: t('menu.users') }) : t('crud.edit', { item: t('menu.users') })}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
@@ -209,7 +201,7 @@ export default function UserManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName="user"
+        itemName={t('menu.user')}
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

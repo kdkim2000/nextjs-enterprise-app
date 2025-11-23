@@ -202,28 +202,20 @@ export default function RoleManagementPage() {
 
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {roles.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No roles loaded"
-            description="Use the search filters above to find roles"
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <ExcelDataGrid
+            rows={roles}
+            columns={columns}
+            onRowsChange={(rows) => setRoles(rows as Role[])}
+            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+            onRefresh={handleRefresh}
+            checkboxSelection={gridPermissions.checkboxSelection}
+            editable={gridPermissions.editable}
+            exportFileName="roles"
+            loading={searching}
           />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={roles}
-              columns={columns}
-              onRowsChange={(rows) => setRoles(rows as Role[])}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="roles"
-              loading={searching}
-            />
-          </Box>
-        )}
+        </Box>
       </Paper>
 
       {/* Edit Drawer */}
@@ -244,7 +236,7 @@ export default function RoleManagementPage() {
           {/* Header */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h6">
-              {!editingRole?.id ? 'Add New Role' : 'Edit Role'}
+              {!editingRole?.id ? t('crud.addNew', { item: t('menu.roles') }) : t('crud.edit', { item: t('menu.roles') })}
             </Typography>
             <IconButton
               onClick={() => {
@@ -473,7 +465,7 @@ export default function RoleManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName="role"
+        itemName={t('menu.role')}
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

@@ -73,7 +73,17 @@
       "Bash(find:*)",
       "Bash(cmd //c \"taskkill /F /PID 31128\")",
       "Bash(cmd //c \"taskkill /F /PID 17208\")",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(cmd //c \"taskkill /F /PID 20824\" 2)",
+      "Bash(for file in \"src/app/[locale]/boards/[boardTypeId]/write/page.tsx\" \"src/app/[locale]/boards/[boardTypeId]/[postId]/edit/page.tsx\" \"src/app/[locale]/boards/[boardTypeId]/[postId]/page.tsx\")",
+      "Bash(do sed -i 's|/api/board-type|/board-type|g; s|/api/post|/post|g; s|/api/comment|/comment|g' \"$file\")",
+      "Bash(cmd //c \"taskkill /F /PID 2128\" 2)",
+      "Bash(cmd //c \"taskkill /F /IM node.exe /FI \"\"WINDOWTITLE eq*backend*\"\" 2>nul\")",
+      "Bash(cmd //c \"taskkill /F /PID 4352\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 12468 /PID 21684\")",
+      "Bash(cmd //c \"taskkill /F /PID 22356\")",
+      "Bash(cmd //c \"scripts\\refactor-board-pages.bat\")",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

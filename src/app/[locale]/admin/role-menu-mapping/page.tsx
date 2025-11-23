@@ -453,7 +453,7 @@ export default function RoleMenuMappingPage() {
         saveLoading={saveLoading}
         saveLabel={currentLocale === 'ko' ? '저장' : 'Save'}
         cancelLabel={currentLocale === 'ko' ? '취소' : 'Cancel'}
-        width={{ xs: '100%', sm: 500, md: 600 }}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <PermissionEditForm
           permission={editingPermission}

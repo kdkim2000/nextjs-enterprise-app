@@ -273,6 +273,12 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
     setAdvancedFilterOpen(false);
   }, []);
 
+  // Initial fetch on mount
+  useEffect(() => {
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchRoles(useQuickSearch);
+  }, [fetchRoles, quickSearch]);
+
   return {
     // State
     roles,
