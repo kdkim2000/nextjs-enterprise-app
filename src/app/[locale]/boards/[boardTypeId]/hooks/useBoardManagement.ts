@@ -226,7 +226,8 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
         title: editingPost.title.trim(),
         content: editingPost.content,
         tags: editingPost.tags || [],
-        isSecret: editingPost.is_secret
+        isSecret: editingPost.is_secret,
+        status: 'published'
       };
 
       if (!editingPost.id) {
