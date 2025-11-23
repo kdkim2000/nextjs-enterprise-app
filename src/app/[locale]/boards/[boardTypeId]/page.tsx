@@ -187,7 +187,7 @@ export default function BoardListPage() {
             {...(canWrite && { onAdd: handleAdd })}
             onRefresh={handleRefresh}
             checkboxSelection={false}
-            editable={false}
+            editable={canWrite}
             exportFileName={`board-${boardTypeId}-posts`}
             loading={searching}
             paginationMode="server"
