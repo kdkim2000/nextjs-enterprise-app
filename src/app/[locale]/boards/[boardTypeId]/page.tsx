@@ -7,7 +7,9 @@ import { Add, Home } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import EditDrawer from '@/components/common/EditDrawer';
 import PostDetailDrawer from '@/components/common/PostDetailDrawer';
+import PostFormFields, { PostFormData } from '@/components/boards/PostFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 import { useBoardManagement } from './hooks/useBoardManagement';
@@ -40,6 +42,11 @@ export default function BoardListPage() {
     errorMessage,
     selectedPostId,
     drawerOpen,
+    dialogOpen,
+    setDialogOpen,
+    editingPost,
+    setEditingPost,
+    saveLoading,
     handleRefresh,
     handleSearchChange,
     handleQuickSearch,
@@ -47,6 +54,8 @@ export default function BoardListPage() {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
+    handleAdd,
+    handleSave,
     handlePostClick,
     handleCloseDrawer
   } = useBoardManagement({
@@ -71,10 +80,6 @@ export default function BoardListPage() {
     const nameField = currentLocale === 'ko' ? 'name_ko' : currentLocale === 'zh' ? 'name_zh' : currentLocale === 'vi' ? 'name_vi' : 'name_en';
     return (boardType as any)[nameField] || (boardType as any).name_en || '';
   }, [boardType, currentLocale]);
-
-  const handleWriteClick = () => {
-    router.push(`/${currentLocale}/boards/${boardTypeId}/write`);
-  };
 
   const handleEditPost = (postId: string) => {
     router.push(`/${currentLocale}/boards/${boardTypeId}/${postId}/edit`);
@@ -148,7 +153,7 @@ export default function BoardListPage() {
               <Button
                 variant="contained"
                 startIcon={<Add />}
-                onClick={handleWriteClick}
+                onClick={handleAdd}
               >
                 Write Post
               </Button>
@@ -205,6 +210,28 @@ export default function BoardListPage() {
           />
         </Box>
       </Paper>
+
+      {/* Edit Drawer for Post Creation/Edit */}
+      <EditDrawer
+        open={dialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditingPost(null);
+        }}
+        title={!editingPost?.id ? 'Write New Post' : 'Edit Post'}
+        onSave={handleSave}
+        saveLoading={saveLoading}
+        saveLabel={t('common.save')}
+        cancelLabel={t('common.cancel')}
+        width={{ xs: '100%', sm: 700, md: 900, lg: 1100 }}
+      >
+        <PostFormFields
+          post={editingPost as PostFormData}
+          onChange={(post) => setEditingPost(post as any)}
+          boardSettings={boardType?.settings}
+          mode={editingPost?.id ? 'edit' : 'create'}
+        />
+      </EditDrawer>
 
       {/* Post Detail Drawer */}
       {selectedPostId && (

@@ -57,6 +57,9 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Fetch posts from API
   const fetchPosts = useCallback(async (
@@ -177,6 +180,96 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     fetchPosts(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchPosts, quickSearch, setPaginationModel]);
 
+  // Post CRUD operations
+  const handleAdd = useCallback(() => {
+    setEditingPost({
+      id: '',
+      title: '',
+      content: '',
+      tags: [],
+      is_pinned: false,
+      is_secret: false,
+      view_count: 0,
+      like_count: 0,
+      comment_count: 0,
+      attachment_count: 0,
+      status: 'published',
+      created_at: new Date().toISOString()
+    });
+    setDialogOpen(true);
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!editingPost) return;
+
+    // Validation
+    if (!editingPost.title.trim()) {
+      await showErrorMessage('Please enter a title');
+      return;
+    }
+    if (!editingPost.content.trim() || editingPost.content === '<p></p>') {
+      await showErrorMessage('Please enter content');
+      return;
+    }
+
+    try {
+      setSaveLoading(true);
+
+      const postData = {
+        ...(editingPost.id ? {} : { boardTypeId }),
+        title: editingPost.title.trim(),
+        content: editingPost.content,
+        tags: editingPost.tags || [],
+        isSecret: editingPost.is_secret
+      };
+
+      if (!editingPost.id) {
+        // Create new post
+        const response = await apiClient.post('/post', postData);
+        if (response.success && response.data) {
+          const newPost = response.data.post || response.data;
+
+          // Upload attachments if any
+          if ((editingPost as any).files && (editingPost as any).files.length > 0) {
+            const formData = new FormData();
+            (editingPost as any).files.forEach((uploadedFile: any) => {
+              formData.append('files', uploadedFile.file);
+            });
+            formData.append('post_id', newPost.id);
+
+            await apiClient.post('/attachment', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+          }
+
+          await showSuccessMessage('Post created successfully!');
+          handleRefresh();
+        } else {
+          throw new Error(response.error || 'Failed to create post');
+        }
+      } else {
+        // Update existing post
+        const response = await apiClient.put(`/post/${editingPost.id}`, postData);
+        if (response.success) {
+          await showSuccessMessage('Post updated successfully!');
+          handleRefresh();
+        } else {
+          throw new Error(response.error || 'Failed to update post');
+        }
+      }
+
+      setDialogOpen(false);
+      setEditingPost(null);
+    } catch (error: any) {
+      console.error('Failed to save post:', error);
+      await showErrorMessage(error.message || 'Failed to save post');
+    } finally {
+      setSaveLoading(false);
+    }
+  }, [editingPost, boardTypeId, showSuccessMessage, showErrorMessage, handleRefresh]);
+
   // Post view handlers
   const handlePostClick = useCallback((postId: string) => {
     setSelectedPostId(postId);
@@ -212,6 +305,11 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     errorMessage,
     selectedPostId,
     drawerOpen,
+    dialogOpen,
+    setDialogOpen,
+    editingPost,
+    setEditingPost,
+    saveLoading,
 
     // Handlers
     handleRefresh,
@@ -221,6 +319,8 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
+    handleAdd,
+    handleSave,
     handlePostClick,
     handleCloseDrawer
   };
