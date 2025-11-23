@@ -45,7 +45,7 @@ export interface FilterFieldConfig {
 
 interface SearchFilterFieldsProps {
   fields: FilterFieldConfig[];
-  values: Record<string, string | string[]>;
+  values: Record<string, string | string[] | boolean | undefined>;
   onChange: (name: string, value: string | string[]) => void;
   onEnter?: () => void;
   disabled?: boolean;

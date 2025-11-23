@@ -524,6 +524,7 @@ export default function CodesPage() {
         saveLoading={codeTypeSaveLoading}
         saveLabel={locale === 'ko' ? '저장' : 'Save'}
         cancelLabel={locale === 'ko' ? '취소' : 'Cancel'}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <CodeTypeFormFields
           codeType={editingCodeType}
@@ -558,6 +559,7 @@ export default function CodesPage() {
         saveLoading={codeSaveLoading}
         saveLabel={locale === 'ko' ? '저장' : 'Save'}
         cancelLabel={locale === 'ko' ? '취소' : 'Cancel'}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <CodeFormFields
           code={editingCode}

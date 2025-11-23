@@ -28,6 +28,12 @@ const codeTypeRoutes = require('./routes/codeType');
 const messageRoutes = require('./routes/message');
 const swaggerRoutes = require('./routes/swagger');
 
+// Board system routes
+const boardTypeRoutes = require('./routes/boardType');
+const postRoutes = require('./routes/post');
+const commentRoutes = require('./routes/comment');
+const attachmentRoutes = require('./routes/attachment');
+
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
 const { errorHandler, notFoundHandler, attachResponseHelpers } = require('./middleware/errorHandler');
@@ -102,6 +108,12 @@ app.use('/api/department', departmentRoutes);
 app.use('/api/code', codeRoutes);
 app.use('/api/code-type', codeTypeRoutes);
 app.use('/api/message', messageRoutes);
+
+// Board system routes
+app.use('/api/board-type', boardTypeRoutes);
+app.use('/api/post', postRoutes);
+app.use('/api/comment', commentRoutes);
+app.use('/api/attachment', attachmentRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);

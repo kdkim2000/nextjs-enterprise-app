@@ -40,11 +40,10 @@ export default function RichTextEditorPage() {
           </Typography>
 
           <RichTextEditor
-            content={editorContent}
+            value={editorContent}
             onChange={setEditorContent}
-            mode={editorMode}
             placeholder="Start typing your content here..."
-            height={500}
+            minHeight={500}
           />
 
           <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>

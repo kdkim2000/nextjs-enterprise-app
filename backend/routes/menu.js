@@ -203,7 +203,10 @@ router.post('/', authenticateToken, async (req, res) => {
       parentId: parentId || null,
       level,
       programId: programId || null,
-      description: JSON.stringify(description || { en: '', ko: '', zh: '', vi: '' })
+      descriptionEn: typeof description === 'string' ? description : description?.en || '',
+      descriptionKo: typeof description === 'object' ? description.ko || '' : '',
+      descriptionZh: typeof description === 'object' ? description.zh || '' : '',
+      descriptionVi: typeof description === 'object' ? description.vi || '' : ''
     };
 
     const dbMenu = await menuService.createMenu(menuData);
@@ -267,7 +270,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (parentId !== undefined) updates.parentId = parentId;
     if (level !== undefined) updates.level = level;
     if (programId !== undefined) updates.programId = programId;
-    if (description) updates.description = JSON.stringify(description);
+    if (description) {
+      if (typeof description === 'object') {
+        if (description.en !== undefined) updates.descriptionEn = description.en;
+        if (description.ko !== undefined) updates.descriptionKo = description.ko;
+        if (description.zh !== undefined) updates.descriptionZh = description.zh;
+        if (description.vi !== undefined) updates.descriptionVi = description.vi;
+      }
+    }
 
     const dbMenu = await menuService.updateMenu(req.params.id, updates);
     const updatedMenu = transformMenuToAPI(dbMenu);
