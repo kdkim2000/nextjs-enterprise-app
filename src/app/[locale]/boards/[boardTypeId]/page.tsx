@@ -152,31 +152,6 @@ export default function BoardListPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
     >
-      {/* Breadcrumbs and Board Header */}
-      <Box sx={{ mb: 2 }}>
-        <Breadcrumbs sx={{ mb: 2 }}>
-          <Link
-            underline="hover"
-            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-            color="inherit"
-            onClick={() => router.push(`/${currentLocale}`)}
-          >
-            <Home sx={{ mr: 0.5 }} fontSize="small" />
-            Home
-          </Link>
-          <Typography color="text.primary">{boardName}</Typography>
-        </Breadcrumbs>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h5">
-            {boardName}
-          </Typography>
-          {boardType.type === 'notice' && (
-            <Chip label="Notice Board" size="small" color="error" variant="outlined" />
-          )}
-        </Box>
-      </Box>
-
       {/* DataGrid Area */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         <Box sx={{ flex: 1, minHeight: 0 }}>
