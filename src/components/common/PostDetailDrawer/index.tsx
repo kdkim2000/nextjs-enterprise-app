@@ -104,8 +104,8 @@ export default function PostDetailDrawer({
       try {
         setLoading(true);
         const response = await apiClient.get(`/post/${postId}`);
-        if (response.success) {
-          setPost(response.data);
+        if (response.success && response.data) {
+          setPost(response.data.post || response.data);
         } else {
           setError(response.error || 'Failed to load post');
         }
@@ -126,8 +126,8 @@ export default function PostDetailDrawer({
     const fetchComments = async () => {
       try {
         const response = await apiClient.get(`/comment/post/${postId}`);
-        if (response.success) {
-          setComments(response.data || []);
+        if (response.success && response.data) {
+          setComments(response.data.comments || []);
         }
       } catch (error) {
         console.error('Error fetching comments:', error);
@@ -142,9 +142,9 @@ export default function PostDetailDrawer({
 
     const fetchAttachments = async () => {
       try {
-        const response = await apiClient.get(`/api/attachment/post/${postId}`);
-        if (response.success) {
-          setAttachments(response.data || []);
+        const response = await apiClient.get(`/attachment/post/${postId}`);
+        if (response.success && response.data) {
+          setAttachments(response.data.attachments || []);
         }
       } catch (error) {
         console.error('Error fetching attachments:', error);
@@ -188,8 +188,8 @@ export default function PostDetailDrawer({
         setNewComment('');
         // Refetch comments
         const commentsResponse = await apiClient.get(`/comment/post/${postId}`);
-        if (commentsResponse.success) {
-          setComments(commentsResponse.data || []);
+        if (commentsResponse.success && commentsResponse.data) {
+          setComments(commentsResponse.data.comments || []);
         }
       }
     } catch (error) {
