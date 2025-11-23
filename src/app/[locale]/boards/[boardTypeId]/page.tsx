@@ -9,12 +9,15 @@ import SearchFilterFields from '@/components/common/SearchFilterFields';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import EditDrawer from '@/components/common/EditDrawer';
 import PostDetailDrawer from '@/components/common/PostDetailDrawer';
+import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import PostFormFields, { PostFormData } from '@/components/boards/PostFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 import { useBoardManagement } from './hooks/useBoardManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
+import { apiClient } from '@/lib/api/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function BoardListPage() {
   const params = useParams();
@@ -22,6 +25,10 @@ export default function BoardListPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const boardTypeId = params.boardTypeId as string;
+  const { user } = useAuth();
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin';
 
   // Board permissions
   const { canWrite, canRead, boardType, loading: permLoading } = useBoardPermissions(boardTypeId);
@@ -47,6 +54,9 @@ export default function BoardListPage() {
     editingPost,
     setEditingPost,
     saveLoading,
+    deleteDialogOpen,
+    deleteTargetIds,
+    deleteLoading,
     handleRefresh,
     handleSearchChange,
     handleQuickSearch,
@@ -56,6 +66,9 @@ export default function BoardListPage() {
     handlePaginationModelChange,
     handleAdd,
     handleSave,
+    handleDelete,
+    handleConfirmDelete,
+    handleCancelDelete,
     handlePostClick,
     handleCloseDrawer
   } = useBoardManagement({
@@ -64,10 +77,56 @@ export default function BoardListPage() {
     boardType
   });
 
+  // Handler functions
+  const handleEditPost = async (postId: string) => {
+    // Close detail drawer first
+    handleCloseDrawer();
+
+    // Fetch the post data
+    try {
+      const response = await apiClient.get(`/post/${postId}`);
+      if (response.success && response.data) {
+        const postData = response.data.post || response.data;
+
+        // Normalize the post data for editing
+        const normalizedPost = {
+          id: postData.id,
+          title: postData.title,
+          content: postData.content,
+          tags: postData.tags || [],
+          is_secret: postData.isSecret ?? postData.is_secret ?? false,
+          is_pinned: postData.isPinned ?? postData.is_pinned ?? false,
+          status: postData.status || 'published'
+        };
+
+        // Open edit drawer with the post data
+        setEditingPost(normalizedPost as any);
+        setDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching post for edit:', error);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    // Refresh the post list after deletion
+    handleRefresh();
+    handleCloseDrawer();
+  };
+
   // Memoized computed values
   const columns = useMemo(() => {
-    return createColumns(t, currentLocale, (postId: string) => handlePostClick(postId), canWrite);
-  }, [t, currentLocale, handlePostClick, canWrite]);
+    return createColumns(
+      t,
+      currentLocale,
+      (postId: string) => handlePostClick(postId),
+      (postId: string) => handleEditPost(postId),
+      canWrite,
+      rowCount,
+      paginationModel.page,
+      paginationModel.pageSize
+    );
+  }, [t, currentLocale, handlePostClick, handleEditPost, canWrite, rowCount, paginationModel.page, paginationModel.pageSize]);
 
   const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
 
@@ -81,16 +140,6 @@ export default function BoardListPage() {
     const nameField = currentLocale === 'ko' ? 'name_ko' : currentLocale === 'zh' ? 'name_zh' : currentLocale === 'vi' ? 'name_vi' : 'name_en';
     return (boardType as any)[nameField] || (boardType as any).name_en || '';
   }, [boardType, currentLocale]);
-
-  const handleEditPost = (postId: string) => {
-    router.push(`/${currentLocale}/boards/${boardTypeId}/${postId}/edit`);
-  };
-
-  const handleDeletePost = async () => {
-    // Refresh the post list after deletion
-    handleRefresh();
-    handleCloseDrawer();
-  };
 
   // Loading state
   if (permLoading) {
@@ -160,8 +209,9 @@ export default function BoardListPage() {
             columns={columns}
             onRowsChange={(rows) => setPosts(rows as any[])}
             {...(canWrite && { onAdd: handleAdd })}
+            {...(canWrite && { onDelete: handleDelete })}
             onRefresh={handleRefresh}
-            checkboxSelection={false}
+            checkboxSelection={canWrite}
             editable={canWrite}
             exportFileName={`board-${boardTypeId}-posts`}
             loading={searching}
@@ -193,6 +243,7 @@ export default function BoardListPage() {
           onChange={(post) => setEditingPost(post as any)}
           boardSettings={boardType?.settings}
           mode={editingPost?.id ? 'edit' : 'create'}
+          isAdmin={isAdmin}
         />
       </EditDrawer>
 
@@ -205,8 +256,29 @@ export default function BoardListPage() {
           boardTypeId={boardTypeId}
           onEdit={handleEditPost}
           onDelete={handleDeletePost}
+          canWrite={canWrite}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        itemCount={deleteTargetIds.length}
+        itemName="post"
+        itemsList={deleteTargetIds.map(id => {
+          const post = posts.find(p => p.id === id);
+          return {
+            id,
+            displayName: post?.title || `Post ${id}`
+          };
+        })}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        loading={deleteLoading}
+        title={t('common.confirmDelete')}
+        cancelText={t('common.cancel')}
+        confirmText={t('common.delete')}
+      />
     </StandardCrudPageLayout>
   );
 }

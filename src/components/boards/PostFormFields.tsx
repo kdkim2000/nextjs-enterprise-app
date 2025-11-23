@@ -14,8 +14,12 @@ import {
   Lock as LockIcon,
   Public as PublicIcon,
   Label as LabelIcon,
-  AttachFile as AttachFileIcon
+  AttachFile as AttachFileIcon,
+  Notifications as NotificationsIcon
 } from '@mui/icons-material';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import FileUploadZone, { UploadedFile } from '@/components/common/FileUploadZone';
 import TagInput from '@/components/common/TagInput';
@@ -26,6 +30,10 @@ export interface PostFormData {
   content: string;
   tags?: string[];
   isSecret: boolean;
+  isPinned?: boolean;
+  showPopup?: boolean;
+  displayStartDate?: Date | null;
+  displayEndDate?: Date | null;
   files?: UploadedFile[];
 }
 
@@ -41,6 +49,7 @@ export interface PostFormFieldsProps {
     maxAttachmentSize?: number;
   };
   mode?: 'create' | 'edit';
+  isAdmin?: boolean;
 }
 
 export default function PostFormFields({
@@ -48,7 +57,8 @@ export default function PostFormFields({
   onChange,
   onError,
   boardSettings = {},
-  mode = 'create'
+  mode = 'create',
+  isAdmin = false
 }: PostFormFieldsProps) {
   if (!post) return null;
 
@@ -57,7 +67,8 @@ export default function PostFormFields({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Title Field */}
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
@@ -167,6 +178,67 @@ export default function PostFormFields({
           />
         </Paper>
       </Box>
+
+      {/* Admin-only: Popup Notification Options */}
+      {isAdmin && (
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <NotificationsIcon fontSize="small" color="action" />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              Popup Notification (Admin Only)
+            </Typography>
+          </Box>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={post.showPopup || false}
+                  onChange={(e) => handleChange('showPopup', e.target.checked)}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    Show as Popup Notification
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Display this notice as a popup when users log in
+                  </Typography>
+                </Box>
+              }
+            />
+
+            {post.showPopup && (
+              <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Divider />
+                <DateTimePicker
+                  label="Display Start Date"
+                  value={post.displayStartDate || null}
+                  onChange={(newValue) => handleChange('displayStartDate', newValue)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      helperText: 'Leave empty to start immediately'
+                    }
+                  }}
+                />
+                <DateTimePicker
+                  label="Display End Date"
+                  value={post.displayEndDate || null}
+                  onChange={(newValue) => handleChange('displayEndDate', newValue)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      helperText: 'Leave empty for no end date'
+                    }
+                  }}
+                />
+              </Box>
+            )}
+          </Paper>
+        </Box>
+      )}
     </Box>
+    </LocalizationProvider>
   );
 }
