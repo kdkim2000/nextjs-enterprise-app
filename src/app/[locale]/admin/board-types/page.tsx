@@ -185,7 +185,7 @@ export default function BoardTypeManagementPage() {
           setDialogOpen(false);
           setEditingBoardType(null);
         }}
-        title={!editingBoardType?.id ? t('crud.addNew', { item: t('menu.boardTypes') }) : t('crud.edit', { item: t('menu.boardTypes') })}
+        title={!editingBoardType?.id ? t('common.create') + ' Board Type' : t('common.edit') + ' Board Type'}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
@@ -203,7 +203,7 @@ export default function BoardTypeManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName={t('menu.boardType')}
+        itemName="Board Type"
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

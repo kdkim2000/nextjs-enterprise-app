@@ -32,10 +32,11 @@ export const createColumns = (
       valueGetter: (_value, row) => {
         // Backend returns name as an object: { en: 'xxx', ko: 'xxx', zh: 'xxx', vi: 'xxx' }
         if (row.name && typeof row.name === 'object') {
-          return row.name[currentLocale] || row.name.en || '';
+          const nameObj = row.name as unknown as Record<string, string>;
+          return nameObj[currentLocale] || nameObj.en || '';
         }
         // Fallback for flat structure
-        return row[`name_${currentLocale}`] || row.name_en || row.name || '';
+        return row[`name_${currentLocale}` as keyof BoardType] || row.name_en || row.name || '';
       }
     },
     {
@@ -106,7 +107,7 @@ export const createColumns = (
           onEdit={() => handleEdit(params.row.id)}
           onView={() => handleViewStats(params.row.id)}
           editTooltip={getLocalizedValue({ en: 'Edit Board Type', ko: '게시판 유형 수정', zh: '编辑板类型', vi: 'Sửa loại bảng' }, currentLocale)}
-          viewTooltip={getLocalizedValue({ en: 'View Statistics', ko: '통계 보기', zh: '查看统计', vi: 'Xem thống kê' }, currentLocale)}
+          viewLabel={getLocalizedValue({ en: 'View Statistics', ko: '통계 보기', zh: '查看统计', vi: 'Xem thống kê' }, currentLocale)}
           showMore={false}
         />
       )

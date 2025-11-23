@@ -86,8 +86,8 @@ export default function AdminBoardListPage() {
         }
 
         const response = await apiClient.get(`/post/board/${boardType.id}?${params}`);
-        if (response.posts) {
-          setPosts(response.posts.map((post: any) => ({
+        if (response.success && response.data?.posts) {
+          setPosts(response.data.posts.map((post: any) => ({
             id: post.id,
             title: post.title,
             authorName: post.authorName || post.author_name,
@@ -101,7 +101,7 @@ export default function AdminBoardListPage() {
             createdAt: post.createdAt || post.created_at,
             status: post.status
           })));
-          setTotalCount(response.pagination?.totalCount || 0);
+          setTotalCount(response.data.pagination?.totalCount || 0);
         }
       } catch (error) {
         console.error('Error fetching posts:', error);
