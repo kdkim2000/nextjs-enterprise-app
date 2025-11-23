@@ -49,8 +49,8 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   const {
     successMessage,
     errorMessage,
-    showSuccessMessage,
-    showErrorMessage
+    showSuccess,
+    showError
   } = useMessage({ locale });
 
   // Local states
@@ -132,13 +132,13 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       }
     } catch (error) {
       console.error('Failed to fetch posts:', error);
-      await showErrorMessage('Failed to load posts');
+      showError('Failed to load posts');
       setPosts([]);
       setRowCount(0);
     } finally {
       setSearching(false);
     }
-  }, [boardType, quickSearch, searchCriteria, setPosts, setRowCount, showErrorMessage]);
+  }, [boardType, quickSearch, searchCriteria, setPosts, setRowCount, showError]);
 
   // Search handlers
   const handleRefresh = useCallback(() => {
@@ -207,11 +207,11 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
 
     // Validation
     if (!editingPost.title.trim()) {
-      await showErrorMessage('Please enter a title');
+      showError('Please enter a title');
       return;
     }
     if (!editingPost.content.trim() || editingPost.content === '<p></p>') {
-      await showErrorMessage('Please enter content');
+      showError('Please enter content');
       return;
     }
 
@@ -247,7 +247,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
             });
           }
 
-          await showSuccessMessage('Post created successfully!');
+          showSuccess('Post created successfully!');
           handleRefresh();
         } else {
           throw new Error(response.error || 'Failed to create post');
@@ -256,7 +256,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
         // Update existing post
         const response = await apiClient.put(`/post/${editingPost.id}`, postData);
         if (response.success) {
-          await showSuccessMessage('Post updated successfully!');
+          showSuccess('Post updated successfully!');
           handleRefresh();
         } else {
           throw new Error(response.error || 'Failed to update post');
@@ -267,11 +267,11 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       setEditingPost(null);
     } catch (error: any) {
       console.error('Failed to save post:', error);
-      await showErrorMessage(error.message || 'Failed to save post');
+      showError(error.message || 'Failed to save post');
     } finally {
       setSaveLoading(false);
     }
-  }, [editingPost, boardType, showSuccessMessage, showErrorMessage, handleRefresh]);
+  }, [editingPost, boardType, showSuccess, showError, handleRefresh]);
 
   // Post view handlers
   const handlePostClick = useCallback((postId: string) => {
