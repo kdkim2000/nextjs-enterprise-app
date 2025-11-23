@@ -32,6 +32,7 @@ import {
   Comment as CommentIcon
 } from '@mui/icons-material';
 import { apiClient } from '@/lib/api/client';
+import SafeHtmlRenderer from '@/components/common/SafeHtmlRenderer';
 
 interface Post {
   id: string;
@@ -331,16 +332,12 @@ export default function PostDetailDrawer({
               </Box>
 
               {/* Content */}
-              <Box
+              <SafeHtmlRenderer
+                html={post.content}
                 sx={{
                   py: 2,
-                  minHeight: 200,
-                  '& img': {
-                    maxWidth: '100%',
-                    height: 'auto'
-                  }
+                  minHeight: 200
                 }}
-                dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
               {/* Attachments */}

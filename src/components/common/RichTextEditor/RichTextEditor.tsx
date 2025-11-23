@@ -8,6 +8,10 @@ import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
 import {
   Box,
   Paper,
@@ -65,7 +69,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3]
+          levels: [1, 2, 3, 4, 5, 6]
+        },
+        codeBlock: {
+          HTMLAttributes: {
+            class: 'code-block'
+          }
         }
       }),
       Link.configure({
@@ -80,6 +89,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           class: 'editor-image'
         }
       }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'editor-table'
+        }
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       TextAlign.configure({
         types: ['heading', 'paragraph']
       }),
@@ -346,6 +364,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 marginTop: theme.spacing(1),
                 marginBottom: theme.spacing(0.5)
               },
+              '& h4': {
+                fontSize: '1.125rem',
+                fontWeight: 600,
+                marginTop: theme.spacing(0.75),
+                marginBottom: theme.spacing(0.5)
+              },
+              '& h5, & h6': {
+                fontSize: '1rem',
+                fontWeight: 600,
+                marginTop: theme.spacing(0.5),
+                marginBottom: theme.spacing(0.5)
+              },
               '& p': {
                 marginTop: theme.spacing(0.5),
                 marginBottom: theme.spacing(0.5)
@@ -391,6 +421,24 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 textDecoration: 'underline',
                 '&:hover': {
                   textDecoration: 'none'
+                }
+              },
+              // Table styles
+              '& .editor-table': {
+                borderCollapse: 'collapse',
+                margin: theme.spacing(1.5, 0),
+                width: '100%',
+                border: `1px solid ${theme.palette.divider}`,
+                '& td, & th': {
+                  border: `1px solid ${theme.palette.divider}`,
+                  padding: theme.spacing(1),
+                  minWidth: '100px',
+                  verticalAlign: 'top'
+                },
+                '& th': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  fontWeight: 600,
+                  textAlign: 'left'
                 }
               }
             }
