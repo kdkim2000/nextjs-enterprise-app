@@ -96,7 +96,10 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       params.append('limit', pageSize.toString());
 
       // Use boardType.id instead of boardTypeId (which is the code)
-      const response = await apiClient.get(`/post/board/${boardType.id}?${params.toString()}`);
+      const url = `/post/board/${boardType.id}?${params.toString()}`;
+      console.log('Fetching posts from:', url);
+      const response = await apiClient.get(url);
+      console.log('API Response:', response);
 
       if (response.posts) {
         // Normalize field names
@@ -287,10 +290,14 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   // Initial fetch and refetch on criteria change
   useEffect(() => {
     if (boardType?.id) {
+      console.log('Fetching posts for boardType:', boardType.id);
       const useQuickSearch = quickSearch.trim() !== '';
       fetchPosts(paginationModel.page, paginationModel.pageSize, useQuickSearch);
+    } else {
+      console.log('BoardType not loaded yet, skipping fetch');
     }
-  }, [fetchPosts, boardType?.id, quickSearch, paginationModel.page, paginationModel.pageSize]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardType?.id, quickSearch, paginationModel.page, paginationModel.pageSize]);
 
   return {
     // State
