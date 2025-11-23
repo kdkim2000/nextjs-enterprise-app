@@ -8,10 +8,11 @@ import { Post, SearchCriteria } from '../types';
 interface UseBoardManagementOptions {
   storageKey?: string;
   boardTypeId: string;
+  boardType?: any;
 }
 
 export const useBoardManagement = (options: UseBoardManagementOptions) => {
-  const { storageKey = 'board-list-page-state', boardTypeId } = options;
+  const { storageKey = 'board-list-page-state', boardTypeId, boardType } = options;
 
   // Use page state hook
   const {
@@ -67,7 +68,8 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     pageSize: number = 20,
     useQuickSearch: boolean = false
   ) => {
-    if (!boardTypeId) return;
+    // Wait for boardType to be loaded
+    if (!boardType || !boardType.id) return;
 
     try {
       setSearching(true);
@@ -93,7 +95,8 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await apiClient.get(`/post/board/${boardTypeId}?${params.toString()}`);
+      // Use boardType.id instead of boardTypeId (which is the code)
+      const response = await apiClient.get(`/post/board/${boardType.id}?${params.toString()}`);
 
       if (response.posts) {
         // Normalize field names
@@ -135,7 +138,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     } finally {
       setSearching(false);
     }
-  }, [boardTypeId, quickSearch, searchCriteria, setPosts, setRowCount, showErrorMessage]);
+  }, [boardType, quickSearch, searchCriteria, setPosts, setRowCount, showErrorMessage]);
 
   // Search handlers
   const handleRefresh = useCallback(() => {
@@ -216,7 +219,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       setSaveLoading(true);
 
       const postData = {
-        ...(editingPost.id ? {} : { boardTypeId }),
+        ...(editingPost.id ? {} : { boardTypeId: boardType?.id }),
         title: editingPost.title.trim(),
         content: editingPost.content,
         tags: editingPost.tags || [],
@@ -268,7 +271,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     } finally {
       setSaveLoading(false);
     }
-  }, [editingPost, boardTypeId, showSuccessMessage, showErrorMessage, handleRefresh]);
+  }, [editingPost, boardType, showSuccessMessage, showErrorMessage, handleRefresh]);
 
   // Post view handlers
   const handlePostClick = useCallback((postId: string) => {
@@ -283,11 +286,11 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
 
   // Initial fetch and refetch on criteria change
   useEffect(() => {
-    if (boardTypeId) {
+    if (boardType?.id) {
       const useQuickSearch = quickSearch.trim() !== '';
       fetchPosts(paginationModel.page, paginationModel.pageSize, useQuickSearch);
     }
-  }, [fetchPosts, boardTypeId, quickSearch, paginationModel.page, paginationModel.pageSize]);
+  }, [fetchPosts, boardType?.id, quickSearch, paginationModel.page, paginationModel.pageSize]);
 
   return {
     // State

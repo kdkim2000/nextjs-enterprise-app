@@ -60,7 +60,8 @@ export default function BoardListPage() {
     handleCloseDrawer
   } = useBoardManagement({
     storageKey: `board-${boardTypeId}-page-state`,
-    boardTypeId
+    boardTypeId,
+    boardType
   });
 
   // Memoized computed values
