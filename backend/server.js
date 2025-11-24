@@ -33,6 +33,7 @@ const boardTypeRoutes = require('./routes/boardType');
 const postRoutes = require('./routes/post');
 const commentRoutes = require('./routes/comment');
 const attachmentRoutes = require('./routes/attachment');
+const qnaRoutes = require('./routes/qna');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -114,6 +115,7 @@ app.use('/api/board-type', boardTypeRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/attachment', attachmentRoutes);
+app.use('/api/qna', qnaRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);

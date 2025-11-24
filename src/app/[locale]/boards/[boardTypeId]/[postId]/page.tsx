@@ -39,6 +39,10 @@ import {
 } from '@mui/icons-material';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { apiClient } from '@/lib/api/client';
+import { useBoardPermissions } from '@/hooks/useBoardPermissions';
+import { useQnA, useAnswerHelpful } from '@/hooks/useQnA';
+import { QnAStatusBadge } from '@/components/boards/QnAStatusBadge';
+import { AnswerActions } from '@/components/boards/AnswerActions';
 
 interface Post {
   id: string;
@@ -62,10 +66,15 @@ interface Post {
 
 interface Comment {
   id: string;
+  author_id: string;
   author_name?: string;
   author_username?: string;
   content: string;
   created_at: string;
+  is_accepted?: boolean;
+  helpful_count?: number;
+  quality_score?: number;
+  parent_id?: string | null;
   replies?: Comment[];
 }
 
@@ -94,6 +103,11 @@ export default function PostDetailPage() {
   const [newComment, setNewComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [isAuthor, setIsAuthor] = useState(false);
+
+  // Q&A hooks
+  const { boardType } = useBoardPermissions(boardTypeId);
+  const isQnABoard = boardType?.type === 'qna';
+  const { qnaData, canAcceptAnswer, acceptAnswer, unacceptAnswer } = useQnA(postId, post?.author_id);
 
   // Fetch post details
   useEffect(() => {
@@ -300,6 +314,11 @@ export default function PostDetailPage() {
             {post.is_secret && <Lock fontSize="small" color="action" />}
             <Typography variant="h4">{post.title}</Typography>
           </Stack>
+          {isQnABoard && qnaData && (
+            <Box sx={{ mt: 1 }}>
+              <QnAStatusBadge status={qnaData.question_status} />
+            </Box>
+          )}
           {post.tags && post.tags.length > 0 && (
             <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
               {post.tags.map((tag, index) => (

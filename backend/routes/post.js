@@ -160,6 +160,47 @@ router.get('/my-posts', authenticateToken, async (req, res) => {
 });
 
 /**
+ * GET /api/post/popup-notifications - Get active popup notifications
+ * IMPORTANT: This must come before /:id route to avoid matching issues
+ */
+router.get('/popup-notifications', authenticateToken, async (req, res) => {
+  try {
+    const now = new Date();
+
+    const query = `
+      SELECT p.*,
+        u.name_ko as author_name_ko,
+        u.name_en as author_name_en,
+        d.name_ko as department_name_ko,
+        d.name_en as department_name_en
+      FROM posts p
+      LEFT JOIN users u ON p.author_id = u.id
+      LEFT JOIN departments d ON u.department = d.id
+      WHERE p.show_popup = true
+        AND p.status = 'published'
+        AND (p.display_start_date IS NULL OR p.display_start_date <= $1)
+        AND (p.display_end_date IS NULL OR p.display_end_date >= $1)
+      ORDER BY p.created_at DESC
+      LIMIT 10
+    `;
+
+    const result = await require('../config/database').query(query, [now]);
+    const notifications = result.rows.map(transformPostToAPI);
+
+    res.json({
+      success: true,
+      notifications
+    });
+  } catch (error) {
+    console.error('Error fetching popup notifications:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch popup notifications'
+    });
+  }
+});
+
+/**
  * GET /api/post/:id - Get a specific post by ID
  */
 router.get('/:id', authenticateToken, checkSecretPostAccess(), async (req, res) => {
@@ -519,46 +560,6 @@ router.delete('/:id/like', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error unliking post:', error);
     res.status(500).json({ error: 'Failed to unlike post' });
-  }
-});
-
-/**
- * GET /api/post/popup-notifications - Get active popup notifications
- */
-router.get('/popup-notifications', authenticateToken, async (req, res) => {
-  try {
-    const now = new Date();
-
-    const query = `
-      SELECT p.*,
-        u.name_ko as author_name_ko,
-        u.name_en as author_name_en,
-        d.name_ko as department_name_ko,
-        d.name_en as department_name_en
-      FROM posts p
-      LEFT JOIN users u ON p.author_id = u.id
-      LEFT JOIN departments d ON u.department = d.id
-      WHERE p.show_popup = true
-        AND p.status = 'published'
-        AND (p.display_start_date IS NULL OR p.display_start_date <= $1)
-        AND (p.display_end_date IS NULL OR p.display_end_date >= $1)
-      ORDER BY p.created_at DESC
-      LIMIT 10
-    `;
-
-    const result = await require('../config/database').query(query, [now]);
-    const notifications = result.rows.map(transformPostToAPI);
-
-    res.json({
-      success: true,
-      notifications
-    });
-  } catch (error) {
-    console.error('Error fetching popup notifications:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch popup notifications'
-    });
   }
 });
 
