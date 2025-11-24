@@ -57,25 +57,39 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
 
     const fetchNotifications = async () => {
       try {
-        // Check if user has chosen "Don't show today"
-        const hideUntil = localStorage.getItem('noticePopupHideUntil');
-        if (hideUntil) {
-          const hideDate = new Date(hideUntil);
-          const now = new Date();
-          if (now < hideDate) {
-            setLoading(false);
-            return;
-          }
-        }
-
         console.log('[NoticePopup] Fetching popup notifications...');
         const response = await apiClient.get<{ notifications: Notice[] }>('/post/popup-notifications');
         console.log('[NoticePopup] Response:', response);
 
         if (response.success && response.data?.notifications && response.data.notifications.length > 0) {
-          console.log('[NoticePopup] Found', response.data.notifications.length, 'notifications');
-          setNotices(response.data.notifications);
-          setOpen(true);
+          // Filter out notifications that user chose to hide today
+          const now = new Date();
+          const hiddenNotices = JSON.parse(localStorage.getItem('hiddenNotices') || '{}');
+
+          const visibleNotifications = response.data.notifications.filter(notice => {
+            const hideUntil = hiddenNotices[notice.id];
+            if (hideUntil) {
+              const hideDate = new Date(hideUntil);
+              // If hide period has expired, show the notice
+              if (now >= hideDate) {
+                delete hiddenNotices[notice.id];
+                localStorage.setItem('hiddenNotices', JSON.stringify(hiddenNotices));
+                return true;
+              }
+              // Still hidden
+              return false;
+            }
+            return true;
+          });
+
+          console.log('[NoticePopup] Found', response.data.notifications.length, 'notifications,', visibleNotifications.length, 'visible');
+
+          if (visibleNotifications.length > 0) {
+            setNotices(visibleNotifications);
+            setOpen(true);
+          } else {
+            console.log('[NoticePopup] All notifications are hidden by user preference');
+          }
         } else {
           console.log('[NoticePopup] No notifications to display');
         }
@@ -90,12 +104,17 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
   }, [user, authLoading]);
 
   const handleClose = () => {
-    if (dontShowToday) {
-      // Hide until tomorrow
+    if (dontShowToday && notices[selectedTab]) {
+      // Hide current notice until tomorrow
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      localStorage.setItem('noticePopupHideUntil', tomorrow.toISOString());
+
+      const hiddenNotices = JSON.parse(localStorage.getItem('hiddenNotices') || '{}');
+      hiddenNotices[notices[selectedTab].id] = tomorrow.toISOString();
+      localStorage.setItem('hiddenNotices', JSON.stringify(hiddenNotices));
+
+      console.log('[NoticePopup] Hiding notice', notices[selectedTab].id, 'until', tomorrow.toISOString());
     }
 
     setOpen(false);
