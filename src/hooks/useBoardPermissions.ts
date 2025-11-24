@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface BoardType {
   id: string;
   code: string;
-  type: 'normal' | 'notice';
+  type: 'normal' | 'notice' | 'qna';
   writeRoles: string[];
   readRoles: string[];
   status: string;
@@ -68,7 +68,11 @@ export function useBoardPermissions(boardTypeIdOrCode?: string): BoardPermission
         setError(null);
 
         // Determine if it's an ID or code
-        const endpoint = boardTypeIdOrCode.startsWith('BOARD-TYPE-')
+        // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (8-4-4-4-12)
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(boardTypeIdOrCode);
+        const isLegacyId = boardTypeIdOrCode.startsWith('BOARD-TYPE-');
+
+        const endpoint = (isUUID || isLegacyId)
           ? `/board-type/${boardTypeIdOrCode}`
           : `/board-type/code/${boardTypeIdOrCode}`;
 

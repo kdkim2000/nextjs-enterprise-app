@@ -137,7 +137,7 @@ export default function HelpFormFields({
           Main Content
         </Typography>
         <RichTextEditor
-          content={help.content || ''}
+          value={help.content || ''}
           onChange={(content) => handleChange('content', content)}
         />
       </Box>

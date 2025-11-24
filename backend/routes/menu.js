@@ -191,23 +191,30 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(409).json({ error: 'Menu path already exists' });
     }
 
+    // Debug logging
+    console.log('[POST /menu] Request body:', JSON.stringify(req.body, null, 2));
+    console.log('[POST /menu] name type:', typeof name, 'value:', name);
+    console.log('[POST /menu] description type:', typeof description, 'value:', description);
+
     const menuData = {
       code,
-      nameEn: typeof name === 'string' ? name : name.en || '',
-      nameKo: typeof name === 'object' ? name.ko || '' : '',
-      nameZh: typeof name === 'object' ? name.zh || '' : '',
-      nameVi: typeof name === 'object' ? name.vi || '' : '',
+      nameEn: (typeof name === 'object' && name !== null) ? (name.en || '') : (typeof name === 'string' ? name : ''),
+      nameKo: (typeof name === 'object' && name !== null) ? (name.ko || '') : '',
+      nameZh: (typeof name === 'object' && name !== null) ? (name.zh || '') : '',
+      nameVi: (typeof name === 'object' && name !== null) ? (name.vi || '') : '',
       path,
       icon: icon || 'Article',
       order,
       parentId: parentId || null,
       level,
       programId: programId || null,
-      descriptionEn: typeof description === 'string' ? description : description?.en || '',
-      descriptionKo: typeof description === 'object' ? description.ko || '' : '',
-      descriptionZh: typeof description === 'object' ? description.zh || '' : '',
-      descriptionVi: typeof description === 'object' ? description.vi || '' : ''
+      descriptionEn: (typeof description === 'object' && description !== null) ? (description.en || '') : (typeof description === 'string' ? description : ''),
+      descriptionKo: (typeof description === 'object' && description !== null) ? (description.ko || '') : '',
+      descriptionZh: (typeof description === 'object' && description !== null) ? (description.zh || '') : '',
+      descriptionVi: (typeof description === 'object' && description !== null) ? (description.vi || '') : ''
     };
+
+    console.log('[POST /menu] Transformed menuData:', JSON.stringify(menuData, null, 2));
 
     const dbMenu = await menuService.createMenu(menuData);
     const newMenu = transformMenuToAPI(dbMenu);
