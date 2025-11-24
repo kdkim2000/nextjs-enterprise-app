@@ -35,6 +35,7 @@ import {
 import { apiClient } from '@/lib/api/client';
 import SafeHtmlRenderer from '@/components/common/SafeHtmlRenderer';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
+import RichTextEditor from '@/components/common/RichTextEditor/RichTextEditor';
 
 interface Post {
   id: string;
@@ -242,7 +243,9 @@ export default function PostDetailDrawer({
   };
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim()) return;
+    // Remove HTML tags and check if there's actual content
+    const textContent = newComment.replace(/<[^>]*>/g, '').trim();
+    if (!textContent) return;
 
     try {
       setSubmittingComment(true);
@@ -505,22 +508,22 @@ export default function PostDetailDrawer({
 
                   {/* New Comment */}
                   <Box sx={{ mb: 3 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      placeholder="Write a comment..."
+                    <RichTextEditor
                       value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      sx={{ mb: 1 }}
+                      onChange={setNewComment}
+                      placeholder="Write a comment..."
+                      minHeight={150}
+                      maxHeight={400}
                     />
-                    <Button
-                      variant="contained"
-                      onClick={handleSubmitComment}
-                      disabled={submittingComment || !newComment.trim()}
-                    >
-                      Submit Comment
-                    </Button>
+                    <Box sx={{ mt: 1 }}>
+                      <Button
+                        variant="contained"
+                        onClick={handleSubmitComment}
+                        disabled={submittingComment || !newComment.replace(/<[^>]*>/g, '').trim()}
+                      >
+                        Submit Comment
+                      </Button>
+                    </Box>
                   </Box>
 
                   {/* Comment List */}
@@ -551,9 +554,16 @@ export default function PostDetailDrawer({
                                 </Box>
                               }
                               secondary={
-                                <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                  {comment.content}
-                                </Typography>
+                                <Box sx={{ mt: 0.5 }}>
+                                  <SafeHtmlRenderer
+                                    html={comment.content}
+                                    sx={{
+                                      fontSize: '0.875rem',
+                                      '& p': { marginTop: 0, marginBottom: '0.5em' },
+                                      '& p:last-child': { marginBottom: 0 }
+                                    }}
+                                  />
+                                </Box>
                               }
                             />
                           </ListItem>
