@@ -94,6 +94,12 @@ export interface PostDetailDrawerProps {
   onEdit?: (postId: string) => void;
   onDelete?: () => void;
   canWrite?: boolean;
+  boardSettings?: {
+    allowComments?: boolean;
+    allowLikes?: boolean;
+    allowAttachments?: boolean;
+    [key: string]: any;
+  };
 }
 
 export default function PostDetailDrawer({
@@ -102,7 +108,8 @@ export default function PostDetailDrawer({
   postId,
   onEdit,
   onDelete,
-  canWrite = false
+  canWrite = false,
+  boardSettings
 }: PostDetailDrawerProps) {
   // State
   const [post, setPost] = useState<Post | null>(null);
@@ -168,9 +175,13 @@ export default function PostDetailDrawer({
     fetchPost();
   }, [postId, open]);
 
-  // Fetch comments
+  // Fetch comments (only if comments are allowed)
   useEffect(() => {
     if (!open || !postId || !post) return;
+
+    // Check if comments are allowed
+    const allowComments = boardSettings?.allowComments ?? true;
+    if (!allowComments) return;
 
     const fetchComments = async () => {
       try {
@@ -183,7 +194,7 @@ export default function PostDetailDrawer({
       }
     };
     fetchComments();
-  }, [postId, post, open]);
+  }, [postId, post, open, boardSettings]);
 
   // Fetch attachments
   useEffect(() => {
@@ -468,85 +479,90 @@ export default function PostDetailDrawer({
                 </>
               )}
 
-              {/* Like Button */}
-              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Button
-                  variant={liked ? 'contained' : 'outlined'}
-                  startIcon={liked ? <ThumbUp /> : <ThumbUpOutlined />}
-                  onClick={handleLike}
-                  size="large"
-                >
-                  Like ({post.likeCount ?? post.like_count ?? 0})
-                </Button>
-              </Box>
+              {/* Like Button - Only show if likes are allowed */}
+              {(boardSettings?.allowLikes ?? true) && (
+                <>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant={liked ? 'contained' : 'outlined'}
+                      startIcon={liked ? <ThumbUp /> : <ThumbUpOutlined />}
+                      onClick={handleLike}
+                      size="large"
+                    >
+                      Like ({post.likeCount ?? post.like_count ?? 0})
+                    </Button>
+                  </Box>
+                  <Divider />
+                </>
+              )}
 
-              <Divider />
-
-              {/* Comments */}
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  Comments ({comments.length})
-                </Typography>
-
-                {/* New Comment */}
-                <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="Write a comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    sx={{ mb: 1 }}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={handleSubmitComment}
-                    disabled={submittingComment || !newComment.trim()}
-                  >
-                    Submit Comment
-                  </Button>
-                </Box>
-
-                {/* Comment List */}
-                {comments.length === 0 ? (
-                  <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
-                    No comments yet
+              {/* Comments - Only show if comments are allowed */}
+              {(boardSettings?.allowComments ?? true) && (
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Comments ({comments.length})
                   </Typography>
-                ) : (
-                  <List>
-                    {comments.map((comment) => {
-                      const authorName = comment.authorName || comment.author_name || comment.authorUsername || comment.author_username || 'Unknown';
-                      const createdAt = comment.createdAt || comment.created_at || '';
 
-                      return (
-                        <ListItem key={comment.id} alignItems="flex-start" sx={{ px: 0 }}>
-                          <ListItemAvatar>
-                            <Avatar>{authorName[0]?.toUpperCase() || 'U'}</Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="subtitle2">
-                                  {authorName}
+                  {/* New Comment */}
+                  <Box sx={{ mb: 3 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={3}
+                      placeholder="Write a comment..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      sx={{ mb: 1 }}
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={handleSubmitComment}
+                      disabled={submittingComment || !newComment.trim()}
+                    >
+                      Submit Comment
+                    </Button>
+                  </Box>
+
+                  {/* Comment List */}
+                  {comments.length === 0 ? (
+                    <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
+                      No comments yet
+                    </Typography>
+                  ) : (
+                    <List>
+                      {comments.map((comment) => {
+                        const authorName = comment.authorName || comment.author_name || comment.authorUsername || comment.author_username || 'Unknown';
+                        const createdAt = comment.createdAt || comment.created_at || '';
+
+                        return (
+                          <ListItem key={comment.id} alignItems="flex-start" sx={{ px: 0 }}>
+                            <ListItemAvatar>
+                              <Avatar>{authorName[0]?.toUpperCase() || 'U'}</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography variant="subtitle2">
+                                    {authorName}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {new Date(createdAt).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              }
+                              secondary={
+                                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                  {comment.content}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {new Date(createdAt).toLocaleString()}
-                                </Typography>
-                              </Box>
-                            }
-                            secondary={
-                              <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                {comment.content}
-                              </Typography>
-                            }
-                          />
-                        </ListItem>
-                      );
-                    })}
-                  </List>
-                )}
-              </Box>
+                              }
+                            />
+                          </ListItem>
+                        );
+                      })}
+                    </List>
+                  )}
+                </Box>
+              )}
             </Stack>
           )}
         </Box>
