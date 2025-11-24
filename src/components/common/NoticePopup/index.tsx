@@ -69,12 +69,12 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
         }
 
         console.log('[NoticePopup] Fetching popup notifications...');
-        const response = await apiClient.get('/post/popup-notifications');
+        const response = await apiClient.get<{ notifications: Notice[] }>('/post/popup-notifications');
         console.log('[NoticePopup] Response:', response);
 
-        if (response.success && response.notifications && response.notifications.length > 0) {
-          console.log('[NoticePopup] Found', response.notifications.length, 'notifications');
-          setNotices(response.notifications);
+        if (response.success && response.data?.notifications && response.data.notifications.length > 0) {
+          console.log('[NoticePopup] Found', response.data.notifications.length, 'notifications');
+          setNotices(response.data.notifications);
           setOpen(true);
         } else {
           console.log('[NoticePopup] No notifications to display');
