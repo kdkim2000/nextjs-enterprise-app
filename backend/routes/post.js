@@ -166,6 +166,8 @@ router.get('/my-posts', authenticateToken, async (req, res) => {
 router.get('/popup-notifications', authenticateToken, async (req, res) => {
   try {
     const now = new Date();
+    console.log('[GET /api/post/popup-notifications] Fetching popup notifications for user:', req.user?.userId);
+    console.log('[GET /api/post/popup-notifications] Current time:', now.toISOString());
 
     const query = `
       SELECT p.*,
@@ -185,14 +187,28 @@ router.get('/popup-notifications', authenticateToken, async (req, res) => {
     `;
 
     const result = await require('../config/database').query(query, [now]);
+    console.log('[GET /api/post/popup-notifications] Found', result.rows.length, 'notifications');
+
+    if (result.rows.length > 0) {
+      console.log('[GET /api/post/popup-notifications] Notifications:', result.rows.map(r => ({
+        id: r.id,
+        title: r.title,
+        show_popup: r.show_popup,
+        display_start_date: r.display_start_date,
+        display_end_date: r.display_end_date
+      })));
+    }
+
     const notifications = result.rows.map(transformPostToAPI);
 
     res.json({
       success: true,
-      notifications
+      data: {
+        notifications
+      }
     });
   } catch (error) {
-    console.error('Error fetching popup notifications:', error);
+    console.error('[GET /api/post/popup-notifications] Error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch popup notifications'
