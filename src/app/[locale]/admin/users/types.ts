@@ -40,5 +40,5 @@ export interface SearchCriteria {
   department: string; // Single department selection
   status: string;
   user_category: string;
-  [key: string]: string | string[];
+  [key: string]: string | string[] | undefined;
 }

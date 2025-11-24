@@ -168,8 +168,8 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   const handleAdd = useCallback(() => {
     setEditingUser({
       id: '',
-      username: '',
-      name: '',
+      loginid: '',
+      name_ko: '',
       email: '',
       role: 'user',
       department: '',
@@ -358,6 +358,12 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   useEffect(() => {
     fetchDepartments();
   }, [fetchDepartments]);
+
+  // Initial fetch and refetch on criteria change
+  useEffect(() => {
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchUsers(paginationModel.page, paginationModel.pageSize, useQuickSearch);
+  }, [fetchUsers, quickSearch, paginationModel.page, paginationModel.pageSize]);
 
   return {
     // State

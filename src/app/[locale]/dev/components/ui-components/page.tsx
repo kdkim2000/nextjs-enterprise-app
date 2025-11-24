@@ -598,8 +598,8 @@ export default function UIComponentsDemo() {
             <CardContent>
               <Box display="flex" flexDirection="column" gap={2}>
                 <PermissionGuard
-                  permission="admin"
-                  userPermissions={['admin', 'user']}
+                  programCode="PROG-ADMIN"
+                  action="view"
                   fallback={
                     <MuiAlert severity="warning">
                       You need admin permission to view this content
@@ -613,8 +613,8 @@ export default function UIComponentsDemo() {
                 </PermissionGuard>
 
                 <PermissionGuard
-                  permission="admin"
-                  userPermissions={['user']}
+                  programCode="PROG-ADMIN"
+                  action="create"
                   fallback={
                     <MuiAlert severity="error">
                       Access denied - Admin permission required

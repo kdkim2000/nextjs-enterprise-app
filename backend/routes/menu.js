@@ -191,20 +191,30 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(409).json({ error: 'Menu path already exists' });
     }
 
+    // Debug logging
+    console.log('[POST /menu] Request body:', JSON.stringify(req.body, null, 2));
+    console.log('[POST /menu] name type:', typeof name, 'value:', name);
+    console.log('[POST /menu] description type:', typeof description, 'value:', description);
+
     const menuData = {
       code,
-      nameEn: typeof name === 'string' ? name : name.en || '',
-      nameKo: typeof name === 'object' ? name.ko || '' : '',
-      nameZh: typeof name === 'object' ? name.zh || '' : '',
-      nameVi: typeof name === 'object' ? name.vi || '' : '',
+      nameEn: (typeof name === 'object' && name !== null) ? (name.en || '') : (typeof name === 'string' ? name : ''),
+      nameKo: (typeof name === 'object' && name !== null) ? (name.ko || '') : '',
+      nameZh: (typeof name === 'object' && name !== null) ? (name.zh || '') : '',
+      nameVi: (typeof name === 'object' && name !== null) ? (name.vi || '') : '',
       path,
       icon: icon || 'Article',
       order,
       parentId: parentId || null,
       level,
       programId: programId || null,
-      description: JSON.stringify(description || { en: '', ko: '', zh: '', vi: '' })
+      descriptionEn: (typeof description === 'object' && description !== null) ? (description.en || '') : (typeof description === 'string' ? description : ''),
+      descriptionKo: (typeof description === 'object' && description !== null) ? (description.ko || '') : '',
+      descriptionZh: (typeof description === 'object' && description !== null) ? (description.zh || '') : '',
+      descriptionVi: (typeof description === 'object' && description !== null) ? (description.vi || '') : ''
     };
+
+    console.log('[POST /menu] Transformed menuData:', JSON.stringify(menuData, null, 2));
 
     const dbMenu = await menuService.createMenu(menuData);
     const newMenu = transformMenuToAPI(dbMenu);
@@ -267,7 +277,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (parentId !== undefined) updates.parentId = parentId;
     if (level !== undefined) updates.level = level;
     if (programId !== undefined) updates.programId = programId;
-    if (description) updates.description = JSON.stringify(description);
+    if (description) {
+      if (typeof description === 'object') {
+        if (description.en !== undefined) updates.descriptionEn = description.en;
+        if (description.ko !== undefined) updates.descriptionKo = description.ko;
+        if (description.zh !== undefined) updates.descriptionZh = description.zh;
+        if (description.vi !== undefined) updates.descriptionVi = description.vi;
+      }
+    }
 
     const dbMenu = await menuService.updateMenu(req.params.id, updates);
     const updatedMenu = transformMenuToAPI(dbMenu);

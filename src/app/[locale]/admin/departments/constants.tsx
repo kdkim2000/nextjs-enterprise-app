@@ -24,18 +24,18 @@ export const createColumns = (
   const columns: GridColDef[] = [
   {
     field: 'id',
-    headerName: 'ID',
+    headerName: getLocalizedValue({ en: 'ID', ko: 'ID', zh: 'ID', vi: 'ID' }, locale),
     width: 70
   },
   {
     field: 'code',
-    headerName: t('code'),
+    headerName: getLocalizedValue({ en: 'Code', ko: '코드', zh: '代码', vi: 'Mã' }, locale),
     width: 120,
     sortable: true
   },
   {
     field: 'name',
-    headerName: t('name'),
+    headerName: getLocalizedValue({ en: 'Name', ko: '이름', zh: '名称', vi: 'Tên' }, locale),
     width: 200,
     sortable: true,
     valueGetter: (_value, row) => {
@@ -44,7 +44,7 @@ export const createColumns = (
   },
   {
     field: 'description',
-    headerName: t('description'),
+    headerName: getLocalizedValue({ en: 'Description', ko: '설명', zh: '描述', vi: 'Mô tả' }, locale),
     width: 250,
     sortable: false,
     valueGetter: (_value, row) => {
@@ -53,7 +53,7 @@ export const createColumns = (
   },
   {
     field: 'parentId',
-    headerName: t('parentDepartment'),
+    headerName: getLocalizedValue({ en: 'Parent Department', ko: '상위 부서', zh: '上级部门', vi: 'Phòng ban cấp trên' }, locale),
     width: 180,
     sortable: true,
     valueGetter: (_value, row) => {
@@ -64,7 +64,7 @@ export const createColumns = (
   },
   {
     field: 'managerId',
-    headerName: t('manager'),
+    headerName: getLocalizedValue({ en: 'Manager', ko: '담당자', zh: '负责人', vi: 'Quản lý' }, locale),
     width: 150,
     sortable: true,
     valueGetter: (_value, row) => {
@@ -75,7 +75,7 @@ export const createColumns = (
   },
   {
     field: 'level',
-    headerName: t('level'),
+    headerName: getLocalizedValue({ en: 'Level', ko: '레벨', zh: '级别', vi: 'Cấp độ' }, locale),
     width: 80,
     sortable: true,
     align: 'center',
@@ -83,7 +83,7 @@ export const createColumns = (
   },
   {
     field: 'status',
-    headerName: t('status'),
+    headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
     width: 100,
     sortable: true,
     type: 'singleSelect',
@@ -108,13 +108,14 @@ export const createColumns = (
   if (canUpdate) {
     columns.push({
       field: 'actions',
-      headerName: t('actions'),
-      width: 80,
+      headerName: getLocalizedValue({ en: 'Actions', ko: '작업', zh: '操作', vi: 'Thao tác' }, locale),
+      width: 100,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
         <ActionsCell
           onEdit={() => handleEdit(params.row.id)}
+          editTooltip={getLocalizedValue({ en: 'Edit Department', ko: '부서 수정', zh: '编辑部门', vi: 'Sửa phòng ban' }, locale)}
           showMore={false}
         />
       )

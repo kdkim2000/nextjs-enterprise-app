@@ -180,7 +180,7 @@ export default function ProgramManagementPage() {
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
-        width={{ xs: '100%', sm: 700, md: 800 }}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <ProgramFormFields
           program={editingProgram}

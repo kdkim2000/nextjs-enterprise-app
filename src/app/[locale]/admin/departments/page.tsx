@@ -158,32 +158,24 @@ export default function DepartmentsPage() {
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {departments.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No departments loaded"
-            description="Use the search filters above to find departments"
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <ExcelDataGrid
+            rows={departments}
+            columns={columns}
+            onRowsChange={(rows) => setDepartments(rows as Department[])}
+            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+            onRefresh={handleRefresh}
+            checkboxSelection={gridPermissions.checkboxSelection}
+            editable={gridPermissions.editable}
+            exportFileName="departments"
+            loading={searching}
+            paginationMode="server"
+            rowCount={rowCount}
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
           />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={departments}
-              columns={columns}
-              onRowsChange={(rows) => setDepartments(rows as Department[])}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="departments"
-              loading={searching}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
-            />
-          </Box>
-        )}
+        </Box>
       </Paper>
 
       {/* Edit Drawer */}
@@ -193,11 +185,12 @@ export default function DepartmentsPage() {
           setDialogOpen(false);
           setEditingDepartment(null);
         }}
-        title={!editingDepartment?.id ? 'Add New Department' : 'Edit Department'}
+        title={!editingDepartment?.id ? t('common.create') + ' Department' : t('common.edit') + ' Department'}
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
+        width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
         <DepartmentFormFields
           department={editingDepartment as DepartmentFormData}
@@ -223,7 +216,7 @@ export default function DepartmentsPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName="department"
+        itemName="Department"
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
