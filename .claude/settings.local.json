@@ -88,7 +88,15 @@
       "Bash(tee:*)",
       "Bash(cmd //c \"taskkill /F /PID 22356\" 2)",
       "Bash(cmd //c \"taskkill /F /PID 31128\" 2)",
-      "Bash(cmd //c \"taskkill /F /PID 32708\")"
+      "Bash(cmd //c \"taskkill /F /PID 32708\")",
+      "Bash(cmd //c \"taskkill /F /PID 13780\")",
+      "Bash(cmd //c \"taskkill /F /PID 34620\")",
+      "Bash(cmd //c \"taskkill /F /PID 25704\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 20492\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 10020\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 4988\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 32020\" 2)",
+      "Bash(cmd //c \"taskkill /F /PID 24124\" 2)"
     ],
     "deny": [],
     "ask": []
