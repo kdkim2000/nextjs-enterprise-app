@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { PermissionProvider } from '@/contexts/PermissionContext';
 import { MenuProvider } from '@/contexts/MenuContext';
 import LanguageLoader from './LanguageLoader';
+import NoticePopup from '@/components/common/NoticePopup';
 import { lightTheme } from '@/theme';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -28,6 +29,7 @@ export function ClientProviders({
           <PermissionProvider>
             <MenuProvider>
               {children}
+              <NoticePopup />
               <ToastContainer
                 position="top-right"
                 autoClose={5000}

@@ -96,21 +96,33 @@ async function getChildMenus(parentId) {
  * @returns {Promise<Object>} Created menu object
  */
 async function createMenu(menuData) {
+  const { v4: uuidv4 } = require('uuid');
+
   const {
-    id, code, nameEn, nameKo, nameZh, nameVi, path, icon,
-    parentId, level, order, visible, programId
+    code, nameEn, nameKo, nameZh, nameVi, path, icon,
+    parentId, level, order, programId,
+    descriptionEn, descriptionKo, descriptionZh, descriptionVi
   } = menuData;
+
+  // Generate UUID if not provided
+  const id = menuData.id || uuidv4();
 
   const query = `
     INSERT INTO menus (
       id, code, name_en, name_ko, name_zh, name_vi, path, icon,
-      parent_id, level, "order", visible, program_id, created_at, updated_at
+      parent_id, level, "order", program_id,
+      description_en, description_ko, description_zh, description_vi,
+      created_at, updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())
     RETURNING *
   `;
 
-  const params = [id, code, nameEn, nameKo, nameZh, nameVi, path, icon, parentId, level, order, visible, programId];
+  const params = [
+    id, code, nameEn, nameKo, nameZh, nameVi, path, icon,
+    parentId, level, order, programId,
+    descriptionEn, descriptionKo, descriptionZh, descriptionVi
+  ];
   const result = await db.query(query, params);
   return result.rows[0];
 }
@@ -124,7 +136,8 @@ async function createMenu(menuData) {
 async function updateMenu(menuId, updates) {
   const allowedFields = [
     'code', 'name_en', 'name_ko', 'name_zh', 'name_vi', 'path', 'icon',
-    'parent_id', 'level', 'order', 'visible', 'program_id'
+    'parent_id', 'level', 'order', 'program_id',
+    'description_en', 'description_ko', 'description_zh', 'description_vi'
   ];
 
   const setClause = [];
@@ -134,7 +147,9 @@ async function updateMenu(menuId, updates) {
   for (const [key, value] of Object.entries(updates)) {
     const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
     if (allowedFields.includes(dbField)) {
-      setClause.push(`${dbField} = $${paramIndex}`);
+      // Quote 'order' as it's a PostgreSQL reserved keyword
+      const quotedField = dbField === 'order' ? '"order"' : dbField;
+      setClause.push(`${quotedField} = $${paramIndex}`);
       params.push(value);
       paramIndex++;
     }
@@ -173,7 +188,7 @@ async function getUserMenus(userId) {
     SELECT DISTINCT m.* FROM menus m
     INNER JOIN role_menu_mappings rmm ON m.id = rmm.menu_id
     INNER JOIN user_role_mappings urm ON rmm.role_id = urm.role_id
-    WHERE urm.user_id = $1 AND m.visible = true
+    WHERE urm.user_id = $1
     ORDER BY m.level, m."order", m.code
   `;
 

@@ -356,7 +356,7 @@ export default function SettingsPage() {
                   <Select
                     value={profileData.user_category}
                     label={locale === 'ko' ? '사용자 유형' : 'User Category'}
-                    onChange={(e) => setProfileData({ ...profileData, user_category: e.target.value })}
+                    onChange={(e) => setProfileData({ ...profileData, user_category: e.target.value as 'admin' | 'regular' | 'contractor' | 'temporary' | 'external' })}
                   >
                     {userCategoryOptions.map(option => (
                       <MenuItem key={option.value} value={option.value}>

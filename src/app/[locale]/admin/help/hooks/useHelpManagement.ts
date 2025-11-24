@@ -303,6 +303,12 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
     fetchHelps(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchHelps, quickSearch, setPaginationModel]);
 
+  // Initial fetch on mount
+  useEffect(() => {
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchHelps(paginationModel.page, paginationModel.pageSize, useQuickSearch);
+  }, [fetchHelps, quickSearch, paginationModel.page, paginationModel.pageSize]);
+
   return {
     // State
     helps,

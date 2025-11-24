@@ -297,6 +297,12 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     fetchDepartments(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchDepartments, quickSearch, setPaginationModel]);
 
+  // Initial fetch and refetch on criteria change
+  useEffect(() => {
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchDepartments(paginationModel.page, paginationModel.pageSize, useQuickSearch);
+  }, [fetchDepartments, quickSearch, paginationModel.page, paginationModel.pageSize]);
+
   return {
     // State
     departments,

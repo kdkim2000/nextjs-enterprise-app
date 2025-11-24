@@ -56,13 +56,23 @@ router.get('/', async (req, res) => {
 // POST /api/help - Create new help content
 router.post('/', async (req, res) => {
   try {
+    // Generate unique ID if not provided
+    const id = req.body.id || `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     const helpData = {
+      id,
       programId: req.body.programId,
       language: req.body.language,
       title: req.body.title,
       content: req.body.content,
+      sections: req.body.sections,
+      faq: req.body.faqs,
+      tips: req.body.tips,
+      troubleshooting: req.body.troubleshooting,
+      videoUrl: req.body.videoUrl,
+      relatedTopics: req.body.relatedLinks,
       status: req.body.status || 'draft',
-      version: 1
+      createdBy: req.user?.id || req.body.createdBy
     };
 
     const newHelp = await helpService.createHelp(helpData);
@@ -93,8 +103,14 @@ router.put('/', async (req, res) => {
       language: req.body.language,
       title: req.body.title,
       content: req.body.content,
+      sections: req.body.sections,
+      faq: req.body.faqs,
+      tips: req.body.tips,
+      troubleshooting: req.body.troubleshooting,
+      videoUrl: req.body.videoUrl,
+      relatedTopics: req.body.relatedLinks,
       status: req.body.status,
-      version: (existingHelp.version || 1) + 1
+      updatedBy: req.user?.id || req.body.updatedBy
     };
 
     const updatedHelp = await helpService.updateHelp(id, updates);

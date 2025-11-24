@@ -40,7 +40,7 @@ export const createColumns = (
           console.log('[Avatar] Using DB image for user:', user.loginid, 'size:', user.avatar_image.length);
         } else if (user.avatarUrl) {
           // Fallback to avatar URL
-          avatarSrc = getAvatarUrl(user.avatarUrl);
+          avatarSrc = getAvatarUrl(user.avatarUrl) || '';
           console.log('[Avatar] Using URL for user:', user.loginid);
         }
 
