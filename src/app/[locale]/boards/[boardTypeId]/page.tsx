@@ -264,6 +264,7 @@ export default function BoardListPage() {
           onEdit={handleEditPost}
           onDelete={handleDeletePost}
           canWrite={canWrite}
+          boardSettings={boardType?.settings}
         />
       )}
 
