@@ -308,6 +308,13 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
       tags, metadata
     } = req.body;
 
+    // Debug: Log all received data
+    console.log('[PUT /api/post/:id] Received body:', JSON.stringify(req.body, null, 2));
+    console.log('[PUT /api/post/:id] User role:', req.user.role);
+    console.log('[PUT /api/post/:id] showPopup:', showPopup);
+    console.log('[PUT /api/post/:id] displayStartDate:', displayStartDate);
+    console.log('[PUT /api/post/:id] displayEndDate:', displayEndDate);
+
     // Debug: Log content before updating
     if (content !== undefined) {
       console.log('[PUT /api/post/:id] Received content length:', content?.length);
@@ -332,7 +339,17 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
       if (displayEndDate !== undefined) updates.displayEndDate = displayEndDate;
     }
 
+    console.log('[PUT /api/post/:id] Final updates object:', JSON.stringify(updates, null, 2));
+
     const dbPost = await postService.updatePost(req.params.id, updates);
+
+    console.log('[PUT /api/post/:id] Updated post from DB:', JSON.stringify({
+      id: dbPost.id,
+      show_popup: dbPost.show_popup,
+      display_start_date: dbPost.display_start_date,
+      display_end_date: dbPost.display_end_date
+    }, null, 2));
+
     const updatedPost = transformPostToAPI(dbPost);
 
     res.json({ post: updatedPost });

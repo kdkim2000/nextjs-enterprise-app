@@ -19,6 +19,7 @@ import {
 import { Close as CloseIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
 import SafeHtmlRenderer from '@/components/common/SafeHtmlRenderer';
 import { apiClient } from '@/lib/api/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Notice {
   id: string;
@@ -34,14 +35,26 @@ interface NoticePopupProps {
 }
 
 export default function NoticePopup({ onClose }: NoticePopupProps) {
+  const { user, loading: authLoading } = useAuth();
   const [open, setOpen] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState(0);
   const [dontShowToday, setDontShowToday] = useState(false);
 
-  // Fetch popup notifications on mount
+  // Fetch popup notifications when user is authenticated
   useEffect(() => {
+    // Wait for auth to load
+    if (authLoading) {
+      return;
+    }
+
+    // Only fetch if user is logged in
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     const fetchNotifications = async () => {
       try {
         // Check if user has chosen "Don't show today"
@@ -55,21 +68,26 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
           }
         }
 
+        console.log('[NoticePopup] Fetching popup notifications...');
         const response = await apiClient.get('/post/popup-notifications');
+        console.log('[NoticePopup] Response:', response);
 
         if (response.success && response.notifications && response.notifications.length > 0) {
+          console.log('[NoticePopup] Found', response.notifications.length, 'notifications');
           setNotices(response.notifications);
           setOpen(true);
+        } else {
+          console.log('[NoticePopup] No notifications to display');
         }
       } catch (error) {
-        console.error('Error fetching popup notifications:', error);
+        console.error('[NoticePopup] Error fetching popup notifications:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchNotifications();
-  }, []);
+  }, [user, authLoading]);
 
   const handleClose = () => {
     if (dontShowToday) {

@@ -96,6 +96,13 @@ export default function BoardListPage() {
           tags: postData.tags || [],
           is_secret: postData.isSecret ?? postData.is_secret ?? false,
           is_pinned: postData.isPinned ?? postData.is_pinned ?? false,
+          showPopup: postData.showPopup ?? postData.show_popup ?? false,
+          displayStartDate: (postData.displayStartDate ?? postData.display_start_date)
+            ? new Date(postData.displayStartDate ?? postData.display_start_date)
+            : null,
+          displayEndDate: (postData.displayEndDate ?? postData.display_end_date)
+            ? new Date(postData.displayEndDate ?? postData.display_end_date)
+            : null,
           status: postData.status || 'published'
         };
 
