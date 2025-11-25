@@ -10,7 +10,7 @@
  * - Lists (bulleted, numbered)
  * - Text alignment (left, center, right, justify)
  * - Blockquotes and code blocks
- * - Links and images
+ * - Links and images (URL, file upload, paste, drag & drop)
  * - Tables
  * - Undo/Redo
  *
@@ -27,7 +27,7 @@
 
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -47,7 +47,12 @@ import {
   Tooltip,
   Stack,
   useTheme,
-  alpha
+  alpha,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  CircularProgress
 } from '@mui/material';
 import {
   FormatBold,
@@ -66,8 +71,11 @@ import {
   FormatAlignJustify,
   Undo,
   Redo,
-  FormatClear
+  FormatClear,
+  CloudUpload,
+  InsertLink
 } from '@mui/icons-material';
+import axiosInstance from '@/lib/axios';
 
 /**
  * Props for the RichTextEditor component
@@ -102,6 +110,50 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   helperText
 }) => {
   const theme = useTheme();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageMenuAnchor, setImageMenuAnchor] = useState<null | HTMLElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  /**
+   * Upload image file to server and return URL
+   */
+  const uploadImage = useCallback(async (file: File): Promise<string | null> => {
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Use axios directly - it auto-sets Content-Type with boundary for FormData
+      const response = await axiosInstance.post('/file/upload', formData);
+
+      // Debug: log full response to understand structure
+      console.log('[RichTextEditor] Upload response:', JSON.stringify(response.data, null, 2));
+
+      // Response structure: { success, data: { message, file: { url, path, ... } } }
+      if (response.data?.success && response.data?.data?.file) {
+        const fileData = response.data.data.file;
+        if (fileData?.url) {
+          return fileData.url;
+        } else if (fileData?.path) {
+          // Fallback to path if url is not available
+          return fileData.path;
+        }
+      }
+      console.error('Image upload failed:', response.data?.error || 'Unknown error');
+      return null;
+    } catch (error: any) {
+      console.error('Error uploading image:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        code: error.code,
+        stack: error.stack
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -174,18 +226,113 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [editor]);
 
   /**
-   * Handle image insertion
-   * Prompts user for image URL and inserts image at cursor position
+   * Handle image menu open
    */
-  const addImage = useCallback(() => {
+  const handleImageMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    setImageMenuAnchor(event.currentTarget);
+  }, []);
+
+  /**
+   * Handle image menu close
+   */
+  const handleImageMenuClose = useCallback(() => {
+    setImageMenuAnchor(null);
+  }, []);
+
+  /**
+   * Handle image insertion via URL
+   */
+  const addImageByUrl = useCallback(() => {
     if (!editor) return;
+    handleImageMenuClose();
 
     const url = window.prompt('Image URL');
-
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
-  }, [editor]);
+  }, [editor, handleImageMenuClose]);
+
+  /**
+   * Handle image file selection
+   */
+  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !editor) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    const url = await uploadImage(file);
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+
+    // Clear input for re-selection
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, [editor, uploadImage]);
+
+  /**
+   * Trigger file input click
+   */
+  const triggerFileUpload = useCallback(() => {
+    handleImageMenuClose();
+    fileInputRef.current?.click();
+  }, [handleImageMenuClose]);
+
+  /**
+   * Handle paste event for images
+   */
+  const handlePaste = useCallback(async (event: React.ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items || !editor) return;
+
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          const url = await uploadImage(file);
+          if (url) {
+            editor.chain().focus().setImage({ src: url }).run();
+          }
+        }
+        return;
+      }
+    }
+  }, [editor, uploadImage]);
+
+  /**
+   * Handle drag over event
+   */
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  }, []);
+
+  /**
+   * Handle drop event for images
+   */
+  const handleDrop = useCallback(async (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0 || !editor) return;
+
+    for (const file of Array.from(files)) {
+      if (file.type.startsWith('image/')) {
+        const url = await uploadImage(file);
+        if (url) {
+          editor.chain().focus().setImage({ src: url }).run();
+        }
+      }
+    }
+  }, [editor, uploadImage]);
 
   if (!editor) {
     return null;
@@ -345,9 +492,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               tooltip="Insert Link"
             />
             <MenuButton
-              onClick={addImage}
-              icon={<ImageIcon fontSize="small" />}
+              onClick={handleImageMenuOpen}
+              icon={uploading ? <CircularProgress size={18} /> : <ImageIcon fontSize="small" />}
               tooltip="Insert Image"
+              disabled={uploading}
             />
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
@@ -377,13 +525,54 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </Stack>
         </Box>
 
+        {/* Image Menu */}
+        <Menu
+          anchorEl={imageMenuAnchor}
+          open={Boolean(imageMenuAnchor)}
+          onClose={handleImageMenuClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <MenuItem onClick={triggerFileUpload}>
+            <ListItemIcon>
+              <CloudUpload fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Upload Image</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={addImageByUrl}>
+            <ListItemIcon>
+              <InsertLink fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Insert from URL</ListItemText>
+          </MenuItem>
+        </Menu>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleFileSelect}
+        />
+
         {/* Editor Content */}
         <Box
+          onPaste={handlePaste}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
           sx={{
             p: 2,
             minHeight,
             maxHeight,
             overflowY: 'auto',
+            position: 'relative',
             '& .ProseMirror': {
               outline: 'none',
               minHeight: typeof minHeight === 'number' ? minHeight - 32 : 'auto',
@@ -493,6 +682,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }}
         >
           <EditorContent editor={editor} />
+
+          {/* Upload overlay */}
+          {uploading && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                zIndex: 10
+              }}
+            >
+              <Stack alignItems="center" spacing={1}>
+                <CircularProgress size={32} />
+                <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                  Uploading image...
+                </Box>
+              </Stack>
+            </Box>
+          )}
         </Box>
       </Paper>
 

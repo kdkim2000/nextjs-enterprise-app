@@ -554,17 +554,17 @@ export default function PostDetailDrawer({
                                 </Box>
                               }
                               secondary={
-                                <Box sx={{ mt: 0.5 }}>
-                                  <SafeHtmlRenderer
-                                    html={comment.content}
-                                    sx={{
-                                      fontSize: '0.875rem',
-                                      '& p': { marginTop: 0, marginBottom: '0.5em' },
-                                      '& p:last-child': { marginBottom: 0 }
-                                    }}
-                                  />
-                                </Box>
+                                <SafeHtmlRenderer
+                                  html={comment.content}
+                                  sx={{
+                                    mt: 0.5,
+                                    fontSize: '0.875rem',
+                                    '& p': { marginTop: 0, marginBottom: '0.5em' },
+                                    '& p:last-child': { marginBottom: 0 }
+                                  }}
+                                />
                               }
+                              secondaryTypographyProps={{ component: 'div' }}
                             />
                           </ListItem>
                         );

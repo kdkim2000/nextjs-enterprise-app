@@ -1,7 +1,7 @@
 'use client';
 
 import { GridColDef } from '@mui/x-data-grid';
-import { Box, Avatar } from '@mui/material';
+import { Box, Avatar, Chip } from '@mui/material';
 import { getAvatarUrl } from '@/lib/config';
 import ActionsCell from '@/components/common/ActionsCell';
 import { User } from './types';
@@ -164,7 +164,20 @@ export const createColumns = (
       headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       width: 100,
       type: 'singleSelect',
-      valueOptions: ['active', 'inactive']
+      valueOptions: ['active', 'inactive'],
+      renderCell: (params) => {
+        const isActive = params.value === 'active';
+        return (
+          <Chip
+            label={isActive
+              ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
+              : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
+            }
+            size="small"
+            color={isActive ? 'success' : 'default'}
+          />
+        );
+      }
     }
   ];
 
