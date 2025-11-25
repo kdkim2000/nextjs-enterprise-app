@@ -2188,6 +2188,236 @@
     "updatedAt": "2024-01-01T00:00:00.000Z"
   },
   {
+    "id": "code-icon-menu",
+    "codeType": "ICON_TYPE",
+    "code": "Menu",
+    "name": {
+      "en": "Menu",
+      "ko": "메뉴",
+      "zh": "菜单",
+      "vi": "Menu"
+    },
+    "description": {
+      "en": "Menu icon",
+      "ko": "메뉴 아이콘",
+      "zh": "菜单图标",
+      "vi": "Biểu tượng menu"
+    },
+    "order": 21,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-message",
+    "codeType": "ICON_TYPE",
+    "code": "Message",
+    "name": {
+      "en": "Message",
+      "ko": "메시지",
+      "zh": "消息",
+      "vi": "Tin nhắn"
+    },
+    "description": {
+      "en": "Message icon",
+      "ko": "메시지 아이콘",
+      "zh": "消息图标",
+      "vi": "Biểu tượng tin nhắn"
+    },
+    "order": 22,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-article",
+    "codeType": "ICON_TYPE",
+    "code": "Article",
+    "name": {
+      "en": "Article",
+      "ko": "문서",
+      "zh": "文章",
+      "vi": "Bài viết"
+    },
+    "description": {
+      "en": "Article icon",
+      "ko": "문서 아이콘",
+      "zh": "文章图标",
+      "vi": "Biểu tượng bài viết"
+    },
+    "order": 23,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-book",
+    "codeType": "ICON_TYPE",
+    "code": "Book",
+    "name": {
+      "en": "Book",
+      "ko": "책",
+      "zh": "书籍",
+      "vi": "Sách"
+    },
+    "description": {
+      "en": "Book icon",
+      "ko": "책 아이콘",
+      "zh": "书籍图标",
+      "vi": "Biểu tượng sách"
+    },
+    "order": 24,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-announcement",
+    "codeType": "ICON_TYPE",
+    "code": "Announcement",
+    "name": {
+      "en": "Announcement",
+      "ko": "공지사항",
+      "zh": "公告",
+      "vi": "Thông báo"
+    },
+    "description": {
+      "en": "Announcement icon",
+      "ko": "공지사항 아이콘",
+      "zh": "公告图标",
+      "vi": "Biểu tượng thông báo"
+    },
+    "order": 25,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-forum",
+    "codeType": "ICON_TYPE",
+    "code": "Forum",
+    "name": {
+      "en": "Forum",
+      "ko": "포럼",
+      "zh": "论坛",
+      "vi": "Diễn đàn"
+    },
+    "description": {
+      "en": "Forum icon",
+      "ko": "포럼 아이콘",
+      "zh": "论坛图标",
+      "vi": "Biểu tượng diễn đàn"
+    },
+    "order": 26,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-info",
+    "codeType": "ICON_TYPE",
+    "code": "Info",
+    "name": {
+      "en": "Info",
+      "ko": "정보",
+      "zh": "信息",
+      "vi": "Thông tin"
+    },
+    "description": {
+      "en": "Info icon",
+      "ko": "정보 아이콘",
+      "zh": "信息图标",
+      "vi": "Biểu tượng thông tin"
+    },
+    "order": 27,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-storage",
+    "codeType": "ICON_TYPE",
+    "code": "Storage",
+    "name": {
+      "en": "Storage",
+      "ko": "저장소",
+      "zh": "存储",
+      "vi": "Lưu trữ"
+    },
+    "description": {
+      "en": "Storage icon",
+      "ko": "저장소 아이콘",
+      "zh": "存储图标",
+      "vi": "Biểu tượng lưu trữ"
+    },
+    "order": 28,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-notifications",
+    "codeType": "ICON_TYPE",
+    "code": "Notifications",
+    "name": {
+      "en": "Notifications",
+      "ko": "알림",
+      "zh": "通知",
+      "vi": "Thông báo"
+    },
+    "description": {
+      "en": "Notifications icon",
+      "ko": "알림 아이콘",
+      "zh": "通知图标",
+      "vi": "Biểu tượng thông báo"
+    },
+    "order": 29,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "code-icon-email",
+    "codeType": "ICON_TYPE",
+    "code": "Email",
+    "name": {
+      "en": "Email",
+      "ko": "이메일",
+      "zh": "电子邮件",
+      "vi": "Email"
+    },
+    "description": {
+      "en": "Email icon",
+      "ko": "이메일 아이콘",
+      "zh": "电子邮件图标",
+      "vi": "Biểu tượng email"
+    },
+    "order": 30,
+    "status": "active",
+    "parentCode": null,
+    "attributes": {},
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
     "id": "code-093",
     "codeType": "ROLE_TYPE",
     "code": "general",

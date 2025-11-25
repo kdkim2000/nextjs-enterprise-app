@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, IconButton, Tooltip, Chip } from '@mui/material';
+import { Box, Button, Tooltip, Chip } from '@mui/material';
 import { CheckCircle, CheckCircleOutline, ThumbUp, ThumbUpOutlined } from '@mui/icons-material';
 
 interface AnswerActionsProps {
