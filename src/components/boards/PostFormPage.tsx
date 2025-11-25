@@ -30,7 +30,6 @@ import RichTextEditor from '@/components/common/RichTextEditor';
 import FileUploadZone, { UploadedFile } from '@/components/common/FileUploadZone';
 import TagInput from '@/components/common/TagInput';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
-import MessageAlert from '@/components/common/MessageAlert';
 
 interface BoardType {
   id: string;
@@ -47,15 +46,6 @@ interface BoardType {
     maxAttachments?: number;
     maxAttachmentSize?: number;
   };
-}
-
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  tags?: string[];
-  is_secret: boolean;
-  author_id: string;
 }
 
 export interface PostFormPageProps {
@@ -91,7 +81,6 @@ export default function PostFormPage({
 
   // State
   const [boardType, setBoardType] = useState<BoardType | null>(null);
-  const [post, setPost] = useState<Post | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -126,7 +115,6 @@ export default function PostFormPage({
           const postResponse = await apiClient.get(`/post/${postId}`);
           if (postResponse.success && postResponse.data) {
             const postData = postResponse.data;
-            setPost(postData);
             setTitle(postData.title);
             setContent(postData.content);
             setTags(postData.tags || []);

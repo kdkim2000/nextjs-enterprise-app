@@ -168,7 +168,7 @@ export default function PostDetailPage() {
   const [saveLoading, setSaveLoading] = useState(false);
 
   // Q&A hooks
-  const { boardType, canWrite } = useBoardPermissions(boardTypeId);
+  const { boardType } = useBoardPermissions(boardTypeId);
   const isQnABoard = boardType?.type === 'qna';
   const { qnaData } = useQnA(postId, post?.author_id);
 

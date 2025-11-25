@@ -56,7 +56,7 @@ export interface PostFormFieldsProps {
 export default function PostFormFields({
   post,
   onChange,
-  onError,
+  onError: _onError,
   boardSettings = {},
   mode = 'create',
   isAdmin = false

@@ -2,13 +2,12 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { Box, Paper, Alert, Skeleton } from '@mui/material';
+import { Box, Alert, Skeleton } from '@mui/material';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import PostFormModal from '@/components/boards/PostFormModal';
 import BoardListView from '@/components/boards/BoardListView';
-import { PostFormData } from '@/components/boards/PostFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 import { useBoardManagement } from './hooks/useBoardManagement';
@@ -47,7 +46,6 @@ export default function BoardListPage() {
     saveLoading,
     deleteDialogOpen,
     deleteTargetIds,
-    setDeleteTargetIds,
     deleteLoading,
     handleRefresh,
     handleSearchChange,
@@ -73,19 +71,12 @@ export default function BoardListPage() {
   const [selectedIds, setSelectedIds] = React.useState<(string | number)[]>([]);
 
   // Memoized computed values
-  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
+  const filterFields = useMemo(() => createFilterFields(currentLocale), [currentLocale]);
 
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
   );
-
-  // Get localized board name
-  const boardName = useMemo(() => {
-    if (!boardType) return boardTypeId;
-    const nameField = `name_${currentLocale}` as keyof typeof boardType;
-    return (boardType as any)[nameField] || boardType.name_en || boardTypeId;
-  }, [boardType, currentLocale, boardTypeId]);
 
   // Handle delete from BoardListView
   const handleDeleteSelected = (ids: (string | number)[]) => {
