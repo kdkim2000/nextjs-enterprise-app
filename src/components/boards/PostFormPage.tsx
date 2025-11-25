@@ -17,13 +17,14 @@ import {
 } from '@mui/material';
 import {
   Save as SaveIcon,
-  Clear as ClearIcon,
+  Close as CloseIcon,
+  DeleteSweep as ClearIcon,
   AttachFile as AttachFileIcon,
   Label as LabelIcon,
   Lock as LockIcon,
   Public as PublicIcon
 } from '@mui/icons-material';
-import { useCurrentLocale } from '@/lib/i18n/client';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { apiClient } from '@/lib/api/client';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import FileUploadZone, { UploadedFile } from '@/components/common/FileUploadZone';
@@ -85,6 +86,7 @@ export default function PostFormPage({
   submitButtonText
 }: PostFormPageProps) {
   const router = useRouter();
+  const t = useI18n();
   const currentLocale = useCurrentLocale();
 
   // State
@@ -218,7 +220,7 @@ export default function PostFormPage({
   };
 
   const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel? Your changes will be lost.')) {
+    if (window.confirm(t('common.confirm'))) {
       if (mode === 'edit' && postId) {
         router.push(`/${currentLocale}${basePath}/${boardTypeId}/${postId}`);
       } else {
@@ -228,7 +230,7 @@ export default function PostFormPage({
   };
 
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to clear all fields?')) {
+    if (window.confirm(t('common.confirm'))) {
       setTitle('');
       setContent('');
       setTags([]);
@@ -241,8 +243,8 @@ export default function PostFormPage({
     ? ((boardType[`name_${currentLocale}` as keyof BoardType] as string) || boardType.name_en)
     : '';
 
-  const defaultPageTitle = mode === 'create' ? 'Write New Post' : 'Edit Post';
-  const defaultSubmitText = mode === 'create' ? 'Save Post' : 'Update Post';
+  const defaultPageTitle = mode === 'create' ? t('board.createPost') : t('board.editPostTitle');
+  const defaultSubmitText = mode === 'create' ? t('common.save') : t('common.save');
 
   // Loading state
   if (initialLoading) {
@@ -253,7 +255,7 @@ export default function PostFormPage({
         showQuickSearch={false}
       >
         <Paper sx={{ p: 3, flex: 1 }}>
-          <Typography>Loading...</Typography>
+          <Typography>{t('common.loading')}</Typography>
         </Paper>
       </StandardCrudPageLayout>
     );
@@ -283,38 +285,47 @@ export default function PostFormPage({
       successMessage={success}
       errorMessage={error}
       headerActions={
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="Clear all fields" arrow>
+        <Stack direction="row" spacing={0.5}>
+          <Tooltip title={t('common.clear')} arrow>
             <IconButton
-              color="default"
               onClick={handleClear}
               disabled={loading}
-              size="medium"
+              size="small"
+              sx={{
+                color: 'action.active',
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
             >
-              <ClearIcon />
+              <ClearIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Cancel" arrow>
+          <Tooltip title={t('common.cancel')} arrow>
             <IconButton
-              color="default"
               onClick={handleCancel}
               disabled={loading}
-              size="medium"
+              size="small"
+              sx={{
+                color: 'error.main',
+                '&:hover': { bgcolor: 'error.50' }
+              }}
             >
-              <ClearIcon />
+              <CloseIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title={submitButtonText || defaultSubmitText} arrow>
             <IconButton
-              color="primary"
               onClick={handleSubmit}
               disabled={loading}
-              size="medium"
+              size="small"
+              sx={{
+                color: 'primary.main',
+                '&:hover': { bgcolor: 'primary.50' }
+              }}
             >
-              <SaveIcon />
+              <SaveIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-        </Box>
+        </Stack>
       }
     >
       {/* Main Form Area */}
@@ -337,14 +348,14 @@ export default function PostFormPage({
         {/* Title Field */}
         <Box>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Title *
+            {t('board.titleRequired')}
           </Typography>
           <TextField
             fullWidth
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter post title..."
+            placeholder={t('board.titlePlaceholder')}
             variant="outlined"
             size="medium"
           />
@@ -355,28 +366,28 @@ export default function PostFormPage({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <LabelIcon fontSize="small" color="action" />
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Tags
+              {t('board.tags')}
             </Typography>
           </Box>
           <TagInput
             value={tags}
             onChange={setTags}
-            placeholder="Type and press Enter to add tags"
+            placeholder={t('board.tagsPlaceholder')}
             maxTags={10}
-            helperText="Add tags to help others find your post"
+            helperText={t('board.tagsHelper')}
           />
         </Box>
 
         {/* Content Field */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Content *
+            {t('board.contentRequired')}
           </Typography>
           <Box sx={{ flex: 1, minHeight: 300 }}>
             <RichTextEditor
               value={content}
               onChange={setContent}
-              placeholder="Write your post content here..."
+              placeholder={t('board.contentPlaceholder')}
               minHeight={300}
             />
           </Box>
@@ -388,7 +399,7 @@ export default function PostFormPage({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <AttachFileIcon fontSize="small" color="action" />
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                {mode === 'edit' ? 'Add New Attachments' : 'Attachments'}
+                {mode === 'edit' ? t('board.addNewAttachments') : t('board.attachmentsTitle')}
               </Typography>
             </Box>
             <FileUploadZone
@@ -398,13 +409,13 @@ export default function PostFormPage({
               maxSize={boardType.settings?.maxAttachmentSize || 10485760}
               helperText={
                 mode === 'edit'
-                  ? 'Upload new files to add to the post'
-                  : `You can upload up to ${boardType.settings?.maxAttachments || 5} files`
+                  ? t('board.attachmentsEditHelper')
+                  : t('board.attachmentsHelper', { count: boardType.settings?.maxAttachments || 5 })
               }
             />
             {mode === 'edit' && (
               <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                Note: Existing attachments will be preserved.
+                {t('board.attachmentsPreserved')}
               </Typography>
             )}
           </Box>
@@ -419,7 +430,7 @@ export default function PostFormPage({
               <PublicIcon fontSize="small" color="action" />
             )}
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Visibility
+              {t('board.visibility')}
             </Typography>
           </Box>
           <Paper variant="outlined" sx={{ p: 2 }}>
@@ -433,10 +444,10 @@ export default function PostFormPage({
               label={
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Secret Post
+                    {t('board.secretPost')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Only you and administrators can view this post
+                    {t('board.secretPostDesc')}
                   </Typography>
                 </Box>
               }
