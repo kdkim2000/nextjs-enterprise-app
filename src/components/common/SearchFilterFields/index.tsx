@@ -98,7 +98,7 @@ export default function SearchFilterFields({
             <Grid key={field.name} size={gridSize}>
               <DepartmentTreeSelect
                 label={field.label}
-                value={(Array.isArray(values[field.name]) ? values[field.name][0] : values[field.name]) as string || ''}
+                value={(Array.isArray(values[field.name]) ? (values[field.name] as string[])[0] : values[field.name]) as string || ''}
                 onChange={(value) => onChange(field.name, value || '')}
                 departments={field.departments || []}
                 locale={locale}
@@ -156,7 +156,7 @@ export default function SearchFilterFields({
             <Grid key={field.name} size={gridSize}>
               <UserSelector
                 label={field.label}
-                value={(Array.isArray(values[field.name]) ? values[field.name][0] : values[field.name]) as string || ''}
+                value={(Array.isArray(values[field.name]) ? (values[field.name] as string[])[0] : values[field.name]) as string || ''}
                 onChange={(userId) => onChange(field.name, userId || '')}
                 helperText={field.placeholder}
                 disabled={disabled}

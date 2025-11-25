@@ -2,8 +2,7 @@ import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import { SearchCriteria } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createFilterFields = (t: any, locale: string): FilterFieldConfig[] => [
+export const createFilterFields = (locale: string): FilterFieldConfig[] => [
   {
     name: 'title',
     label: getLocalizedValue({ en: 'Title', ko: '제목', zh: '标题', vi: 'Tiêu đề' }, locale),

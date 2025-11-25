@@ -182,7 +182,7 @@ export default function CodeMultiSelect({
       select
       label={label}
       value={loading ? [] : value}
-      onChange={handleChange}
+      onChange={handleChange as unknown as React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>}
       required={required}
       disabled={disabled || loading}
       error={displayError}
@@ -192,7 +192,7 @@ export default function CodeMultiSelect({
       placeholder={placeholder}
       SelectProps={{
         multiple: true,
-        renderValue: renderValue as any,
+        renderValue: renderValue as unknown as (value: unknown) => React.ReactNode,
         endAdornment: loading ? (
           <Box sx={{ display: 'flex', mr: 2 }}>
             <CircularProgress size={20} />

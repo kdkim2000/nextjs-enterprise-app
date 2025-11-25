@@ -18,7 +18,7 @@ import {
 } from '@mui/icons-material';
 import CodeSelect from '@/components/common/CodeSelect';
 import UserAutocomplete from '@/components/common/UserAutocomplete';
-import DepartmentTreeInline from '@/components/common/DepartmentTreeInline';
+import DepartmentTreeInline, { Department } from '@/components/common/DepartmentTreeInline';
 
 export interface DepartmentFormData {
   id?: string;
@@ -41,7 +41,7 @@ export interface DepartmentFormFieldsProps {
   department: DepartmentFormData | null;
   onChange: (department: DepartmentFormData) => void;
   onError?: (error: string) => void;
-  departments?: Array<{ id: string; name: { en: string; ko: string; zh: string; vi: string } }>;
+  departments?: Department[];
   locale?: string;
   labels?: {
     code?: string;

@@ -97,7 +97,7 @@ export default function YearPicker({
         <DatePicker
           views={['year']}
           value={toDayjs(value)}
-          onChange={handleChange}
+          onChange={(newValue) => handleChange(newValue as Dayjs | null)}
           disabled={disabled}
           format="YYYY"
           minDate={minYear ? toDayjs(minYear) || undefined : undefined}

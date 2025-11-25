@@ -40,7 +40,15 @@ import {
   AccountTree,
   School,
   Palette,
-  Message
+  Message,
+  Article,
+  Book,
+  Announcement,
+  Forum,
+  Info,
+  Storage,
+  Notifications,
+  Email
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { MenuItem } from '@/types/menu';
@@ -54,26 +62,54 @@ const DRAWER_WIDTH_COLLAPSED = 72;
 const iconMap: Record<string, React.ReactElement> = {
   AccountTree: <AccountTree />,
   AdminPanelSettings: <AdminPanelSettings />,
+  Announcement: <Announcement />,
+  Article: <Article />,
   Assessment: <Assessment />,
   Assignment: <Assignment />,
+  Book: <Book />,
   Build: <Build />,
   Code: <Code />,
   Dashboard: <Dashboard />,
   Description: <Description />,
+  Email: <Email />,
   Folder: <Folder />,
+  Forum: <Forum />,
   GridOn: <GridOn />,
   Help: <Help />,
+  Info: <Info />,
   Link: <Link />,
   List: <ListIcon />,
   Menu: <MenuIcon />,
   Message: <Message />,
+  Notifications: <Notifications />,
   Palette: <Palette />,
   People: <People />,
   School: <School />,
   Security: <Security />,
   Settings: <Settings />,
+  Storage: <Storage />,
   TrendingUp: <TrendingUp />,
   Widgets: <GridOn />
+};
+
+// Helper function to get icon by name (case-insensitive)
+const getIcon = (iconName: string): React.ReactElement => {
+  if (!iconName) return <Dashboard />;
+
+  // Try exact match first
+  if (iconMap[iconName]) return iconMap[iconName];
+
+  // Try PascalCase conversion (e.g., 'build' -> 'Build', 'trendingUp' -> 'TrendingUp')
+  const pascalCase = iconName.charAt(0).toUpperCase() + iconName.slice(1);
+  if (iconMap[pascalCase]) return iconMap[pascalCase];
+
+  // Try finding case-insensitive match
+  const lowerName = iconName.toLowerCase();
+  const matchedKey = Object.keys(iconMap).find(key => key.toLowerCase() === lowerName);
+  if (matchedKey) return iconMap[matchedKey];
+
+  // Default to Dashboard
+  return <Dashboard />;
 };
 
 interface SidebarProps {
@@ -159,7 +195,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
     const isExpanded = expandedMenus.has(menu.id);
     const hasChildren = menu.children && menu.children.length > 0;
     const isActive = pathname === `/${locale}${menu.path}`;
-    const icon = iconMap[menu.icon] || <Dashboard />;
+    const icon = getIcon(menu.icon);
 
     return (
       <React.Fragment key={menu.id}>
@@ -318,7 +354,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
                         color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
                       }}
                     >
-                      {iconMap[menu.icon] || <Dashboard />}
+                      {getIcon(menu.icon)}
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText
@@ -372,7 +408,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
                         color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
                       }}
                     >
-                      {iconMap[menu.icon] || <Dashboard />}
+                      {getIcon(menu.icon)}
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText

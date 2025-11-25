@@ -91,7 +91,7 @@ export default function TimePicker({
         )}
         <MuiTimePicker
           value={toDayjs(value)}
-          onChange={handleChange}
+          onChange={(newValue) => handleChange(newValue as Dayjs | null)}
           disabled={disabled}
           ampm={false}
           format="HH:mm"

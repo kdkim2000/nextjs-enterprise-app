@@ -75,8 +75,8 @@ export default function DatePicker({
     return date.toISOString();
   };
 
-  const handleChange = (value: Dayjs | null) => {
-    const datetimeValue = toDateTimeString(value);
+  const handleChange = (newValue: Dayjs | null) => {
+    const datetimeValue = toDateTimeString(newValue);
     onChange(datetimeValue);
   };
 
@@ -107,7 +107,7 @@ export default function DatePicker({
         )}
         <MuiDatePicker
           value={toDayjs(value)}
-          onChange={handleChange}
+          onChange={(newValue) => handleChange(newValue as Dayjs | null)}
           disabled={disabled}
           format="YYYY-MM-DD"
           minDate={minDate ? toDayjs(minDate) || undefined : undefined}
