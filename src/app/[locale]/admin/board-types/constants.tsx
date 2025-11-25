@@ -1,7 +1,6 @@
 import { GridColDef } from '@mui/x-data-grid-pro';
 import { BoardType } from './types';
 import ActionsCell from '@/components/common/ActionsCell';
-import StatusMenu from '@/components/common/StatusMenu';
 import { Chip } from '@mui/material';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
@@ -80,18 +79,22 @@ export const createColumns = (
     {
       field: 'status',
       headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, currentLocale),
-      width: 120,
+      width: 100,
       type: 'singleSelect',
       valueOptions: ['active', 'inactive'],
-      renderCell: (params) => (
-        <StatusMenu
-          row={params.row}
-          onStatusChange={async (newStatus) => {
-            // Status change will be handled by the hook
-            console.log('Status change:', params.row.id, newStatus);
-          }}
-        />
-      )
+      renderCell: (params) => {
+        const isActive = params.value === 'active';
+        return (
+          <Chip
+            label={isActive
+              ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, currentLocale)
+              : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, currentLocale)
+            }
+            size="small"
+            color={isActive ? 'success' : 'default'}
+          />
+        );
+      }
     }
   ];
 

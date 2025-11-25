@@ -99,7 +99,7 @@ export default function AvatarUpload({
         }
       }
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string }; message?: string } };
+      const error = err as { response?: { data?: { error?: string } }; message?: string };
       const errorMessage = error.response?.data?.error || error.message || 'Failed to process avatar';
       if (onError) {
         onError(errorMessage);

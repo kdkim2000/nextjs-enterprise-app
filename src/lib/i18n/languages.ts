@@ -46,7 +46,7 @@ export const SUPPORTED_LANGUAGES: LanguageConfig[] = [
 
 export const DEFAULT_LANGUAGE = 'en';
 
-export const LANGUAGE_CODES = SUPPORTED_LANGUAGES.map(lang => lang.code) as const;
+export const LANGUAGE_CODES = ['en', 'ko', 'zh', 'vi'] as const;
 export type LanguageCode = typeof LANGUAGE_CODES[number];
 
 /**

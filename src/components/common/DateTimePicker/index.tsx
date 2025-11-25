@@ -97,7 +97,7 @@ export default function DateTimePicker({
         )}
         <MuiDateTimePicker
           value={toDayjs(value)}
-          onChange={handleChange}
+          onChange={(newValue) => handleChange(newValue as Dayjs | null)}
           disabled={disabled}
           format="YYYY-MM-DD HH:mm"
           ampm={false}
