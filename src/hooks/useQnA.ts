@@ -188,7 +188,7 @@ export function useAnswerHelpful(commentId?: string) {
 
       if (response.success) {
         setIsHelpful(!isHelpful);
-        setHelpfulCount(response.helpfulCount || 0);
+        setHelpfulCount((response as any).helpfulCount || 0);
       }
     } catch (err: any) {
       console.error('Error toggling helpful:', err);
@@ -240,8 +240,8 @@ export function useQnAStats(boardTypeId?: string) {
         setError(null);
         const response = await apiClient.get(`/qna/stats/${boardTypeId}`);
 
-        if (response.success && response.stats) {
-          setStats(response.stats);
+        if (response.success && (response as any).stats) {
+          setStats((response as any).stats);
         }
       } catch (err: any) {
         console.error('Error fetching Q&A stats:', err);

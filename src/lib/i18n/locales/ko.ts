@@ -217,14 +217,38 @@ export default {
   },
   admin: {
     dashboard: {
+      title: '관리자 대시보드',
+      subtitle: '시스템 관리 및 설정',
+      // 사용자 & 접근 관리
       userManagement: '사용자 관리',
-      userManagementDesc: '사용자, 역할 및 권한 관리',
+      userManagementDesc: '사용자 계정 및 프로필 관리',
+      roleManagement: '역할 관리',
+      roleManagementDesc: '역할 및 권한 정의',
+      userRoleMapping: '사용자-역할 매핑',
+      userRoleMappingDesc: '사용자에게 역할 할당',
+      departmentManagement: '부서 관리',
+      departmentManagementDesc: '조직 부서 관리',
+      // 메뉴 & 네비게이션
       menuManagement: '메뉴 관리',
       menuManagementDesc: '애플리케이션 메뉴 및 네비게이션 구성',
-      securitySettings: '보안 설정',
-      securitySettingsDesc: '보안 정책 및 설정 관리',
+      programManagement: '프로그램 관리',
+      programManagementDesc: '애플리케이션 프로그램 관리',
+      roleMenuMapping: '역할-메뉴 매핑',
+      roleMenuMappingDesc: '역할별 메뉴 접근 권한 설정',
+      // 콘텐츠 관리
+      boardTypeManagement: '게시판 유형 관리',
+      boardTypeManagementDesc: '게시판 유형 및 설정 구성',
+      postManagement: '게시물 관리',
+      postManagementDesc: '전체 게시물 관리',
+      helpManagement: '도움말 관리',
+      helpManagementDesc: '도움말 문서 관리',
+      // 시스템 설정
+      codeManagement: '코드 관리',
+      codeManagementDesc: '시스템 코드 및 값 관리',
+      messageManagement: '메시지 관리',
+      messageManagementDesc: '시스템 메시지 관리',
       systemLogs: '시스템 로그',
-      systemLogsDesc: '시스템 로그 보기 및 분석'
+      systemLogsDesc: '시스템 로그 조회 및 분석'
     }
   },
   board: {

@@ -348,7 +348,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     icon,
     tooltip
   }: {
-    onClick: () => void;
+    onClick: (event?: React.MouseEvent<HTMLElement>) => void;
     isActive?: boolean;
     disabled?: boolean;
     icon: React.ReactNode;
@@ -492,7 +492,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               tooltip="Insert Link"
             />
             <MenuButton
-              onClick={handleImageMenuOpen}
+              onClick={(e) => e && handleImageMenuOpen(e)}
               icon={uploading ? <CircularProgress size={18} /> : <ImageIcon fontSize="small" />}
               tooltip="Insert Image"
               disabled={uploading}

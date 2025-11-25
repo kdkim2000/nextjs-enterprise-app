@@ -75,7 +75,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     handleUserMenuClose();
 
     // Change locale immediately for better UX
-    changeLocale(newLocale as LanguageCode);
+    changeLocale(newLocale as 'en' | 'ko' | 'zh' | 'vi');
 
     // Save to backend asynchronously
     try {
