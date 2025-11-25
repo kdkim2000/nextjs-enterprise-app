@@ -217,12 +217,36 @@ export default {
   },
   admin: {
     dashboard: {
+      title: 'Bảng điều khiển quản trị',
+      subtitle: 'Quản lý và cài đặt hệ thống',
+      // Quản lý người dùng & truy cập
       userManagement: 'Quản lý người dùng',
-      userManagementDesc: 'Quản lý người dùng, vai trò và quyền',
+      userManagementDesc: 'Quản lý tài khoản và hồ sơ người dùng',
+      roleManagement: 'Quản lý vai trò',
+      roleManagementDesc: 'Định nghĩa vai trò và quyền',
+      userRoleMapping: 'Gán vai trò người dùng',
+      userRoleMappingDesc: 'Gán vai trò cho người dùng',
+      departmentManagement: 'Quản lý phòng ban',
+      departmentManagementDesc: 'Quản lý phòng ban tổ chức',
+      // Menu & điều hướng
       menuManagement: 'Quản lý menu',
       menuManagementDesc: 'Cấu hình menu và điều hướng ứng dụng',
-      securitySettings: 'Cài đặt bảo mật',
-      securitySettingsDesc: 'Quản lý chính sách và cài đặt bảo mật',
+      programManagement: 'Quản lý chương trình',
+      programManagementDesc: 'Quản lý chương trình ứng dụng',
+      roleMenuMapping: 'Gán menu vai trò',
+      roleMenuMappingDesc: 'Cấu hình quyền truy cập menu theo vai trò',
+      // Quản lý nội dung
+      boardTypeManagement: 'Quản lý loại bảng',
+      boardTypeManagementDesc: 'Cấu hình loại bảng và cài đặt',
+      postManagement: 'Quản lý bài viết',
+      postManagementDesc: 'Quản lý tất cả bài viết',
+      helpManagement: 'Quản lý trợ giúp',
+      helpManagementDesc: 'Quản lý tài liệu trợ giúp',
+      // Cài đặt hệ thống
+      codeManagement: 'Quản lý mã',
+      codeManagementDesc: 'Quản lý mã và giá trị hệ thống',
+      messageManagement: 'Quản lý tin nhắn',
+      messageManagementDesc: 'Quản lý tin nhắn hệ thống',
       systemLogs: 'Nhật ký hệ thống',
       systemLogsDesc: 'Xem và phân tích nhật ký hệ thống'
     }

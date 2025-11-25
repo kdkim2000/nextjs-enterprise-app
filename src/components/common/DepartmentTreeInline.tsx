@@ -20,7 +20,8 @@ import { getLocalizedValue } from '@/lib/i18n/multiLang';
 export interface Department {
   id: string;
   code: string;
-  parent_id: string | null;
+  parent_id?: string | null;
+  parentId?: string | null;
   name: {
     en: string;
     ko: string;
@@ -65,6 +66,11 @@ export default function DepartmentTreeInline({
 }: DepartmentTreeInlineProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
+  // Helper function to get parent ID (supports both snake_case and camelCase)
+  const getParentId = (dept: Department): string | null => {
+    return dept.parent_id ?? dept.parentId ?? null;
+  };
+
   // Build tree structure from flat department list
   const departmentTree = useMemo(() => {
     const nodeMap = new Map<string, DepartmentTreeNode>();
@@ -80,10 +86,11 @@ export default function DepartmentTreeInline({
       const node = nodeMap.get(dept.id);
       if (!node) return;
 
-      if (!dept.parent_id) {
+      const parentId = getParentId(dept);
+      if (!parentId) {
         rootNodes.push(node);
       } else {
-        const parent = nodeMap.get(dept.parent_id);
+        const parent = nodeMap.get(parentId);
         if (parent) {
           parent.children.push(node);
         } else {
@@ -108,9 +115,10 @@ export default function DepartmentTreeInline({
 
     const descendants = new Set<string>([currentDepartmentId]);
 
-    const findDescendants = (parentId: string) => {
+    const findDescendants = (parentIdToFind: string) => {
       departments.forEach(dept => {
-        if (dept.parent_id === parentId && !descendants.has(dept.id)) {
+        const deptParentId = getParentId(dept);
+        if (deptParentId === parentIdToFind && !descendants.has(dept.id)) {
           descendants.add(dept.id);
           findDescendants(dept.id);
         }
@@ -121,7 +129,7 @@ export default function DepartmentTreeInline({
     return descendants;
   }, [departments, currentDepartmentId]);
 
-  const handleSelect = (_event: React.SyntheticEvent, itemId: string | null) => {
+  const handleSelect = (_event: React.SyntheticEvent | null, itemId: string | null) => {
     if (itemId && !disabled && !disabledIds.has(itemId)) {
       onChange(itemId === value ? '' : itemId);
     }

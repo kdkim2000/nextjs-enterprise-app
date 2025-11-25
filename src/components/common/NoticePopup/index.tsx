@@ -35,7 +35,7 @@ interface NoticePopupProps {
 }
 
 export default function NoticePopup({ onClose }: NoticePopupProps) {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [open, setOpen] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);

@@ -217,12 +217,36 @@ export default {
   },
   admin: {
     dashboard: {
+      title: 'Admin Dashboard',
+      subtitle: 'System administration and management',
+      // User & Access Management
       userManagement: 'User Management',
-      userManagementDesc: 'Manage users, roles, and permissions',
+      userManagementDesc: 'Manage user accounts and profiles',
+      roleManagement: 'Role Management',
+      roleManagementDesc: 'Define roles and permissions',
+      userRoleMapping: 'User-Role Mapping',
+      userRoleMappingDesc: 'Assign roles to users',
+      departmentManagement: 'Department Management',
+      departmentManagementDesc: 'Manage organizational departments',
+      // Menu & Navigation
       menuManagement: 'Menu Management',
       menuManagementDesc: 'Configure application menus and navigation',
-      securitySettings: 'Security Settings',
-      securitySettingsDesc: 'Manage security policies and settings',
+      programManagement: 'Program Management',
+      programManagementDesc: 'Manage application programs',
+      roleMenuMapping: 'Role-Menu Mapping',
+      roleMenuMappingDesc: 'Configure menu access by role',
+      // Content Management
+      boardTypeManagement: 'Board Type Management',
+      boardTypeManagementDesc: 'Configure board types and settings',
+      postManagement: 'Post Management',
+      postManagementDesc: 'Manage all posts across boards',
+      helpManagement: 'Help Management',
+      helpManagementDesc: 'Manage help documentation',
+      // System Settings
+      codeManagement: 'Code Management',
+      codeManagementDesc: 'Manage system codes and values',
+      messageManagement: 'Message Management',
+      messageManagementDesc: 'Manage system messages',
       systemLogs: 'System Logs',
       systemLogsDesc: 'View and analyze system logs'
     }

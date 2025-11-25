@@ -217,12 +217,36 @@ export default {
   },
   admin: {
     dashboard: {
+      title: '管理员仪表板',
+      subtitle: '系统管理和设置',
+      // 用户与访问管理
       userManagement: '用户管理',
-      userManagementDesc: '管理用户、角色和权限',
+      userManagementDesc: '管理用户账户和个人资料',
+      roleManagement: '角色管理',
+      roleManagementDesc: '定义角色和权限',
+      userRoleMapping: '用户角色映射',
+      userRoleMappingDesc: '为用户分配角色',
+      departmentManagement: '部门管理',
+      departmentManagementDesc: '管理组织部门',
+      // 菜单与导航
       menuManagement: '菜单管理',
       menuManagementDesc: '配置应用程序菜单和导航',
-      securitySettings: '安全设置',
-      securitySettingsDesc: '管理安全策略和设置',
+      programManagement: '程序管理',
+      programManagementDesc: '管理应用程序',
+      roleMenuMapping: '角色菜单映射',
+      roleMenuMappingDesc: '按角色配置菜单访问权限',
+      // 内容管理
+      boardTypeManagement: '板块类型管理',
+      boardTypeManagementDesc: '配置板块类型和设置',
+      postManagement: '帖子管理',
+      postManagementDesc: '管理所有帖子',
+      helpManagement: '帮助管理',
+      helpManagementDesc: '管理帮助文档',
+      // 系统设置
+      codeManagement: '代码管理',
+      codeManagementDesc: '管理系统代码和值',
+      messageManagement: '消息管理',
+      messageManagementDesc: '管理系统消息',
       systemLogs: '系统日志',
       systemLogsDesc: '查看和分析系统日志'
     }
