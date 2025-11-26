@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
@@ -13,6 +14,7 @@ interface UseBoardManagementOptions {
 
 export const useBoardManagement = (options: UseBoardManagementOptions) => {
   const { storageKey = 'board-list-page-state', boardTypeId, boardType } = options;
+  const router = useRouter();
 
   // Use page state hook
   const {
@@ -56,9 +58,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   // Local states
   const [searching, setSearching] = useState(false);
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -209,7 +209,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       status: 'published',
       created_at: new Date().toISOString()
     });
-    setDialogOpen(true);
+    setModalOpen(true);
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -278,7 +278,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
         }
       }
 
-      setDialogOpen(false);
+      setModalOpen(false);
       setEditingPost(null);
     } catch (error: any) {
       console.error('Failed to save post:', error);
@@ -288,15 +288,15 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     }
   }, [editingPost, boardType, showSuccess, showError, handleRefresh]);
 
-  // Post view handlers
+  // Post view handlers - Navigate to detail page instead of opening drawer
   const handlePostClick = useCallback((postId: string) => {
-    setSelectedPostId(postId);
-    setDrawerOpen(true);
-  }, []);
+    router.push(`/boards/${boardTypeId}/${postId}`);
+  }, [router, boardTypeId]);
 
-  const handleCloseDrawer = useCallback(() => {
-    setDrawerOpen(false);
-    setSelectedPostId(null);
+  // Close modal
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+    setEditingPost(null);
   }, []);
 
   // Delete handler - opens confirmation dialog
@@ -373,15 +373,14 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     setAdvancedFilterOpen,
     successMessage,
     errorMessage,
-    selectedPostId,
-    drawerOpen,
-    dialogOpen,
-    setDialogOpen,
+    modalOpen,
+    setModalOpen,
     editingPost,
     setEditingPost,
     saveLoading,
     deleteDialogOpen,
     deleteTargetIds,
+    setDeleteTargetIds,
     deleteLoading,
 
     // Handlers
@@ -398,6 +397,6 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     handleConfirmDelete,
     handleCancelDelete,
     handlePostClick,
-    handleCloseDrawer
+    handleCloseModal
   };
 };

@@ -15,6 +15,32 @@ interface ApiResponse<T = any> {
   message?: string;
 }
 
+interface BackendResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+/**
+ * Helper to extract standardized response from backend response
+ */
+function extractResponse<T>(responseData: any): ApiResponse<T> {
+  if (responseData && typeof responseData === 'object' && 'success' in responseData) {
+    const resp = responseData as BackendResponse<T>;
+    return {
+      success: resp.success,
+      data: resp.data,
+      error: resp.error,
+      message: resp.message
+    };
+  }
+  return {
+    success: true,
+    data: responseData
+  };
+}
+
 /**
  * API Client with standardized response format
  */
@@ -25,22 +51,7 @@ export const apiClient = {
   async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
       const response = await axiosInstance.get<any>(url, config);
-
-      // If backend returns { success, data } format, unwrap it
-      if (response.data && typeof response.data === 'object' && 'success' in response.data) {
-        return {
-          success: response.data.success,
-          data: response.data.data,
-          error: response.data.error,
-          message: response.data.message
-        };
-      }
-
-      // Otherwise, wrap it
-      return {
-        success: true,
-        data: response.data
-      };
+      return extractResponse<T>(response.data);
     } catch (error: any) {
       return {
         success: false,
@@ -54,23 +65,8 @@ export const apiClient = {
    */
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      const response = await axiosInstance.post<T>(url, data, config);
-
-      // If backend returns { success, data } format, unwrap it
-      if (response.data && typeof response.data === 'object' && 'success' in response.data) {
-        return {
-          success: response.data.success,
-          data: response.data.data,
-          error: response.data.error,
-          message: response.data.message
-        };
-      }
-
-      // Otherwise, wrap it
-      return {
-        success: true,
-        data: response.data
-      };
+      const response = await axiosInstance.post<any>(url, data, config);
+      return extractResponse<T>(response.data);
     } catch (error: any) {
       return {
         success: false,
@@ -84,23 +80,8 @@ export const apiClient = {
    */
   async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      const response = await axiosInstance.put<T>(url, data, config);
-
-      // If backend returns { success, data } format, unwrap it
-      if (response.data && typeof response.data === 'object' && 'success' in response.data) {
-        return {
-          success: response.data.success,
-          data: response.data.data,
-          error: response.data.error,
-          message: response.data.message
-        };
-      }
-
-      // Otherwise, wrap it
-      return {
-        success: true,
-        data: response.data
-      };
+      const response = await axiosInstance.put<any>(url, data, config);
+      return extractResponse<T>(response.data);
     } catch (error: any) {
       return {
         success: false,
@@ -114,23 +95,8 @@ export const apiClient = {
    */
   async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      const response = await axiosInstance.patch<T>(url, data, config);
-
-      // If backend returns { success, data } format, unwrap it
-      if (response.data && typeof response.data === 'object' && 'success' in response.data) {
-        return {
-          success: response.data.success,
-          data: response.data.data,
-          error: response.data.error,
-          message: response.data.message
-        };
-      }
-
-      // Otherwise, wrap it
-      return {
-        success: true,
-        data: response.data
-      };
+      const response = await axiosInstance.patch<any>(url, data, config);
+      return extractResponse<T>(response.data);
     } catch (error: any) {
       return {
         success: false,
@@ -144,23 +110,8 @@ export const apiClient = {
    */
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      const response = await axiosInstance.delete<T>(url, config);
-
-      // If backend returns { success, data } format, unwrap it
-      if (response.data && typeof response.data === 'object' && 'success' in response.data) {
-        return {
-          success: response.data.success,
-          data: response.data.data,
-          error: response.data.error,
-          message: response.data.message
-        };
-      }
-
-      // Otherwise, wrap it
-      return {
-        success: true,
-        data: response.data
-      };
+      const response = await axiosInstance.delete<any>(url, config);
+      return extractResponse<T>(response.data);
     } catch (error: any) {
       return {
         success: false,

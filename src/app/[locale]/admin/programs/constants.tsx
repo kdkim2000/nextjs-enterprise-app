@@ -1,6 +1,7 @@
 'use client';
 
 import { GridColDef } from '@mui/x-data-grid';
+import { Chip } from '@mui/material';
 import ActionsCell from '@/components/common/ActionsCell';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
@@ -69,7 +70,7 @@ export const createColumns = (
     },
     {
       field: 'status',
-      headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
+      headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale)
       width: 120,
       type: 'singleSelect',
       valueOptions: PROGRAM_STATUS as unknown as string[],

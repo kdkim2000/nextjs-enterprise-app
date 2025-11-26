@@ -8,7 +8,6 @@ import {
   DialogActions,
   Button,
   Grid,
-  Paper,
   Typography,
   Box,
   Divider
@@ -28,20 +27,34 @@ interface BoardTypeStatsDialogProps {
   onClose: () => void;
 }
 
+// Helper function to get stat value from different possible field names
+// API returns: total_posts, total_comments, total_likes, total_views, total_attachments
+// Also supports: post_count, comment_count, etc.
+const getStatValue = (boardType: any, statName: string): number => {
+  const value =
+    boardType[`total_${statName}`] ||
+    boardType[`${statName.slice(0, -1)}_count`] ||  // posts -> post_count
+    boardType[statName] ||
+    0;
+  return parseInt(value) || 0;
+};
+
 const StatCard: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: number;
   color: string;
 }> = ({ icon, label, value, color }) => (
-  <Paper
+  <Box
     sx={{
       p: 2,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100%'
+      height: '100%',
+      bgcolor: 'action.hover',
+      borderRadius: 1
     }}
   >
     <Box sx={{ color, mb: 1 }}>{icon}</Box>
@@ -51,7 +64,7 @@ const StatCard: React.FC<{
     <Typography variant="body2" color="text.secondary">
       {label}
     </Typography>
-  </Paper>
+  </Box>
 );
 
 const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
@@ -85,7 +98,7 @@ const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
               <StatCard
                 icon={<Article fontSize="large" />}
                 label="Total Posts"
-                value={boardType.post_count || 0}
+                value={getStatValue(boardType, 'posts')}
                 color="primary.main"
               />
             </Grid>
@@ -93,7 +106,7 @@ const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
               <StatCard
                 icon={<Comment fontSize="large" />}
                 label="Total Comments"
-                value={boardType.comment_count || 0}
+                value={getStatValue(boardType, 'comments')}
                 color="secondary.main"
               />
             </Grid>
@@ -101,7 +114,7 @@ const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
               <StatCard
                 icon={<ThumbUp fontSize="large" />}
                 label="Total Likes"
-                value={boardType.like_count || 0}
+                value={getStatValue(boardType, 'likes')}
                 color="success.main"
               />
             </Grid>
@@ -109,7 +122,7 @@ const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
               <StatCard
                 icon={<Visibility fontSize="large" />}
                 label="Total Views"
-                value={boardType.view_count || 0}
+                value={getStatValue(boardType, 'views')}
                 color="info.main"
               />
             </Grid>
@@ -117,30 +130,32 @@ const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
               <StatCard
                 icon={<AttachFile fontSize="large" />}
                 label="Total Attachments"
-                value={boardType.attachment_count || 0}
+                value={getStatValue(boardType, 'attachments')}
                 color="warning.main"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
-              <Paper
+              <Box
                 sx={{
                   p: 2,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: '100%'
+                  height: '100%',
+                  bgcolor: 'action.hover',
+                  borderRadius: 1
                 }}
               >
                 <Typography variant="h4" gutterBottom>
-                  {boardType.post_count > 0
-                    ? ((boardType.comment_count || 0) / boardType.post_count).toFixed(1)
+                  {getStatValue(boardType, 'posts') > 0
+                    ? (getStatValue(boardType, 'comments') / getStatValue(boardType, 'posts')).toFixed(1)
                     : '0.0'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Comments per Post
                 </Typography>
-              </Paper>
+              </Box>
             </Grid>
           </Grid>
 
@@ -172,9 +187,9 @@ const BoardTypeStatsDialog: React.FC<BoardTypeStatsDialogProps> = ({
               Permissions:
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              • Write Roles: {boardType.write_roles?.join(', ') || 'None'}
+              • Write Roles: {(boardType.write_roles || boardType.writeRoles)?.join(', ') || 'None'}
               <br />
-              • Read Roles: {boardType.read_roles?.join(', ') || 'None'}
+              • Read Roles: {(boardType.read_roles || boardType.readRoles)?.join(', ') || 'None'}
             </Typography>
           </Box>
         </Box>

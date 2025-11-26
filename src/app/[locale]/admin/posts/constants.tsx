@@ -1,9 +1,9 @@
 import { GridColDef } from '@mui/x-data-grid-pro';
 import { Post } from './types';
 import ActionsCell from '@/components/common/ActionsCell';
-import StatusMenu from '@/components/common/StatusMenu';
 import { Chip, Box, Tooltip } from '@mui/material';
 import { PushPin, Lock, CheckCircle, Visibility, ThumbUp, Comment, AttachFile } from '@mui/icons-material';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,16 +129,25 @@ export const createColumns = (
     {
       field: 'status',
       headerName: t('common.status'),
-      width: 120,
+      width: 100,
       editable: false,
-      renderCell: (params) => (
-        <StatusMenu
-          row={params.row}
-          onStatusChange={async (newStatus) => {
-            console.log('Status change:', params.row.id, newStatus);
-          }}
-        />
-      )
+      renderCell: (params) => {
+        const status = params.value as string;
+        const isPublished = status === 'published';
+        const isDraft = status === 'draft';
+        return (
+          <Chip
+            label={isPublished
+              ? getLocalizedValue({ en: 'Published', ko: '게시됨', zh: '已发布', vi: 'Đã xuất bản' }, currentLocale)
+              : isDraft
+                ? getLocalizedValue({ en: 'Draft', ko: '임시', zh: '草稿', vi: 'Bản nháp' }, currentLocale)
+                : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, currentLocale)
+            }
+            size="small"
+            color={isPublished ? 'success' : isDraft ? 'warning' : 'default'}
+          />
+        );
+      }
     },
     {
       field: 'actions',

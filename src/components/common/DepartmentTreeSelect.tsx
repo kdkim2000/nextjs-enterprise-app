@@ -179,7 +179,7 @@ export default function DepartmentTreeSelect({
     }
   }, [searchQuery, filteredTree, departments]);
 
-  const handleSelect = (_event: React.SyntheticEvent, itemId: string | null) => {
+  const handleSelect = (_event: React.SyntheticEvent | null, itemId: string | null) => {
     if (itemId) {
       setSelectedId(itemId);
     }
