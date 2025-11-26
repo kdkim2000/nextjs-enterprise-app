@@ -19,62 +19,18 @@ import {
   ExpandLess,
   ExpandMore,
   Star,
-  StarBorder,
-  Dashboard,
-  People,
-  Assessment,
-  Settings,
-  List as ListIcon,
-  AdminPanelSettings,
-  GridOn,
-  TrendingUp,
-  Menu as MenuIcon,
-  Description,
-  Folder,
-  Assignment,
-  Build,
-  Code,
-  Security,
-  Help,
-  Link,
-  AccountTree,
-  School,
-  Palette,
-  Message
+  StarBorder
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { MenuItem } from '@/types/menu';
 import { useMenu } from '@/hooks/useMenu';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
+import { getMenuIcon } from '@/lib/icons/menuIcons';
 
 const DRAWER_WIDTH = 280;
 const DRAWER_WIDTH_COLLAPSED = 72;
 
-// Icon mapping - synchronized with ICON_TYPE codes in database
-const iconMap: Record<string, React.ReactElement> = {
-  AccountTree: <AccountTree />,
-  AdminPanelSettings: <AdminPanelSettings />,
-  Assessment: <Assessment />,
-  Assignment: <Assignment />,
-  Build: <Build />,
-  Code: <Code />,
-  Dashboard: <Dashboard />,
-  Description: <Description />,
-  Folder: <Folder />,
-  GridOn: <GridOn />,
-  Help: <Help />,
-  Link: <Link />,
-  List: <ListIcon />,
-  Menu: <MenuIcon />,
-  Message: <Message />,
-  Palette: <Palette />,
-  People: <People />,
-  School: <School />,
-  Security: <Security />,
-  Settings: <Settings />,
-  TrendingUp: <TrendingUp />,
-  Widgets: <GridOn />
-};
+
 
 interface SidebarProps {
   expanded: boolean;
@@ -159,7 +115,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
     const isExpanded = expandedMenus.has(menu.id);
     const hasChildren = menu.children && menu.children.length > 0;
     const isActive = pathname === `/${locale}${menu.path}`;
-    const icon = iconMap[menu.icon] || <Dashboard />;
+    const icon = getMenuIcon(menu.icon);
 
     return (
       <React.Fragment key={menu.id}>
@@ -318,7 +274,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
                         color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
                       }}
                     >
-                      {iconMap[menu.icon] || <Dashboard />}
+                      {getMenuIcon(menu.icon)}
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText
@@ -372,7 +328,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
                         color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
                       }}
                     >
-                      {iconMap[menu.icon] || <Dashboard />}
+                      {getMenuIcon(menu.icon)}
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText

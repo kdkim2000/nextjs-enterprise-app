@@ -1,36 +1,16 @@
 'use client';
 
+import React from 'react';
 import { GridColDef } from '@mui/x-data-grid';
-import { IconButton } from '@mui/material';
+import { IconButton, Box, Tooltip } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { getMenuIcon, getAvailableIconNames } from '@/lib/icons/menuIcons';
 
-// AVAILABLE_ICONS is now deprecated - use CodeSelect with codeType="ICON_TYPE" instead
-// This array is kept for reference only and synchronized with ICON_TYPE codes in database
-export const AVAILABLE_ICONS = [
-  'AccountTree',
-  'AdminPanelSettings',
-  'Assessment',
-  'Assignment',
-  'Build',
-  'Code',
-  'Dashboard',
-  'Description',
-  'Folder',
-  'GridOn',
-  'Help',
-  'Link',
-  'List',
-  'Message',
-  'Palette',
-  'People',
-  'School',
-  'Security',
-  'Settings',
-  'TrendingUp',
-  'Widgets'
-];
+// AVAILABLE_ICONS is deprecated - use getAvailableIconNames() from '@/lib/icons/menuIcons' instead
+// For form selection, use CodeSelect with codeType="ICON_TYPE"
+export const AVAILABLE_ICONS = getAvailableIconNames();
 
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,7 +31,19 @@ export const createColumns = (
       }
     },
     { field: 'path', headerName: t('menuManagement.path'), width: 220, flex: 1 },
-    { field: 'icon', headerName: t('menuManagement.icon'), width: 100 },
+    {
+      field: 'icon',
+      headerName: t('menuManagement.icon'),
+      width: 120,
+      renderCell: (params) => (
+        <Tooltip title={params.value || 'Dashboard'}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {getMenuIcon(params.value)}
+            <span style={{ fontSize: '0.75rem', color: '#666' }}>{params.value}</span>
+          </Box>
+        </Tooltip>
+      )
+    },
     { field: 'order', headerName: t('menuManagement.order'), width: 70, type: 'number' },
     { field: 'level', headerName: t('menuManagement.level'), width: 70, type: 'number' },
     {

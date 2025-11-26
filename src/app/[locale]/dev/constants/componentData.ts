@@ -129,6 +129,12 @@ export const componentCategories = [
         description: 'User avatar upload with crop and preview',
         path: '/dev/components/avatar-upload',
         tags: ['Image', 'Profile', 'Upload']
+      },
+      {
+        title: 'Attachments',
+        description: 'Comprehensive file attachment system with attachment type validation, multi-file upload, drag-drop, and progress tracking',
+        path: '/dev/components/attachments',
+        tags: ['Upload', 'Attachment', 'API', 'Validation']
       }
     ]
   },

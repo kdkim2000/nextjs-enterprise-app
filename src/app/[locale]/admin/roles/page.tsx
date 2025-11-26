@@ -34,6 +34,7 @@ import RouteGuard from '@/components/auth/RouteGuard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 import { Role } from '@/types/role';
 import { useRoleManagement } from './hooks/useRoleManagement';
 import { createColumns } from './constants';
@@ -42,7 +43,10 @@ import { createFilterFields, calculateActiveFilterCount } from './utils';
 export default function RoleManagementPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
-  const gridPermissions = useDataGridPermissions('PROG-ROLE-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use help hook
   const {
@@ -53,7 +57,7 @@ export default function RoleManagementPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-ROLE-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // User search dialog state
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -131,7 +135,7 @@ export default function RoleManagementPage() {
   }, [editingRole]);
 
   return (
-    <RouteGuard programCode="PROG-ROLE-MGMT" requiredPermission="view" fallbackUrl="/dashboard">
+    <RouteGuard programCode={programId || ''} requiredPermission="view" fallbackUrl="/dashboard">
       <PageContainer>
         {/* Header - Auto mode: fetches menu info based on current path */}
         <PageHeader
@@ -476,7 +480,7 @@ export default function RoleManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        programId="PROG-ROLE-MGMT"
+        programId={programId || ''}
         language={language as 'en' | 'ko'}
         isAdmin={isAdmin}
       />

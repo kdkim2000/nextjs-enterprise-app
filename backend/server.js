@@ -34,6 +34,7 @@ const postRoutes = require('./routes/post');
 const commentRoutes = require('./routes/comment');
 const attachmentRoutes = require('./routes/attachment');
 const qnaRoutes = require('./routes/qna');
+const attachmentTypeRoutes = require('./routes/attachmentType');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -116,6 +117,7 @@ app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/attachment', attachmentRoutes);
 app.use('/api/qna', qnaRoutes);
+app.use('/api/attachment-type', attachmentTypeRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);

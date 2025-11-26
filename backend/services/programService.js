@@ -87,19 +87,30 @@ async function getProgramByCode(code) {
 async function createProgram(programData) {
   const {
     id, code, nameEn, nameKo, nameZh, nameVi,
-    description, category, path, icon
+    descriptionEn, descriptionKo, descriptionZh, descriptionVi,
+    category, type, status, permissions
   } = programData;
 
   const query = `
     INSERT INTO programs (
       id, code, name_en, name_ko, name_zh, name_vi,
-      description, category, path, icon, created_at, updated_at
+      description_en, description_ko, description_zh, description_vi,
+      category, type, status, permissions, created_at, updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
     RETURNING *
   `;
 
-  const params = [id, code, nameEn, nameKo, nameZh, nameVi, description, category, path, icon];
+  // For JSONB columns, pass the object directly (pg driver handles serialization)
+  const permissionsValue = permissions || [];
+
+  const params = [
+    id, code, nameEn || '', nameKo || '', nameZh || '', nameVi || '',
+    descriptionEn || '', descriptionKo || '', descriptionZh || '', descriptionVi || '',
+    category, type || 'module', status || 'development',
+    JSON.stringify(permissionsValue)
+  ];
+  console.log('[createProgram] SQL params:', params);
   const result = await db.query(query, params);
   return result.rows[0];
 }
@@ -113,7 +124,8 @@ async function createProgram(programData) {
 async function updateProgram(programId, updates) {
   const allowedFields = [
     'code', 'name_en', 'name_ko', 'name_zh', 'name_vi',
-    'description', 'category', 'path', 'icon'
+    'description_en', 'description_ko', 'description_zh', 'description_vi',
+    'category', 'type', 'status', 'permissions'
   ];
 
   const setClause = [];
@@ -123,8 +135,14 @@ async function updateProgram(programId, updates) {
   for (const [key, value] of Object.entries(updates)) {
     const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
     if (allowedFields.includes(dbField)) {
-      setClause.push(`${dbField} = $${paramIndex}`);
-      params.push(value);
+      // Handle permissions as JSON
+      if (dbField === 'permissions') {
+        setClause.push(`${dbField} = $${paramIndex}`);
+        params.push(value ? JSON.stringify(value) : '[]');
+      } else {
+        setClause.push(`${dbField} = $${paramIndex}`);
+        params.push(value);
+      }
       paramIndex++;
     }
   }

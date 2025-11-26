@@ -14,6 +14,7 @@ import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 import { useMessageManagement } from './hooks/useMessageManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -22,7 +23,10 @@ import { Message } from './types';
 export default function MessagesPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
-  const gridPermissions = useDataGridPermissions('PROG-MESSAGE-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use help hook
   const {
@@ -33,7 +37,7 @@ export default function MessagesPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-MESSAGE-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // Use custom hook for all business logic
   const {
@@ -129,7 +133,7 @@ export default function MessagesPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-MESSAGE-MGMT"
+      programId={programId || ''}
       helpExists={helpExists}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
