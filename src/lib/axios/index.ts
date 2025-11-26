@@ -26,6 +26,11 @@ axiosInstance.interceptors.request.use(
       }
     }
 
+    // For FormData, remove Content-Type header to let browser set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error: AxiosError) => {

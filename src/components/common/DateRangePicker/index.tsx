@@ -143,7 +143,7 @@ export default function DateRangePicker({
           <DatePicker
             label={startLabel}
             value={toDayjs(startDate)}
-            onChange={handleStartDateChange}
+            onChange={(newValue) => handleStartDateChange(newValue as Dayjs | null)}
             disabled={disabled}
             format="YYYY-MM-DD"
             slotProps={{
@@ -287,7 +287,7 @@ export default function DateRangePicker({
           <DatePicker
             label={endLabel}
             value={toDayjs(endDate)}
-            onChange={handleEndDateChange}
+            onChange={(newValue) => handleEndDateChange(newValue as Dayjs | null)}
             disabled={disabled}
             format="YYYY-MM-DD"
             minDate={toDayjs(startDate) || undefined}

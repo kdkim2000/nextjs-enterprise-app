@@ -16,7 +16,7 @@ export interface MessageAlertProps {
 /**
  * Helper function to extract message string from various formats
  */
-function getMessageString(message: MessageType): string | null {
+function getMessageString(message: MessageType | undefined): string | null {
   if (!message) return null;
   if (typeof message === 'string') return message;
   if (typeof message === 'object' && 'message' in message) return message.message;
@@ -46,7 +46,7 @@ export default function MessageAlert({
   infoMessage,
   sx = {}
 }: MessageAlertProps) {
-  const messages: Array<{ message: MessageType; severity: AlertColor }> = [
+  const messages: Array<{ message: MessageType | undefined; severity: AlertColor }> = [
     { message: errorMessage, severity: 'error' },
     { message: warningMessage, severity: 'warning' },
     { message: successMessage, severity: 'success' },

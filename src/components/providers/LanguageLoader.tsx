@@ -50,7 +50,7 @@ export default function LanguageLoader() {
           // Only change if different from current and is a supported language
           if (savedLanguage !== currentLocale && isLanguageSupported(savedLanguage)) {
             console.log(`[LanguageLoader] Auto-applying saved language: ${savedLanguage}`);
-            changeLocale(savedLanguage as LanguageCode);
+            changeLocale(savedLanguage as 'en' | 'ko' | 'zh' | 'vi');
           }
         }
       } catch (error: any) {
