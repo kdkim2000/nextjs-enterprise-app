@@ -17,6 +17,7 @@ import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useMessage } from '@/hooks/useMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useProgramId } from '@/hooks/useProgramId';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
 import { Role, UserRoleMapping, SearchCriteria } from './types';
@@ -31,8 +32,11 @@ export default function UserRoleMappingPage() {
     showErrorMessage
   } = useMessage({ locale: currentLocale });
 
-  // Permission control
-  const gridPermissions = useDataGridPermissions('PROG-USER-ROLE-MAP');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  // Permission control - use programId from DB
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // State
   const [roles, setRoles] = useState<Role[]>([]);
@@ -250,7 +254,7 @@ export default function UserRoleMappingPage() {
       errorMessage={errorMessage}
       showQuickSearch={false}
       showAdvancedFilter={false}
-      programId="PROG-USER-ROLE-MAP"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={true}

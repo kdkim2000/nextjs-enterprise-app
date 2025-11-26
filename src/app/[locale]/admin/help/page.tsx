@@ -16,13 +16,17 @@ import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { HelpContent } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useProgramId } from '@/hooks/useProgramId';
 
 export default function HelpManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
 
-  // Permission control
-  const gridPermissions = useDataGridPermissions('PROG-HELP-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  // Permission control - use programId from DB
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use custom hook for all business logic
   const {
@@ -122,7 +126,7 @@ export default function HelpManagementPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-HELP-MGMT"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

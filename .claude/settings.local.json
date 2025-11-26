@@ -96,7 +96,15 @@
       "Bash(cmd //c \"taskkill /F /PID 10020\" 2)",
       "Bash(cmd //c \"taskkill /F /PID 4988\" 2)",
       "Bash(cmd //c \"taskkill /F /PID 32020\" 2)",
-      "Bash(cmd //c \"taskkill /F /PID 24124\" 2)"
+      "Bash(cmd //c \"taskkill /F /PID 24124\" 2)",
+      "Bash(elif [ -f .env ])",
+      "Bash(then grep \"DB_\" .env)",
+      "Bash(else echo \"No .env file found\")",
+      "Bash(PGPASSWORD=ezen0301 psql:*)",
+      "Bash(PGPASSWORD='AppUser2024!' psql:*)",
+      "Bash(MIGRATION_USER=postgres MIGRATION_PASSWORD=postgres node scripts/run-migration.js:*)",
+      "Bash(PGPASSWORD='PostgreSQL2024!' psql:*)",
+      "Bash(PGPASSWORD=postgres psql:*)"
     ],
     "deny": [],
     "ask": []

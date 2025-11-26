@@ -1,11 +1,16 @@
 'use client';
 
 import { GridColDef } from '@mui/x-data-grid';
-import { Box, Avatar } from '@mui/material';
+import { Box, Avatar, Chip } from '@mui/material';
 import { getAvatarUrl } from '@/lib/config';
 import ActionsCell from '@/components/common/ActionsCell';
 import { User } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+
+export const STATUS_OPTIONS = [
+  { value: 'active', labelEn: 'Active', labelKo: '활성', labelZh: '激活', labelVi: 'Hoạt động' },
+  { value: 'inactive', labelEn: 'Inactive', labelKo: '비활성', labelZh: '未激活', labelVi: 'Không hoạt động' }
+];
 
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,8 +168,24 @@ export const createColumns = (
       field: 'status',
       headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       width: 100,
+      sortable: true,
       type: 'singleSelect',
-      valueOptions: ['active', 'inactive']
+      valueOptions: ['active', 'inactive'],
+      renderCell: (params) => {
+        const status = params.value as string;
+        const color = status === 'active' ? 'success' : 'default';
+        const label = STATUS_OPTIONS.find(opt => opt.value === status);
+        const labelText = label
+          ? getLocalizedValue({ en: label.labelEn, ko: label.labelKo, zh: label.labelZh, vi: label.labelVi }, locale)
+          : status;
+        return (
+          <Chip
+            label={labelText}
+            color={color}
+            size="small"
+          />
+        );
+      }
     }
   ];
 

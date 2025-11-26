@@ -2,18 +2,17 @@
 
 import React, { useMemo } from 'react';
 import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
-import ProgramFormFields, { ProgramFormData } from '@/components/admin/ProgramFormFields';
+import ProgramFormFields from '@/components/admin/ProgramFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 import { useProgramManagement } from './hooks/useProgramManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -22,7 +21,10 @@ import { Program } from './types';
 export default function ProgramManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
-  const gridPermissions = useDataGridPermissions('PROG-PROGRAM-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use help hook
   const {
@@ -33,7 +35,7 @@ export default function ProgramManagementPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-PROGRAM-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // Use custom hook for all business logic
   const {
@@ -75,8 +77,8 @@ export default function ProgramManagementPage() {
   } = useProgramManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(currentLocale, handleEdit, gridPermissions.editable), [currentLocale, handleEdit, gridPermissions.editable]);
-  const filterFields = useMemo(() => createFilterFields(), []);
+  const columns = useMemo(() => createColumns(t, currentLocale, handleEdit, gridPermissions.editable), [t, currentLocale, handleEdit, gridPermissions.editable]);
+  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
@@ -96,6 +98,14 @@ export default function ProgramManagementPage() {
     [selectedForDelete, programs, currentLocale]
   );
 
+  // Localized placeholder
+  const quickSearchPlaceholder = getLocalizedValue({
+    en: 'Search by code or name...',
+    ko: '코드 또는 이름으로 검색...',
+    zh: '按代码或名称搜索...',
+    vi: 'Tìm theo mã hoặc tên...'
+  }, currentLocale);
+
   return (
     <StandardCrudPageLayout
       // Page Header
@@ -109,7 +119,7 @@ export default function ProgramManagementPage() {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by code or name..."
+      quickSearchPlaceholder={quickSearchPlaceholder}
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
@@ -123,13 +133,14 @@ export default function ProgramManagementPage() {
           values={searchCriteria}
           onChange={handleSearchChange}
           onEnter={handleAdvancedFilterApply}
+          locale={currentLocale}
         />
       }
       onFilterApply={handleAdvancedFilterApply}
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-PROGRAM-MGMT"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}
@@ -140,32 +151,24 @@ export default function ProgramManagementPage() {
     >
       {/* DataGrid Area - Flexible */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {programs.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No programs found"
-            description="Try adjusting your search criteria"
+        <Box sx={{ flex: 1, minHeight: 0 }}>
+          <ExcelDataGrid
+            rows={programs}
+            columns={columns}
+            onRowsChange={(rows) => setPrograms(rows as Program[])}
+            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+            onRefresh={handleRefresh}
+            checkboxSelection={gridPermissions.checkboxSelection}
+            editable={gridPermissions.editable}
+            exportFileName="programs"
+            loading={searching}
+            paginationMode="server"
+            rowCount={rowCount}
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
           />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={programs}
-              columns={columns}
-              onRowsChange={(rows) => setPrograms(rows as Program[])}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="programs"
-              loading={searching}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
-            />
-          </Box>
-        )}
+        </Box>
       </Paper>
 
       {/* Edit Drawer */}
@@ -175,7 +178,10 @@ export default function ProgramManagementPage() {
           setDialogOpen(false);
           setEditingProgram(null);
         }}
-        title={!editingProgram?.id ? 'Add New Program' : 'Edit Program'}
+        title={!editingProgram?.id
+          ? getLocalizedValue({ en: 'Add New Program', ko: '프로그램 추가', zh: '添加程序', vi: 'Thêm chương trình' }, currentLocale)
+          : getLocalizedValue({ en: 'Edit Program', ko: '프로그램 수정', zh: '编辑程序', vi: 'Sửa chương trình' }, currentLocale)
+        }
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
@@ -193,7 +199,7 @@ export default function ProgramManagementPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName="program"
+        itemName={getLocalizedValue({ en: 'program', ko: '프로그램', zh: '程序', vi: 'chương trình' }, currentLocale)}
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}

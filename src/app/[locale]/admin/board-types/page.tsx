@@ -18,13 +18,17 @@ import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { BoardType } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 
 export default function BoardTypeManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
 
-  // Permission control
-  const gridPermissions = useDataGridPermissions('PROG-BOARD-TYPE');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  // Permission control - use programId from DB
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use common help hook
   const {
@@ -35,7 +39,7 @@ export default function BoardTypeManagementPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-BOARD-TYPE' });
+  } = useHelp({ programId: programId || '' });
 
   // Use custom hook for all business logic
   const {
@@ -147,7 +151,7 @@ export default function BoardTypeManagementPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-BOARD-TYPE"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

@@ -1,30 +1,29 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
-import DepartmentFormFields, { DepartmentFormData } from '@/components/admin/DepartmentFormFields';
-import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
-import { useDepartmentManagement } from './hooks/useDepartmentManagement';
-import { createColumns } from './constants';
-import { createFilterFields, calculateActiveFilterCount } from './utils';
-import { Department } from './types';
+import AttachmentTypeFormFields from '@/components/admin/AttachmentTypeFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useAttachmentTypeManagement } from './hooks/useAttachmentTypeManagement';
+import { createColumns } from './constants';
+import { createFilterFields, calculateActiveFilterCount } from './utils';
+import { AttachmentType } from './types';
 
-export default function DepartmentsPage() {
+export default function AttachmentTypeManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
 
   // Get programId from DB (menus table)
-  const { programId } = useProgramId();
+  const { programId, isLoading: programIdLoading } = useProgramId();
 
   // Permission control - use programId from DB
   const gridPermissions = useDataGridPermissions(programId || '');
@@ -43,9 +42,8 @@ export default function DepartmentsPage() {
   // Use custom hook for all business logic
   const {
     // State
-    departments,
-    setDepartments,
-    allUsers,
+    attachmentTypes,
+    setAttachmentTypes,
     searchCriteria,
     quickSearch,
     setQuickSearch,
@@ -54,8 +52,8 @@ export default function DepartmentsPage() {
     searching,
     saveLoading,
     dialogOpen,
-    editingDepartment,
-    setEditingDepartment,
+    editingItem,
+    setEditingItem,
     advancedFilterOpen,
     setAdvancedFilterOpen,
     deleteConfirmOpen,
@@ -77,28 +75,18 @@ export default function DepartmentsPage() {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
-    setDialogOpen,
-    fetchUsers,
-    fetchDepartments
-  } = useDepartmentManagement();
-
-  // Fetch users on mount for manager dropdown
-  useEffect(() => {
-    void fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setDialogOpen
+  } = useAttachmentTypeManagement();
 
   // Memoized computed values
   const columns = useMemo(
-    () => createColumns(t, currentLocale, departments, allUsers, handleEdit, gridPermissions.editable),
-    [t, currentLocale, departments, allUsers, handleEdit, gridPermissions.editable]
+    () => createColumns(t, currentLocale, handleEdit, gridPermissions.editable),
+    [t, currentLocale, handleEdit, gridPermissions.editable]
   );
-
   const filterFields = useMemo(
-    () => createFilterFields(t, departments, allUsers, currentLocale),
-    [t, departments, allUsers, currentLocale]
+    () => createFilterFields(t, currentLocale),
+    [t, currentLocale]
   );
-
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
@@ -107,15 +95,15 @@ export default function DepartmentsPage() {
   const deleteItemsList = useMemo(
     () =>
       selectedForDelete.map((id) => {
-        const department = departments.find((d) => d.id === id);
-        return department
+        const item = attachmentTypes.find((a) => a.id === id);
+        return item
           ? {
-              id: department.id,
-              displayName: `${department.code} (${currentLocale === 'ko' ? department.name?.ko : department.name?.en})`
+              id: item.id!,
+              displayName: `${item.code} (${getLocalizedValue(item.name, currentLocale)})`
             }
           : { id, displayName: String(id) };
       }),
-    [selectedForDelete, departments, currentLocale]
+    [selectedForDelete, attachmentTypes, currentLocale]
   );
 
   return (
@@ -131,7 +119,12 @@ export default function DepartmentsPage() {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by code or name..."
+      quickSearchPlaceholder={getLocalizedValue({
+        en: 'Search by code or name...',
+        ko: '코드 또는 이름으로 검색...',
+        zh: '按代码或名称搜索...',
+        vi: 'Tìm theo mã hoặc tên...'
+      }, currentLocale)}
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
@@ -145,6 +138,7 @@ export default function DepartmentsPage() {
           values={searchCriteria}
           onChange={handleSearchChange}
           onEnter={handleAdvancedFilterApply}
+          locale={currentLocale}
         />
       }
       onFilterApply={handleAdvancedFilterApply}
@@ -160,19 +154,19 @@ export default function DepartmentsPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area - Flexible */}
+      {/* DataGrid Area */}
       <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         <Box sx={{ flex: 1, minHeight: 0 }}>
           <ExcelDataGrid
-            rows={departments}
+            rows={attachmentTypes}
             columns={columns}
-            onRowsChange={(rows) => setDepartments(rows as Department[])}
+            onRowsChange={(rows) => setAttachmentTypes(rows as AttachmentType[])}
             {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
             {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
             onRefresh={handleRefresh}
             checkboxSelection={gridPermissions.checkboxSelection}
             editable={gridPermissions.editable}
-            exportFileName="departments"
+            exportFileName="attachment-types"
             loading={searching}
             paginationMode="server"
             rowCount={rowCount}
@@ -187,32 +181,22 @@ export default function DepartmentsPage() {
         open={dialogOpen}
         onClose={() => {
           setDialogOpen(false);
-          setEditingDepartment(null);
+          setEditingItem(null);
         }}
-        title={!editingDepartment?.id ? t('common.create') + ' Department' : t('common.edit') + ' Department'}
+        title={!editingItem?.id
+          ? `${t('common.create')} ${getLocalizedValue({ en: 'Attachment Type', ko: '첨부파일 종류', zh: '附件类型', vi: 'Loại tệp đính kèm' }, currentLocale)}`
+          : `${t('common.edit')} ${getLocalizedValue({ en: 'Attachment Type', ko: '첨부파일 종류', zh: '附件类型', vi: 'Loại tệp đính kèm' }, currentLocale)}`
+        }
         onSave={handleSave}
         saveLoading={saveLoading}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
         width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
       >
-        <DepartmentFormFields
-          department={editingDepartment as DepartmentFormData}
-          onChange={(dept) => setEditingDepartment(dept as DepartmentFormData)}
-          departments={departments}
+        <AttachmentTypeFormFields
+          data={editingItem as any}
+          onChange={setEditingItem as any}
           locale={currentLocale}
-          labels={{
-            code: t('fields.code'),
-            nameEn: t('fields.nameEn'),
-            nameKo: t('fields.nameKo'),
-            descriptionEn: t('fields.descriptionEn'),
-            descriptionKo: t('fields.descriptionKo'),
-            parentDepartment: t('fields.parentDepartment'),
-            manager: t('fields.manager'),
-            status: t('fields.status'),
-            order: t('fields.order'),
-            none: t('fields.none')
-          }}
         />
       </EditDrawer>
 
@@ -220,7 +204,7 @@ export default function DepartmentsPage() {
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
         itemCount={selectedForDelete.length}
-        itemName="Department"
+        itemName={getLocalizedValue({ en: 'Attachment Type', ko: '첨부파일 종류', zh: '附件类型', vi: 'Loại tệp đính kèm' }, currentLocale)}
         itemsList={deleteItemsList}
         onCancel={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
