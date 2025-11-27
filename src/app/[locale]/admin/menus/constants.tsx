@@ -13,7 +13,7 @@ import { getMenuIcon, getAvailableIconNames } from '@/lib/icons/menuIcons';
 export const AVAILABLE_ICONS = getAvailableIconNames();
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   locale: string,
   allMenus: MenuItemType[],

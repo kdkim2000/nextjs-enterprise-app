@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -153,30 +153,32 @@ export default function DepartmentTreeSelect({
 
   // Auto-expand nodes when searching
   useEffect(() => {
-    if (searchQuery.trim()) {
-      const expanded: string[] = [];
-      const addNodeAndAncestors = (nodeId: string) => {
-        if (!expanded.includes(nodeId)) {
-          expanded.push(nodeId);
-        }
-        const dept = departments.find(d => d.id === nodeId);
-        if (dept?.parent_id) {
-          addNodeAndAncestors(dept.parent_id);
-        }
-      };
-
-      filteredTree.forEach(node => {
-        const addAllNodes = (n: DepartmentTreeNode) => {
-          addNodeAndAncestors(n.id);
-          n.children.forEach(addAllNodes);
+    startTransition(() => {
+      if (searchQuery.trim()) {
+        const expanded: string[] = [];
+        const addNodeAndAncestors = (nodeId: string) => {
+          if (!expanded.includes(nodeId)) {
+            expanded.push(nodeId);
+          }
+          const dept = departments.find(d => d.id === nodeId);
+          if (dept?.parent_id) {
+            addNodeAndAncestors(dept.parent_id);
+          }
         };
-        addAllNodes(node);
-      });
 
-      setExpandedItems(expanded);
-    } else {
-      setExpandedItems([]);
-    }
+        filteredTree.forEach(node => {
+          const addAllNodes = (n: DepartmentTreeNode) => {
+            addNodeAndAncestors(n.id);
+            n.children.forEach(addAllNodes);
+          };
+          addAllNodes(node);
+        });
+
+        setExpandedItems(expanded);
+      } else {
+        setExpandedItems([]);
+      }
+    });
   }, [searchQuery, filteredTree, departments]);
 
   const handleSelect = (_event: React.SyntheticEvent | null, itemId: string | null) => {

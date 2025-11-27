@@ -102,7 +102,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       console.log('[useProgramManagement] API response:', response);
 
       // Programs now use MultiLangField format directly
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const transformedPrograms = (response.programs || []).map((prog: any) => ({
         ...prog,
         version: prog.version || '',
@@ -211,7 +211,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       setDialogOpen(false);
       setEditingProgram(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_PROGRAM_SAVE_FAIL');
       console.error('Failed to save program:', err);
     } finally {
@@ -244,7 +244,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_PROGRAM_DELETE_FAIL');
       console.error('Failed to delete programs:', err);
     } finally {

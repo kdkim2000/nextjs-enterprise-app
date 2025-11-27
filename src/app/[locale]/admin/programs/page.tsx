@@ -77,7 +77,7 @@ export default function ProgramManagementPage() {
   } = useProgramManagement();
 
   // Memoized computed values
-  const columns = useMemo(() => createColumns(t, currentLocale, handleEdit, gridPermissions.editable), [t, currentLocale, handleEdit, gridPermissions.editable]);
+  const columns = useMemo(() => createColumns(currentLocale, handleEdit, gridPermissions.editable), [currentLocale, handleEdit, gridPermissions.editable]);
   const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),

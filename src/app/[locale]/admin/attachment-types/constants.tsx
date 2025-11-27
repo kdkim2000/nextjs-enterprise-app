@@ -22,7 +22,7 @@ const formatBytes = (bytes: number): string => {
 };
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   locale: string,
   handleEdit: (id: string | number) => void,

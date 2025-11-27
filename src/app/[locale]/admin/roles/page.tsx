@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, startTransition } from 'react';
 import {
   Box,
   Paper,
@@ -18,14 +18,13 @@ import {
   Switch,
   Chip
 } from '@mui/material';
-import { Search, HelpOutline, Close, PersonSearch, Clear } from '@mui/icons-material';
+import { HelpOutline, Close, PersonSearch, Clear } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
@@ -125,13 +124,15 @@ export default function RoleManagementPage() {
 
   // Initialize user names when editing role
   useEffect(() => {
-    if (editingRole) {
-      setManagerName(editingRole.managerName || '');
-      setRepresentativeName(editingRole.representativeName || '');
-    } else {
-      setManagerName('');
-      setRepresentativeName('');
-    }
+    startTransition(() => {
+      if (editingRole) {
+        setManagerName(editingRole.managerName || '');
+        setRepresentativeName(editingRole.representativeName || '');
+      } else {
+        setManagerName('');
+        setRepresentativeName('');
+      }
+    });
   }, [editingRole]);
 
   return (

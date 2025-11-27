@@ -187,7 +187,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       // Refresh sidebar menus
       await refreshMenus();
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_MENU_SAVE_FAIL');
       console.error('Failed to save menu:', err);
     } finally {
@@ -222,7 +222,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_MENU_DELETE_FAIL');
       console.error('Failed to delete menus:', err);
     } finally {

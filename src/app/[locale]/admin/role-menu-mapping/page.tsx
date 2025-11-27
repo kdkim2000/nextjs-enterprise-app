@@ -197,7 +197,7 @@ export default function RoleMenuMappingPage() {
 
       void fetchData();
       void fetchMappings();
-    } catch (err: any) {
+    } catch (error) {
       await showErrorMessage('MAPPING_ROLE_ASSIGN_FAIL');
     }
   }, [selectedProgram, fetchData, fetchMappings, showSuccessMessage, showErrorMessage]);
@@ -242,7 +242,7 @@ export default function RoleMenuMappingPage() {
       setEditingPermission(null);
       await fetchData();
       await fetchMappings();
-    } catch (err: any) {
+    } catch (error) {
       await showErrorMessage('MAPPING_PERMISSION_UPDATE_FAIL');
     } finally {
       setSaveLoading(false);
@@ -268,7 +268,7 @@ export default function RoleMenuMappingPage() {
       setSelectedMappingsForDelete([]);
       await fetchData();
       await fetchMappings();
-    } catch (err: any) {
+    } catch (error) {
       await showErrorMessage('MAPPING_DELETE_FAIL');
     } finally {
       setDeleting(false);

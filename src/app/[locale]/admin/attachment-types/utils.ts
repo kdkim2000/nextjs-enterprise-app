@@ -2,7 +2,7 @@ import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import { SearchCriteria } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const createFilterFields = (t: any, locale: string): FilterFieldConfig[] => {
   const statusOptions = [
     { value: '', label: getLocalizedValue({ en: 'All Status', ko: '전체 상태', zh: '所有状态', vi: 'Tất cả trạng thái' }, locale) },

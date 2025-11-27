@@ -73,7 +73,7 @@ export default function BoardListPage() {
   const [selectedIds, setSelectedIds] = React.useState<(string | number)[]>([]);
 
   // Memoized computed values
-  const filterFields = useMemo(() => createFilterFields(t, currentLocale), [t, currentLocale]);
+  const filterFields = useMemo(() => createFilterFields(currentLocale), [currentLocale]);
 
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),

@@ -20,7 +20,7 @@ export interface MenuFormFieldsProps {
   onChange: (menu: MenuFormData) => void;
   allMenus: MenuItemType[];
   locale: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any;
 }
 
