@@ -1,5 +1,3 @@
-'use client';
-
 import { GridColDef } from '@mui/x-data-grid';
 import { Box, Chip, Typography } from '@mui/material';
 import { PushPin, Lock, Comment, AttachFile, Visibility, ThumbUp } from '@mui/icons-material';
@@ -7,8 +5,7 @@ import { Post } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any,
+  _t: (key: string) => string,
   locale: string,
   handleView: (id: string) => void,
   canUpdate: boolean = true,
