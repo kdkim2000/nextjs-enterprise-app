@@ -482,7 +482,13 @@ function getDateBasedPath(date = new Date()) {
  */
 async function ensureStorageDirectory(storagePath) {
   const fullPath = path.join(process.cwd(), 'uploads', storagePath);
-  await fs.mkdir(fullPath, { recursive: true });
+  try {
+    await fs.mkdir(fullPath, { recursive: true });
+    console.log('[AttachmentService] Ensured directory exists:', fullPath);
+  } catch (err) {
+    console.error('[AttachmentService] Failed to create directory:', fullPath, err.message);
+    throw err;
+  }
   return fullPath;
 }
 
@@ -529,13 +535,28 @@ async function uploadFiles(attachmentTypeCode, files, options = {}) {
     createdBy
   } = options;
 
+  console.log('[AttachmentService.uploadFiles] Starting upload:', {
+    attachmentTypeCode,
+    filesCount: files?.length,
+    referenceType,
+    referenceId,
+    existingAttachmentId
+  });
+
   // Get attachment type settings
   const attachmentTypeService = require('./attachmentTypeService');
   const attachmentType = await attachmentTypeService.getAttachmentTypeByCode(attachmentTypeCode);
 
   if (!attachmentType) {
-    throw new Error(`Attachment type '${attachmentTypeCode}' not found`);
+    console.error('[AttachmentService.uploadFiles] Attachment type not found:', attachmentTypeCode);
+    throw new Error(`Attachment type '${attachmentTypeCode}' not found. Please run migration/ensure_board_general_attachment_type.sql`);
   }
+
+  console.log('[AttachmentService.uploadFiles] Found attachment type:', {
+    id: attachmentType.id,
+    code: attachmentType.code,
+    storagePath: attachmentType.storage_path
+  });
 
   // Create or get attachment group
   let attachment;
@@ -544,7 +565,9 @@ async function uploadFiles(attachmentTypeCode, files, options = {}) {
     if (!attachment) {
       throw new Error(`Attachment '${existingAttachmentId}' not found`);
     }
+    console.log('[AttachmentService.uploadFiles] Using existing attachment:', attachment.id);
   } else {
+    console.log('[AttachmentService.uploadFiles] Creating new attachment...');
     attachment = await createAttachment({
       attachmentTypeId: attachmentType.id,
       referenceType,
@@ -553,6 +576,7 @@ async function uploadFiles(attachmentTypeCode, files, options = {}) {
       description,
       createdBy
     });
+    console.log('[AttachmentService.uploadFiles] Created attachment:', attachment.id);
   }
 
   // Check file count limit
@@ -591,7 +615,9 @@ async function uploadFiles(attachmentTypeCode, files, options = {}) {
       const checksum = calculateChecksum(file.buffer);
 
       // Save physical file (with date-based directory structure)
+      console.log('[AttachmentService.uploadFiles] Saving file:', file.originalname);
       const { fullPath, relativePath } = await saveFileToStorage(file.buffer, baseStoragePath, storedFilename);
+      console.log('[AttachmentService.uploadFiles] File saved to:', fullPath);
 
       // Check if image
       const isImage = isImageFile(file.mimetype);
@@ -611,9 +637,11 @@ async function uploadFiles(attachmentTypeCode, files, options = {}) {
         order: existingCount + i,
         createdBy
       });
+      console.log('[AttachmentService.uploadFiles] File added to DB:', savedFile.id);
 
       uploadedFiles.push(savedFile);
     } catch (error) {
+      console.error('[AttachmentService.uploadFiles] Error processing file:', file.originalname, error.message);
       errors.push({ file: file.originalname, error: error.message });
     }
   }

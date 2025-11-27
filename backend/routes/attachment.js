@@ -80,13 +80,30 @@ router.post('/upload', authenticateToken, ...uploadMultipleBuffer('files', 20), 
       description
     } = req.body;
 
+    console.log('[ATTACHMENT UPLOAD] Request received:', {
+      attachmentTypeCode,
+      attachmentId,
+      referenceType,
+      referenceId,
+      filesCount: req.files?.length || 0,
+      userId: req.user?.userId
+    });
+
     if (!attachmentTypeCode) {
+      console.error('[ATTACHMENT UPLOAD] Missing attachmentTypeCode');
       return res.status(400).json({ error: 'Missing required field: attachmentTypeCode' });
     }
 
     if (!req.files || req.files.length === 0) {
+      console.error('[ATTACHMENT UPLOAD] No files in request');
       return res.status(400).json({ error: 'No files uploaded' });
     }
+
+    console.log('[ATTACHMENT UPLOAD] Files received:', req.files.map(f => ({
+      name: f.originalname,
+      size: f.size,
+      mimetype: f.mimetype
+    })));
 
     // Upload files using the service
     const result = await attachmentService.uploadFiles(attachmentTypeCode, req.files, {
@@ -98,9 +115,15 @@ router.post('/upload', authenticateToken, ...uploadMultipleBuffer('files', 20), 
       createdBy: req.user.userId
     });
 
+    console.log('[ATTACHMENT UPLOAD] Upload result:', {
+      attachmentId: result.attachment?.id,
+      filesUploaded: result.files?.length || 0,
+      errors: result.errors
+    });
+
     // Check for errors
     if (result.errors && result.errors.length > 0) {
-      console.warn('Some files failed to upload:', result.errors);
+      console.warn('[ATTACHMENT UPLOAD] Some files failed to upload:', result.errors);
     }
 
     res.status(201).json({
@@ -109,7 +132,8 @@ router.post('/upload', authenticateToken, ...uploadMultipleBuffer('files', 20), 
       errors: result.errors
     });
   } catch (error) {
-    console.error('Error uploading files:', error);
+    console.error('[ATTACHMENT UPLOAD] Error:', error.message);
+    console.error('[ATTACHMENT UPLOAD] Stack:', error.stack);
     res.status(500).json({ error: error.message || 'Failed to upload files' });
   }
 });
