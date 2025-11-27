@@ -67,7 +67,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [allDepartments, setAllDepartments] = useState<any[]>([]);
 
   // Fetch all departments for dropdown
@@ -208,7 +208,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       setDialogOpen(false);
       setEditingUser(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_USER_SAVE_FAIL');
       console.error('Failed to save user:', err);
     } finally {
@@ -241,7 +241,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_USER_DELETE_FAIL');
       console.error('Failed to delete users:', err);
     } finally {
@@ -278,7 +278,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       setResetPasswordDialogOpen(false);
       setResetPasswordUser(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('USER_PASSWORD_RESET_FAIL');
       console.error('Failed to reset password:', err);
     } finally {

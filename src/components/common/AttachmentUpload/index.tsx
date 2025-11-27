@@ -46,6 +46,45 @@ import {
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 // ==========================================
+// HELPER FUNCTIONS
+// ==========================================
+
+/**
+ * Build accept config from attachment type settings
+ * Extracted as a pure function to avoid React Compiler memoization issues
+ */
+function buildAcceptConfig(
+  accept?: Record<string, string[]>,
+  allowedExtensions?: string[]
+): Record<string, string[]> {
+  if (accept) return accept;
+
+  if (!allowedExtensions?.length) {
+    return { '*/*': [] };
+  }
+
+  return allowedExtensions.reduce<Record<string, string[]>>((acc, ext) => {
+    const dotExt = ext.startsWith('.') ? ext : `.${ext}`;
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
+      return { ...acc, 'image/*': [...(acc['image/*'] || []), dotExt] };
+    } else if (ext === 'pdf') {
+      return { ...acc, 'application/pdf': ['.pdf'] };
+    } else if (['doc', 'docx'].includes(ext)) {
+      return { ...acc, 'application/msword': [...(acc['application/msword'] || []), dotExt] };
+    } else if (['xls', 'xlsx'].includes(ext)) {
+      return { ...acc, 'application/vnd.ms-excel': [...(acc['application/vnd.ms-excel'] || []), dotExt] };
+    } else if (['ppt', 'pptx'].includes(ext)) {
+      return { ...acc, 'application/vnd.ms-powerpoint': [...(acc['application/vnd.ms-powerpoint'] || []), dotExt] };
+    } else if (['zip', 'rar', '7z'].includes(ext)) {
+      return { ...acc, 'application/zip': [...(acc['application/zip'] || []), dotExt] };
+    } else if (['txt', 'csv'].includes(ext)) {
+      return { ...acc, 'text/*': [...(acc['text/*'] || []), dotExt] };
+    }
+    return acc;
+  }, {});
+}
+
+// ==========================================
 // TYPES
 // ==========================================
 
@@ -183,45 +222,10 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   }, [attachment?.files, onChange]);
 
   // Build accept config from attachment type settings
-  const acceptConfig = useMemo(() => {
-    if (accept) return accept;
-
-    if (!attachmentType?.allowedExtensions?.length) {
-      return {
-        '*/*': []
-      };
-    }
-
-    // Build accept object from extensions
-    const acceptObj: Record<string, string[]> = {};
-    attachmentType.allowedExtensions.forEach(ext => {
-      const dotExt = ext.startsWith('.') ? ext : `.${ext}`;
-      // Map common extensions to MIME types
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
-        acceptObj['image/*'] = acceptObj['image/*'] || [];
-        acceptObj['image/*'].push(dotExt);
-      } else if (ext === 'pdf') {
-        acceptObj['application/pdf'] = ['.pdf'];
-      } else if (['doc', 'docx'].includes(ext)) {
-        acceptObj['application/msword'] = acceptObj['application/msword'] || [];
-        acceptObj['application/msword'].push(dotExt);
-      } else if (['xls', 'xlsx'].includes(ext)) {
-        acceptObj['application/vnd.ms-excel'] = acceptObj['application/vnd.ms-excel'] || [];
-        acceptObj['application/vnd.ms-excel'].push(dotExt);
-      } else if (['ppt', 'pptx'].includes(ext)) {
-        acceptObj['application/vnd.ms-powerpoint'] = acceptObj['application/vnd.ms-powerpoint'] || [];
-        acceptObj['application/vnd.ms-powerpoint'].push(dotExt);
-      } else if (['zip', 'rar', '7z'].includes(ext)) {
-        acceptObj['application/zip'] = acceptObj['application/zip'] || [];
-        acceptObj['application/zip'].push(dotExt);
-      } else if (['txt', 'csv'].includes(ext)) {
-        acceptObj['text/*'] = acceptObj['text/*'] || [];
-        acceptObj['text/*'].push(dotExt);
-      }
-    });
-
-    return Object.keys(acceptObj).length > 0 ? acceptObj : { '*/*': [] };
-  }, [accept, attachmentType?.allowedExtensions]);
+  const acceptConfig = useMemo(
+    () => buildAcceptConfig(accept, attachmentType?.allowedExtensions),
+    [accept, attachmentType?.allowedExtensions]
+  );
 
   // Dropzone handler
   const onDrop = useCallback(
@@ -242,9 +246,9 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
       }
 
       // Handle rejected files
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       (rejectedFiles as any[]).forEach(({ file, errors: fileErrors }: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const errorMessages = fileErrors.map((e: any) => {
           if (e.code === 'file-too-large') {
             return 'File is too large';

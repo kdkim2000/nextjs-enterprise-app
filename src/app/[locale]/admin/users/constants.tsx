@@ -8,10 +8,10 @@ import { User } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   locale: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   allDepartments: any[],
   handleEdit: (id: string | number) => void,
   handleResetPassword?: (id: string | number) => void,

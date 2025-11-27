@@ -23,7 +23,7 @@ export default function AttachmentTypeManagementPage() {
   const currentLocale = useCurrentLocale();
 
   // Get programId from DB (menus table)
-  const { programId, isLoading: programIdLoading } = useProgramId();
+  const { programId } = useProgramId();
 
   // Permission control - use programId from DB
   const gridPermissions = useDataGridPermissions(programId || '');

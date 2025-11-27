@@ -128,7 +128,14 @@
       "Bash(then grep \"DB_\" E:/apps/nextjs-enterprise-app/backend/.env)",
       "Bash(PGPASSWORD=app_password psql:*)",
       "Bash(PGPASSWORD='AppUser2024!' psql:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git stash:*)",
+      "Bash(for file in src/app/[locale]/admin/*/hooks/*.ts)",
+      "Bash(do if grep -q '} catch {' $file)",
+      "Bash(then if grep -A5 '} catch {' $file)",
+      "Bash(then echo \"Issue in: $file\" fi fi done)",
+      "Bash(for file in \"src/app/[locale]/admin/departments/hooks/useDepartmentManagement.ts\" \"src/app/[locale]/admin/help/hooks/useHelpManagement.ts\" \"src/app/[locale]/admin/menus/hooks/useMenuManagement.ts\" \"src/app/[locale]/admin/programs/hooks/useProgramManagement.ts\" \"src/app/[locale]/admin/roles/hooks/useRoleManagement.ts\" \"src/app/[locale]/admin/users/hooks/useUserManagement.ts\")",
+      "Bash(do echo \"=== $file ===\" grep -n \"catch {\" \"$file\")"
     ],
     "deny": [],
     "ask": []

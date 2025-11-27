@@ -191,7 +191,7 @@ export default function SettingsPage() {
       }
       await showSuccessMessage('SETTINGS_PROFILE_UPDATE_SUCCESS');
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
+      const _err = error as { response?: { data?: { error?: string } } };
       await showErrorMessage('SETTINGS_PROFILE_UPDATE_FAIL');
     } finally {
       setLoading(false);
@@ -218,7 +218,7 @@ export default function SettingsPage() {
       await showSuccessMessage('SETTINGS_PASSWORD_CHANGE_SUCCESS');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
+      const _err = error as { response?: { data?: { error?: string } } };
       await showErrorMessage('SETTINGS_PASSWORD_CHANGE_FAIL');
     } finally {
       setLoading(false);
@@ -233,7 +233,7 @@ export default function SettingsPage() {
       const status = enabled ? 'enabled' : 'disabled';
       await showSuccessMessage('SETTINGS_MFA_TOGGLE_SUCCESS', { status });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
+      const _err = error as { response?: { data?: { error?: string } } };
       await showErrorMessage('SETTINGS_MFA_TOGGLE_FAIL');
     } finally {
       setLoading(false);
@@ -252,7 +252,7 @@ export default function SettingsPage() {
 
       await showSuccessMessage('SETTINGS_PREFERENCES_SAVE_SUCCESS');
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
+      const _err = error as { response?: { data?: { error?: string } } };
       await showErrorMessage('SETTINGS_PREFERENCES_SAVE_FAIL');
     } finally {
       setLoading(false);

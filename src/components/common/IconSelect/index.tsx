@@ -104,8 +104,8 @@ export default function IconSelect({
   };
 
   // Render selected value with icon
-  const renderValue = (selected: string) => {
-    if (!selected) return null;
+  const renderValue = (selected: unknown) => {
+    if (!selected || typeof selected !== 'string') return null;
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         {getMenuIcon(selected)}

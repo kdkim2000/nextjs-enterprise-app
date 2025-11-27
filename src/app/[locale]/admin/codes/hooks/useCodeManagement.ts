@@ -80,7 +80,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
         try {
           const response = await api.get('/help?programId=PROG-CODE-MGMT&language=en');
           setHelpExists(!!response.help);
-        } catch {
+        } catch (error) {
           setHelpExists(false);
         }
       } catch (error) {
@@ -215,7 +215,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       setDialogOpen(false);
       setEditingCode(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_CODE_SAVE_FAIL');
       console.error('Failed to save code:', err);
     } finally {
@@ -248,7 +248,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_CODE_DELETE_FAIL');
       console.error('Failed to delete codes:', err);
     } finally {

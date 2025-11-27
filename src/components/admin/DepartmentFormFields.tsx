@@ -68,9 +68,9 @@ export default function DepartmentFormFields({
   locale = 'en',
   labels = {}
 }: DepartmentFormFieldsProps) {
-  if (!department) return null;
-
   const [expanded, setExpanded] = useState<string[]>(['basic', 'names', 'descriptions', 'hierarchy', 'settings']);
+
+  if (!department) return null;
 
   const handleChange = (field: keyof DepartmentFormData, value: string | number) => {
     onChange({ ...department, [field]: value });

@@ -3,7 +3,7 @@ import { LANGUAGES, STATUS_OPTIONS } from './constants';
 import { SearchCriteria } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const createFilterFields = (t: any, locale: string): FilterFieldConfig[] => [
   {
     name: 'programId',

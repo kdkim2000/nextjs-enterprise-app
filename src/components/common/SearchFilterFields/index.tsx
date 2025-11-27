@@ -39,7 +39,7 @@ export interface FilterFieldConfig {
   /**
    * For department-select type: department list
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   departments?: any[];
 }
 

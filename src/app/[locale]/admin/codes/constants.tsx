@@ -8,7 +8,7 @@ import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { CodeOption } from '@/hooks/useCodeOptions';
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   handleEdit: (id: string | number) => void,
   canUpdate: boolean = true,

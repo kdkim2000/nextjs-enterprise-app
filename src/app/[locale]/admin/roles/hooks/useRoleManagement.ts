@@ -192,7 +192,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_ROLE_DELETE_FAIL');
       console.error('Failed to delete roles:', err);
     } finally {
@@ -219,7 +219,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
       setDialogOpen(false);
       setEditingRole(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_ROLE_SAVE_FAIL');
       console.error('Failed to save role:', err);
     } finally {
