@@ -188,14 +188,8 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
     attachmentTypeCode,
     referenceType,
     referenceId,
-    onUploadComplete: (result) => {
-      if (onUploadComplete) {
-        onUploadComplete(result.attachment.id, result.attachment.files);
-      }
-      if (onChange) {
-        onChange(result.attachment.files);
-      }
-    },
+    // Note: onUploadComplete is handled via useEffect on attachment.id change
+    // This ensures both fetched and uploaded attachments notify the parent
     onError: (err) => {
       if (onError) {
         onError(err.message);
@@ -213,6 +207,14 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
       fetchAttachments();
     }
   }, [autoFetch, referenceType, referenceId, fetchAttachments]);
+
+  // Notify parent when attachment is loaded (either from fetch or upload)
+  // This ensures the parent component knows the attachment ID for saving
+  useEffect(() => {
+    if (attachment?.id && onUploadComplete) {
+      onUploadComplete(attachment.id, attachment.files || []);
+    }
+  }, [attachment?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Notify parent when files change
   useEffect(() => {
