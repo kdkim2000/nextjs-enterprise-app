@@ -99,16 +99,18 @@ export function useAttachment(options: UseAttachmentOptions) {
    * Fetch attachment type settings
    */
   const fetchAttachmentType = useCallback(async () => {
+    console.log('[useAttachment] Fetching attachment type:', attachmentTypeCode);
     try {
       const response = await api.get<{ attachmentType: AttachmentType }>(
         `/attachment-type/code/${attachmentTypeCode}`
       );
+      console.log('[useAttachment] Attachment type fetched:', response.attachmentType);
       setAttachmentType(response.attachmentType);
       return response.attachmentType;
     } catch (err) {
       const error = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
       const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to fetch attachment type';
-      console.error('Failed to fetch attachment type:', error);
+      console.error('[useAttachment] Failed to fetch attachment type:', error);
       setError(errorMessage);
       return null;
     }
@@ -147,7 +149,11 @@ export function useAttachment(options: UseAttachmentOptions) {
    * Upload files
    */
   const uploadFiles = useCallback(async (files: File[]) => {
-    if (files.length === 0) return null;
+    console.log('[useAttachment] uploadFiles called with', files.length, 'files');
+    if (files.length === 0) {
+      console.log('[useAttachment] No files to upload');
+      return null;
+    }
 
     try {
       setUploading(true);
@@ -187,11 +193,19 @@ export function useAttachment(options: UseAttachmentOptions) {
         formData.append('files', file);
       });
 
+      console.log('[useAttachment] Uploading with FormData:', {
+        attachmentTypeCode,
+        attachmentId: attachment?.id,
+        referenceType,
+        referenceId,
+        filesCount: files.length,
+        fileNames: files.map(f => f.name)
+      });
+
       // Upload with progress tracking
+      // Note: Don't set Content-Type header for FormData - browser will set it with boundary
+      console.log('[useAttachment] Sending API request to /attachment/upload');
       const response = await api.post<UploadResult>('/attachment/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
         onUploadProgress: (progressEvent) => {
           const progress = progressEvent.total
             ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -202,6 +216,12 @@ export function useAttachment(options: UseAttachmentOptions) {
             progress
           })));
         }
+      });
+
+      console.log('[useAttachment] API response received:', {
+        attachmentId: response.attachment?.id,
+        uploadedFilesCount: response.uploadedFiles?.length,
+        errors: response.errors
       });
 
       // Update progress to success
@@ -219,10 +239,12 @@ export function useAttachment(options: UseAttachmentOptions) {
       }));
 
       // Update attachment state
+      console.log('[useAttachment] Setting attachment state:', response.attachment?.id);
       setAttachment(response.attachment);
 
       // Call completion callback
       if (onUploadComplete) {
+        console.log('[useAttachment] Calling onUploadComplete callback');
         onUploadComplete(response);
       }
 
@@ -230,6 +252,12 @@ export function useAttachment(options: UseAttachmentOptions) {
     } catch (err) {
       const error = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
       const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Upload failed';
+
+      console.error('[useAttachment] Upload failed:', {
+        errorMessage,
+        responseData: error.response?.data,
+        status: (err as any)?.response?.status
+      });
 
       // Update progress to error
       setUploadProgress(prev => prev.map(p => ({

@@ -212,6 +212,7 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   // This ensures the parent component knows the attachment ID for saving
   useEffect(() => {
     if (attachment?.id && onUploadComplete) {
+      console.log('[AttachmentUpload] Notifying parent of attachment ID:', attachment.id);
       onUploadComplete(attachment.id, attachment.files || []);
     }
   }, [attachment?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -232,6 +233,10 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   // Dropzone handler
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejectedFiles: unknown[]) => {
+      console.log('[AttachmentUpload] onDrop called:', {
+        acceptedFiles: acceptedFiles.map(f => f.name),
+        rejectedFiles: (rejectedFiles as any[]).map((r: any) => r.file?.name)
+      });
       setError(null);
 
       // Validate files
@@ -272,7 +277,11 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
 
       // Upload valid files
       if (validFiles.length > 0) {
+        console.log('[AttachmentUpload] Calling uploadFiles with', validFiles.length, 'files');
         await uploadFiles(validFiles);
+        console.log('[AttachmentUpload] uploadFiles completed');
+      } else {
+        console.log('[AttachmentUpload] No valid files to upload');
       }
     },
     [validateFile, uploadFiles, setError, onError]
