@@ -23,6 +23,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import FileUploadZone, { UploadedFile } from '@/components/common/FileUploadZone';
 import TagInput from '@/components/common/TagInput';
+import { useI18n } from '@/lib/i18n/client';
 
 export interface PostFormData {
   id?: string;
@@ -60,6 +61,8 @@ export default function PostFormFields({
   mode = 'create',
   isAdmin = false
 }: PostFormFieldsProps) {
+  const t = useI18n();
+
   if (!post) return null;
 
   const handleChange = (field: keyof PostFormData, value: any) => {
@@ -72,14 +75,14 @@ export default function PostFormFields({
       {/* Title Field */}
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Title *
+          {t('board.titleRequired')}
         </Typography>
         <TextField
           fullWidth
           required
           value={post.title}
           onChange={(e) => handleChange('title', e.target.value)}
-          placeholder="Enter post title..."
+          placeholder={t('board.titlePlaceholder')}
           variant="outlined"
           size="medium"
         />
@@ -90,28 +93,28 @@ export default function PostFormFields({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <LabelIcon fontSize="small" color="action" />
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            Tags
+            {t('board.tags')}
           </Typography>
         </Box>
         <TagInput
           value={post.tags || []}
           onChange={(tags) => handleChange('tags', tags)}
-          placeholder="Type and press Enter to add tags"
+          placeholder={t('board.tagsPlaceholder')}
           maxTags={10}
-          helperText="Add tags to help others find your post"
+          helperText={t('board.tagsHelper')}
         />
       </Box>
 
       {/* Content Field */}
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Content *
+          {t('board.contentRequired')}
         </Typography>
         <Box sx={{ minHeight: 300 }}>
           <RichTextEditor
             value={post.content}
             onChange={(content) => handleChange('content', content)}
-            placeholder="Write your post content here..."
+            placeholder={t('board.contentPlaceholder')}
             minHeight={300}
           />
         </Box>
@@ -123,7 +126,7 @@ export default function PostFormFields({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <AttachFileIcon fontSize="small" color="action" />
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {mode === 'edit' ? 'Add New Attachments' : 'Attachments'}
+              {mode === 'edit' ? t('board.addNewAttachments') : t('board.attachmentsTitle')}
             </Typography>
           </Box>
           <FileUploadZone
@@ -133,13 +136,13 @@ export default function PostFormFields({
             maxSize={boardSettings?.maxAttachmentSize || 10485760}
             helperText={
               mode === 'edit'
-                ? 'Upload new files to add to the post'
-                : `You can upload up to ${boardSettings?.maxAttachments || 5} files`
+                ? t('board.attachmentsEditHelper')
+                : t('board.attachmentsHelper', { count: boardSettings?.maxAttachments || 5 })
             }
           />
           {mode === 'edit' && (
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              Note: Existing attachments will be preserved.
+              {t('board.attachmentsPreserved')}
             </Typography>
           )}
         </Box>
@@ -154,7 +157,7 @@ export default function PostFormFields({
             <PublicIcon fontSize="small" color="action" />
           )}
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            Visibility
+            {t('board.visibility')}
           </Typography>
         </Box>
         <Paper variant="outlined" sx={{ p: 2 }}>
@@ -168,10 +171,10 @@ export default function PostFormFields({
             label={
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  Secret Post
+                  {t('board.secretPost')}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Only you and administrators can view this post
+                  {t('board.secretPostDesc')}
                 </Typography>
               </Box>
             }
@@ -185,7 +188,7 @@ export default function PostFormFields({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <NotificationsIcon fontSize="small" color="action" />
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Popup Notification (Admin Only)
+              {t('board.popupNotification')}
             </Typography>
           </Box>
           <Paper variant="outlined" sx={{ p: 2 }}>
@@ -199,40 +202,69 @@ export default function PostFormFields({
               label={
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Show as Popup Notification
+                    {t('board.showAsPopup')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Display this notice as a popup when users log in
+                    {t('board.showAsPopupDesc')}
                   </Typography>
                 </Box>
               }
             />
 
             {post.showPopup && (
-              <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Divider />
-                <DateTimePicker
-                  label="Display Start Date"
-                  value={post.displayStartDate || null}
-                  onChange={(newValue) => handleChange('displayStartDate', newValue)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      helperText: 'Leave empty to start immediately'
-                    }
+              <Box sx={{ mt: 2 }}>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {t('board.displayPeriod')}
+                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 2,
+                    alignItems: { sm: 'flex-start' }
                   }}
-                />
-                <DateTimePicker
-                  label="Display End Date"
-                  value={post.displayEndDate || null}
-                  onChange={(newValue) => handleChange('displayEndDate', newValue)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      helperText: 'Leave empty for no end date'
-                    }
-                  }}
-                />
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <DateTimePicker
+                      label={t('board.startDate')}
+                      value={post.displayStartDate || null}
+                      onChange={(newValue) => handleChange('displayStartDate', newValue)}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          size: 'small',
+                          helperText: t('board.startDateHelper')
+                        }
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: { xs: 'none', sm: 'flex' },
+                      alignItems: 'center',
+                      pt: 1,
+                      color: 'text.secondary'
+                    }}
+                  >
+                    ~
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <DateTimePicker
+                      label={t('board.endDate')}
+                      value={post.displayEndDate || null}
+                      onChange={(newValue) => handleChange('displayEndDate', newValue)}
+                      minDateTime={post.displayStartDate || undefined}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          size: 'small',
+                          helperText: t('board.endDateHelper')
+                        }
+                      }}
+                    />
+                  </Box>
+                </Box>
               </Box>
             )}
           </Paper>

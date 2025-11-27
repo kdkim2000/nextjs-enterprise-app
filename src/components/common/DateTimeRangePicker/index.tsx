@@ -110,7 +110,7 @@ export default function DateTimeRangePicker({
           <DateTimePicker
             label={startLabel}
             value={toDayjs(startDateTime)}
-            onChange={handleStartChange}
+            onChange={(newValue) => handleStartChange(newValue as Dayjs | null)}
             disabled={disabled}
             format="YYYY-MM-DD HH:mm"
             ampm={false}
@@ -178,7 +178,7 @@ export default function DateTimeRangePicker({
           <DateTimePicker
             label={endLabel}
             value={toDayjs(endDateTime)}
-            onChange={handleEndChange}
+            onChange={(newValue) => handleEndChange(newValue as Dayjs | null)}
             disabled={disabled}
             format="YYYY-MM-DD HH:mm"
             ampm={false}

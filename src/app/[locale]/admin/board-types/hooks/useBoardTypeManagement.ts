@@ -160,24 +160,47 @@ export const useBoardTypeManagement = () => {
     try {
       setDeleteLoading(true);
 
+      const errors: string[] = [];
+      let successCount = 0;
+
       for (const id of selectedForDelete) {
         const response = await apiClient.delete(`/board-type/${id}`);
         if (!response.success) {
-          throw new Error(response.error || `Failed to delete board type ${id}`);
+          // Collect errors but continue with other deletions
+          const boardType = boardTypes.find(bt => bt.id === id);
+          const name = boardType?.code || id;
+          errors.push(`${name}: ${response.error || 'Failed to delete'}`);
+        } else {
+          successCount++;
         }
       }
 
-      setSuccessMessage(`${selectedForDelete.length} board type(s) deleted successfully`);
+      // Close dialog first
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
-      fetchBoardTypes();
+
+      // Show appropriate message
+      if (errors.length > 0) {
+        // Show error message with details
+        setErrorMessage(errors.join('\n'));
+      }
+
+      if (successCount > 0) {
+        setSuccessMessage(`${successCount} board type(s) deleted successfully`);
+        fetchBoardTypes();
+      } else if (errors.length > 0) {
+        // No successful deletions, just refresh to ensure UI is in sync
+        fetchBoardTypes();
+      }
     } catch (error: any) {
       console.error('Error deleting board types:', error);
+      setDeleteConfirmOpen(false);
+      setSelectedForDelete([]);
       setErrorMessage(error.message || 'Failed to delete board types');
     } finally {
       setDeleteLoading(false);
     }
-  }, [selectedForDelete, fetchBoardTypes]);
+  }, [selectedForDelete, boardTypes, fetchBoardTypes]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmOpen(false);

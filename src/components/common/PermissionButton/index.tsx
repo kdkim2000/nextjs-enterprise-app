@@ -6,7 +6,7 @@ import { useProgramPermissions } from '@/contexts/PermissionContext';
 
 export type PermissionAction = 'view' | 'create' | 'update' | 'delete';
 
-export interface PermissionButtonProps extends Omit<ButtonProps, 'disabled'> {
+export interface PermissionButtonProps extends Omit<ButtonProps, 'disabled' | 'action'> {
   programCode: string;
   action: PermissionAction;
   children: ReactNode;

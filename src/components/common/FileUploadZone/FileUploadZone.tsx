@@ -271,8 +271,8 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                 {/* File Info */}
                 <ListItemText
                   primary={
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Typography variant="body2" noWrap>
+                    <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" component="span" noWrap>
                         {uploadedFile.file.name}
                       </Typography>
                       {uploadedFile.uploaded && (
@@ -281,11 +281,11 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                       {uploadedFile.error && (
                         <Chip label="Error" size="small" color="error" />
                       )}
-                    </Stack>
+                    </Box>
                   }
                   secondary={
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
+                    <Box component="span" sx={{ display: 'block' }}>
+                      <Typography variant="caption" color="text.secondary" component="span">
                         {formatFileSize(uploadedFile.file.size)}
                       </Typography>
                       {uploadedFile.progress !== undefined &&
@@ -300,7 +300,8 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                         <Typography
                           variant="caption"
                           color="error"
-                          display="block"
+                          component="span"
+                          sx={{ display: 'block' }}
                         >
                           {uploadedFile.error}
                         </Typography>
