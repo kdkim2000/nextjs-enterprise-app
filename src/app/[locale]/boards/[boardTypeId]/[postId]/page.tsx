@@ -333,8 +333,15 @@ export default function PostDetailPage() {
         isPinned: editingPost.isPinned,
         showPopup: editingPost.showPopup,
         displayStartDate: editingPost.displayStartDate,
-        displayEndDate: editingPost.displayEndDate
+        displayEndDate: editingPost.displayEndDate,
+        // Pass attachmentId to link uploaded files to the post
+        ...(editingPost.attachmentId && { attachmentId: editingPost.attachmentId })
       };
+
+      console.log('[PostDetailPage] Saving post with data:', {
+        ...postData,
+        content: postData.content?.substring(0, 50) + '...'
+      });
 
       const response = await apiClient.put(`/post/${post.id}`, postData);
       if (response.success) {
