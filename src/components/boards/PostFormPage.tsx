@@ -134,6 +134,8 @@ export default function PostFormPage({
   }, [boardTypeId, postId, mode]);
 
   const handleSubmit = async () => {
+    console.log('[PostFormPage] handleSubmit called, attachmentId:', attachmentId);
+
     // Validation
     if (!title.trim()) {
       setError('Please enter a title');
@@ -157,6 +159,11 @@ export default function PostFormPage({
         // Pass attachmentId to link attachment to post
         ...(attachmentId && { attachmentId })
       };
+
+      console.log('[PostFormPage] Submitting postData:', {
+        ...postData,
+        content: postData.content?.substring(0, 100) + '...'
+      });
 
       // Create or update post
       let postResponse;
@@ -379,7 +386,10 @@ export default function PostFormPage({
               referenceId={mode === 'edit' ? postId : undefined}
               locale={currentLocale}
               autoFetch={mode === 'edit'}
-              onUploadComplete={(id) => setAttachmentId(id)}
+              onUploadComplete={(id) => {
+                console.log('[PostFormPage] onUploadComplete received attachmentId:', id);
+                setAttachmentId(id);
+              }}
               helperText={
                 mode === 'edit'
                   ? t('board.attachmentsEditHelper')
