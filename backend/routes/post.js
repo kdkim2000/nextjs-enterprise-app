@@ -54,6 +54,7 @@ function transformPostToAPI(dbPost) {
     attachmentCount: dbPost.attachment_count,
     tags,
     metadata,
+    attachmentId: dbPost.attachment_id,
     createdAt: dbPost.created_at,
     updatedAt: dbPost.updated_at,
     publishedAt: dbPost.published_at,
@@ -207,11 +208,39 @@ router.get('/:id', authenticateToken, checkSecretPostAccess(), async (req, res) 
   try {
     const dbPost = req.post; // Injected by checkSecretPostAccess middleware
 
-    // Get attachments
-    const attachments = await attachmentService.getAttachmentsByPostId(req.params.id);
-
     const post = transformPostToAPI(dbPost);
-    post.attachments = attachments;
+
+    // Get attachments - prefer new attachment system if attachment_id exists
+    if (dbPost.attachment_id) {
+      try {
+        const attachment = await attachmentService.getAttachmentById(dbPost.attachment_id);
+        if (attachment) {
+          post.attachment = {
+            id: attachment.id,
+            attachmentTypeId: attachment.attachment_type_id,
+            fileCount: attachment.file_count,
+            totalSize: attachment.total_size,
+            files: attachment.files ? attachment.files.map(f => ({
+              id: f.id,
+              originalFilename: f.original_filename,
+              storedFilename: f.stored_filename,
+              fileExtension: f.file_extension,
+              mimeType: f.mime_type,
+              fileSize: f.file_size,
+              isImage: f.is_image,
+              downloadCount: f.download_count,
+              createdAt: f.created_at
+            })) : []
+          };
+        }
+      } catch (attachError) {
+        console.error('Error fetching attachment:', attachError);
+      }
+    } else {
+      // Fallback to legacy attachment system
+      const attachments = await attachmentService.getAttachmentsByPostId(req.params.id);
+      post.attachments = attachments;
+    }
 
     res.json({ post });
   } catch (error) {
@@ -229,7 +258,7 @@ router.post('/', authenticateToken, async (req, res) => {
       boardTypeId, title, content,
       postType, status, isSecret, isPinned, pinnedUntil,
       showPopup, displayStartDate, displayEndDate,
-      tags, metadata
+      tags, metadata, attachmentId
     } = req.body;
 
     // Validate required fields
@@ -283,10 +312,23 @@ router.post('/', authenticateToken, async (req, res) => {
       displayEndDate: (req.user.role === 'admin' && displayEndDate) || null,
       isApproved: true,
       tags,
-      metadata
+      metadata,
+      attachmentId: attachmentId || null
     };
 
     const dbPost = await postService.createPost(postData);
+
+    // Update attachment reference if attachmentId provided
+    if (attachmentId) {
+      try {
+        await attachmentService.updateAttachmentReference(attachmentId, 'post', dbPost.id);
+        console.log('[POST /api/post] Updated attachment reference:', attachmentId, 'to post:', dbPost.id);
+      } catch (attachError) {
+        console.error('[POST /api/post] Failed to update attachment reference:', attachError);
+        // Don't fail the request if attachment update fails
+      }
+    }
+
     const newPost = transformPostToAPI(dbPost);
 
     res.status(201).json({ post: newPost });
@@ -305,7 +347,7 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
       title, content, postType, status,
       isSecret, isPinned, pinnedUntil,
       showPopup, displayStartDate, displayEndDate,
-      tags, metadata
+      tags, metadata, attachmentId
     } = req.body;
 
     // Debug: Log content before updating
@@ -322,6 +364,7 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
     if (isSecret !== undefined) updates.isSecret = isSecret;
     if (tags !== undefined) updates.tags = tags;
     if (metadata !== undefined) updates.metadata = metadata;
+    if (attachmentId !== undefined) updates.attachmentId = attachmentId;
 
     // Only admin can pin posts and manage popup notifications
     if (req.user.role === 'admin') {
@@ -333,6 +376,17 @@ router.put('/:id', authenticateToken, checkPostEditPermission(), async (req, res
     }
 
     const dbPost = await postService.updatePost(req.params.id, updates);
+
+    // Update attachment reference if attachmentId provided
+    if (attachmentId) {
+      try {
+        await attachmentService.updateAttachmentReference(attachmentId, 'post', req.params.id);
+        console.log('[PUT /api/post/:id] Updated attachment reference:', attachmentId, 'to post:', req.params.id);
+      } catch (attachError) {
+        console.error('[PUT /api/post/:id] Failed to update attachment reference:', attachError);
+      }
+    }
+
     const updatedPost = transformPostToAPI(dbPost);
 
     res.json({ post: updatedPost });

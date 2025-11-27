@@ -7,11 +7,6 @@ import ActionsCell from '@/components/common/ActionsCell';
 import { User } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-export const STATUS_OPTIONS = [
-  { value: 'active', labelEn: 'Active', labelKo: '활성', labelZh: '激活', labelVi: 'Hoạt động' },
-  { value: 'inactive', labelEn: 'Inactive', labelKo: '비활성', labelZh: '未激活', labelVi: 'Không hoạt động' }
-];
-
 export const createColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any,
@@ -168,21 +163,18 @@ export const createColumns = (
       field: 'status',
       headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       width: 100,
-      sortable: true,
       type: 'singleSelect',
       valueOptions: ['active', 'inactive'],
       renderCell: (params) => {
-        const status = params.value as string;
-        const color = status === 'active' ? 'success' : 'default';
-        const label = STATUS_OPTIONS.find(opt => opt.value === status);
-        const labelText = label
-          ? getLocalizedValue({ en: label.labelEn, ko: label.labelKo, zh: label.labelZh, vi: label.labelVi }, locale)
-          : status;
+        const isActive = params.value === 'active';
         return (
           <Chip
-            label={labelText}
-            color={color}
+            label={isActive
+              ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
+              : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
+            }
             size="small"
+            color={isActive ? 'success' : 'default'}
           />
         );
       }

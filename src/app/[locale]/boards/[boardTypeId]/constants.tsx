@@ -3,7 +3,6 @@
 import { GridColDef } from '@mui/x-data-grid';
 import { Box, Chip, Typography } from '@mui/material';
 import { PushPin, Lock, Comment, AttachFile, Visibility, ThumbUp } from '@mui/icons-material';
-import ActionsCell from '@/components/common/ActionsCell';
 import { Post } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
@@ -12,7 +11,6 @@ export const createColumns = (
   t: any,
   locale: string,
   handleView: (id: string) => void,
-  handleEdit: (id: string) => void,
   canUpdate: boolean = true,
   totalRows: number = 0,
   currentPage: number = 0,
@@ -133,25 +131,6 @@ export const createColumns = (
       }
     }
   ];
-
-  if (canUpdate) {
-    columns.push({
-      field: 'actions',
-      headerName: getLocalizedValue({ en: 'Actions', ko: '작업', zh: '操作', vi: 'Thao tác' }, locale),
-      width: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => {
-        return (
-          <ActionsCell
-            onEdit={() => handleEdit(params.row.id)}
-            editTooltip={getLocalizedValue({ en: 'Edit Post', ko: '게시글 수정', zh: '编辑帖子', vi: 'Chỉnh sửa bài viết' }, locale)}
-            showMore={false}
-          />
-        );
-      }
-    });
-  }
 
   return columns;
 };

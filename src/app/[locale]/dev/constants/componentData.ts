@@ -131,10 +131,22 @@ export const componentCategories = [
         tags: ['Image', 'Profile', 'Upload']
       },
       {
-        title: 'Attachments',
-        description: 'Comprehensive file attachment system with attachment type validation, multi-file upload, drag-drop, and progress tracking',
-        path: '/dev/components/attachments',
-        tags: ['Upload', 'Attachment', 'API', 'Validation']
+        title: 'Tag Input',
+        description: 'Tag input with keyboard support, suggestions, and validation',
+        path: '/dev/components/tag-input',
+        tags: ['Tags', 'Input', 'Chips']
+      },
+      {
+        title: 'File Upload Zone',
+        description: 'Drag-and-drop file upload with preview, progress, and file type validation',
+        path: '/dev/components/file-upload-zone',
+        tags: ['Upload', 'Drag-Drop', 'Preview']
+      },
+      {
+        title: 'Department Tree Select',
+        description: 'Hierarchical department selection with tree navigation and search',
+        path: '/dev/components/department-tree-select',
+        tags: ['Tree', 'Department', 'Hierarchy']
       }
     ]
   },
@@ -281,6 +293,12 @@ export const componentCategories = [
         description: 'Centralized message management with code-based messages, multi-language support, and dynamic parameters',
         path: '/dev/components/message-system',
         tags: ['Message', 'i18n', 'Hook', 'System']
+      },
+      {
+        title: 'Safe HTML Renderer',
+        description: 'XSS-protected HTML rendering with DOMPurify - safely displays user-generated content',
+        path: '/dev/components/safe-html-renderer',
+        tags: ['HTML', 'XSS', 'Security', 'Sanitize']
       }
     ]
   },

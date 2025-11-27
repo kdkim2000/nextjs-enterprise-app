@@ -98,7 +98,7 @@ export default function MonthPicker({
         <DatePicker
           views={['year', 'month']}
           value={toDayjs(value)}
-          onChange={handleChange}
+          onChange={(newValue) => handleChange(newValue as Dayjs | null)}
           disabled={disabled}
           format="YYYY-MM"
           minDate={minDate ? toDayjs(minDate) || undefined : undefined}
