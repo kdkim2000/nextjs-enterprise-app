@@ -96,14 +96,15 @@ interface Comment {
   replies?: Comment[];
 }
 
-interface Attachment {
+interface AttachmentFile {
   id: string;
-  original_name: string;
-  originalName?: string;
-  file_size: number;
-  fileSize?: number;
-  mime_type: string;
-  mimeType?: string;
+  attachmentId: string;
+  originalFilename: string;
+  fileExtension: string;
+  mimeType: string;
+  fileSize: number;
+  isImage: boolean;
+  downloadCount: number;
 }
 
 // Normalize post data from API
@@ -154,7 +155,7 @@ export default function PostDetailPage() {
   // State
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -223,14 +224,23 @@ export default function PostDetailPage() {
     }
   }, [postId, post]);
 
-  // Fetch attachments
+  // Fetch attachments using new reference-based API
   useEffect(() => {
     const fetchAttachments = async () => {
       try {
-        const response = await apiClient.get(`/attachment/post/${postId}`);
+        const response = await apiClient.get(`/attachment/reference/post/${postId}`);
         if (response.success) {
           const attachmentsData = response.data?.attachments || response.data;
-          setAttachments(Array.isArray(attachmentsData) ? attachmentsData : []);
+          // Extract files from all attachments
+          const allFiles: AttachmentFile[] = [];
+          if (Array.isArray(attachmentsData)) {
+            attachmentsData.forEach((attachment: any) => {
+              if (attachment.files && Array.isArray(attachment.files)) {
+                allFiles.push(...attachment.files);
+              }
+            });
+          }
+          setAttachments(allFiles);
         }
       } catch (error) {
         console.error('Error fetching attachments:', error);
@@ -284,9 +294,12 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleDownload = async (attachment: Attachment) => {
+  const handleDownload = async (file: AttachmentFile) => {
     try {
-      window.open(`/api/attachment/${attachment.id}/download`, '_blank');
+      // Use token for authenticated download
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      window.open(`${baseUrl}/attachment/file/${file.id}/download?token=${token}`, '_blank');
     } catch (error) {
       console.error('Error downloading attachment:', error);
     }
@@ -521,12 +534,12 @@ export default function PostDetailPage() {
                 </Typography>
               </Stack>
               <List dense>
-                {attachments.map((attachment) => (
+                {attachments.map((file) => (
                   <ListItem
-                    key={attachment.id}
+                    key={file.id}
                     secondaryAction={
                       <Tooltip title={t('common.download')}>
-                        <IconButton edge="end" onClick={() => handleDownload(attachment)} size="small">
+                        <IconButton edge="end" onClick={() => handleDownload(file)} size="small">
                           <Download />
                         </IconButton>
                       </Tooltip>
@@ -534,10 +547,31 @@ export default function PostDetailPage() {
                     sx={{ py: 0.5 }}
                   >
                     <ListItemText
-                      primary={attachment.original_name || attachment.originalName}
-                      secondary={formatFileSize(attachment.file_size || attachment.fileSize || 0)}
-                      primaryTypographyProps={{ variant: 'body2' }}
-                      secondaryTypographyProps={{ variant: 'caption' }}
+                      primary={
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Typography variant="body2">{file.originalFilename}</Typography>
+                          <Chip
+                            label={file.fileExtension.toUpperCase()}
+                            size="small"
+                            variant="outlined"
+                            sx={{ height: 20, fontSize: '0.7rem' }}
+                          />
+                        </Stack>
+                      }
+                      secondary={
+                        <Stack direction="row" spacing={2}>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatFileSize(file.fileSize)}
+                          </Typography>
+                          {file.downloadCount > 0 && (
+                            <Typography variant="caption" color="text.secondary">
+                              Downloads: {file.downloadCount}
+                            </Typography>
+                          )}
+                        </Stack>
+                      }
+                      primaryTypographyProps={{ component: 'div' }}
+                      secondaryTypographyProps={{ component: 'div' }}
                     />
                   </ListItem>
                 ))}
