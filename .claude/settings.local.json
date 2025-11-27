@@ -135,7 +135,9 @@
       "Bash(then if grep -A5 '} catch {' $file)",
       "Bash(then echo \"Issue in: $file\" fi fi done)",
       "Bash(for file in \"src/app/[locale]/admin/departments/hooks/useDepartmentManagement.ts\" \"src/app/[locale]/admin/help/hooks/useHelpManagement.ts\" \"src/app/[locale]/admin/menus/hooks/useMenuManagement.ts\" \"src/app/[locale]/admin/programs/hooks/useProgramManagement.ts\" \"src/app/[locale]/admin/roles/hooks/useRoleManagement.ts\" \"src/app/[locale]/admin/users/hooks/useUserManagement.ts\")",
-      "Bash(do echo \"=== $file ===\" grep -n \"catch {\" \"$file\")"
+      "Bash(do echo \"=== $file ===\" grep -n \"catch {\" \"$file\")",
+      "Bash(PGPASSWORD='AppUser2024!' psql -h localhost -U app_user -d app_db -c \"SELECT id, code, name_ko, status FROM attachment_types WHERE code = ''BOARD_GENERAL'';\")",
+      "Bash(PGPASSWORD='PostgreSQL2024!' psql:*)"
     ],
     "deny": [],
     "ask": []
