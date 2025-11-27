@@ -6,7 +6,8 @@ import {
   ShowChart,
   Storage,
   ViewModule,
-  ListAlt
+  ListAlt,
+  Dashboard
 } from '@mui/icons-material';
 
 export const componentCategories = [
@@ -55,6 +56,12 @@ export const componentCategories = [
         description: 'Advanced data grid with sorting, filtering, pagination, Excel export/import, inline editing, and permission-based actions',
         path: '/dev/components/data-grid',
         tags: ['Table', 'Grid', 'Excel', 'CRUD', 'Business']
+      },
+      {
+        title: 'SimpleListView',
+        description: 'Lightweight table-based list with pagination, checkbox selection, and toolbar actions - ideal for read-only data display',
+        path: '/dev/components/simple-list-view',
+        tags: ['Table', 'List', 'Pagination', 'Lightweight']
       },
       {
         title: 'Search & Filter Panel',
@@ -153,6 +160,12 @@ export const componentCategories = [
         description: 'Comprehensive file attachment system with attachment type validation, multi-file upload, drag-drop, and progress tracking',
         path: '/dev/components/attachments',
         tags: ['Upload', 'Attachment', 'API', 'Validation']
+      },
+      {
+        title: 'Icon Select',
+        description: 'MUI icon selector dropdown with search functionality and icon preview',
+        path: '/dev/components/icon-select',
+        tags: ['Icon', 'Select', 'MUI', 'Search']
       }
     ]
   },
@@ -226,6 +239,12 @@ export const componentCategories = [
     icon: ViewModule,
     color: '#00897b',
     components: [
+      {
+        title: 'Form Dialog',
+        description: 'Full-screen responsive dialog for complex forms with loading state and validation support',
+        path: '/dev/components/form-dialog',
+        tags: ['Dialog', 'Form', 'Full-Screen', 'Responsive']
+      },
       {
         title: 'Delete Confirm Dialog',
         description: 'Specialized confirmation dialog for delete operations with safety checks',
@@ -305,13 +324,19 @@ export const componentCategories = [
         description: 'XSS-protected HTML rendering with DOMPurify - safely displays user-generated content',
         path: '/dev/components/safe-html-renderer',
         tags: ['HTML', 'XSS', 'Security', 'Sanitize']
+      },
+      {
+        title: 'Notice Popup',
+        description: 'Automatic popup dialog for important notifications with "Don\'t show today" feature and localStorage persistence',
+        path: '/dev/components/notice-popup',
+        tags: ['Notification', 'Popup', 'Dialog', 'Auto']
       }
     ]
   },
   {
     category: 'Layout Components',
     description: 'Page structure and navigation components',
-    icon: ViewModule,
+    icon: Dashboard,
     color: '#f57c00',
     components: [
       {
@@ -319,6 +344,18 @@ export const componentCategories = [
         description: 'Standard page container with consistent padding and spacing',
         path: '/dev/components/page-container',
         tags: ['Layout', 'Container', 'Wrapper']
+      },
+      {
+        title: 'Page State Wrapper',
+        description: 'Handles common page states: loading skeleton, error, permission denied, not found, empty - with retry support',
+        path: '/dev/components/page-state-wrapper',
+        tags: ['Layout', 'State', 'Loading', 'Error']
+      },
+      {
+        title: 'Master Detail Layout',
+        description: 'Resizable split-pane layout with draggable divider for master-detail patterns',
+        path: '/dev/components/master-detail-layout',
+        tags: ['Layout', 'Split', 'Resizable', 'Panel']
       },
       {
         title: 'Empty State',
