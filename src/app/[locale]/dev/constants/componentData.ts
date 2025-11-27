@@ -147,6 +147,12 @@ export const componentCategories = [
         description: 'Hierarchical department selection with tree navigation and search',
         path: '/dev/components/department-tree-select',
         tags: ['Tree', 'Department', 'Hierarchy']
+      },
+      {
+        title: 'Attachments',
+        description: 'Comprehensive file attachment system with attachment type validation, multi-file upload, drag-drop, and progress tracking',
+        path: '/dev/components/attachments',
+        tags: ['Upload', 'Attachment', 'API', 'Validation']
       }
     ]
   },
