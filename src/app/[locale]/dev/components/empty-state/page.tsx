@@ -158,7 +158,7 @@ export default function EmptyStateDemoPage() {
                 mt: 1,
               }}
             >
-              {`import EmptyState from '@/components/common/EmptyState';\nimport { Search, Inbox } from '@mui/icons-material';`}
+              {`import EmptyState from '@/components/common/EmptyState';\nimport { Inbox } from '@mui/icons-material';`}
             </Box>
           </Typography>
 

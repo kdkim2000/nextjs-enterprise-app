@@ -274,15 +274,16 @@ async function getAllRoleProgramMappings(options = {}) {
 }
 
 async function createRoleProgramMapping(data) {
-  const { id, roleId, programId, canView, canCreate, canUpdate, canDelete } = data;
+  const { id, roleId, programId, canView, canCreate, canUpdate, canDelete, createdBy } = data;
+  console.log('[mappingService] createRoleProgramMapping - input data:', data);
   const query = `
-    INSERT INTO role_program_mappings (id, role_id, program_id, can_view, can_create, can_update, can_delete, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-    ON CONFLICT (role_id, program_id) DO UPDATE
-    SET can_view = $4, can_create = $5, can_update = $6, can_delete = $7, updated_at = NOW()
+    INSERT INTO role_program_mappings (id, role_id, program_id, can_view, can_create, can_update, can_delete, created_by, created_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
     RETURNING *
   `;
-  const result = await db.query(query, [id, roleId, programId, canView, canCreate, canUpdate, canDelete]);
+  console.log('[mappingService] Query params:', [id, roleId, programId, canView, canCreate, canUpdate, canDelete, createdBy]);
+  const result = await db.query(query, [id, roleId, programId, canView, canCreate, canUpdate, canDelete, createdBy]);
+  console.log('[mappingService] Insert result:', result.rows[0]);
   return result.rows[0];
 }
 
@@ -302,7 +303,6 @@ async function updateRoleProgramMapping(id, updates) {
   }
 
   if (setClause.length === 0) throw new Error('No valid fields to update');
-  setClause.push(`updated_at = NOW()`);
   params.push(id);
 
   const query = `UPDATE role_program_mappings SET ${setClause.join(', ')} WHERE id = $${paramIndex} RETURNING *`;

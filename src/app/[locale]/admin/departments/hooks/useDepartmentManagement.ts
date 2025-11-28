@@ -63,7 +63,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [allUsers, setAllUsers] = useState<any[]>([]);
 
   // Fetch all users for manager dropdown
@@ -197,7 +197,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       setDialogOpen(false);
       setEditingDepartment(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_DEPARTMENT_SAVE_FAIL');
       console.error('Failed to save department:', err);
     } finally {
@@ -230,7 +230,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_DEPARTMENT_DELETE_FAIL');
       console.error('Failed to delete departments:', err);
     } finally {

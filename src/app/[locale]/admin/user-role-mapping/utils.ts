@@ -3,7 +3,7 @@ import { STATUS_OPTIONS } from './constants';
 import { SearchCriteria, UserRoleMapping } from './types';
 
 export const createFilterFields = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   locale: string
 ): FilterFieldConfig[] => {

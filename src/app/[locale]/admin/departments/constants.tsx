@@ -12,11 +12,11 @@ export const STATUS_OPTIONS = [
 ];
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   locale: string,
   allDepartments: Department[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   allUsers: any[],
   handleEdit: (id: string | number) => void,
   canUpdate: boolean = true

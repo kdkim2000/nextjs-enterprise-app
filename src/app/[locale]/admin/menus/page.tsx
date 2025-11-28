@@ -14,6 +14,7 @@ import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 import { useMenuManagement } from './hooks/useMenuManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -22,7 +23,10 @@ import { Menu } from './types';
 export default function MenuManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
-  const gridPermissions = useDataGridPermissions('PROG-MENU-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use help hook
   const {
@@ -33,7 +37,7 @@ export default function MenuManagementPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-MENU-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // Use custom hook for all business logic
   const {
@@ -136,7 +140,7 @@ export default function MenuManagementPage() {
       onFilterClear={handleAdvancedSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-MENU-MGMT"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

@@ -143,7 +143,7 @@ async function createPost(postData) {
     authorId, authorName, authorDepartment,
     postType, status, isAnonymous, isSecret,
     isPinned, pinnedUntil, showPopup, displayStartDate, displayEndDate,
-    isApproved, tags, metadata
+    isApproved, tags, metadata, attachmentId
   } = postData;
 
   const id = uuidv4();
@@ -154,10 +154,10 @@ async function createPost(postData) {
       author_id, author_name, author_department, is_anonymous,
       post_type, status, is_secret, is_pinned, pinned_until,
       show_popup, display_start_date, display_end_date,
-      is_approved, tags, metadata,
+      is_approved, tags, metadata, attachment_id,
       created_at, updated_at, published_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, NOW(), NOW(), NOW())
     RETURNING *
   `;
 
@@ -169,7 +169,8 @@ async function createPost(postData) {
     showPopup || false, displayStartDate || null, displayEndDate || null,
     isApproved !== undefined ? isApproved : true,
     JSON.stringify(tags || []),
-    JSON.stringify(metadata || {})
+    JSON.stringify(metadata || {}),
+    attachmentId || null
   ];
 
   const result = await db.query(query, params);
@@ -187,7 +188,8 @@ async function updatePost(postId, updates) {
     'title', 'content', 'post_type', 'status',
     'is_secret', 'is_pinned', 'pinned_until',
     'show_popup', 'display_start_date', 'display_end_date',
-    'is_approved', 'approved_by', 'approved_at', 'tags', 'metadata'
+    'is_approved', 'approved_by', 'approved_at', 'tags', 'metadata',
+    'attachment_id'
   ];
 
   const setClause = [];

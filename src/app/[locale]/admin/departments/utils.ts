@@ -2,12 +2,12 @@ import { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import { STATUS_OPTIONS } from './constants';
 import { SearchCriteria, Department } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const createFilterFields = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   allDepartments: Department[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   allUsers: any[],
   currentLocale: string
 ): FilterFieldConfig[] => [

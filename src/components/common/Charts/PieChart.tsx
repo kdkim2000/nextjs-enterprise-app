@@ -8,7 +8,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  TooltipProps
 } from 'recharts';
 import { Box, useTheme, Paper } from '@mui/material';
 

@@ -14,7 +14,6 @@ const authRoutes = require('./routes/auth');
 const menuRoutes = require('./routes/menu');
 const userRoutes = require('./routes/user');
 const userSettingsRoutes = require('./routes/userSettings');
-const fileRoutes = require('./routes/file');
 const logRoutes = require('./routes/log');
 const roleRoutes = require('./routes/role');
 const userRoleMappingRoutes = require('./routes/userRoleMapping');
@@ -34,6 +33,7 @@ const postRoutes = require('./routes/post');
 const commentRoutes = require('./routes/comment');
 const attachmentRoutes = require('./routes/attachment');
 const qnaRoutes = require('./routes/qna');
+const attachmentTypeRoutes = require('./routes/attachmentType');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -97,7 +97,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/user-settings', userSettingsRoutes);
-app.use('/api/file', fileRoutes);
 app.use('/api/log', logRoutes);
 app.use('/api/role', roleRoutes);
 app.use('/api/user-role-mapping', userRoleMappingRoutes);
@@ -116,6 +115,7 @@ app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/attachment', attachmentRoutes);
 app.use('/api/qna', qnaRoutes);
+app.use('/api/attachment-type', attachmentTypeRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);

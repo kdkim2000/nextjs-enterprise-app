@@ -54,6 +54,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { MenuItem } from '@/types/menu';
 import { useMenu } from '@/hooks/useMenu';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
+import { getMenuIcon } from '@/lib/icons/menuIcons';
 
 const DRAWER_WIDTH = 280;
 const DRAWER_WIDTH_COLLAPSED = 72;
@@ -91,7 +92,6 @@ const iconMap: Record<string, React.ReactElement> = {
   TrendingUp: <TrendingUp />,
   Widgets: <GridOn />
 };
-
 // Helper function to get icon by name (case-insensitive)
 const getIcon = (iconName: string): React.ReactElement => {
   if (!iconName) return <Dashboard />;
@@ -195,7 +195,9 @@ export default function Sidebar({ expanded }: SidebarProps) {
     const isExpanded = expandedMenus.has(menu.id);
     const hasChildren = menu.children && menu.children.length > 0;
     const isActive = pathname === `/${locale}${menu.path}`;
-    const icon = getIcon(menu.icon);
+
+    const icon = getMenuIcon(menu.icon);
+
 
     return (
       <React.Fragment key={menu.id}>
@@ -354,7 +356,8 @@ export default function Sidebar({ expanded }: SidebarProps) {
                         color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
                       }}
                     >
-                      {getIcon(menu.icon)}
+                      {getMenuIcon(menu.icon)}
+
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText
@@ -408,7 +411,8 @@ export default function Sidebar({ expanded }: SidebarProps) {
                         color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
                       }}
                     >
-                      {getIcon(menu.icon)}
+                      {getMenuIcon(menu.icon)}
+
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText

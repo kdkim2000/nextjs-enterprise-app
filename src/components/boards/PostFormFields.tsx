@@ -21,9 +21,9 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import RichTextEditor from '@/components/common/RichTextEditor';
-import FileUploadZone, { UploadedFile } from '@/components/common/FileUploadZone';
+import AttachmentUpload from '@/components/common/AttachmentUpload';
 import TagInput from '@/components/common/TagInput';
-import { useI18n } from '@/lib/i18n/client';
+import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 
 export interface PostFormData {
   id?: string;
@@ -35,7 +35,7 @@ export interface PostFormData {
   showPopup?: boolean;
   displayStartDate?: Date | null;
   displayEndDate?: Date | null;
-  files?: UploadedFile[];
+  attachmentId?: string | null;
 }
 
 export interface PostFormFieldsProps {
@@ -62,6 +62,7 @@ export default function PostFormFields({
   isAdmin = false
 }: PostFormFieldsProps) {
   const t = useI18n();
+  const currentLocale = useCurrentLocale();
 
   if (!post) return null;
 
@@ -129,22 +130,23 @@ export default function PostFormFields({
               {mode === 'edit' ? t('board.addNewAttachments') : t('board.attachmentsTitle')}
             </Typography>
           </Box>
-          <FileUploadZone
-            value={post.files || []}
-            onChange={(files) => handleChange('files', files)}
-            maxFiles={boardSettings?.maxAttachments || 5}
-            maxSize={boardSettings?.maxAttachmentSize || 10485760}
+          <AttachmentUpload
+            attachmentTypeCode="BOARD_GENERAL"
+            referenceType={mode === 'edit' ? 'post' : undefined}
+            referenceId={mode === 'edit' ? post.id : undefined}
+            locale={currentLocale}
+            autoFetch={mode === 'edit'}
+            onUploadComplete={(id) => {
+              console.log('[PostFormFields] onUploadComplete received attachmentId:', id);
+              handleChange('attachmentId', id);
+            }}
             helperText={
               mode === 'edit'
                 ? t('board.attachmentsEditHelper')
                 : t('board.attachmentsHelper', { count: boardSettings?.maxAttachments || 5 })
             }
+            compact
           />
-          {mode === 'edit' && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              {t('board.attachmentsPreserved')}
-            </Typography>
-          )}
         </Box>
       )}
 

@@ -1,7 +1,7 @@
 import { BoardTypeSearchCriteria } from './types';
 import { BOARD_TYPE_OPTIONS, CATEGORY_OPTIONS } from './constants';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const createFilterFields = (t: any, currentLocale: string) => [
   {
     name: 'code',

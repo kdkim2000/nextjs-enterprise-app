@@ -27,7 +27,7 @@ import {
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { apiClient } from '@/lib/api/client';
 import RichTextEditor from '@/components/common/RichTextEditor';
-import FileUploadZone, { UploadedFile } from '@/components/common/FileUploadZone';
+import AttachmentUpload from '@/components/common/AttachmentUpload';
 import TagInput from '@/components/common/TagInput';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 
@@ -84,7 +84,7 @@ export default function PostFormPage({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [attachmentId, setAttachmentId] = useState<string | null>(null);
   const [isSecret, setIsSecret] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -134,6 +134,8 @@ export default function PostFormPage({
   }, [boardTypeId, postId, mode]);
 
   const handleSubmit = async () => {
+    console.log('[PostFormPage] handleSubmit called, attachmentId:', attachmentId);
+
     // Validation
     if (!title.trim()) {
       setError('Please enter a title');
@@ -153,8 +155,15 @@ export default function PostFormPage({
         title: title.trim(),
         content,
         tags,
-        isSecret: isSecret
+        isSecret: isSecret,
+        // Pass attachmentId to link attachment to post
+        ...(attachmentId && { attachmentId })
       };
+
+      console.log('[PostFormPage] Submitting postData:', {
+        ...postData,
+        content: postData.content?.substring(0, 100) + '...'
+      });
 
       // Create or update post
       let postResponse;
@@ -172,25 +181,6 @@ export default function PostFormPage({
           throw new Error(postResponse.error || 'Failed to update post');
         }
         finalPostId = postId!;
-      }
-
-      // Upload attachments if any
-      if (files.length > 0 && boardType?.settings?.allowAttachments) {
-        const formData = new FormData();
-        files.forEach((uploadedFile) => {
-          formData.append('files', uploadedFile.file);
-        });
-        formData.append('post_id', finalPostId);
-
-        const uploadResponse = await apiClient.post('/attachment', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        if (!uploadResponse.success) {
-          console.error('Failed to upload attachments:', uploadResponse.error);
-        }
       }
 
       setSuccess(mode === 'create' ? 'Post created successfully!' : 'Post updated successfully!');
@@ -222,7 +212,7 @@ export default function PostFormPage({
       setTitle('');
       setContent('');
       setTags([]);
-      setFiles([]);
+      setAttachmentId(null);
       setIsSecret(false);
     }
   };
@@ -390,22 +380,23 @@ export default function PostFormPage({
                 {mode === 'edit' ? t('board.addNewAttachments') : t('board.attachmentsTitle')}
               </Typography>
             </Box>
-            <FileUploadZone
-              value={files}
-              onChange={setFiles}
-              maxFiles={boardType.settings?.maxAttachments || 5}
-              maxSize={boardType.settings?.maxAttachmentSize || 10485760}
+            <AttachmentUpload
+              attachmentTypeCode="BOARD_GENERAL"
+              referenceType={mode === 'edit' ? 'post' : undefined}
+              referenceId={mode === 'edit' ? postId : undefined}
+              locale={currentLocale}
+              autoFetch={mode === 'edit'}
+              onUploadComplete={(id) => {
+                console.log('[PostFormPage] onUploadComplete received attachmentId:', id);
+                setAttachmentId(id);
+              }}
               helperText={
                 mode === 'edit'
                   ? t('board.attachmentsEditHelper')
                   : t('board.attachmentsHelper', { count: boardType.settings?.maxAttachments || 5 })
               }
+              compact
             />
-            {mode === 'edit' && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                {t('board.attachmentsPreserved')}
-              </Typography>
-            )}
           </Box>
         )}
 

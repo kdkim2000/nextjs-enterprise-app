@@ -20,6 +20,7 @@ import RouteGuard from '@/components/auth/RouteGuard';
 import { GridColDef } from '@mui/x-data-grid';
 import { api } from '@/lib/axios';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { useProgramId } from '@/hooks/useProgramId';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import type { LogEntry } from '@/types/log';
 
@@ -65,6 +66,9 @@ const loadPageState = () => {
 export default function LogsPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
+
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
 
   // Load saved state on mount
   const savedState = loadPageState();
@@ -406,7 +410,7 @@ export default function LogsPage() {
   ], [locale]);
 
   return (
-    <RouteGuard programCode="PROG-LOGS" requiredPermission="view" fallbackUrl="/dashboard">
+    <RouteGuard programCode={programId || ''} requiredPermission="view" fallbackUrl="/dashboard">
       <PageContainer>
         <PageHeader useMenu showBreadcrumb />
 
