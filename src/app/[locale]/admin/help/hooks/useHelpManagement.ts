@@ -77,7 +77,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
         try {
           const response = await api.get('/help?programId=PROG-HELP-MGMT&language=en');
           setHelpExists(!!response.help);
-        } catch {
+        } catch (error) {
           setHelpExists(false);
         }
       } catch (error) {
@@ -204,7 +204,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
       setDialogOpen(false);
       setEditingHelp(null);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_HELP_SAVE_FAIL');
       console.error('Failed to save help:', err);
     } finally {
@@ -237,7 +237,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_HELP_DELETE_FAIL');
       console.error('Failed to delete helps:', err);
     } finally {

@@ -2,10 +2,8 @@
 
 import React, { useMemo } from 'react';
 import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
@@ -16,13 +14,17 @@ import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { HelpContent } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useProgramId } from '@/hooks/useProgramId';
 
 export default function HelpManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
 
-  // Permission control
-  const gridPermissions = useDataGridPermissions('PROG-HELP-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  // Permission control - use programId from DB
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use custom hook for all business logic
   const {
@@ -122,7 +124,7 @@ export default function HelpManagementPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-HELP-MGMT"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

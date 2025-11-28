@@ -2,10 +2,8 @@
 
 import React, { useMemo, useEffect } from 'react';
 import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
@@ -17,13 +15,17 @@ import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { Department } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 
 export default function DepartmentsPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
 
-  // Permission control
-  const gridPermissions = useDataGridPermissions('PROG-DEPT-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  // Permission control - use programId from DB
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use common help hook
   const {
@@ -34,7 +36,7 @@ export default function DepartmentsPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-DEPT-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // Use custom hook for all business logic
   const {
@@ -147,7 +149,7 @@ export default function DepartmentsPage() {
       onFilterClear={handleQuickSearchClear}
       onFilterClose={handleAdvancedFilterClose}
       // Help
-      programId="PROG-DEPT-MGMT"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

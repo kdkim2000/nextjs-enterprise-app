@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, startTransition } from 'react';
 import {
   Box,
   Paper,
@@ -18,14 +18,13 @@ import {
   Switch,
   Chip
 } from '@mui/material';
-import { Search, HelpOutline, Close, PersonSearch, Clear } from '@mui/icons-material';
+import { HelpOutline, Close, PersonSearch, Clear } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import HelpViewer from '@/components/common/HelpViewer';
 import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
@@ -34,6 +33,7 @@ import RouteGuard from '@/components/auth/RouteGuard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 import { Role } from '@/types/role';
 import { useRoleManagement } from './hooks/useRoleManagement';
 import { createColumns } from './constants';
@@ -42,7 +42,10 @@ import { createFilterFields, calculateActiveFilterCount } from './utils';
 export default function RoleManagementPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
-  const gridPermissions = useDataGridPermissions('PROG-ROLE-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use help hook
   const {
@@ -53,7 +56,7 @@ export default function RoleManagementPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-ROLE-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // User search dialog state
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -121,17 +124,19 @@ export default function RoleManagementPage() {
 
   // Initialize user names when editing role
   useEffect(() => {
-    if (editingRole) {
-      setManagerName(editingRole.managerName || '');
-      setRepresentativeName(editingRole.representativeName || '');
-    } else {
-      setManagerName('');
-      setRepresentativeName('');
-    }
+    startTransition(() => {
+      if (editingRole) {
+        setManagerName(editingRole.managerName || '');
+        setRepresentativeName(editingRole.representativeName || '');
+      } else {
+        setManagerName('');
+        setRepresentativeName('');
+      }
+    });
   }, [editingRole]);
 
   return (
-    <RouteGuard programCode="PROG-ROLE-MGMT" requiredPermission="view" fallbackUrl="/dashboard">
+    <RouteGuard programCode={programId || ''} requiredPermission="view" fallbackUrl="/dashboard">
       <PageContainer>
         {/* Header - Auto mode: fetches menu info based on current path */}
         <PageHeader
@@ -476,7 +481,7 @@ export default function RoleManagementPage() {
       <HelpViewer
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        programId="PROG-ROLE-MGMT"
+        programId={programId || ''}
         language={language as 'en' | 'ko'}
         isAdmin={isAdmin}
       />

@@ -21,6 +21,7 @@ import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useCodeOptions } from '@/hooks/useCodeOptions';
 import { useHelp } from '@/hooks/useHelp';
+import { useProgramId } from '@/hooks/useProgramId';
 import { createColumns } from './constants';
 import {
   createFilterFields,
@@ -37,7 +38,10 @@ export default function CodesPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
-  const gridPermissions = useDataGridPermissions('PROG-CODE-MGMT');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // Use help hook
   const {
@@ -48,7 +52,7 @@ export default function CodesPage() {
     canManageHelp,
     navigateToHelpEdit,
     language
-  } = useHelp({ programId: 'PROG-CODE-MGMT' });
+  } = useHelp({ programId: programId || '' });
 
   // Fetch status options from code management system
   const { codes: statusOptions } = useCodeOptions('COMMON_STATUS', locale);
@@ -405,7 +409,7 @@ export default function CodesPage() {
       errorMessage={errorMessage}
       showQuickSearch={false}
       showAdvancedFilter={false}
-      programId="PROG-CODE-MGMT"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       isAdmin={isAdmin}

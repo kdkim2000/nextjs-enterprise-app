@@ -135,7 +135,7 @@ export const multiLangToFormData = <T extends string>(
  * ```
  */
 export const formDataToMultiLang = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   formData: any,
   fieldPrefix: string
 ): MultiLangField => {
@@ -230,7 +230,7 @@ export const multiLangFieldsToFormData = (
  * ```
  */
 export const formDataToMultiLangFields = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   formData: any
 ): { name: MultiLangField; description: MultiLangField } => {
   return {
@@ -373,7 +373,7 @@ export const searchMultiLangField = (
  * @returns True if value is a valid MultiLangField
  */
 export const isMultiLangField = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   value: any
 ): value is MultiLangField => {
   if (!value || typeof value !== 'object') return false;
@@ -389,7 +389,7 @@ export const isMultiLangField = (
  * @returns True if value is a valid SupportedLanguage
  */
 export const isSupportedLanguage = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   value: any
 ): value is SupportedLanguage => {
   return SUPPORTED_LANGUAGES.includes(value as SupportedLanguage);

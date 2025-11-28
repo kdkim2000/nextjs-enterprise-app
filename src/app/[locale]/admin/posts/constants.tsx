@@ -6,7 +6,7 @@ import { PushPin, Lock, CheckCircle, Visibility, ThumbUp, Comment, AttachFile } 
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   currentLocale: string,
   handleEdit: (row: Post) => void,

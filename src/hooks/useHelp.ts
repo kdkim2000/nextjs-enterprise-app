@@ -107,7 +107,7 @@ export function useHelp({ programId, autoCheck = true }: UseHelpOptions): UseHel
       try {
         const response = await api.get(`/help?programId=${programId}&language=${locale}`);
         setHelpExists(!!response.help);
-      } catch (error) {
+      } catch {
         // If API returns 404 or error, help doesn't exist
         setHelpExists(false);
       }

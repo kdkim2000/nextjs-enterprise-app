@@ -69,3 +69,6 @@ pgdata/
 # claude settings
 .claude/settings.local.json
 migration/.claude/
+
+# Uploaded files
+uploads/

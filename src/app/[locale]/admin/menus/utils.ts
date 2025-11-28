@@ -4,9 +4,9 @@ import { AVAILABLE_ICONS } from './constants';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const createFilterFields = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   allMenus: MenuItemType[],
   locale: string

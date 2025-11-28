@@ -42,7 +42,7 @@ export interface UserFormFieldsProps {
   loginidLabel?: string;
   usernameLabel?: string; // backward compatibility
   emailLabel?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   departments?: any[];
   locale?: string;
 }

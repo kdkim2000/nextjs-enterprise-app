@@ -27,16 +27,28 @@ function transformProgramToAPI(dbProgram) {
         (typeof dbProgram.description === 'string' ? JSON.parse(dbProgram.description) : dbProgram.description)
         : { en: '', ko: '', zh: '', vi: '' });
 
+  // Parse permissions from JSON if stored as string
+  let parsedPermissions = [];
+  if (dbProgram.permissions) {
+    try {
+      parsedPermissions = typeof dbProgram.permissions === 'string'
+        ? JSON.parse(dbProgram.permissions)
+        : dbProgram.permissions;
+    } catch (e) {
+      parsedPermissions = [];
+    }
+  }
+
   return {
     id: dbProgram.id,
     code: dbProgram.code,
     name: transformed.name,
     description,
     category: dbProgram.category,
-    type: 'module', // Default type
-    status: 'active', // Default status
-    permissions: [], // Permissions not stored in programs table
-    config: {}, // Config not stored in programs table
+    type: dbProgram.type || 'module',
+    status: dbProgram.status || 'active',
+    permissions: parsedPermissions,
+    config: {},
     metadata: {
       createdAt: dbProgram.created_at,
       updatedAt: dbProgram.updated_at
@@ -164,8 +176,11 @@ router.post('/', authenticateToken, async (req, res) => {
       metadata
     } = req.body;
 
+    console.log('[POST /program] Request body:', JSON.stringify(req.body, null, 2));
+
     // Validate required fields
     if (!code || !name || !category || !type) {
+      console.log('[POST /program] Missing fields - code:', code, 'name:', name, 'category:', category, 'type:', type);
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -182,13 +197,19 @@ router.post('/', authenticateToken, async (req, res) => {
       nameKo: name.ko || '',
       nameZh: name.zh || '',
       nameVi: name.vi || '',
-      description: JSON.stringify(description || { en: '', ko: '' }),
+      descriptionEn: description?.en || '',
+      descriptionKo: description?.ko || '',
+      descriptionZh: description?.zh || '',
+      descriptionVi: description?.vi || '',
       category,
-      path: null,
-      icon: null
+      type: type || 'module',
+      status: status || 'development',
+      permissions: permissions || []
     };
 
+    console.log('[POST /program] Creating program with data:', JSON.stringify(programData, null, 2));
     const dbProgram = await programService.createProgram(programData);
+    console.log('[POST /program] Created program:', JSON.stringify(dbProgram, null, 2));
     const newProgram = {
       ...transformProgramToAPI(dbProgram),
       type: type || 'module',
@@ -205,7 +226,8 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(201).json({ program: newProgram });
   } catch (error) {
     console.error('Error creating program:', error);
-    res.status(500).json({ error: 'Failed to create program' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to create program', details: error.message });
   }
 });
 
@@ -250,22 +272,19 @@ router.put('/:id', authenticateToken, async (req, res) => {
       if (name.zh !== undefined) updates.nameZh = name.zh;
       if (name.vi !== undefined) updates.nameVi = name.vi;
     }
-    if (description) updates.description = JSON.stringify(description);
+    if (description) {
+      if (description.en !== undefined) updates.descriptionEn = description.en;
+      if (description.ko !== undefined) updates.descriptionKo = description.ko;
+      if (description.zh !== undefined) updates.descriptionZh = description.zh;
+      if (description.vi !== undefined) updates.descriptionVi = description.vi;
+    }
     if (category) updates.category = category;
+    if (type !== undefined) updates.type = type;
+    if (status !== undefined) updates.status = status;
+    if (permissions !== undefined) updates.permissions = permissions;
 
     const dbProgram = await programService.updateProgram(req.params.id, updates);
-    const updatedProgram = {
-      ...transformProgramToAPI(dbProgram),
-      type: type !== undefined ? type : 'module',
-      status: status !== undefined ? status : 'active',
-      permissions: permissions !== undefined ? permissions : [],
-      config: config !== undefined ? config : {},
-      metadata: {
-        ...metadata,
-        createdAt: dbProgram.created_at,
-        updatedAt: dbProgram.updated_at
-      }
-    };
+    const updatedProgram = transformProgramToAPI(dbProgram);
 
     res.json({ program: updatedProgram });
   } catch (error) {

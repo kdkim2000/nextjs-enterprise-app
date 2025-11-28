@@ -5,7 +5,7 @@ import { Chip } from '@mui/material';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export const createColumns = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any,
   currentLocale: string,
   handleEdit: (id: string | number) => void,

@@ -238,30 +238,20 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
         showPopup: (editingPost as any).showPopup,
         displayStartDate: (editingPost as any).displayStartDate,
         displayEndDate: (editingPost as any).displayEndDate,
-        status: 'published'
+        status: 'published',
+        // Pass attachmentId to link uploaded files to the post
+        ...((editingPost as any).attachmentId && { attachmentId: (editingPost as any).attachmentId })
       };
+
+      console.log('[useBoardManagement] Saving post with data:', {
+        ...postData,
+        content: postData.content?.substring(0, 50) + '...'
+      });
 
       if (!editingPost.id) {
         // Create new post
         const response = await apiClient.post('/post', postData);
         if (response.success && response.data) {
-          const newPost = response.data.post || response.data;
-
-          // Upload attachments if any
-          if ((editingPost as any).files && (editingPost as any).files.length > 0) {
-            const formData = new FormData();
-            (editingPost as any).files.forEach((uploadedFile: any) => {
-              formData.append('files', uploadedFile.file);
-            });
-            formData.append('post_id', newPost.id);
-
-            await apiClient.post('/attachment', formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data'
-              }
-            });
-          }
-
           showSuccess('Post created successfully!');
           handleRefresh();
         } else {

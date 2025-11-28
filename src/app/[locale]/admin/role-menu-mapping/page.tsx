@@ -19,6 +19,7 @@ import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { api } from '@/lib/axios';
 import { useMessage } from '@/hooks/useMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
+import { useProgramId } from '@/hooks/useProgramId';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount, applyMappingFilters } from './utils';
 import { Role, Program, RoleProgramMapping, SearchCriteria, PermissionFormData } from './types';
@@ -32,7 +33,10 @@ export default function RoleMenuMappingPage() {
     showSuccessMessage,
     showErrorMessage
   } = useMessage({ locale: currentLocale });
-  const gridPermissions = useDataGridPermissions('PROG-ROLE-MENU-MAP');
+  // Get programId from DB (menus table)
+  const { programId } = useProgramId();
+
+  const gridPermissions = useDataGridPermissions(programId || '');
 
   // State
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -193,7 +197,7 @@ export default function RoleMenuMappingPage() {
 
       void fetchData();
       void fetchMappings();
-    } catch (err: any) {
+    } catch (error) {
       await showErrorMessage('MAPPING_ROLE_ASSIGN_FAIL');
     }
   }, [selectedProgram, fetchData, fetchMappings, showSuccessMessage, showErrorMessage]);
@@ -238,7 +242,7 @@ export default function RoleMenuMappingPage() {
       setEditingPermission(null);
       await fetchData();
       await fetchMappings();
-    } catch (err: any) {
+    } catch (error) {
       await showErrorMessage('MAPPING_PERMISSION_UPDATE_FAIL');
     } finally {
       setSaveLoading(false);
@@ -264,7 +268,7 @@ export default function RoleMenuMappingPage() {
       setSelectedMappingsForDelete([]);
       await fetchData();
       await fetchMappings();
-    } catch (err: any) {
+    } catch (error) {
       await showErrorMessage('MAPPING_DELETE_FAIL');
     } finally {
       setDeleting(false);
@@ -316,7 +320,7 @@ export default function RoleMenuMappingPage() {
       errorMessage={errorMessage}
       showQuickSearch={false}
       showAdvancedFilter={false}
-      programId="PROG-ROLE-MENU-MAP"
+      programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
       language={currentLocale}

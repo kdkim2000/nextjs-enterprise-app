@@ -7,8 +7,8 @@ import { getLocalizedValue } from '@/lib/i18n/multiLang';
 export const createColumns = (
   _t: (key: string) => string,
   locale: string,
-  _handleView: (id: string) => void,
-  _canUpdate: boolean = true,
+  handleView: (id: string) => void,
+  canUpdate: boolean = true,
   totalRows: number = 0,
   currentPage: number = 0,
   pageSize: number = 10

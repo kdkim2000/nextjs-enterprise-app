@@ -136,6 +136,9 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/role-program-mapping
 router.post('/', authenticateToken, async (req, res) => {
   try {
+    console.log('[role-program-mapping POST] Request body:', req.body);
+    console.log('[role-program-mapping POST] User:', req.user?.username, req.user?.role);
+
     if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
@@ -168,8 +171,13 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Program not found' });
     }
 
+    // Generate unique ID for the mapping (keep under 50 chars for VARCHAR(50))
+    const timestamp = Date.now().toString(36); // Base36 for shorter string
+    const mappingId = `RPM-${timestamp}-${Math.random().toString(36).substring(2, 8)}`;
+
     // Create new mapping
     const mappingData = {
+      id: mappingId,
       roleId,
       programId,
       canView: canView !== undefined ? canView : true,
@@ -179,12 +187,15 @@ router.post('/', authenticateToken, async (req, res) => {
       createdBy: req.user.username
     };
 
+    console.log('[role-program-mapping POST] Creating mapping with data:', mappingData);
     const newMapping = await mappingService.createRoleProgramMapping(mappingData);
+    console.log('[role-program-mapping POST] Created mapping:', newMapping);
     const enrichedMapping = await enrichMappingWithDetails(newMapping);
 
     res.status(201).json({ mapping: enrichedMapping });
   } catch (error) {
-    console.error('Create role-program mapping error:', error);
+    console.error('[role-program-mapping POST] Error:', error.message);
+    console.error('[role-program-mapping POST] Stack:', error.stack);
     res.status(500).json({ error: error.message || 'Failed to create role-program mapping' });
   }
 });

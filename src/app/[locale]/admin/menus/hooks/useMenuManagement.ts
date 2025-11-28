@@ -3,6 +3,7 @@ import { api } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
+import { useMenu } from '@/hooks/useMenu';
 import { Menu, MenuFormData, SearchCriteria } from '../types';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import {
@@ -51,6 +52,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     showSuccessMessage,
     showErrorMessage
   } = useMessage({ locale: currentLocale });
+
+  // Get refreshMenus from menu context to update sidebar after changes
+  const { refreshMenus } = useMenu();
 
   // Local states
   const [allMenus, setAllMenus] = useState<MenuItemType[]>([]);
@@ -180,8 +184,10 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       setDialogOpen(false);
       setEditingMenu(null);
       await fetchMenus();
+      // Refresh sidebar menus
+      await refreshMenus();
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_MENU_SAVE_FAIL');
       console.error('Failed to save menu:', err);
     } finally {
@@ -205,6 +211,8 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       // Refresh menus
       await fetchMenus();
+      // Refresh sidebar menus
+      await refreshMenus();
 
       // Show success message
       const count = selectedForDelete.length;
@@ -214,7 +222,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       setDeleteConfirmOpen(false);
       setSelectedForDelete([]);
     } catch (err) {
-      const error = err as { response?: { data?: { error?: string } } };
+      const _error = err as { response?: { data?: { error?: string } } };
       await showErrorMessage('CRUD_MENU_DELETE_FAIL');
       console.error('Failed to delete menus:', err);
     } finally {

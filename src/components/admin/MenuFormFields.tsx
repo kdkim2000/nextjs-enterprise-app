@@ -13,14 +13,14 @@ import {
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { MenuFormData } from '@/app/[locale]/admin/menus/types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
-import CodeSelect from '@/components/common/CodeSelect';
+import IconSelect from '@/components/common/IconSelect';
 
 export interface MenuFormFieldsProps {
   menu: MenuFormData | null;
   onChange: (menu: MenuFormData) => void;
   allMenus: MenuItemType[];
   locale: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   t: any;
 }
 
@@ -95,12 +95,10 @@ export default function MenuFormFields({
       />
 
       {/* Icon */}
-      <CodeSelect
-        codeType="ICON_TYPE"
+      <IconSelect
         value={menu.icon || 'Dashboard'}
         onChange={(value) => handleChange('icon', value)}
         label={t('menuManagement.icon')}
-        locale={locale}
       />
 
       <Divider />

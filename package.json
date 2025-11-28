@@ -9,7 +9,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "migrate:conversations": "node scripts/migrate-conversations.js",
+    "migrate:conversations:force": "node scripts/migrate-conversations.js --force",
+    "migrate:conversations:status": "node scripts/migrate-conversations.js --status",
+    "migrate:conversations:md": "node scripts/migrate-conversations.js --md-only",
+    "migrate:conversations:db": "node scripts/migrate-conversations.js --db-only"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
