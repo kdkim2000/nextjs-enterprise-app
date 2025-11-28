@@ -116,30 +116,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   /**
    * Upload image file to server and return URL
+   * Uses the new attachments system with IMAGE_ONLY type
    */
   const uploadImage = useCallback(async (file: File): Promise<string | null> => {
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('files', file);
+      formData.append('attachmentTypeCode', 'IMAGE_ONLY');
+      formData.append('referenceType', 'editor');
 
-      // Use axios directly - it auto-sets Content-Type with boundary for FormData
-      const response = await axiosInstance.post('/file/upload', formData);
+      // Use new attachment upload API
+      const response = await axiosInstance.post('/attachment/upload', formData);
 
       // Debug: log full response to understand structure
       console.log('[RichTextEditor] Upload response:', JSON.stringify(response.data, null, 2));
 
-      // Response structure: { success, data: { message, file: { url, path, ... } } }
-      if (response.data?.success && response.data?.data?.file) {
-        const fileData = response.data.data.file;
-        if (fileData?.url) {
-          return fileData.url;
-        } else if (fileData?.path) {
-          // Fallback to path if url is not available
-          return fileData.path;
-        }
+      // Response structure: { attachment, uploadedFiles: [{ id, storagePath, storedFilename, ... }], errors }
+      if (response.data?.uploadedFiles && response.data.uploadedFiles.length > 0) {
+        const uploadedFile = response.data.uploadedFiles[0];
+        // Construct URL from storage path and filename
+        const fileUrl = `/api/attachment/file/${uploadedFile.id}/view`;
+        console.log('[RichTextEditor] Image URL:', fileUrl);
+        return fileUrl;
       }
-      console.error('Image upload failed:', response.data?.error || 'Unknown error');
+      console.error('Image upload failed:', response.data?.errors || 'Unknown error');
       return null;
     } catch (error: any) {
       console.error('Error uploading image:', {
