@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Dialog,
   DialogTitle,
@@ -35,22 +36,32 @@ interface NoticePopupProps {
 }
 
 export default function NoticePopup({ onClose }: NoticePopupProps) {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState(0);
   const [dontShowToday, setDontShowToday] = useState(false);
 
+  // Check if current page is login page (should not show notices)
+  const isLoginPage = pathname?.includes('/login');
+
   // Fetch popup notifications when user is authenticated
   useEffect(() => {
+    // Don't show notices on login page
+    if (isLoginPage) {
+      setLoading(false);
+      return;
+    }
+
     // Wait for auth to load
     if (authLoading) {
       return;
     }
 
-    // Only fetch if user is logged in
-    if (!user) {
+    // Only fetch if user is fully authenticated
+    if (!isAuthenticated || !user) {
       setLoading(false);
       return;
     }
@@ -101,7 +112,7 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
     };
 
     fetchNotifications();
-  }, [user, authLoading]);
+  }, [user, isAuthenticated, authLoading, isLoginPage]);
 
   const handleClose = () => {
     if (dontShowToday && notices[selectedTab]) {

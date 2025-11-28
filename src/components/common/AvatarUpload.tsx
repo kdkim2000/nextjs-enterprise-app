@@ -17,7 +17,8 @@ export interface AvatarUploadProps {
   avatarUrl?: string;
   avatarImage?: string; // Base64 encoded image
   name: string;
-  onAvatarChange?: (avatarUrl: string) => void;
+  userId?: string; // User ID for attachment reference
+  onAvatarChange?: (avatarUrl: string, attachmentId?: string) => void;
   onAvatarImageChange?: (base64Image: string) => void; // Callback for base64 image
   onDelete?: () => void; // Callback for delete
   onError?: (error: string) => void;
@@ -35,6 +36,7 @@ export default function AvatarUpload({
   avatarUrl,
   avatarImage,
   name,
+  userId,
   onAvatarChange,
   onAvatarImageChange,
   onDelete,
@@ -85,17 +87,28 @@ export default function AvatarUpload({
           onAvatarImageChange(base64String);
         }
       } else {
-        // Upload to server
+        // Upload to server using new attachments system
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('files', file);
+        formData.append('attachmentTypeCode', 'PROFILE_IMAGE');
+        formData.append('referenceType', 'user');
+        if (userId) {
+          formData.append('referenceId', userId);
+        }
 
-        const response = await api.post('/file/upload', formData, {
+        const response = await api.post('/attachment/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        if (onAvatarChange) {
-          onAvatarChange(response.file.path);
+
+        // Response: { attachment, uploadedFiles: [{ id, storagePath, storedFilename }] }
+        if (response.uploadedFiles && response.uploadedFiles.length > 0) {
+          const uploadedFile = response.uploadedFiles[0];
+          const fileUrl = `/api/attachment/file/${uploadedFile.id}/view`;
+          if (onAvatarChange) {
+            onAvatarChange(fileUrl, response.attachment?.id);
+          }
         }
       }
     } catch (err) {

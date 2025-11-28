@@ -217,7 +217,7 @@ async function getBoardTypeStats(boardTypeId) {
     LEFT JOIN posts p ON bt.id = p.board_type_id
     LEFT JOIN comments c ON p.id = c.post_id
     LEFT JOIN post_likes pl ON p.id = pl.post_id
-    LEFT JOIN attachments a ON p.id = a.post_id
+    LEFT JOIN attachments a ON a.reference_type = 'post' AND a.reference_id = p.id AND a.status = 'active'
     WHERE bt.id = $1
     GROUP BY bt.id, bt.code, bt.name_en, bt.name_ko, bt.total_posts, bt.total_views
   `;

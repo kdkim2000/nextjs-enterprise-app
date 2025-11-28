@@ -181,7 +181,7 @@ export default function BoardListPage() {
             displayStartDate: (editingPost as any).displayStartDate,
             displayEndDate: (editingPost as any).displayEndDate,
             files: (editingPost as any).files
-          } : null}
+          } as any : null}
           onChange={(post) => setEditingPost({
             ...editingPost,
             id: post.id,
@@ -193,7 +193,7 @@ export default function BoardListPage() {
             showPopup: post.showPopup,
             displayStartDate: post.displayStartDate,
             displayEndDate: post.displayEndDate,
-            files: post.files
+            files: (post as any).files
           } as any)}
           mode={editingPost?.id ? 'edit' : 'create'}
           saveLoading={saveLoading}
