@@ -15,6 +15,7 @@ interface UseBoardManagementOptions {
 export const useBoardManagement = (options: UseBoardManagementOptions) => {
   const { storageKey = 'board-list-page-state', boardTypeId, boardType } = options;
   const router = useRouter();
+  const locale = useCurrentLocale();
 
   // Use page state hook
   const {
@@ -47,7 +48,6 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   });
 
   // Use unified message system
-  const locale = useCurrentLocale();
   const {
     successMessage,
     errorMessage,
@@ -58,9 +58,6 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
   // Local states
   const [searching, setSearching] = useState(false);
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTargetIds, setDeleteTargetIds] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -193,101 +190,20 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     fetchPosts(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchPosts, quickSearch, setPaginationModel]);
 
-  // Post CRUD operations
+  // Navigate to write page (instead of opening modal)
   const handleAdd = useCallback(() => {
-    setEditingPost({
-      id: '',
-      title: '',
-      content: '',
-      tags: [],
-      is_pinned: false,
-      is_secret: false,
-      view_count: 0,
-      like_count: 0,
-      comment_count: 0,
-      attachment_count: 0,
-      status: 'published',
-      created_at: new Date().toISOString()
-    });
-    setModalOpen(true);
-  }, []);
+    router.push(`/${locale}/boards/${boardTypeId}/write`);
+  }, [router, locale, boardTypeId]);
 
-  const handleSave = useCallback(async () => {
-    if (!editingPost) return;
+  // Navigate to edit page
+  const handleEdit = useCallback((postId: string) => {
+    router.push(`/${locale}/boards/${boardTypeId}/${postId}/edit`);
+  }, [router, locale, boardTypeId]);
 
-    // Validation
-    if (!editingPost.title.trim()) {
-      showError('Please enter a title');
-      return;
-    }
-    if (!editingPost.content?.trim() || editingPost.content === '<p></p>') {
-      showError('Please enter content');
-      return;
-    }
-
-    try {
-      setSaveLoading(true);
-
-      const postData = {
-        ...(editingPost.id ? {} : { boardTypeId: boardType?.id }),
-        title: editingPost.title.trim(),
-        content: editingPost.content,
-        tags: editingPost.tags || [],
-        isSecret: editingPost.is_secret,
-        isPinned: editingPost.is_pinned,
-        showPopup: (editingPost as any).showPopup,
-        displayStartDate: (editingPost as any).displayStartDate,
-        displayEndDate: (editingPost as any).displayEndDate,
-        status: 'published',
-        // Pass attachmentId to link uploaded files to the post
-        ...((editingPost as any).attachmentId && { attachmentId: (editingPost as any).attachmentId })
-      };
-
-      console.log('[useBoardManagement] Saving post with data:', {
-        ...postData,
-        content: postData.content?.substring(0, 50) + '...'
-      });
-
-      if (!editingPost.id) {
-        // Create new post
-        const response = await apiClient.post('/post', postData);
-        if (response.success && response.data) {
-          showSuccess('Post created successfully!');
-          handleRefresh();
-        } else {
-          throw new Error(response.error || 'Failed to create post');
-        }
-      } else {
-        // Update existing post
-        const response = await apiClient.put(`/post/${editingPost.id}`, postData);
-        if (response.success) {
-          showSuccess('Post updated successfully!');
-          handleRefresh();
-        } else {
-          throw new Error(response.error || 'Failed to update post');
-        }
-      }
-
-      setModalOpen(false);
-      setEditingPost(null);
-    } catch (error: any) {
-      console.error('Failed to save post:', error);
-      showError(error.message || 'Failed to save post');
-    } finally {
-      setSaveLoading(false);
-    }
-  }, [editingPost, boardType, showSuccess, showError, handleRefresh]);
-
-  // Post view handlers - Navigate to detail page instead of opening drawer
+  // Post view handlers - Navigate to detail page
   const handlePostClick = useCallback((postId: string) => {
-    router.push(`/boards/${boardTypeId}/${postId}`);
-  }, [router, boardTypeId]);
-
-  // Close modal
-  const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
-    setEditingPost(null);
-  }, []);
+    router.push(`/${locale}/boards/${boardTypeId}/${postId}`);
+  }, [router, locale, boardTypeId]);
 
   // Delete handler - opens confirmation dialog
   const handleDelete = useCallback((ids: (string | number)[]) => {
@@ -363,11 +279,6 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     setAdvancedFilterOpen,
     successMessage,
     errorMessage,
-    modalOpen,
-    setModalOpen,
-    editingPost,
-    setEditingPost,
-    saveLoading,
     deleteDialogOpen,
     deleteTargetIds,
     setDeleteTargetIds,
@@ -382,11 +293,10 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
     handleAdvancedFilterClose,
     handlePaginationModelChange,
     handleAdd,
-    handleSave,
+    handleEdit,
     handleDelete,
     handleConfirmDelete,
     handleCancelDelete,
-    handlePostClick,
-    handleCloseModal
+    handlePostClick
   };
 };

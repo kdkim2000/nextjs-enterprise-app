@@ -34,6 +34,7 @@ const commentRoutes = require('./routes/comment');
 const attachmentRoutes = require('./routes/attachment');
 const qnaRoutes = require('./routes/qna');
 const attachmentTypeRoutes = require('./routes/attachmentType');
+const conversationRoutes = require('./routes/conversation');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -116,6 +117,9 @@ app.use('/api/comment', commentRoutes);
 app.use('/api/attachment', attachmentRoutes);
 app.use('/api/qna', qnaRoutes);
 app.use('/api/attachment-type', attachmentTypeRoutes);
+
+// Claude Code conversation routes (read-only)
+app.use('/api/conversation', conversationRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);

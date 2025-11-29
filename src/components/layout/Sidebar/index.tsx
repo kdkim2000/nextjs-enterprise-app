@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Drawer,
   List,
@@ -48,7 +48,8 @@ import {
   Info,
   Storage,
   Notifications,
-  Email
+  Email,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { MenuItem } from '@/types/menu';
@@ -121,7 +122,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
   const pathname = usePathname();
   const locale = useCurrentLocale();
   const t = useI18n();
-  const { menus, favoriteMenus, recentMenus, isFavorite, addToFavorites, removeFromFavorites } = useMenu();
+  const { menus, favoriteMenus, isFavorite, addToFavorites, removeFromFavorites, refreshMenus, isLoading } = useMenu();
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -132,24 +133,14 @@ export default function Sidebar({ expanded }: SidebarProps) {
     return menu.name[localeKey] || menu.name.en || '';
   };
 
-  // Optimize: Deduplicate and sort "My Work" menus (recent + favorites)
-  // Using useMemo to prevent unnecessary recalculations on every render
-  const myWorkMenus = useMemo(() => {
-    // Combine recent and favorite menus
-    const combined = [...recentMenus, ...favoriteMenus];
-
-    // Remove duplicates by menu ID (keep the first occurrence which is from recentMenus)
-    const seen = new Set<string>();
-    const deduplicated = combined.filter((menu) => {
-      if (seen.has(menu.id)) {
-        return false;
-      }
-      seen.add(menu.id);
-      return true;
-    });
-
-    return deduplicated;
-  }, [recentMenus, favoriteMenus]);
+  // Helper function to get menu navigation path
+  // Uses boardTypeId for board menus to support dynamic board type IDs
+  const getMenuPath = (menu: MenuItem): string => {
+    if (menu.boardTypeId && menu.path?.startsWith('/boards')) {
+      return `/${locale}/boards/${menu.boardTypeId}`;
+    }
+    return `/${locale}${menu.path}`;
+  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -168,11 +159,11 @@ export default function Sidebar({ expanded }: SidebarProps) {
   };
 
   const handleMenuClick = (menu: MenuItem) => {
-    console.log('[Sidebar] Menu clicked:', menu.code, menu.path);
+    console.log('[Sidebar] Menu clicked:', menu.code, menu.path, 'boardTypeId:', menu.boardTypeId);
     if (menu.children && menu.children.length > 0) {
       handleToggleExpand(menu.id);
     } else {
-      const targetPath = `/${locale}${menu.path}`;
+      const targetPath = getMenuPath(menu);
       console.log('[Sidebar] Navigating to:', targetPath);
       router.push(targetPath);
     }
@@ -284,33 +275,49 @@ export default function Sidebar({ expanded }: SidebarProps) {
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Tabs - only show when expanded */}
+      {/* Tabs and Refresh Button - only show when expanded */}
       {expanded && (
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          variant="fullWidth"
-          sx={{
-            borderBottom: 1,
-            borderColor: 'divider',
-            '& .MuiTab-root': {
-              minHeight: 48,
-              textTransform: 'none',
-              fontWeight: 500,
-              fontSize: '0.875rem'
-            }
-          }}
-        >
-          <Tab label={t('menu.allMenus')} />
-          <Tab
-            label={t('menu.favorites')}
-            disabled={favoriteMenus.length === 0}
-          />
-          <Tab
-            label={t('menu.myWork')}
-            disabled={myWorkMenus.length === 0}
-          />
-        </Tabs>
+        <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            variant="fullWidth"
+            sx={{
+              flex: 1,
+              '& .MuiTab-root': {
+                minHeight: 48,
+                textTransform: 'none',
+                fontWeight: 500,
+                fontSize: '0.875rem'
+              }
+            }}
+          >
+            <Tab label={t('menu.allMenus')} />
+            <Tab
+              label={t('menu.favorites')}
+              disabled={favoriteMenus.length === 0}
+            />
+          </Tabs>
+          <Tooltip title={t('menu.refresh')}>
+            <IconButton
+              size="small"
+              onClick={() => refreshMenus()}
+              disabled={isLoading}
+              sx={{ mr: 1 }}
+            >
+              <RefreshIcon 
+                fontSize="small" 
+                sx={{ 
+                  animation: isLoading ? 'spin 1s linear infinite' : 'none',
+                  '@keyframes spin': {
+                    '0%': { transform: 'rotate(0deg)' },
+                    '100%': { transform: 'rotate(360deg)' }
+                  }
+                }} 
+              />
+            </IconButton>
+          </Tooltip>
+        </Box>
       )}
 
       {/* Tab Content */}
@@ -357,62 +364,6 @@ export default function Sidebar({ expanded }: SidebarProps) {
                       }}
                     >
                       {getMenuIcon(menu.icon)}
-
-                    </ListItemIcon>
-                    {expanded && (
-                      <ListItemText
-                        primary={getMenuName(menu)}
-                        primaryTypographyProps={{ fontSize: '0.9rem' }}
-                      />
-                    )}
-                  </ListItemButton>
-                </ListItem>
-              </Tooltip>
-            ))}
-          </List>
-        ) : expanded && currentTab === 2 ? (
-          // My Work Tab - Recent + Favorites (deduplicated)
-          <List dense>
-            {myWorkMenus.map((menu) => (
-              <Tooltip
-                key={`mywork-${menu.id}`}
-                title={!expanded ? getMenuName(menu) : ''}
-                placement="right"
-              >
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => router.push(`/${locale}${menu.path}`)}
-                    selected={pathname === `/${locale}${menu.path}`}
-                    sx={{
-                      borderRadius: 1.5,
-                      mx: 1,
-                      my: 0.25,
-                      minHeight: 44,
-                      justifyContent: expanded ? 'initial' : 'center',
-                      '&.Mui-selected': {
-                        backgroundColor: 'primary.main',
-                        color: 'primary.contrastText',
-                        '&:hover': {
-                          backgroundColor: 'primary.dark'
-                        },
-                        '& .MuiListItemIcon-root': {
-                          color: 'primary.contrastText'
-                        }
-                      },
-                      '&:hover': {
-                        backgroundColor: 'action.hover'
-                      }
-                    }}
-                  >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 40,
-                        justifyContent: 'center',
-                        color: pathname === `/${locale}${menu.path}` ? 'inherit' : 'text.secondary'
-                      }}
-                    >
-                      {getMenuIcon(menu.icon)}
-
                     </ListItemIcon>
                     {expanded && (
                       <ListItemText

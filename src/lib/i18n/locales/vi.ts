@@ -77,6 +77,7 @@ export default {
     addToFavorites: 'Thêm vào yêu thích',
     removeFromFavorites: 'Xóa khỏi yêu thích',
     allMenus: 'Tất cả menu',
+    refresh: 'Làm mới',
     myWork: 'Công việc của tôi'
   },
   menuManagement: {
@@ -305,6 +306,8 @@ export default {
     visibility: 'Hiển thị',
     secretPost: 'Bài viết bí mật',
     secretPostDesc: 'Chỉ bạn và quản trị viên có thể xem bài viết này',
+    pinnedPost: 'Thông báo (Ghim)',
+    pinnedPostDesc: 'Ghim bài viết này lên đầu danh sách',
     popupNotification: 'Thông báo popup (Chỉ Admin)',
     showAsPopup: 'Hiển thị dưới dạng popup',
     showAsPopupDesc: 'Hiển thị thông báo này dưới dạng popup khi người dùng đăng nhập',

@@ -13,12 +13,15 @@ interface AuthenticatedLayoutProps {
   children: React.ReactNode;
   requireRole?: 'admin' | 'manager' | 'user';
   showAutoLogoutWarning?: boolean;
+  /** When true, removes padding and scroll from content wrapper - children manage their own layout */
+  fullBleed?: boolean;
 }
 
 export default function AuthenticatedLayout({
   children,
   requireRole,
-  showAutoLogoutWarning = false
+  showAutoLogoutWarning = false,
+  fullBleed = false
 }: AuthenticatedLayoutProps) {
   const router = useRouter();
   const locale = useCurrentLocale();
@@ -67,30 +70,39 @@ export default function AuthenticatedLayout({
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <DashboardHeader onMenuClick={() => setSidebarExpanded(!sidebarExpanded)} />
 
-      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Sidebar expanded={sidebarExpanded} />
 
         <Box
           component="main"
           sx={{
             flex: 1,
+            minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
             minWidth: 0
           }}
         >
-          <Box
-            sx={{
-              flex: 1,
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              px: 2,
-              py: 2
-            }}
-          >
-            {children}
-          </Box>
+          {fullBleed ? (
+            // Full bleed mode: children manage their own scroll and padding
+            <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {children}
+            </Box>
+          ) : (
+            // Default mode: wrapper provides scroll and padding
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                px: 2,
+                py: 2
+              }}
+            >
+              {children}
+            </Box>
+          )}
         </Box>
       </Box>
 

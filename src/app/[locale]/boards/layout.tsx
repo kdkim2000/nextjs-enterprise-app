@@ -8,7 +8,7 @@ export default function BoardsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthenticatedLayout>
+    <AuthenticatedLayout fullBleed>
       {children}
     </AuthenticatedLayout>
   );

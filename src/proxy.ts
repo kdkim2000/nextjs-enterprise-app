@@ -2,9 +2,9 @@ import { createI18nMiddleware } from 'next-international/middleware';
 import { NextRequest } from 'next/server';
 
 const I18nMiddleware = createI18nMiddleware({
-  locales: ['en', 'ko'],
+  locales: ['en', 'ko', 'zh', 'vi'],
   defaultLocale: 'en',
-  urlMappingStrategy: 'rewrite'
+  urlMappingStrategy: 'rewriteDefault'
 });
 
 export function proxy(request: NextRequest) {

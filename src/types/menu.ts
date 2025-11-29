@@ -13,6 +13,7 @@ export interface MenuItem {
   parentId: string | null;
   level: number;
   programId: string | null;
+  boardTypeId?: string | null;  // For board menus - links to board_types table
   description: {
     en: string;
     ko: string;
