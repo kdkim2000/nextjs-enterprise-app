@@ -10,7 +10,9 @@ import {
   Skeleton,
   Select,
   MenuItem,
-  FormControl
+  FormControl,
+  SxProps,
+  Theme
 } from '@mui/material';
 import { SentimentDissatisfied } from '@mui/icons-material';
 
@@ -245,12 +247,14 @@ export function CardWrapper({
   children,
   onClick,
   selected = false,
-  hoverEffect = true
+  hoverEffect = true,
+  sx
 }: {
   children: ReactNode;
   onClick?: () => void;
   selected?: boolean;
   hoverEffect?: boolean;
+  sx?: SxProps<Theme>;
 }) {
   return (
     <Paper
@@ -272,7 +276,8 @@ export function CardWrapper({
               transform: 'translateY(-2px)',
               boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
             }
-          })
+          }),
+        ...(sx as object)
       }}
     >
       {children}

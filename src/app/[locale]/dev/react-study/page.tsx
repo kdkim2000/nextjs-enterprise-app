@@ -4,218 +4,396 @@ import React from 'react';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
-  Grid,
-  Button,
   Chip,
-  Stack,
-  Paper,
-  Divider
+  Avatar,
+  LinearProgress
 } from '@mui/material';
 import {
   MenuBook,
   Code,
   Psychology,
-  Timeline,
   Rocket,
-  Group
+  AccessTime,
+  PlayArrow,
+  Lock,
+  WorkspacePremium
 } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
+import { useCurrentLocale } from '@/lib/i18n/client';
 import PageContainer from '@/components/common/PageContainer';
 import PageHeader from '@/components/common/PageHeader';
+import CardGrid, { CardWrapper } from '@/components/common/CardGrid';
 
-export default function ReactStudyPage() {
+// 코스 데이터 임포트
+import { coursesMeta, courseLevelConfig, CourseMeta } from './data/courses';
+import { chaptersMeta as beginnerChapters } from './data/beginner';
+import { chaptersMeta as intermediateChapters } from './data/intermediate';
+import { chaptersMeta as advancedChapters } from './data/advanced';
+
+// 아이콘 매핑
+const iconMap: Record<string, React.ReactNode> = {
+  Code: <Code sx={{ fontSize: 22 }} />,
+  Psychology: <Psychology sx={{ fontSize: 22 }} />,
+  Rocket: <Rocket sx={{ fontSize: 22 }} />,
+  WorkspacePremium: <WorkspacePremium sx={{ fontSize: 22 }} />
+};
+
+// 코스별 챕터 수 매핑
+const courseChapterCounts: Record<string, number> = {
+  beginner: beginnerChapters.length,
+  intermediate: intermediateChapters.length,
+  advanced: advancedChapters.length
+};
+
+// Course Card Component
+function CourseCard({
+  course,
+  onClick
+}: {
+  course: CourseMeta;
+  onClick: () => void;
+}) {
+  const levelConfig = courseLevelConfig[course.level];
+  const chapterCount = courseChapterCounts[course.id] || 0;
+  const isAvailable = chapterCount > 0;
+  const progress = course.status === 'published' ? 100 : course.status === 'ready' ? 50 : 10;
+
   return (
-    <PageContainer sx={{ height: 'auto', minHeight: '100vh', overflow: 'auto' }}>
-      <PageHeader useMenu showBreadcrumb />
-
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom fontWeight={600}>
-          React 연구회
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          React 학습을 위한 체계적인 교재와 실습 자료를 제공합니다.
-        </Typography>
+    <CardWrapper
+      onClick={isAvailable ? onClick : undefined}
+      sx={{
+        opacity: isAvailable ? 1 : 0.6,
+        cursor: isAvailable ? 'pointer' : 'default',
+        '&:hover': isAvailable ? {
+          borderColor: course.color,
+          transform: 'translateY(-2px)',
+          boxShadow: `0 8px 24px ${course.color}20`
+        } : {}
+      }}
+    >
+      {/* Header - Icon & Level Badge */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Avatar
+          sx={{
+            width: 40,
+            height: 40,
+            bgcolor: course.color,
+            color: 'white'
+          }}
+        >
+          {iconMap[course.icon]}
+        </Avatar>
+        <Chip
+          size="small"
+          label={levelConfig.labelKo}
+          sx={{
+            height: 22,
+            bgcolor: `${course.color}15`,
+            color: course.color,
+            fontWeight: 600,
+            fontSize: '0.7rem'
+          }}
+        />
       </Box>
 
-      {/* Welcome Section */}
-      <Paper
+      {/* Title */}
+      <Typography
+        variant="subtitle1"
+        fontWeight={600}
         sx={{
-          p: 4,
-          mb: 4,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
+          mb: 1,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: 1,
+          WebkitBoxOrient: 'vertical',
+          color: isAvailable ? 'grey.800' : 'grey.500'
         }}
       >
-        <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-          <Group sx={{ fontSize: 48 }} />
-          <Box>
-            <Typography variant="h5" fontWeight={600} gutterBottom>
-              React 연구회에 오신 것을 환영합니다
+        {course.titleKo}
+      </Typography>
+
+      {/* Description */}
+      <Typography
+        variant="body2"
+        sx={{
+          mb: 2,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          lineHeight: 1.5,
+          minHeight: 42,
+          color: 'grey.500',
+          fontSize: '0.8rem'
+        }}
+      >
+        {course.descriptionKo}
+      </Typography>
+
+      {/* Meta Info */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'grey.500' }}>
+          <MenuBook sx={{ fontSize: 14 }} />
+          <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+            {chapterCount}개 챕터
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'grey.500' }}>
+          <AccessTime sx={{ fontSize: 14 }} />
+          <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+            약 {course.estimatedHours}시간
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Progress */}
+      {isAvailable && (
+        <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+            <Typography variant="caption" sx={{ color: 'grey.500', fontSize: '0.7rem' }}>
+              {course.status === 'draft' ? '컨텐츠 작성 중' : course.status === 'ready' ? '준비 완료' : '공개됨'}
             </Typography>
-            <Typography variant="body1">
-              함께 배우고 성장하는 React 학습 커뮤니티
+            <Typography variant="caption" sx={{ color: course.color, fontWeight: 600, fontSize: '0.7rem' }}>
+              {progress}%
             </Typography>
           </Box>
-        </Stack>
-      </Paper>
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{
+              height: 4,
+              borderRadius: 2,
+              bgcolor: 'grey.200',
+              '& .MuiLinearProgress-bar': {
+                bgcolor: course.color,
+                borderRadius: 2
+              }
+            }}
+          />
+        </Box>
+      )}
 
-      {/* Study Curriculum */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h5" gutterBottom fontWeight={600}>
-            학습 커리큘럼
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
+      {/* Footer - Action Button */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          pt: 1.5,
+          borderTop: '1px solid',
+          borderColor: 'grey.100'
+        }}
+      >
+        {isAvailable ? (
+          <Chip
+            size="small"
+            icon={<PlayArrow sx={{ fontSize: 14 }} />}
+            label="시작하기"
+            sx={{
+              height: 26,
+              bgcolor: course.color,
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '0.75rem',
+              '& .MuiChip-icon': { color: 'white' },
+              '&:hover': { filter: 'brightness(0.9)' }
+            }}
+          />
+        ) : (
+          <Chip
+            size="small"
+            icon={<Lock sx={{ fontSize: 12 }} />}
+            label="준비 중"
+            sx={{
+              height: 26,
+              bgcolor: 'grey.100',
+              color: 'grey.500',
+              fontWeight: 500,
+              fontSize: '0.75rem',
+              '& .MuiChip-icon': { color: 'grey.400' }
+            }}
+          />
+        )}
+      </Box>
+    </CardWrapper>
+  );
+}
 
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6} lg={4}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                    <Code color="primary" />
-                    <Typography variant="h6">기초 과정</Typography>
-                    <Chip label="준비 중" size="small" color="warning" />
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    React의 기본 개념과 JSX, 컴포넌트, Props에 대해 학습합니다.
-                  </Typography>
-                  <Button variant="outlined" size="small" disabled>
-                    시작하기
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+export default function ReactStudyPage() {
+  const locale = useCurrentLocale();
+  const router = useRouter();
 
-            <Grid item xs={12} md={6} lg={4}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                    <Psychology color="primary" />
-                    <Typography variant="h6">중급 과정</Typography>
-                    <Chip label="준비 중" size="small" color="warning" />
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    Hooks, State 관리, 라이프사이클에 대해 심화 학습합니다.
-                  </Typography>
-                  <Button variant="outlined" size="small" disabled>
-                    시작하기
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+  const handleCourseClick = (courseId: string) => {
+    router.push(`/${locale}/dev/react-study/${courseId}`);
+  };
 
-            <Grid item xs={12} md={6} lg={4}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                    <Rocket color="primary" />
-                    <Typography variant="h6">고급 과정</Typography>
-                    <Chip label="준비 중" size="small" color="warning" />
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    성능 최적화, 고급 패턴, 실전 프로젝트를 진행합니다.
-                  </Typography>
-                  <Button variant="outlined" size="small" disabled>
-                    시작하기
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Fixed Header Area */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          zIndex: 10
+        }}
+      >
+        <PageContainer sx={{ pb: 0, pt: 1 }}>
+          <PageHeader useMenu showBreadcrumb />
+        </PageContainer>
+      </Box>
 
-      {/* Learning Resources */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h5" gutterBottom fontWeight={600}>
-            학습 자료
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
+      {/* Scrollable Content Area */}
+      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', bgcolor: 'grey.50' }}>
+        <PageContainer sx={{ py: 3 }}>
+          {/* Section Title */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'grey.700' }}>
+              학습 커리큘럼
+            </Typography>
+            <Chip
+              size="small"
+              label={`${coursesMeta.length}개 코스`}
+              sx={{
+                height: 20,
+                bgcolor: 'grey.100',
+                color: 'grey.600',
+                fontWeight: 500,
+                fontSize: '0.7rem'
+              }}
+            />
+          </Box>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Paper variant="outlined" sx={{ p: 2 }}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <MenuBook color="primary" sx={{ fontSize: 40 }} />
-                  <Box>
-                    <Typography variant="h6">공식 문서</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      React 공식 문서와 튜토리얼
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-            </Grid>
+          {/* Courses Grid */}
+          <CardGrid
+            items={coursesMeta}
+            loading={false}
+            columns={{ xs: 12, sm: 6, md: 4 }}
+            renderCard={(course) => (
+              <CourseCard
+                course={course}
+                onClick={() => handleCourseClick(course.id)}
+              />
+            )}
+            emptyIcon={<MenuBook sx={{ fontSize: 64 }} />}
+            emptyTitle="아직 준비된 코스가 없습니다"
+            emptyDescription="곧 컨텐츠가 추가될 예정입니다."
+          />
 
-            <Grid item xs={12} sm={6}>
-              <Paper variant="outlined" sx={{ p: 2 }}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Timeline color="primary" sx={{ fontSize: 40 }} />
-                  <Box>
-                    <Typography variant="h6">학습 로드맵</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      단계별 React 학습 가이드
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Study Guidelines */}
-      <Card>
-        <CardContent>
-          <Typography variant="h5" gutterBottom fontWeight={600}>
-            학습 가이드
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                학습 목표
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                • React의 핵심 개념과 원리를 이해하고 실무에 적용할 수 있다
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                • 컴포넌트 기반 개발 방법론을 습득한다
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                • 현대적인 React 개발 도구와 생태계를 활용할 수 있다
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                학습 방법
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                • 매주 정해진 교재를 학습하고 실습 예제를 완성합니다
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                • 학습한 내용을 바탕으로 미니 프로젝트를 진행합니다
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                • 함께 토론하고 서로의 코드를 리뷰합니다
+          {/* Learning Guide Section */}
+          <Box sx={{ mt: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ color: 'grey.700' }}>
+                학습 안내
               </Typography>
             </Box>
 
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                참여 방법
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                자세한 내용은 개발팀에 문의해주세요.
-              </Typography>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+                gap: 2
+              }}
+            >
+              {/* Learning Goals */}
+              <Box
+                sx={{
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'grey.200',
+                  bgcolor: 'white'
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.main' }}>
+                    <Rocket sx={{ fontSize: 16 }} />
+                  </Avatar>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ color: 'grey.800' }}>
+                    학습 목표
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • React 핵심 개념과 원리 이해
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 컴포넌트 기반 개발 방법론 습득
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 현대적 React 생태계 활용
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Learning Method */}
+              <Box
+                sx={{
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'grey.200',
+                  bgcolor: 'white'
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <Avatar sx={{ width: 28, height: 28, bgcolor: 'success.main' }}>
+                    <MenuBook sx={{ fontSize: 16 }} />
+                  </Avatar>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ color: 'grey.800' }}>
+                    학습 방법
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 매주 정해진 교재 학습
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 실습 예제 완성 및 미니 프로젝트
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 토론 및 코드 리뷰
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Resources */}
+              <Box
+                sx={{
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'grey.200',
+                  bgcolor: 'white'
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <Avatar sx={{ width: 28, height: 28, bgcolor: 'warning.main' }}>
+                    <Code sx={{ fontSize: 16 }} />
+                  </Avatar>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ color: 'grey.800' }}>
+                    학습 자료
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • React 공식 문서 참조
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 프로젝트 내 실제 코드 예제
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'grey.600', fontSize: '0.8rem' }}>
+                    • 단계별 학습 로드맵
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
-          </Stack>
-        </CardContent>
-      </Card>
-    </PageContainer>
+          </Box>
+        </PageContainer>
+      </Box>
+    </Box>
   );
 }
