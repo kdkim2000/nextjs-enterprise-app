@@ -144,7 +144,18 @@
       "Bash(git checkout:*)",
       "Bash(npm run migrate:conversations:*)",
       "Bash(PGPASSWORD='AppUser2024!' psql -h localhost -p 5432 -U app_user -d nextjs_enterprise_app -f \"migration/insert_conversations_2025-11-29T09-19-12.sql\")",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(npx next lint:*)",
+      "Bash(\"src/app/[locale]/dev/react-study/page.tsx\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/[courseId]/page.tsx\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/[courseId]/[chapterId]/page.tsx\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/data/advanced/\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/data/courses.ts\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/data/intermediate/chapters/08-nextjs-app-router.ts\" )",
+      "Bash(\"src/components/common/CardGrid/index.tsx\")",
+      "Bash(\"src/app/[locale]/dev/react-study/data/types.ts\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/data/beginner/\" )",
+      "Bash(\"src/app/[locale]/dev/react-study/data/intermediate/\")"
     ],
     "deny": [],
     "ask": []
