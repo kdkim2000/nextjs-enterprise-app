@@ -77,6 +77,7 @@ export default {
     addToFavorites: 'Add to Favorites',
     removeFromFavorites: 'Remove from Favorites',
     allMenus: 'All Menus',
+    refresh: 'Refresh',
     myWork: 'My Work'
   },
   menuManagement: {
@@ -305,6 +306,8 @@ export default {
     visibility: 'Visibility',
     secretPost: 'Secret Post',
     secretPostDesc: 'Only you and administrators can view this post',
+    pinnedPost: 'Notice (Pinned)',
+    pinnedPostDesc: 'Pin this post to the top of the list',
     popupNotification: 'Popup Notification (Admin Only)',
     showAsPopup: 'Show as Popup Notification',
     showAsPopupDesc: 'Display this notice as a popup when users log in',

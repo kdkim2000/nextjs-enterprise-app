@@ -108,26 +108,8 @@ router.get('/all', authenticateToken, async (req, res) => {
 });
 
 /**
- * GET /api/board-type/:id - Get a specific board type by ID
- */
-router.get('/:id', authenticateToken, async (req, res) => {
-  try {
-    const dbBoardType = await boardTypeService.getBoardTypeById(req.params.id);
-
-    if (!dbBoardType) {
-      return res.status(404).json({ success: false, error: 'Board type not found' });
-    }
-
-    const boardType = transformBoardTypeToAPI(dbBoardType);
-    res.json({ success: true, data: boardType });
-  } catch (error) {
-    console.error('Error fetching board type:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch board type' });
-  }
-});
-
-/**
  * GET /api/board-type/code/:code - Get a specific board type by code
+ * NOTE: Must be defined BEFORE /:id route to avoid being matched as an ID
  */
 router.get('/code/:code', authenticateToken, async (req, res) => {
   try {
@@ -147,6 +129,7 @@ router.get('/code/:code', authenticateToken, async (req, res) => {
 
 /**
  * GET /api/board-type/:id/stats - Get board type statistics
+ * NOTE: Must be defined BEFORE /:id route to avoid being matched as an ID
  */
 router.get('/:id/stats', authenticateToken, async (req, res) => {
   try {
@@ -160,6 +143,26 @@ router.get('/:id/stats', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching board type stats:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch board type stats' });
+  }
+});
+
+/**
+ * GET /api/board-type/:id - Get a specific board type by ID
+ * NOTE: This catch-all route must be defined LAST among GET routes
+ */
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const dbBoardType = await boardTypeService.getBoardTypeById(req.params.id);
+
+    if (!dbBoardType) {
+      return res.status(404).json({ success: false, error: 'Board type not found' });
+    }
+
+    const boardType = transformBoardTypeToAPI(dbBoardType);
+    res.json({ success: true, data: boardType });
+  } catch (error) {
+    console.error('Error fetching board type:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch board type' });
   }
 });
 
