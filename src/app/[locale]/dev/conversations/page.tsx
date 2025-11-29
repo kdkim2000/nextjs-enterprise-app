@@ -9,9 +9,19 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Alert
+  Alert,
+  IconButton,
+  Checkbox,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Tooltip
 } from '@mui/material';
-import { Chat, Schedule, CalendarToday, AccountTree } from '@mui/icons-material';
+import { Chat, Schedule, CalendarToday, AccountTree, Delete, DeleteSweep } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import PageHeader from '@/components/common/PageHeader';
@@ -62,17 +72,63 @@ interface FilterOptions {
 // Conversation Card Component - using common Badge components
 function ConversationCard({
   conversation,
-  onClick
+  onClick,
+  selectionMode = false,
+  selected = false,
+  onSelect,
+  onDelete
 }: {
   conversation: Conversation;
   onClick: () => void;
+  selectionMode?: boolean;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }) {
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect?.(conversation.id);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(conversation.id);
+  };
+
   return (
-    <CardWrapper onClick={onClick}>
-      {/* Header - Category & Difficulty */}
+    <CardWrapper onClick={selectionMode ? () => onSelect?.(conversation.id) : onClick}>
+      {/* Header - Category & Difficulty + Actions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <CategoryBadge category={conversation.category} size="small" />
-        <DifficultyBadge difficulty={conversation.difficulty_level} size="small" />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {selectionMode && (
+            <Checkbox
+              checked={selected}
+              onClick={handleCheckboxClick}
+              size="small"
+              sx={{ p: 0, mr: 0.5 }}
+            />
+          )}
+          <CategoryBadge category={conversation.category} size="small" />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <DifficultyBadge difficulty={conversation.difficulty_level} size="small" />
+          {!selectionMode && (
+            <Tooltip title="Delete">
+              <IconButton
+                size="small"
+                onClick={handleDeleteClick}
+                sx={{
+                  ml: 0.5,
+                  p: 0.5,
+                  color: 'grey.400',
+                  '&:hover': { color: 'error.main', bgcolor: 'error.lighter' }
+                }}
+              >
+                <Delete sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
 
       {/* Title */}
@@ -148,6 +204,19 @@ export default function ConversationsPage() {
 
   // Advanced filter panel state
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+
+  // Delete functionality state
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -241,6 +310,83 @@ export default function ConversationsPage() {
     if (branch) count++;
     return count;
   }, [category, difficulty, branch]);
+
+  // Selection handlers
+  const handleToggleSelection = (id: string) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === conversations.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(conversations.map((c) => c.id)));
+    }
+  };
+
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+    setSelectedIds(new Set());
+  };
+
+  // Delete handlers
+  const handleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
+
+    setDeleting(true);
+    try {
+      await axiosInstance.delete(`/conversation/${deleteTargetId}`);
+      setSnackbar({ open: true, message: 'Conversation deleted successfully', severity: 'success' });
+      fetchConversations();
+    } catch (err) {
+      console.error('Failed to delete conversation:', err);
+      setSnackbar({ open: true, message: 'Failed to delete conversation', severity: 'error' });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setDeleteTargetId(null);
+    }
+  };
+
+  const handleBatchDeleteConfirm = async () => {
+    if (selectedIds.size === 0) return;
+
+    setDeleting(true);
+    try {
+      await axiosInstance.delete('/conversation/batch', { data: { ids: Array.from(selectedIds) } });
+      setSnackbar({
+        open: true,
+        message: `${selectedIds.size} conversation(s) deleted successfully`,
+        severity: 'success'
+      });
+      setSelectedIds(new Set());
+      setSelectionMode(false);
+      fetchConversations();
+    } catch (err) {
+      console.error('Failed to delete conversations:', err);
+      setSnackbar({ open: true, message: 'Failed to delete conversations', severity: 'error' });
+    } finally {
+      setDeleting(false);
+      setBatchDeleteDialogOpen(false);
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -398,6 +544,69 @@ export default function ConversationsPage() {
             </Alert>
           )}
 
+          {/* Selection Toolbar */}
+          {selectionMode && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+                p: 1.5,
+                bgcolor: 'primary.lighter',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'primary.light'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Checkbox
+                  checked={selectedIds.size === conversations.length && conversations.length > 0}
+                  indeterminate={selectedIds.size > 0 && selectedIds.size < conversations.length}
+                  onChange={handleSelectAll}
+                  size="small"
+                />
+                <Typography variant="body2" fontWeight={500}>
+                  {selectedIds.size} selected
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={toggleSelectionMode}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteSweep />}
+                  disabled={selectedIds.size === 0}
+                  onClick={() => setBatchDeleteDialogOpen(true)}
+                >
+                  Delete ({selectedIds.size})
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          {/* Bulk Selection Toggle Button */}
+          {!selectionMode && conversations.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<DeleteSweep />}
+                onClick={toggleSelectionMode}
+                sx={{ color: 'grey.600', borderColor: 'grey.300' }}
+              >
+                Select Multiple
+              </Button>
+            </Box>
+          )}
+
           {/* Conversations Grid */}
           <CardGrid
             items={conversations}
@@ -405,7 +614,14 @@ export default function ConversationsPage() {
             skeletonCount={pageSize}
             columns={{ xs: 12, sm: 6, md: 4 }}
             renderCard={(conv) => (
-              <ConversationCard conversation={conv} onClick={() => handleCardClick(conv.id)} />
+              <ConversationCard
+                conversation={conv}
+                onClick={() => handleCardClick(conv.id)}
+                selectionMode={selectionMode}
+                selected={selectedIds.has(conv.id)}
+                onSelect={handleToggleSelection}
+                onDelete={handleDeleteClick}
+              />
             )}
             pagination={{
               page,
@@ -423,6 +639,56 @@ export default function ConversationsPage() {
           />
         </PageContainer>
       </Box>
+
+      {/* Single Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Delete Conversation</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this conversation? This action cannot be undone.
+            All messages and related data will be permanently removed.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained" disabled={deleting}>
+            {deleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Batch Delete Confirmation Dialog */}
+      <Dialog open={batchDeleteDialogOpen} onClose={() => setBatchDeleteDialogOpen(false)}>
+        <DialogTitle>Delete Multiple Conversations</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete {selectedIds.size} conversation(s)?
+            This action cannot be undone. All messages and related data will be permanently removed.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBatchDeleteDialogOpen(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button onClick={handleBatchDeleteConfirm} color="error" variant="contained" disabled={deleting}>
+            {deleting ? 'Deleting...' : `Delete ${selectedIds.size} Conversation(s)`}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
