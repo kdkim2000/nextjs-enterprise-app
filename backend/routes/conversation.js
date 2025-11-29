@@ -192,4 +192,72 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/conversation/batch:
+ *   delete:
+ *     summary: 여러 대화 일괄 삭제
+ *     tags: [Conversation]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ */
+router.delete('/batch', async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'ids array is required' });
+    }
+
+    const result = await conversationService.deleteConversations(ids);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error deleting conversations:', error);
+    res.status(500).json({ error: 'Failed to delete conversations' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/conversation/{id}:
+ *   delete:
+ *     summary: 대화 삭제
+ *     tags: [Conversation]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await conversationService.deleteConversation(id);
+
+    if (!result.success) {
+      return res.status(404).json({ error: result.error });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    res.status(500).json({ error: 'Failed to delete conversation' });
+  }
+});
+
 module.exports = router;

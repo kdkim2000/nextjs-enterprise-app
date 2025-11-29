@@ -413,6 +413,118 @@ const conversationService = {
       difficulties: difficulties.rows.map(r => r.difficulty_level),
       branches: branches.rows.map(r => r.branch_name)
     };
+  },
+
+  /**
+   * 대화 삭제 (관련 메시지, 태그 매핑, 코드 변경사항 모두 삭제)
+   */
+  async deleteConversation(id) {
+    const client = await db.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // 대화 존재 여부 확인
+      const checkQuery = 'SELECT id, title FROM conversations WHERE id = $1';
+      const checkResult = await client.query(checkQuery, [id]);
+
+      if (checkResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return { success: false, error: 'Conversation not found' };
+      }
+
+      const conversation = checkResult.rows[0];
+
+      // 1. 메시지 삭제
+      const deleteMessagesQuery = 'DELETE FROM conversation_messages WHERE conversation_id = $1';
+      const messagesResult = await client.query(deleteMessagesQuery, [id]);
+
+      // 2. 태그 매핑 삭제
+      const deleteTagMappingsQuery = 'DELETE FROM conversation_tag_mappings WHERE conversation_id = $1';
+      await client.query(deleteTagMappingsQuery, [id]);
+
+      // 3. 코드 변경사항 삭제
+      const deleteCodeChangesQuery = 'DELETE FROM conversation_code_changes WHERE conversation_id = $1';
+      await client.query(deleteCodeChangesQuery, [id]);
+
+      // 4. 대화 삭제
+      const deleteConversationQuery = 'DELETE FROM conversations WHERE id = $1';
+      await client.query(deleteConversationQuery, [id]);
+
+      await client.query('COMMIT');
+
+      return {
+        success: true,
+        deleted: {
+          conversationId: id,
+          title: conversation.title,
+          messagesDeleted: messagesResult.rowCount
+        }
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  },
+
+  /**
+   * 여러 대화 일괄 삭제
+   */
+  async deleteConversations(ids) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return { success: false, error: 'No conversation IDs provided' };
+    }
+
+    const client = await db.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // 존재하는 대화 확인
+      const checkQuery = 'SELECT id, title FROM conversations WHERE id = ANY($1)';
+      const checkResult = await client.query(checkQuery, [ids]);
+      const existingIds = checkResult.rows.map(r => r.id);
+
+      if (existingIds.length === 0) {
+        await client.query('ROLLBACK');
+        return { success: false, error: 'No conversations found' };
+      }
+
+      // 1. 메시지 삭제
+      const deleteMessagesQuery = 'DELETE FROM conversation_messages WHERE conversation_id = ANY($1)';
+      const messagesResult = await client.query(deleteMessagesQuery, [existingIds]);
+
+      // 2. 태그 매핑 삭제
+      const deleteTagMappingsQuery = 'DELETE FROM conversation_tag_mappings WHERE conversation_id = ANY($1)';
+      await client.query(deleteTagMappingsQuery, [existingIds]);
+
+      // 3. 코드 변경사항 삭제
+      const deleteCodeChangesQuery = 'DELETE FROM conversation_code_changes WHERE conversation_id = ANY($1)';
+      await client.query(deleteCodeChangesQuery, [existingIds]);
+
+      // 4. 대화 삭제
+      const deleteConversationsQuery = 'DELETE FROM conversations WHERE id = ANY($1)';
+      const conversationsResult = await client.query(deleteConversationsQuery, [existingIds]);
+
+      await client.query('COMMIT');
+
+      return {
+        success: true,
+        deleted: {
+          conversationsDeleted: conversationsResult.rowCount,
+          messagesDeleted: messagesResult.rowCount,
+          requestedIds: ids,
+          deletedIds: existingIds
+        }
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 };
 
