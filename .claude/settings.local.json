@@ -138,7 +138,10 @@
       "Bash(do echo \"=== $file ===\" grep -n \"catch {\" \"$file\")",
       "Bash(PGPASSWORD='AppUser2024!' psql -h localhost -U app_user -d app_db -c \"SELECT id, code, name_ko, status FROM attachment_types WHERE code = ''BOARD_GENERAL'';\")",
       "Bash(PGPASSWORD='PostgreSQL2024!' psql:*)",
-      "Bash(if [ -f E:/apps/nextjs-enterprise-app/backend/.env ])"
+      "Bash(if [ -f E:/apps/nextjs-enterprise-app/backend/.env ])",
+      "Bash(cmd //c \"taskkill /F /PID 33344\")",
+      "Bash(cmd //c \"taskkill /F /IM node.exe\")",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

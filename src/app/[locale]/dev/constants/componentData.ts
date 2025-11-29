@@ -7,7 +7,8 @@ import {
   Storage,
   ViewModule,
   ListAlt,
-  Dashboard
+  Dashboard,
+  Build
 } from '@mui/icons-material';
 
 export const componentCategories = [
@@ -330,6 +331,12 @@ export const componentCategories = [
         description: 'Automatic popup dialog for important notifications with "Don\'t show today" feature and localStorage persistence',
         path: '/dev/components/notice-popup',
         tags: ['Notification', 'Popup', 'Dialog', 'Auto']
+      },
+      {
+        title: 'Badge Components',
+        description: 'Collection of badge components: CategoryBadge, DifficultyBadge, StatusBadge, MetaInfo, BranchBadge with variants and sizes',
+        path: '/dev/components/badge',
+        tags: ['Badge', 'Category', 'Status', 'Chip']
       }
     ]
   },
@@ -406,6 +413,20 @@ export const componentCategories = [
         description: 'Historical data with forecast projections and confidence intervals',
         path: '/dev/components/trend-chart',
         tags: ['Chart', 'Trend', 'Forecast']
+      }
+    ]
+  },
+  {
+    category: 'Utilities',
+    description: 'Utility functions and helpers for common operations',
+    icon: Build,
+    color: '#607d8b',
+    components: [
+      {
+        title: 'Date Utilities',
+        description: 'Date formatting functions: formatDate, formatRelativeTime, formatDuration with locale support',
+        path: '/dev/components/date-utils',
+        tags: ['Date', 'Format', 'Utility', 'i18n']
       }
     ]
   }

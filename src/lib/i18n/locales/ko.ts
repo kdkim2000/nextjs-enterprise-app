@@ -77,6 +77,7 @@ export default {
     addToFavorites: '즐겨찾기에 추가',
     removeFromFavorites: '즐겨찾기에서 제거',
     allMenus: '전체 메뉴',
+    refresh: '새로고침',
     myWork: '나의 업무'
   },
   menuManagement: {
@@ -305,6 +306,8 @@ export default {
     visibility: '공개 설정',
     secretPost: '비밀글',
     secretPostDesc: '본인과 관리자만 이 게시물을 볼 수 있습니다',
+    pinnedPost: '공지사항 (상단고정)',
+    pinnedPostDesc: '이 게시물을 목록 상단에 고정합니다',
     popupNotification: '팝업 알림 (관리자 전용)',
     showAsPopup: '팝업으로 표시',
     showAsPopupDesc: '사용자 로그인 시 팝업으로 표시됩니다',

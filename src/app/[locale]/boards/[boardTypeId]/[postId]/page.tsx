@@ -32,7 +32,9 @@ import {
   Visibility,
   Comment as CommentIcon,
   Send,
-  AttachFile
+  AttachFile,
+  CalendarToday,
+  Person
 } from '@mui/icons-material';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { apiClient } from '@/lib/api/client';
@@ -40,10 +42,12 @@ import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 import { useQnA } from '@/hooks/useQnA';
 import { useAuth } from '@/contexts/AuthContext';
 import { QnAStatusBadge } from '@/components/boards/QnAStatusBadge';
-import PostFormModal from '@/components/boards/PostFormModal';
-import { PostFormData } from '@/components/boards/PostFormFields';
 import SafeHtmlRenderer from '@/components/common/SafeHtmlRenderer';
 import RichTextEditor from '@/components/common/RichTextEditor';
+import PageContainer from '@/components/common/PageContainer';
+import PageHeader from '@/components/common/PageHeader';
+import { MetaInfo } from '@/components/common/Badge';
+import { formatDate as formatDateUtil } from '@/lib/utils/date';
 
 interface Post {
   id: string;
@@ -162,11 +166,6 @@ export default function PostDetailPage() {
   const [error, setError] = useState('');
   const [newComment, setNewComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
-
-  // Edit modal state
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<PostFormData | null>(null);
-  const [saveLoading, setSaveLoading] = useState(false);
 
   // Q&A hooks
   const { boardType, canWrite } = useBoardPermissions(boardTypeId);
@@ -305,67 +304,9 @@ export default function PostDetailPage() {
     }
   };
 
+  // Navigate to edit page
   const handleEdit = () => {
-    if (!post) return;
-
-    setEditingPost({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      tags: post.tags || [],
-      isSecret: post.is_secret,
-      isPinned: post.is_pinned
-    });
-    setEditModalOpen(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingPost || !post) return;
-
-    try {
-      setSaveLoading(true);
-
-      const postData = {
-        title: editingPost.title.trim(),
-        content: editingPost.content,
-        tags: editingPost.tags || [],
-        isSecret: editingPost.isSecret,
-        isPinned: editingPost.isPinned,
-        showPopup: editingPost.showPopup,
-        displayStartDate: editingPost.displayStartDate,
-        displayEndDate: editingPost.displayEndDate,
-        // Pass attachmentId to link uploaded files to the post
-        ...(editingPost.attachmentId && { attachmentId: editingPost.attachmentId })
-      };
-
-      console.log('[PostDetailPage] Saving post with data:', {
-        ...postData,
-        content: postData.content?.substring(0, 50) + '...'
-      });
-
-      const response = await apiClient.put(`/post/${post.id}`, postData);
-      if (response.success) {
-        setPost({
-          ...post,
-          title: editingPost.title,
-          content: editingPost.content,
-          tags: editingPost.tags,
-          is_secret: editingPost.isSecret,
-          is_pinned: editingPost.isPinned || false
-        });
-        setEditModalOpen(false);
-        setEditingPost(null);
-      }
-    } catch (error) {
-      console.error('Error saving post:', error);
-    } finally {
-      setSaveLoading(false);
-    }
-  };
-
-  const handleCloseEditModal = () => {
-    setEditModalOpen(false);
-    setEditingPost(null);
+    router.push(`/${currentLocale}/boards/${boardTypeId}/${postId}/edit`);
   };
 
   const handleDelete = async () => {
@@ -406,7 +347,7 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <CircularProgress />
       </Box>
     );
@@ -414,7 +355,7 @@ export default function PostDetailPage() {
 
   if (error || !post) {
     return (
-      <Box sx={{ py: 4 }}>
+      <Box sx={{ flex: 1, minHeight: 0, p: 4 }}>
         <Alert severity="error">{error || t('common.error')}</Alert>
         <Button onClick={() => router.push(`/boards/${boardTypeId}`)} sx={{ mt: 2 }}>
           {t('board.backToList')}
@@ -424,289 +365,327 @@ export default function PostDetailPage() {
   }
 
   return (
-    <Box sx={{ py: 3 }}>
-      {/* Header Actions */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Tooltip title={t('board.backToList')}>
-          <IconButton onClick={() => router.push(`/boards/${boardTypeId}`)}>
-            <ArrowBack />
-          </IconButton>
-        </Tooltip>
-        {canEdit && (
-          <Stack direction="row" spacing={0.5}>
-            <Tooltip title={t('board.editPost')}>
-              <IconButton onClick={handleEdit} color="primary">
-                <Edit />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={t('board.deletePost')}>
-              <IconButton onClick={handleDelete} color="error">
-                <Delete />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        )}
-      </Box>
+    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Fixed Header Area */}
+      <Box sx={{ flexShrink: 0, borderBottom: '1px solid', borderColor: 'grey.200', bgcolor: 'white' }}>
+        <PageContainer sx={{ pb: 0, pt: 1 }}>
+          <PageHeader useMenu showBreadcrumb compact />
 
-      {/* Post Content */}
-      <Paper sx={{ p: 3, mb: 2 }}>
-        {/* Title */}
-        <Box sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            {post.is_pinned && (
-              <Tooltip title={t('board.pinned')}>
-                <PushPin fontSize="small" color="primary" />
-              </Tooltip>
-            )}
-            {post.is_secret && (
-              <Tooltip title={t('board.secret')}>
-                <Lock fontSize="small" color="action" />
-              </Tooltip>
-            )}
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>{post.title}</Typography>
-          </Stack>
-          {isQnABoard && qnaData && (
-            <Box sx={{ mt: 1 }}>
-              <QnAStatusBadge status={qnaData.question_status} />
-            </Box>
-          )}
-          {post.tags && post.tags.length > 0 && (
-            <Stack direction="row" spacing={0.5} sx={{ mt: 1 }} flexWrap="wrap">
-              {post.tags.map((tag, index) => (
-                <Chip key={index} label={tag} size="small" variant="outlined" />
-              ))}
-            </Stack>
-          )}
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Metadata */}
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {(post.author_name || post.author_username || 'U')[0].toUpperCase()}
-            </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={600}>
-                {post.author_name || post.author_username || 'Unknown'}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {formatDate(post.created_at)}
-              </Typography>
-            </Box>
-          </Box>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Tooltip title={t('board.views')}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Visibility fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">{post.view_count || 0}</Typography>
-              </Box>
-            </Tooltip>
-            <Tooltip title={t('board.likes')}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <ThumbUp fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">{likeCount}</Typography>
-              </Box>
-            </Tooltip>
-            <Tooltip title={t('board.comments')}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <CommentIcon fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">{comments.length}</Typography>
-              </Box>
-            </Tooltip>
-          </Stack>
-        </Box>
-
-        {/* Content - Using SafeHtmlRenderer for XSS protection */}
-        <Box sx={{ py: 2, minHeight: 150 }}>
-          <SafeHtmlRenderer
-            html={post.content}
+          {/* Title Bar with Controls */}
+          <Box
             sx={{
-              '& p:first-of-type': { marginTop: 0 },
-              '& p:last-of-type': { marginBottom: 0 }
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              py: 1.5
             }}
-          />
-        </Box>
+          >
+            {/* Left: Back + Title */}
+            <Tooltip title={t('board.backToList')}>
+              <IconButton
+                onClick={() => router.push(`/${currentLocale}/boards/${boardTypeId}`)}
+                sx={{
+                  bgcolor: 'grey.100',
+                  width: 40,
+                  height: 40,
+                  '&:hover': { bgcolor: 'grey.200' }
+                }}
+              >
+                <ArrowBack />
+              </IconButton>
+            </Tooltip>
 
-        {/* Attachments */}
-        {attachments.length > 0 && (
-          <>
-            <Divider sx={{ my: 2 }} />
-            <Box>
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                <AttachFile fontSize="small" color="action" />
-                <Typography variant="subtitle2">
-                  {t('board.attachmentsTitle')} ({attachments.length})
-                </Typography>
-              </Stack>
-              <List dense>
-                {attachments.map((file) => (
-                  <ListItem
-                    key={file.id}
-                    secondaryAction={
-                      <Tooltip title={t('common.download')}>
-                        <IconButton edge="end" onClick={() => handleDownload(file)} size="small">
-                          <Download />
-                        </IconButton>
-                      </Tooltip>
-                    }
-                    sx={{ py: 0.5 }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Typography variant="body2">{file.originalFilename}</Typography>
-                          <Chip
-                            label={file.fileExtension.toUpperCase()}
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 20, fontSize: '0.7rem' }}
-                          />
-                        </Stack>
-                      }
-                      secondary={
-                        <Stack direction="row" spacing={2}>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatFileSize(file.fileSize)}
-                          </Typography>
-                          {file.downloadCount > 0 && (
-                            <Typography variant="caption" color="text.secondary">
-                              Downloads: {file.downloadCount}
-                            </Typography>
-                          )}
-                        </Stack>
-                      }
-                      primaryTypographyProps={{ component: 'div' }}
-                      secondaryTypographyProps={{ component: 'div' }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          </>
-        )}
-
-        {/* Like Button */}
-        <Divider sx={{ my: 2 }} />
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Tooltip title={liked ? t('board.unlike') : t('board.like')}>
-            <IconButton
-              onClick={handleLike}
-              color={liked ? 'primary' : 'default'}
-              sx={{
-                border: 1,
-                borderColor: liked ? 'primary.main' : 'divider',
-                borderRadius: 2,
-                px: 3,
-                py: 1,
-                gap: 1
-              }}
-            >
-              {liked ? <ThumbUp /> : <ThumbUpOutlined />}
-              <Typography variant="body2" fontWeight={500}>{likeCount}</Typography>
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Paper>
-
-      {/* Comments Section */}
-      <Paper sx={{ p: 3 }}>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-          <CommentIcon color="action" />
-          <Typography variant="h6">
-            {t('board.commentsTitle')} ({comments.length})
-          </Typography>
-        </Stack>
-        <Divider sx={{ mb: 2 }} />
-
-        {/* New Comment with RichTextEditor */}
-        <Box sx={{ mb: 3 }}>
-          <RichTextEditor
-            value={newComment}
-            onChange={setNewComment}
-            placeholder={t('board.writeComment')}
-            minHeight={120}
-          />
-          <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
-            <Tooltip title={t('board.submitComment')}>
-              <span>
-                <IconButton
-                  onClick={handleSubmitComment}
-                  disabled={submittingComment || !newComment.trim() || newComment === '<p></p>'}
-                  color="primary"
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              {/* Title + Badges */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={600}
                   sx={{
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                    '&:disabled': { bgcolor: 'action.disabledBackground' }
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: 'grey.800'
                   }}
                 >
-                  {submittingComment ? <CircularProgress size={20} color="inherit" /> : <Send />}
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Box>
-        </Box>
-
-        {/* Comment List */}
-        {comments.length === 0 ? (
-          <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
-            {t('board.noComments')}
-          </Typography>
-        ) : (
-          <List disablePadding>
-            {comments.map((comment, index) => (
-              <React.Fragment key={comment.id}>
-                {index > 0 && <Divider sx={{ my: 1 }} />}
-                <ListItem alignItems="flex-start" sx={{ px: 0 }}>
-                  <ListItemAvatar>
-                    <Avatar sx={{ width: 36, height: 36 }}>
-                      {(comment.author_name || comment.author_username || 'U')[0].toUpperCase()}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle2">
-                          {comment.author_name || comment.author_username || 'Unknown'}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatDate(comment.created_at)}
-                        </Typography>
-                      </Box>
-                    }
-                    secondary={
-                      <SafeHtmlRenderer
-                        html={comment.content}
-                        sx={{
-                          fontSize: '0.875rem',
-                          '& p': { marginTop: 0, marginBottom: '0.5em' },
-                          '& p:last-child': { marginBottom: 0 }
-                        }}
-                      />
-                    }
-                    secondaryTypographyProps={{ component: 'div' }}
+                  {post.title}
+                </Typography>
+                {post.is_pinned && (
+                  <Chip
+                    size="small"
+                    icon={<PushPin sx={{ fontSize: 12 }} />}
+                    label={t('board.pinned')}
+                    sx={{
+                      height: 20,
+                      bgcolor: '#3b82f615',
+                      color: '#3b82f6',
+                      fontWeight: 500,
+                      fontSize: '0.65rem',
+                      flexShrink: 0,
+                      '& .MuiChip-icon': { color: '#3b82f6' }
+                    }}
                   />
-                </ListItem>
-              </React.Fragment>
-            ))}
-          </List>
-        )}
-      </Paper>
+                )}
+                {post.is_secret && (
+                  <Chip
+                    size="small"
+                    icon={<Lock sx={{ fontSize: 12 }} />}
+                    label={t('board.secret')}
+                    sx={{
+                      height: 20,
+                      bgcolor: '#f59e0b15',
+                      color: '#f59e0b',
+                      fontWeight: 500,
+                      fontSize: '0.65rem',
+                      flexShrink: 0,
+                      '& .MuiChip-icon': { color: '#f59e0b' }
+                    }}
+                  />
+                )}
+                {isQnABoard && qnaData && (
+                  <QnAStatusBadge status={qnaData.question_status} />
+                )}
+              </Box>
+              {/* Meta Info */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.25 }}>
+                <MetaInfo icon={<Person sx={{ fontSize: 11 }} />} value={post.author_name || post.author_username || 'Unknown'} size="small" />
+                <MetaInfo icon={<CalendarToday sx={{ fontSize: 11 }} />} value={formatDate(post.created_at)} size="small" />
+                <MetaInfo icon={<Visibility sx={{ fontSize: 11 }} />} value={post.view_count || 0} size="small" />
+                <MetaInfo icon={<ThumbUp sx={{ fontSize: 11 }} />} value={likeCount} size="small" />
+                <MetaInfo icon={<CommentIcon sx={{ fontSize: 11 }} />} value={comments.length} size="small" />
+              </Box>
+            </Box>
 
-      {/* Edit Post Modal */}
-      <PostFormModal
-        open={editModalOpen}
-        onClose={handleCloseEditModal}
-        onSave={handleSaveEdit}
-        post={editingPost}
-        onChange={setEditingPost}
-        mode="edit"
-        saveLoading={saveLoading}
-        boardSettings={boardType?.settings}
-        isAdmin={isAdmin}
-      />
+            {/* Right: Controls */}
+            {canEdit && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                <Tooltip title={t('board.editPost')}>
+                  <IconButton
+                    onClick={handleEdit}
+                    sx={{
+                      bgcolor: 'grey.100',
+                      width: 40,
+                      height: 40,
+                      '&:hover': { bgcolor: 'grey.200' }
+                    }}
+                  >
+                    <Edit fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={t('board.deletePost')}>
+                  <IconButton
+                    onClick={handleDelete}
+                    sx={{
+                      bgcolor: 'grey.100',
+                      color: 'error.main',
+                      width: 40,
+                      height: 40,
+                      '&:hover': { bgcolor: 'error.lighter' }
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
+          </Box>
+        </PageContainer>
+      </Box>
+
+      {/* Scrollable Content Area */}
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', bgcolor: 'grey.50' }}>
+        <PageContainer fullHeight={false} sx={{ py: 2 }}>
+          {/* Post Content */}
+          <Paper sx={{ p: 3, mb: 2 }}>
+            {/* Tags */}
+            {post.tags && post.tags.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                  {post.tags.map((tag, index) => (
+                    <Chip key={index} label={tag} size="small" variant="outlined" sx={{ height: 24 }} />
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {/* Content - Using SafeHtmlRenderer for XSS protection */}
+            <Box sx={{ py: 2, minHeight: 150 }}>
+              <SafeHtmlRenderer
+                html={post.content}
+                sx={{
+                  '& p:first-of-type': { marginTop: 0 },
+                  '& p:last-of-type': { marginBottom: 0 }
+                }}
+              />
+            </Box>
+
+            {/* Attachments */}
+            {attachments.length > 0 && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Box>
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                    <AttachFile fontSize="small" color="action" />
+                    <Typography variant="subtitle2">
+                      {t('board.attachmentsTitle')} ({attachments.length})
+                    </Typography>
+                  </Stack>
+                  <List dense>
+                    {attachments.map((file) => (
+                      <ListItem
+                        key={file.id}
+                        secondaryAction={
+                          <Tooltip title={t('common.download')}>
+                            <IconButton edge="end" onClick={() => handleDownload(file)} size="small">
+                              <Download />
+                            </IconButton>
+                          </Tooltip>
+                        }
+                        sx={{ py: 0.5 }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Typography variant="body2">{file.originalFilename}</Typography>
+                              <Chip
+                                label={file.fileExtension.toUpperCase()}
+                                size="small"
+                                variant="outlined"
+                                sx={{ height: 20, fontSize: '0.7rem' }}
+                              />
+                            </Stack>
+                          }
+                          secondary={
+                            <Stack direction="row" spacing={2}>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatFileSize(file.fileSize)}
+                              </Typography>
+                              {file.downloadCount > 0 && (
+                                <Typography variant="caption" color="text.secondary">
+                                  Downloads: {file.downloadCount}
+                                </Typography>
+                              )}
+                            </Stack>
+                          }
+                          primaryTypographyProps={{ component: 'div' }}
+                          secondaryTypographyProps={{ component: 'div' }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              </>
+            )}
+
+            {/* Like Button */}
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Tooltip title={liked ? t('board.unlike') : t('board.like')}>
+                <IconButton
+                  onClick={handleLike}
+                  color={liked ? 'primary' : 'default'}
+                  sx={{
+                    border: 1,
+                    borderColor: liked ? 'primary.main' : 'divider',
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1,
+                    gap: 1
+                  }}
+                >
+                  {liked ? <ThumbUp /> : <ThumbUpOutlined />}
+                  <Typography variant="body2" fontWeight={500}>{likeCount}</Typography>
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Paper>
+
+          {/* Comments Section */}
+          <Paper sx={{ p: 3 }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+              <CommentIcon color="action" />
+              <Typography variant="h6">
+                {t('board.commentsTitle')} ({comments.length})
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 2 }} />
+
+            {/* New Comment with RichTextEditor */}
+            <Box sx={{ mb: 3 }}>
+              <RichTextEditor
+                value={newComment}
+                onChange={setNewComment}
+                placeholder={t('board.writeComment')}
+                minHeight={120}
+              />
+              <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                <Tooltip title={t('board.submitComment')}>
+                  <span>
+                    <IconButton
+                      onClick={handleSubmitComment}
+                      disabled={submittingComment || !newComment.trim() || newComment === '<p></p>'}
+                      color="primary"
+                      sx={{
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        '&:hover': { bgcolor: 'primary.dark' },
+                        '&:disabled': { bgcolor: 'action.disabledBackground' }
+                      }}
+                    >
+                      {submittingComment ? <CircularProgress size={20} color="inherit" /> : <Send />}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
+            </Box>
+
+            {/* Comment List */}
+            {comments.length === 0 ? (
+              <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
+                {t('board.noComments')}
+              </Typography>
+            ) : (
+              <List disablePadding>
+                {comments.map((comment, index) => (
+                  <React.Fragment key={comment.id}>
+                    {index > 0 && <Divider sx={{ my: 1 }} />}
+                    <ListItem alignItems="flex-start" sx={{ px: 0 }}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ width: 36, height: 36 }}>
+                          {(comment.author_name || comment.author_username || 'U')[0].toUpperCase()}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="subtitle2">
+                              {comment.author_name || comment.author_username || 'Unknown'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {formatDate(comment.created_at)}
+                            </Typography>
+                          </Box>
+                        }
+                        secondary={
+                          <SafeHtmlRenderer
+                            html={comment.content}
+                            sx={{
+                              fontSize: '0.875rem',
+                              '& p': { marginTop: 0, marginBottom: '0.5em' },
+                              '& p:last-child': { marginBottom: 0 }
+                            }}
+                          />
+                        }
+                        secondaryTypographyProps={{ component: 'div' }}
+                      />
+                    </ListItem>
+                  </React.Fragment>
+                ))}
+              </List>
+            )}
+          </Paper>
+        </PageContainer>
+      </Box>
     </Box>
   );
 }

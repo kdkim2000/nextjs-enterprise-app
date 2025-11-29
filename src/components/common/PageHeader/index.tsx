@@ -22,6 +22,9 @@ interface PageHeaderProps {
   // Common props
   actions?: React.ReactNode;
   showBreadcrumb?: boolean;
+
+  // Compact mode - only shows breadcrumb, no title section, minimal spacing
+  compact?: boolean;
 }
 
 /**
@@ -36,6 +39,9 @@ interface PageHeaderProps {
  *
  * 3. Manual mode (backward compatible):
  *    <PageHeader title="My Title" description="My Description" />
+ *
+ * 4. Compact mode (breadcrumb only, minimal spacing):
+ *    <PageHeader useMenu showBreadcrumb compact />
  */
 export default function PageHeader({
   title,
@@ -43,7 +49,8 @@ export default function PageHeader({
   useMenu: useMenuMode = false,
   menu: menuProp,
   actions,
-  showBreadcrumb = false
+  showBreadcrumb = false,
+  compact = false
 }: PageHeaderProps) {
   const pathname = usePathname();
   const locale = useCurrentLocale();
@@ -97,12 +104,16 @@ export default function PageHeader({
 
     return (
       <Breadcrumbs
-        separator={<NavigateNext fontSize="small" />}
-        sx={{ mb: 1 }}
+        separator={<NavigateNext fontSize="small" sx={{ fontSize: compact ? 14 : 16 }} />}
+        sx={{ mb: compact ? 0 : 1 }}
       >
         {breadcrumbItems.map((item, index) => (
           index === breadcrumbItems.length - 1 ? (
-            <Typography key={item.id} color="text.primary" fontSize="0.875rem">
+            <Typography
+              key={item.id}
+              color="text.primary"
+              fontSize={compact ? '0.75rem' : '0.875rem'}
+            >
               {item.name[locale as 'en' | 'ko']}
             </Typography>
           ) : (
@@ -111,7 +122,7 @@ export default function PageHeader({
               color="inherit"
               href={`/${locale}${item.path}`}
               underline="hover"
-              fontSize="0.875rem"
+              fontSize={compact ? '0.75rem' : '0.875rem'}
             >
               {item.name[locale as 'en' | 'ko']}
             </Link>
@@ -120,6 +131,15 @@ export default function PageHeader({
       </Breadcrumbs>
     );
   };
+
+  // Compact mode: only breadcrumb with minimal spacing
+  if (compact) {
+    return (
+      <Box sx={{ mb: 0.5, flexShrink: 0 }}>
+        {showBreadcrumb && getBreadcrumb()}
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ mb: 1.5, flexShrink: 0 }}>

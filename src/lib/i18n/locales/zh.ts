@@ -77,6 +77,7 @@ export default {
     addToFavorites: '添加到收藏夹',
     removeFromFavorites: '从收藏夹中移除',
     allMenus: '所有菜单',
+    refresh: '刷新',
     myWork: '我的工作'
   },
   menuManagement: {
@@ -305,6 +306,8 @@ export default {
     visibility: '可见性',
     secretPost: '私密帖子',
     secretPostDesc: '只有您和管理员可以查看此帖子',
+    pinnedPost: '公告（置顶）',
+    pinnedPostDesc: '将此帖子置顶显示在列表顶部',
     popupNotification: '弹窗通知（仅管理员）',
     showAsPopup: '显示为弹窗通知',
     showAsPopupDesc: '用户登录时以弹窗形式显示此公告',

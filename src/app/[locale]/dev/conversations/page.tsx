@@ -1,41 +1,33 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Grid,
-  TextField,
-  InputAdornment,
   Chip,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
-  Alert,
-  IconButton,
-  Tooltip,
-  Paper
+  Alert
 } from '@mui/material';
-import {
-  Search,
-  Chat,
-  Schedule,
-  Code,
-  BugReport,
-  Build,
-  Psychology,
-  Speed,
-  Refresh,
-  CalendarToday,
-  AccountTree,
-  Clear
-} from '@mui/icons-material';
+import { Chat, Schedule, CalendarToday, AccountTree } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
-import CardGrid, { CardWrapper, StatCard } from '@/components/common/CardGrid';
+import QuickSearchBar from '@/components/common/QuickSearchBar';
+import SearchFilterPanel from '@/components/common/SearchFilterPanel';
+import CardGrid, { CardWrapper } from '@/components/common/CardGrid';
+import {
+  CategoryBadge,
+  DifficultyBadge,
+  MetaInfo,
+  BranchBadge,
+  categoryConfigs,
+  difficultyColors
+} from '@/components/common/Badge';
+import { formatDate } from '@/lib/utils/date';
 import axiosInstance from '@/lib/axios';
 
 // Types
@@ -67,24 +59,7 @@ interface FilterOptions {
   branches: string[];
 }
 
-// Category icons and colors
-const categoryConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
-  'bug-fix': { icon: <BugReport sx={{ fontSize: 18 }} />, color: '#ef4444', label: 'Bug Fix' },
-  feature: { icon: <Build sx={{ fontSize: 18 }} />, color: '#22c55e', label: 'Feature' },
-  refactor: { icon: <Code sx={{ fontSize: 18 }} />, color: '#a855f7', label: 'Refactor' },
-  debugging: { icon: <Psychology sx={{ fontSize: 18 }} />, color: '#f97316', label: 'Debugging' },
-  performance: { icon: <Speed sx={{ fontSize: 18 }} />, color: '#06b6d4', label: 'Performance' },
-  general: { icon: <Chat sx={{ fontSize: 18 }} />, color: '#6b7280', label: 'General' }
-};
-
-// Difficulty colors
-const difficultyColors: Record<string, string> = {
-  easy: '#22c55e',
-  medium: '#eab308',
-  hard: '#ef4444'
-};
-
-// Conversation Card Component
+// Conversation Card Component - using common Badge components
 function ConversationCard({
   conversation,
   onClick
@@ -92,51 +67,12 @@ function ConversationCard({
   conversation: Conversation;
   onClick: () => void;
 }) {
-  const catConfig = categoryConfig[conversation.category] || categoryConfig.general;
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
   return (
     <CardWrapper onClick={onClick}>
       {/* Header - Category & Difficulty */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.75,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 2,
-            bgcolor: `${catConfig.color}10`,
-            color: catConfig.color
-          }}
-        >
-          {catConfig.icon}
-          <Typography variant="caption" fontWeight={600}>
-            {catConfig.label}
-          </Typography>
-        </Box>
-        <Chip
-          label={conversation.difficulty_level}
-          size="small"
-          sx={{
-            height: 22,
-            fontSize: '0.7rem',
-            fontWeight: 600,
-            bgcolor: `${difficultyColors[conversation.difficulty_level]}15`,
-            color: difficultyColors[conversation.difficulty_level],
-            textTransform: 'capitalize',
-            border: 'none'
-          }}
-        />
+        <CategoryBadge category={conversation.category} size="small" />
+        <DifficultyBadge difficulty={conversation.difficulty_level} size="small" />
       </Box>
 
       {/* Title */}
@@ -160,15 +96,9 @@ function ConversationCard({
 
       {/* Meta Info */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'grey.500' }}>
-          <Chat sx={{ fontSize: 14 }} />
-          <Typography variant="caption">{conversation.total_messages}</Typography>
-        </Box>
+        <MetaInfo icon={<Chat sx={{ fontSize: 14 }} />} value={conversation.total_messages} />
         {conversation.duration_minutes > 0 && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'grey.500' }}>
-            <Schedule sx={{ fontSize: 14 }} />
-            <Typography variant="caption">{conversation.duration_minutes}m</Typography>
-          </Box>
+          <MetaInfo icon={<Schedule sx={{ fontSize: 14 }} />} value={`${conversation.duration_minutes}m`} />
         )}
       </Box>
 
@@ -189,25 +119,7 @@ function ConversationCard({
             {formatDate(conversation.started_at)}
           </Typography>
         </Box>
-        {conversation.branch_name && conversation.branch_name !== 'unknown' && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              px: 1,
-              py: 0.25,
-              borderRadius: 1,
-              bgcolor: 'grey.100',
-              color: 'grey.600'
-            }}
-          >
-            <AccountTree sx={{ fontSize: 12 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>
-              {conversation.branch_name}
-            </Typography>
-          </Box>
-        )}
+        <BranchBadge branch={conversation.branch_name} size="small" />
       </Box>
     </CardWrapper>
   );
@@ -230,8 +142,12 @@ export default function ConversationsPage() {
   const [difficulty, setDifficulty] = useState('');
   const [branch, setBranch] = useState('');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  // Advanced filter panel state
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -267,7 +183,7 @@ export default function ConversationsPage() {
     try {
       const params = new URLSearchParams();
       params.append('page', page.toString());
-      params.append('limit', '12');
+      params.append('limit', pageSize.toString());
       if (debouncedSearch) params.append('search', debouncedSearch);
       if (category) params.append('category', category);
       if (difficulty) params.append('difficulty', difficulty);
@@ -283,16 +199,21 @@ export default function ConversationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, category, difficulty, branch]);
+  }, [page, pageSize, debouncedSearch, category, difficulty, branch]);
 
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Reset page when filters change
+  // Reset page when filters or page size change
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, category, difficulty, branch]);
+  }, [debouncedSearch, category, difficulty, branch, pageSize]);
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+  };
 
   // Handle card click
   const handleCardClick = (id: string) => {
@@ -307,244 +228,201 @@ export default function ConversationsPage() {
     setBranch('');
   };
 
-  const hasActiveFilters = search || category || difficulty || branch;
+  // Quick search handler
+  const handleQuickSearch = () => {
+    fetchConversations();
+  };
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (category) count++;
+    if (difficulty) count++;
+    if (branch) count++;
+    return count;
+  }, [category, difficulty, branch]);
 
   return (
-    <PageContainer>
-      <PageHeader useMenu showBreadcrumb />
-
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="h5" fontWeight={700} color="grey.800">
-              Claude Conversations
-            </Typography>
-            <Typography variant="body2" color="grey.500" sx={{ mt: 0.5 }}>
-              Browse and search conversation history
-            </Typography>
-          </Box>
-          <Tooltip title="Refresh">
-            <IconButton
-              onClick={fetchConversations}
-              sx={{
-                bgcolor: 'grey.100',
-                '&:hover': { bgcolor: 'grey.200' }
-              }}
-            >
-              <Refresh />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-
-      {/* Stats Cards */}
-      {stats && (
-        <Grid container spacing={2} sx={{ mb: 4 }}>
-          <Grid item xs={6} sm={3}>
-            <StatCard value={stats.total} label="Total Sessions" color="primary" />
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <StatCard value={stats.totalMessages.toLocaleString()} label="Total Messages" color="success" />
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <StatCard value={stats.avgMessages} label="Avg Messages" color="warning" />
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <StatCard value={`${stats.avgDuration}m`} label="Avg Duration" color="info" />
-          </Grid>
-        </Grid>
-      )}
-
-      {/* Filters */}
-      <Paper
-        elevation={0}
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Fixed Header Area */}
+      <Box
         sx={{
-          p: 2,
-          mb: 3,
-          borderRadius: 3,
-          border: '1px solid',
-          borderColor: 'grey.200',
-          bgcolor: 'grey.50'
+          flexShrink: 0,
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          zIndex: 10
         }}
       >
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-          {/* Search */}
-          <TextField
-            size="small"
-            placeholder="Search conversations..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{
-              width: { xs: '100%', sm: 280 },
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'white',
-                borderRadius: 2,
-                '& fieldset': { borderColor: 'grey.200' }
-              }
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: 'grey.400', fontSize: 20 }} />
-                </InputAdornment>
-              ),
-              endAdornment: search && (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setSearch('')}>
-                    <Clear sx={{ fontSize: 16 }} />
-                  </IconButton>
-                </InputAdornment>
-              )
-            }}
-          />
+        <PageContainer sx={{ pb: 0, pt: 1 }}>
+          <PageHeader useMenu showBreadcrumb />
 
-          {/* Category */}
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={category}
-              label="Category"
-              onChange={(e) => setCategory(e.target.value)}
-              sx={{ bgcolor: 'white', borderRadius: 2 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {filterOptions?.categories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ color: categoryConfig[cat]?.color }}>{categoryConfig[cat]?.icon}</Box>
-                    <Typography variant="body2">{categoryConfig[cat]?.label || cat}</Typography>
+          {/* Sticky Search Bar */}
+          <Box sx={{ pb: 2 }}>
+            <QuickSearchBar
+              searchValue={search}
+              onSearchChange={setSearch}
+              onSearch={handleQuickSearch}
+              onClear={clearFilters}
+              onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
+              placeholder="Search conversations..."
+              searching={loading}
+              activeFilterCount={activeFilterCount}
+              showAdvancedButton={true}
+            />
+
+            {/* Advanced Filter Panel */}
+            {advancedFilterOpen && (
+              <SearchFilterPanel
+                title="Filters"
+                activeFilterCount={activeFilterCount}
+                onApply={handleQuickSearch}
+                onClear={clearFilters}
+                onClose={() => setAdvancedFilterOpen(false)}
+                mode="advanced"
+                expanded={true}
+                showHeader={false}
+              >
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  {/* Category */}
+                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      value={category}
+                      label="Category"
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      {filterOptions?.categories.map((cat) => (
+                        <MenuItem key={cat} value={cat}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{ color: categoryConfigs[cat]?.color }}>{categoryConfigs[cat]?.icon}</Box>
+                            <Typography variant="body2">{categoryConfigs[cat]?.label || cat}</Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* Difficulty */}
+                  <FormControl size="small" sx={{ minWidth: 140 }}>
+                    <InputLabel>Difficulty</InputLabel>
+                    <Select
+                      value={difficulty}
+                      label="Difficulty"
+                      onChange={(e) => setDifficulty(e.target.value)}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      {filterOptions?.difficulties.map((diff) => (
+                        <MenuItem key={diff} value={diff}>
+                          <Box
+                            sx={{
+                              px: 1,
+                              py: 0.25,
+                              borderRadius: 1,
+                              bgcolor: `${difficultyColors[diff]}15`,
+                              color: difficultyColors[diff],
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              textTransform: 'capitalize'
+                            }}
+                          >
+                            {diff}
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* Branch */}
+                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <InputLabel>Branch</InputLabel>
+                    <Select
+                      value={branch}
+                      label="Branch"
+                      onChange={(e) => setBranch(e.target.value)}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      {filterOptions?.branches.map((br) => (
+                        <MenuItem key={br} value={br}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <AccountTree sx={{ fontSize: 14, color: 'grey.500' }} />
+                            <Typography variant="body2">{br}</Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                {/* Category Quick Filters */}
+                {stats && (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2 }}>
+                    {Object.entries(stats.byCategory).map(([cat, count]) => (
+                      <Chip
+                        key={cat}
+                        icon={categoryConfigs[cat]?.icon as React.ReactElement}
+                        label={`${categoryConfigs[cat]?.label || cat} (${count})`}
+                        onClick={() => setCategory(category === cat ? '' : cat)}
+                        size="small"
+                        sx={{
+                          bgcolor: category === cat ? categoryConfigs[cat]?.color : 'white',
+                          color: category === cat ? 'white' : categoryConfigs[cat]?.color,
+                          borderColor: categoryConfigs[cat]?.color,
+                          border: '1px solid',
+                          fontWeight: 500,
+                          '& .MuiChip-icon': {
+                            color: category === cat ? 'white' : categoryConfigs[cat]?.color
+                          },
+                          '&:hover': {
+                            bgcolor: category === cat ? categoryConfigs[cat]?.color : `${categoryConfigs[cat]?.color}10`
+                          }
+                        }}
+                      />
+                    ))}
                   </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Difficulty */}
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Difficulty</InputLabel>
-            <Select
-              value={difficulty}
-              label="Difficulty"
-              onChange={(e) => setDifficulty(e.target.value)}
-              sx={{ bgcolor: 'white', borderRadius: 2 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {filterOptions?.difficulties.map((diff) => (
-                <MenuItem key={diff} value={diff}>
-                  <Box
-                    sx={{
-                      px: 1,
-                      py: 0.25,
-                      borderRadius: 1,
-                      bgcolor: `${difficultyColors[diff]}15`,
-                      color: difficultyColors[diff],
-                      fontWeight: 600,
-                      fontSize: '0.75rem',
-                      textTransform: 'capitalize'
-                    }}
-                  >
-                    {diff}
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Branch */}
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>Branch</InputLabel>
-            <Select
-              value={branch}
-              label="Branch"
-              onChange={(e) => setBranch(e.target.value)}
-              sx={{ bgcolor: 'white', borderRadius: 2 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {filterOptions?.branches.map((br) => (
-                <MenuItem key={br} value={br}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <AccountTree sx={{ fontSize: 14, color: 'grey.500' }} />
-                    <Typography variant="body2">{br}</Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Box sx={{ flex: 1 }} />
-
-          {/* Results count & Clear */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {hasActiveFilters && (
-              <Chip
-                label="Clear filters"
-                size="small"
-                onClick={clearFilters}
-                onDelete={clearFilters}
-                sx={{ bgcolor: 'white' }}
-              />
+                )}
+              </SearchFilterPanel>
             )}
-            <Typography variant="body2" color="grey.500">
-              {total} results
-            </Typography>
           </Box>
-        </Box>
+        </PageContainer>
+      </Box>
 
-        {/* Category Quick Filters */}
-        {stats && (
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'grey.200' }}>
-            {Object.entries(stats.byCategory).map(([cat, count]) => (
-              <Chip
-                key={cat}
-                icon={categoryConfig[cat]?.icon as React.ReactElement}
-                label={`${categoryConfig[cat]?.label || cat} (${count})`}
-                onClick={() => setCategory(category === cat ? '' : cat)}
-                size="small"
-                sx={{
-                  bgcolor: category === cat ? categoryConfig[cat]?.color : 'white',
-                  color: category === cat ? 'white' : categoryConfig[cat]?.color,
-                  borderColor: categoryConfig[cat]?.color,
-                  border: '1px solid',
-                  fontWeight: 500,
-                  '& .MuiChip-icon': {
-                    color: category === cat ? 'white' : categoryConfig[cat]?.color
-                  },
-                  '&:hover': {
-                    bgcolor: category === cat ? categoryConfig[cat]?.color : `${categoryConfig[cat]?.color}10`
-                  }
-                }}
-              />
-            ))}
-          </Box>
-        )}
-      </Paper>
+      {/* Scrollable Content Area */}
+      <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        <PageContainer sx={{ py: 2 }}>
+          {/* Error */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-      {/* Error */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Conversations Grid */}
-      <CardGrid
-        items={conversations}
-        loading={loading}
-        skeletonCount={6}
-        columns={{ xs: 12, sm: 6, md: 4 }}
-        renderCard={(conv) => (
-          <ConversationCard conversation={conv} onClick={() => handleCardClick(conv.id)} />
-        )}
-        pagination={{
-          page,
-          totalPages,
-          onChange: setPage
-        }}
-        emptyIcon={<Chat sx={{ fontSize: 64 }} />}
-        emptyTitle="No conversations found"
-        emptyDescription="Try adjusting your search or filters"
-      />
-    </PageContainer>
+          {/* Conversations Grid */}
+          <CardGrid
+            items={conversations}
+            loading={loading}
+            skeletonCount={pageSize}
+            columns={{ xs: 12, sm: 6, md: 4 }}
+            renderCard={(conv) => (
+              <ConversationCard conversation={conv} onClick={() => handleCardClick(conv.id)} />
+            )}
+            pagination={{
+              page,
+              totalPages,
+              onChange: setPage
+            }}
+            pageSize={{
+              value: pageSize,
+              onChange: handlePageSizeChange
+            }}
+            totalCount={total}
+            emptyIcon={<Chat sx={{ fontSize: 64 }} />}
+            emptyTitle="No conversations found"
+            emptyDescription="Try adjusting your search or filters"
+          />
+        </PageContainer>
+      </Box>
+    </Box>
   );
 }
