@@ -21,6 +21,16 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { v4: uuidv4 } = require('uuid');
+const { execSync } = require('child_process');
+
+// Database Configuration
+const DB_CONFIG = {
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || '5432',
+  database: process.env.DB_NAME || 'nextjs_enterprise_app',
+  user: process.env.DB_USER || 'app_user',
+  password: process.env.DB_PASSWORD || '<REDACTED_PASSWORD>'
+};
 
 // Configuration
 const CLAUDE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.claude');
@@ -431,6 +441,37 @@ function generateInsertSQL(messages, metadata, title) {
 }
 
 /**
+ * SQL을 PostgreSQL DB에 직접 실행
+ */
+function executeSqlToDb(sqlContent) {
+  const tempSqlPath = path.join(__dirname, '..', 'migration', '_temp_migration.sql');
+
+  try {
+    // 임시 SQL 파일 저장
+    fs.writeFileSync(tempSqlPath, sqlContent, 'utf8');
+
+    // psql 명령어 실행 (Windows 호환: env로 PGPASSWORD 전달)
+    console.log('\n🔄 Executing SQL to database...');
+    execSync(`psql -h ${DB_CONFIG.host} -p ${DB_CONFIG.port} -U ${DB_CONFIG.user} -d ${DB_CONFIG.database} -f "${tempSqlPath}"`, {
+      stdio: 'pipe',
+      encoding: 'utf8',
+      env: { ...process.env, PGPASSWORD: DB_CONFIG.password }
+    });
+
+    console.log('✅ Database updated successfully');
+    return true;
+  } catch (error) {
+    console.error(`❌ Database error: ${error.message}`);
+    return false;
+  } finally {
+    // 임시 파일 삭제
+    if (fs.existsSync(tempSqlPath)) {
+      fs.unlinkSync(tempSqlPath);
+    }
+  }
+}
+
+/**
  * 메인 실행
  */
 async function main() {
@@ -583,12 +624,15 @@ async function main() {
   // 추적 데이터 저장
   saveTrackingData(trackingData);
 
-  // SQL 파일 저장 (새로운 세션이 있을 때만)
+  // SQL 파일 저장 및 DB 실행 (새로운 세션이 있을 때만)
   if (!mdOnly && newSessionsCount > 0) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
     const sqlPath = path.join(__dirname, '..', 'migration', `insert_conversations_${timestamp}.sql`);
     fs.writeFileSync(sqlPath, sqlOutput, 'utf8');
     console.log(`\n💾 SQL saved to: ${sqlPath}`);
+
+    // DB에 자동 실행
+    executeSqlToDb(sqlOutput);
   }
 
   console.log('\n' + '='.repeat(60));
@@ -598,10 +642,7 @@ async function main() {
   console.log(`📊 Total migrated (all time): ${trackingData.totalMigrated}`);
   console.log('='.repeat(60));
 
-  if (!mdOnly && newSessionsCount > 0) {
-    console.log('\n📋 To import new sessions to database, run:');
-    console.log(`   psql -h localhost -U app_user -d app_db -f migration/insert_conversations_*.sql`);
-  } else if (newSessionsCount === 0) {
+  if (newSessionsCount === 0) {
     console.log('\nℹ️  No new sessions to process. Use --force to reprocess all.');
   }
 }
