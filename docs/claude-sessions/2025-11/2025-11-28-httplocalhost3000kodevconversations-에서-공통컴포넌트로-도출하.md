@@ -9,8 +9,8 @@
 | **브랜치** | 13-claude |
 | **카테고리** | bug-fix |
 | **난이도** | hard |
-| **소요시간** | 424분 |
-| **메시지 수** | 675 |
+| **소요시간** | 573분 |
+| **메시지 수** | 829 |
 | **세션 ID** | a849adf3-c837-4af8-9e5c-50efbf5207a7 |
 
 ---
@@ -4690,4 +4690,931 @@ The feature includes:
 - Sending `isPinned` in submit data
 - Admin-only visibility for the checkbox
 - Visual indicator with pin icon
+
+### 👤 사용자 (오후 1:43:53)
+
+로그인시 팝업 공지와 기간을 설정할 수 있는 UI를 추가하라. http://localhost:3000/boards/2e2b8977-0282-4a07-a7da-ed1bf74dd1e6/57245858-7d90-4fa9-a246-73fd6cfa3df1/edit
+
+### 🤖 Claude (오후 1:44:02)
+
+팝업 공지 및 기간 설정 UI를 추가하겠습니다. 먼저 현재 코드를 확인하고 필요한 상태와 UI를 추가합니다.
+
+### 👤 사용자 (오후 1:44:05)
+
+
+
+### 👤 사용자 (오후 1:44:15)
+
+
+
+### 👤 사용자 (오후 1:44:25)
+
+
+
+### 👤 사용자 (오후 1:44:36)
+
+
+
+### 👤 사용자 (오후 1:44:44)
+
+
+
+### 👤 사용자 (오후 1:44:56)
+
+
+
+### 👤 사용자 (오후 1:45:03)
+
+
+
+### 👤 사용자 (오후 1:45:13)
+
+
+
+### 👤 사용자 (오후 1:45:21)
+
+
+
+### 👤 사용자 (오후 1:45:48)
+
+
+
+### 👤 사용자 (오후 1:45:57)
+
+
+
+### 👤 사용자 (오후 1:47:42)
+
+
+
+### 🤖 Claude (오후 1:47:49)
+
+빌드 성공! 이제 백엔드에서 팝업 관련 필드를 지원하는지 확인해보겠습니다.
+
+### 👤 사용자 (오후 1:47:59)
+
+
+
+### 🤖 Claude (오후 1:48:06)
+
+백엔드에서 팝업 필드를 아직 지원하지 않습니다. 데이터베이스 스키마와 백엔드를 확인하겠습니다.
+
+### 👤 사용자 (오후 1:48:12)
+
+
+
+### 👤 사용자 (오후 1:48:18)
+
+
+
+### 👤 사용자 (오후 1:48:36)
+
+
+
+### 👤 사용자 (오후 1:48:44)
+
+
+
+### 🤖 Claude (오후 1:48:53)
+
+백엔드에서 이미 `show_popup`, `display_start_date`, `display_end_date` 필드를 지원합니다. 프론트엔드의 필드명을 백엔드와 맞춰야 합니다.
+
+### 👤 사용자 (오후 1:48:57)
+
+
+
+### 👤 사용자 (오후 1:49:12)
+
+
+
+### 👤 사용자 (오후 1:49:27)
+
+
+
+### 👤 사용자 (오후 1:49:53)
+
+
+
+### 👤 사용자 (오후 1:51:51)
+
+
+
+### 👤 사용자 (오후 1:52:00)
+
+
+
+### 🤖 Claude (오후 1:52:13)
+
+빌드 성공! 팝업 공지 및 기간 설정 UI가 추가되었습니다.
+
+**변경 사항 요약:**
+
+1. **State 변수 추가** (`PostFormPage.tsx:102-104`):
+   - `showPopup`: 팝업 표시 여부
+   - `displayStartDate`: 표시 시작일
+   - `displayEndDate`: 표시 종료일
+
+2. **Edit 모드 데이터 로드** (`PostFormPage.tsx:148-157`):
+   - 기존 게시물의 팝업 설정을 불러와서 폼에 표시
+
+3. **Submit 데이터 포함** (`PostFormPage.tsx:194-196`):
+   - 저장시 `showPopup`, `displayStartDate`, `displayEndDate` 전송
+
+4. **Admin 전용 UI** (`PostFormPage.tsx:542-622`):
+   - "팝업 알림" 섹션 추가 (관리자만 표시)
+   - "팝업으로 표시" 체크박스
+   - 체크시 표시 기간 설정 UI 노출:
+     - 시작일/시간 입력 (datetime-local)
+     - 종료일/시간 입력 (datetime-local)
+   - 번역 지원 (이미 locale 파일에 존재)
+
+**UI 구조:**
+```
+공개 설정
+├── 비밀글 체크박스
+└── 공지사항 (상단고정) 체크박스 [Admin]
+
+팝업 알림 (관리자 전용) [Admin]
+├── 팝업으로 표시 체크박스
+└── 표시 기간 (팝업 체크시만 노출)
+    ├── 시작일
+    └── 종료일
+```
+
+### 👤 사용자 (오후 1:52:57)
+
+Popup Notification (Admin Only) 기간 입력시 공통컴포넌트를 활용하여 좌우로 배치할 수 있도록 수정하라. 
+
+### 🤖 Claude (오후 1:53:03)
+
+공통 컴포넌트를 확인하고 기간 입력 UI를 좌우 배치로 수정하겠습니다.
+
+### 👤 사용자 (오후 1:53:06)
+
+
+
+### 🤖 Claude (오후 1:53:12)
+
+`DateTimeRangePicker` 컴포넌트가 있네요. 이를 확인하겠습니다.
+
+### 👤 사용자 (오후 1:53:15)
+
+
+
+### 🤖 Claude (오후 1:53:23)
+
+`DateTimeRangePicker` 컴포넌트를 사용하여 기간 입력 UI를 수정하겠습니다.
+
+### 👤 사용자 (오후 1:53:28)
+
+
+
+### 👤 사용자 (오후 1:53:45)
+
+
+
+### 🤖 Claude (오후 1:53:52)
+
+이제 사용하지 않는 `ScheduleIcon` import를 제거하겠습니다.
+
+### 👤 사용자 (오후 1:53:57)
+
+
+
+### 🤖 Claude (오후 1:54:03)
+
+빌드하여 변경사항을 확인하겠습니다.
+
+### 👤 사용자 (오후 1:55:48)
+
+
+
+### 🤖 Claude (오후 1:55:59)
+
+빌드 성공! 변경 사항을 요약합니다.
+
+**변경 사항 요약:**
+
+1. **공통 컴포넌트 활용** (`PostFormPage.tsx:42`):
+   - `DateTimeRangePicker` 컴포넌트 import 추가
+
+2. **기간 입력 UI 개선** (`PostFormPage.tsx:577-595`):
+   - 기존: 세로로 배치된 두 개의 `TextField` (datetime-local)
+   - 변경: `DateTimeRangePicker` 컴포넌트로 교체
+   - 좌우 배치 (시작일 ~ 종료일)
+   - 달력 팝업 지원
+   - 다국어 지원 (`lang={currentLocale}`)
+
+3. **불필요한 import 제거**:
+   - `ScheduleIcon` 제거 (더 이상 사용하지 않음)
+
+**변경된 UI 구조:**
+```
+팝업 알림 (관리자 전용)
+├── ☑ 팝업으로 표시
+└── 표시 기간
+    [시작일 시간] ~ [종료일 시간]  ← 좌우 배치
+```
+
+**`DateTimeRangePicker` 컴포넌트 특징:**
+- Google 스타일 모던 디자인
+- 날짜+시간 선택 팝업
+- 종료일 최소값이 시작일로 자동 설정
+- 반응형 레이아웃
+
+### 👤 사용자 (오후 1:57:03)
+
+sidebar 에서 즐겨찾기가 잘되어 있어서 나의업무는 없어도 될 것 같다. 너무 복잡하니 해당기능을 제거하라. 
+
+### 🤖 Claude (오후 1:57:10)
+
+Sidebar에서 "나의업무" 탭을 제거하겠습니다.
+
+### 👤 사용자 (오후 1:57:13)
+
+
+
+### 👤 사용자 (오후 1:57:23)
+
+
+
+### 👤 사용자 (오후 1:57:32)
+
+
+
+### 👤 사용자 (오후 1:57:43)
+
+
+
+### 👤 사용자 (오후 1:57:55)
+
+
+
+### 👤 사용자 (오후 1:58:20)
+
+
+
+### 🤖 Claude (오후 1:58:26)
+
+빌드하여 변경사항을 확인하겠습니다.
+
+### 👤 사용자 (오후 2:00:05)
+
+
+
+### 🤖 Claude (오후 2:00:16)
+
+빌드 성공! "나의업무" 탭이 제거되었습니다.
+
+**변경 사항 요약:**
+
+1. **Import 정리** (`Sidebar/index.tsx:3`):
+   - `useMemo` import 제거 (더 이상 사용하지 않음)
+
+2. **useMenu Hook** (`Sidebar/index.tsx:125`):
+   - `recentMenus` 제거
+
+3. **myWorkMenus 로직 제거** (`Sidebar/index.tsx:145`):
+   - 최근 메뉴 + 즐겨찾기 조합 로직 삭제
+
+4. **탭 UI 간소화** (`Sidebar/index.tsx:294-300`):
+   - 기존: 전체 메뉴 | 즐겨찾기 | 나의업무
+   - 변경: 전체 메뉴 | 즐겨찾기
+
+5. **탭 콘텐츠 간소화** (`Sidebar/index.tsx:325-382`):
+   - "나의업무" 탭 콘텐츠 전체 삭제
+   - 탭 0: 전체 메뉴
+   - 탭 1: 즐겨찾기
+
+**결과:**
+- 사이드바가 더 단순해짐
+- 즐겨찾기 기능으로 충분히 자주 사용하는 메뉴에 빠르게 접근 가능
+
+### 👤 사용자 (오후 3:48:47)
+
+http://localhost:3000/ko/boards/8176d891-c24b-4d35-889d-a588f00436f7/19e1111f-a82f-4868-8790-e56a55fcc181 페이지를 찾을 수 없음 오류가 발생한다.
+
+### 🤖 Claude (오후 3:48:53)
+
+게시물 상세 페이지 라우트를 확인하겠습니다.
+
+### 👤 사용자 (오후 3:48:57)
+
+
+
+### 👤 사용자 (오후 3:49:05)
+
+
+
+### 👤 사용자 (오후 3:49:18)
+
+
+
+### 🤖 Claude (오후 3:49:24)
+
+페이지 파일은 존재합니다. 파일 내용을 확인하겠습니다.
+
+### 👤 사용자 (오후 3:49:29)
+
+
+
+### 🤖 Claude (오후 3:49:41)
+
+페이지 파일은 정상입니다. 레이아웃이나 라우팅 문제일 수 있습니다. 확인하겠습니다.
+
+### 👤 사용자 (오후 3:49:45)
+
+
+
+### 👤 사용자 (오후 3:49:52)
+
+
+
+### 👤 사용자 (오후 3:50:10)
+
+
+
+### 🤖 Claude (오후 3:50:17)
+
+`MetaInfo` 컴포넌트 import를 확인하겠습니다.
+
+### 👤 사용자 (오후 3:50:23)
+
+
+
+### 🤖 Claude (오후 3:50:28)
+
+개발 서버를 실행하여 실제 오류를 확인하겠습니다.
+
+### 👤 사용자 (오후 3:50:32)
+
+
+
+### 👤 사용자 (오후 3:50:54)
+
+
+
+### 👤 사용자 (오후 3:50:59)
+
+
+
+### 🤖 Claude (오후 3:51:08)
+
+기존 개발 서버가 실행 중입니다. 페이지를 직접 테스트해보겠습니다.
+
+### 👤 사용자 (오후 3:51:14)
+
+
+
+### 👤 사용자 (오후 3:51:26)
+
+
+
+### 🤖 Claude (오후 3:51:34)
+
+문제를 찾았습니다! `/ko/boards/...`에서 `/boards/...`로 리다이렉트되어 locale이 제거되고 있습니다. 이로 인해 404가 발생합니다.
+
+locale 관련 설정을 확인하겠습니다.
+
+### 👤 사용자 (오후 3:51:50)
+
+
+
+### 👤 사용자 (오후 3:51:58)
+
+
+
+### 👤 사용자 (오후 3:52:10)
+
+
+
+### 👤 사용자 (오후 3:52:21)
+
+
+
+### 👤 사용자 (오후 3:52:31)
+
+
+
+### 🤖 Claude (오후 3:52:40)
+
+문제를 발견했습니다! `router.push`에서 locale이 누락된 부분들이 있습니다.
+
+### 👤 사용자 (오후 3:52:43)
+
+
+
+### 👤 사용자 (오후 3:52:53)
+
+
+
+### 👤 사용자 (오후 3:53:02)
+
+
+
+### 👤 사용자 (오후 3:53:09)
+
+
+
+### 👤 사용자 (오후 3:53:18)
+
+
+
+### 👤 사용자 (오후 3:53:27)
+
+
+
+### 👤 사용자 (오후 3:53:40)
+
+
+
+### 👤 사용자 (오후 3:53:50)
+
+
+
+### 👤 사용자 (오후 3:53:58)
+
+
+
+### 👤 사용자 (오후 3:54:10)
+
+
+
+### 👤 사용자 (오후 3:54:20)
+
+
+
+### 👤 사용자 (오후 3:54:35)
+
+
+
+### 👤 사용자 (오후 3:54:47)
+
+
+
+### 🤖 Claude (오후 3:54:55)
+
+`next-international` 라이브러리가 307 리다이렉트를 생성하는데 locale이 누락되고 있습니다. 설정을 확인하겠습니다.
+
+### 👤 사용자 (오후 3:55:02)
+
+
+
+### 👤 사용자 (오후 3:55:10)
+
+
+
+### 👤 사용자 (오후 3:55:23)
+
+
+
+### 🤖 Claude (오후 3:55:32)
+
+`next-international`에 미들웨어가 누락되어 있습니다. 미들웨어를 생성하겠습니다.
+
+### 👤 사용자 (오후 3:55:37)
+
+
+
+### 🤖 Claude (오후 3:55:44)
+
+개발 서버를 재시작하여 변경사항을 적용합니다.
+
+### 👤 사용자 (오후 3:55:57)
+
+
+
+### 👤 사용자 (오후 3:56:18)
+
+
+
+### 👤 사용자 (오후 3:56:24)
+
+
+
+### 🤖 Claude (오후 3:56:34)
+
+기존 개발 서버가 아직 실행 중입니다. 미들웨어를 적용하려면 서버를 재시작해야 합니다.
+
+페이지가 localhost:3000에서 실행 중이라면, 미들웨어 변경사항을 적용하기 위해 개발 서버를 재시작해주세요 (Ctrl+C 후 `npm run dev`).
+
+하지만 먼저 빌드를 확인하겠습니다:
+
+### 👤 사용자 (오후 3:57:50)
+
+
+
+### 🤖 Claude (오후 3:57:56)
+
+`proxy.ts` 파일이 이미 있습니다. 확인하겠습니다.
+
+### 👤 사용자 (오후 3:58:00)
+
+
+
+### 🤖 Claude (오후 3:58:10)
+
+`proxy.ts`가 이미 존재합니다. 먼저 `middleware.ts`를 삭제하고 `proxy.ts`를 수정하겠습니다.
+
+### 👤 사용자 (오후 3:58:17)
+
+
+
+### 👤 사용자 (오후 3:58:31)
+
+
+
+### 🤖 Claude (오후 3:58:39)
+
+빌드하여 확인하겠습니다.
+
+### 👤 사용자 (오후 4:01:42)
+
+
+
+### 👤 사용자 (오후 4:02:53)
+
+
+
+### 👤 사용자 (오후 4:03:01)
+
+
+
+### 🤖 Claude (오후 4:03:08)
+
+빌드 성공! 이제 `/ko/dev/theme-demo` 페이지의 레이아웃 문제를 확인하겠습니다.
+
+### 👤 사용자 (오후 4:03:12)
+
+
+
+### 👤 사용자 (오후 4:03:21)
+
+
+
+### 👤 사용자 (오후 4:03:32)
+
+
+
+### 👤 사용자 (오후 4:04:36)
+
+This session is being continued from a previous conversation that ran out of context. The conversation is summarized below:
+Analysis:
+Let me analyze this conversation chronologically to capture all important details:
+
+1. **Initial Context (from previous session summary)**:
+   - User was working on fixing board post create/edit from popup modal to page-based navigation
+   - Various fixes were made including sidebar menu reload, Q&A menu navigation using `boardTypeId`
+   - `isPinned` (Notice) option was being added to `PostFormPage`
+
+2. **Completing isPinned (Notice) Option**:
+   - Added `isPinned` checkbox UI to `PostFormPage.tsx` with admin-only visibility
+   - Added translations for `pinnedPost` and `pinnedPostDesc` in all 4 locale files (en, ko, zh, vi)
+
+3. **Popup Notification Feature Request**:
+   - User requested adding popup notification with display period settings to post edit page
+   - Added state variables: `showPopup`, `displayStartDate`, `displayEndDate`
+   - Added loading of popup data in edit mode
+   - Added popup data to submit payload
+   - Added admin-only UI section with checkbox and date inputs
+   - Initially used wrong field names (`isPopup`, `popupStartDate`, `popupEndDate`), then corrected to match backend (`showPopup`, `displayStartDate`, `displayEndDate`)
+
+4. **DateTimeRangePicker Integration**:
+   - User requested using common component for period input with horizontal layout
+   - Replaced manual TextField inputs with `DateTimeRangePicker` component
+   - Removed `ScheduleIcon` import
+
+5. **Sidebar "My Work" Tab Removal**:
+   - User requested removing "나의업무" (My Work) tab as it was too complex
+   - Removed `useMemo` import
+   - Removed `recentMenus` from useMenu destructuring
+   - Removed `myWorkMenus` logic
+   - Removed "My Work" tab and its content
+   - Now only "전체 메뉴" (All Menus) and "즐겨찾기" (Favorites) tabs remain
+
+6. **Page Not Found Error**:
+   - User reported 404 error on `/ko/boards/8176d891-c24b-4d35-889d-a588f00436f7/19e1111f-a82f-4868-8790-e56a55fcc181`
+   - Investigation revealed HTTP 307 redirect stripping locale prefix
+   - Found `proxy.ts` existed with `next-international` middleware
+   - Created `middleware.ts` but got error about both files existing
+   - Deleted `middleware.ts`
+   - Updated `proxy.ts` to:
+     - Add missing locales: `['en', 'ko', 'zh', 'vi']`
+     - Changed `urlMappingStrategy` from `'rewrite'` to `'rewriteDefault'`
+
+7. **Theme Demo Layout Issue**:
+   - User reported layout issues on `/ko/dev/theme-demo`
+   - Read the theme-demo page and dev layout
+   - Dev layout uses `AuthenticatedLayout` without `fullBleed`
+   - Theme demo page has its own scroll handling with `height: '100%'` and `overflow: hidden`
+   - Issue was being investigated when summary was requested
+
+Key errors encountered:
+- Build error: Both middleware.ts and proxy.ts detected (Next.js 16 only allows one)
+- Port in use errors when trying to restart dev server
+- 307 redirect stripping locale from URL
+
+Summary:
+1. Primary Request and Intent:
+   - Complete adding `isPinned` (Notice/공지사항) checkbox to `PostFormPage.tsx`
+   - Add popup notification feature with display period settings to post edit page
+   - Use `DateTimeRangePicker` common component for horizontal date range layout
+   - Remove "나의업무" (My Work) tab from sidebar as it's redundant with favorites
+   - Fix "페이지를 찾을 수 없음" (page not found) error on board post detail page
+   - Fix layout issues on `/ko/dev/theme-demo` page
+
+2. Key Technical Concepts:
+   - `next-international` middleware/proxy configuration for locale routing
+   - `urlMappingStrategy: 'rewriteDefault'` vs `'rewrite'`
+   - Next.js 16 uses `proxy.ts` instead of `middleware.ts`
+   - `DateTimeRangePicker` common component for date range selection
+   - Admin-only form options with `isAdmin` check
+   - HTTP 307 Temporary Redirect and locale handling
+
+3. Files and Code Sections:
+   - **`src/components/boards/PostFormPage.tsx`**
+     - Added popup notification feature with admin-only visibility
+     - Integrated `DateTimeRangePicker` for display period
+     - Key additions:
+     ```typescript
+     // State variables
+     const [showPopup, setShowPopup] = useState(false);
+     const [displayStartDate, setDisplayStartDate] = useState<string>('');
+     const [displayEndDate, setDisplayEndDate] = useState<string>('');
+     
+     // Loading in edit mode
+     setShowPopup(postData.show_popup ?? postData.showPopup ?? false);
+     if (postData.display_start_date || postData.displayStartDate) {
+       const startDate = new Date(postData.display_start_date || postData.displayStartDate);
+       setDisplayStartDate(startDate.toISOString().slice(0, 16));
+     }
+     
+     // Submit payload
+     showPopup: showPopup,
+     displayStartDate: displayStartDate ? new Date(displayStartDate).toISOString() : null,
+     displayEndDate: displayEndDate ? new Date(displayEndDate).toISOString() : null,
+     
+     // UI with DateTimeRangePicker
+     {showPopup && (
+       <Box sx={{ pl: 4 }}>
+         <DateTimeRangePicker
+           label={t('board.displayPeriod')}
+           startDateTime={displayStartDate}
+           endDateTime={displayEndDate}
+           onChange={(start, end) => {
+             setDisplayStartDate(start);
+             setDisplayEndDate(end);
+           }}
+           startLabel={t('board.startDate')}
+           endLabel={t('board.endDate')}
+           helperText={t('board.startDateHelper')}
+           disabled={loading}
+           lang={currentLocale}
+         />
+       </Box>
+     )}
+     ```
+
+   - **`src/components/layout/Sidebar/index.tsx`**
+     - Removed "My Work" tab and related code
+     - Changed from `import React, { useState, useMemo }` to `import React, { useState }`
+     - Removed `recentMenus` from useMenu destructuring
+     - Removed `myWorkMenus` useMemo hook
+     - Tabs now only have "All Menus" and "Favorites"
+
+   - **`src/proxy.ts`**
+     - Updated to fix locale routing issue
+     ```typescript
+     import { createI18nMiddleware } from 'next-international/middleware';
+     import { NextRequest } from 'next/server';
+
+     const I18nMiddleware = createI18nMiddleware({
+       locales: ['en', 'ko', 'zh', 'vi'],
+       defaultLocale: 'en',
+       urlMappingStrategy: 'rewriteDefault'
+     });
+
+     export function proxy(request: NextRequest) {
+       return I18nMiddleware(request);
+     }
+
+     export const config = {
+       matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)']
+     };
+     ```
+
+   - **`src/lib/i18n/locales/*.ts`**
+     - Added `pinnedPost` and `pinnedPostDesc` translations in en.ts, ko.ts, zh.ts, vi.ts
+
+   - **`src/app/[locale]/dev/layout.tsx`**
+     - Uses `AuthenticatedLayout` without `fullBleed`
+     ```typescript
+     export default function DevLayout({ children }: { children: React.ReactNode; }) {
+       return (
+         <AuthenticatedLayout>
+           {children}
+         </AuthenticatedLayout>
+       );
+     }
+     ```
+
+   - **`src/app/[locale]/dev/theme-demo/page.tsx`**
+     - Has its own scroll handling with `height: '100%'`, `overflow: hidden`
+     - May conflict with AuthenticatedLayout's default scroll wrapper
+
+4. Errors and fixes:
+   - **Build error with both middleware.ts and proxy.ts**:
+     - Error: "Both middleware file and proxy file are detected"
+     - Fix: Deleted `middleware.ts`, updated `proxy.ts` instead (Next.js 16 uses proxy.ts)
+   
+   - **307 redirect stripping locale prefix**:
+     - curl showed `/ko/boards/...` redirecting to `/boards/...` (without locale)
+     - Fix: Updated `proxy.ts` to use `urlMappingStrategy: 'rewriteDefault'` and added all locales
+
+   - **Wrong field names for popup data**:
+     - Initially used `isPopup`, `popupStartDate`, `popupEndDate`
+     - Backend uses `show_popup`, `display_start_date`, `display_end_date`
+     - Fix: Changed to `showPopup`, `displayStartDate`, `displayEndDate` to match backend
+
+5. Problem Solving:
+   - Solved: `isPinned` checkbox added with admin visibility
+   - Solved: Popup notification UI with `DateTimeRangePicker`
+   - Solved: Sidebar "My Work" tab removed
+   - In Progress: 307 redirect/locale issue - updated proxy.ts but needs server restart to verify
+   - In Progress: Theme demo layout issue - was investigating when summary requested
+
+6. All user messages:
+   - "로그인시 팝업 공지와 기간을 설정할 수 있는 UI를 추가하라. http://localhost:3000/boards/2e2b8977-0282-4a07-a7da-ed1bf74dd1e6/57245858-7d90-4fa9-a246-73fd6cfa3df1/edit"
+   - "Popup Notification (Admin Only) 기간 입력시 공통컴포넌트를 활용하여 좌우로 배치할 수 있도록 수정하라."
+   - "sidebar 에서 즐겨찾기가 잘되어 있어서 나의업무는 없어도 될 것 같다. 너무 복잡하니 해당기능을 제거하라."
+   - "http://localhost:3000/ko/boards/8176d891-c24b-4d35-889d-a588f00436f7/19e1111f-a82f-4868-8790-e56a55fcc181 페이지를 찾을 수 없음 오류가 발생한다."
+   - "http://localhost:3000/ko/dev/theme-demo 에 공통컴포넌트가 변경되었는지 전체적인 layout이 이상하다. 필요하다면 새로운 공통컴포넌트를 만들거나 다른 방법을 고려하라"
+
+7. Pending Tasks:
+   - Verify the 307 redirect fix works after server restart
+   - Fix the layout issue on `/ko/dev/theme-demo` page
+
+8. Current Work:
+   Investigating the layout issue on `/ko/dev/theme-demo` page. The user reported:
+   > "http://localhost:3000/ko/dev/theme-demo 에 공통컴포넌트가 변경되었는지 전체적인 layout이 이상하다. 필요하다면 새로운 공통컴포넌트를 만들거나 다른 방법을 고려하라"
+
+   Read the theme-demo page and found:
+   - Dev layout uses `AuthenticatedLayout` without `fullBleed` prop
+   - Theme demo page has `height: '100%'` and `overflow: hidden` on outer Box
+   - This may conflict with AuthenticatedLayout's default scroll wrapper (which has `overflowY: 'auto'` and padding)
+
+9. Optional Next Step:
+   Fix the theme-demo layout issue. The problem is likely that the theme-demo page uses `height: '100%'` but the parent `AuthenticatedLayout` without `fullBleed` wraps content in a scrollable container with padding. Options:
+   1. Add `fullBleed` to dev layout: `<AuthenticatedLayout fullBleed>`
+   2. Modify theme-demo page to work with the default layout wrapper
+   3. Create a separate layout for pages that need custom scroll handling
+
+   Also need to verify the proxy.ts change fixed the 307 redirect issue by having user restart dev server..
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+### 🤖 Claude (오후 4:04:41)
+
+I'll continue investigating and fixing the theme-demo layout issue. Let me read the relevant files to understand the problem.
+
+### 👤 사용자 (오후 4:04:44)
+
+
+
+### 👤 사용자 (오후 4:04:49)
+
+
+
+### 👤 사용자 (오후 4:04:49)
+
+
+
+### 👤 사용자 (오후 4:05:08)
+
+
+
+### 👤 사용자 (오후 4:05:22)
+
+
+
+### 👤 사용자 (오후 4:05:30)
+
+
+
+### 🤖 Claude (오후 4:05:42)
+
+I see the issue. The theme-demo page has custom scroll handling (`height: '100%'` and `overflow: hidden` on outer Box) but the dev layout uses `AuthenticatedLayout` without `fullBleed` prop. The default mode adds padding and scroll wrapper that conflicts with theme-demo's layout.
+
+The fix is to add `fullBleed` to the dev layout since dev pages often need custom layouts:
+
+### 👤 사용자 (오후 4:05:47)
+
+
+
+### 🤖 Claude (오후 4:05:52)
+
+Now let me check other dev pages to ensure they work with `fullBleed` mode:
+
+### 👤 사용자 (오후 4:06:05)
+
+
+
+### 👤 사용자 (오후 4:06:16)
+
+
+
+### 👤 사용자 (오후 4:06:28)
+
+
+
+### 🤖 Claude (오후 4:06:32)
+
+Let me check a component page to see if it handles its own scroll:
+
+### 👤 사용자 (오후 4:06:35)
+
+
+
+### 🤖 Claude (오후 4:06:41)
+
+Let me check the PageContainer component:
+
+### 👤 사용자 (오후 4:06:50)
+
+
+
+### 👤 사용자 (오후 4:06:57)
+
+
+
+### 🤖 Claude (오후 4:07:32)
+
+I see the issue. The data-grid and other dev pages use `PageContainer` without their own scroll handling - they rely on the default layout's scroll wrapper. If I set `fullBleed` on the dev layout, those pages won't scroll properly.
+
+The best solution is to create a specialized layout just for theme-demo. Let me revert the dev layout and create a theme-demo specific layout:
+
+### 👤 사용자 (오후 4:07:35)
+
+
+
+### 🤖 Claude (오후 4:07:43)
+
+Actually, creating a nested layout won't work properly because Next.js combines layouts - it would result in nested `AuthenticatedLayout`. The better approach is to modify theme-demo to work with the default layout's scroll wrapper.
+
+Let me update theme-demo to remove its own scroll handling and work with the standard layout:
+
+### 👤 사용자 (오후 4:07:48)
+
+
+
+### 🤖 Claude (오후 4:07:54)
+
+Now I need to fix the closing of the page. Let me read the end of the file to fix the closing tags:
+
+### 👤 사용자 (오후 4:07:57)
+
+
+
+### 👤 사용자 (오후 4:08:07)
+
+
+
+### 🤖 Claude (오후 4:08:14)
+
+Now let me check if we can remove unused `Box` import and verify the file compiles:
+
+### 👤 사용자 (오후 4:08:17)
+
+
+
+### 🤖 Claude (오후 4:08:23)
+
+The indentation is off. Let me fix it:
+
+### 👤 사용자 (오후 4:08:26)
+
+
+
+### 🤖 Claude (오후 4:08:34)
+
+Let me verify the TypeScript compiles correctly:
+
+### 👤 사용자 (오후 4:09:04)
+
+
+
+### 🤖 Claude (오후 4:09:12)
+
+Those are MUI type issues unrelated to my changes. Let me check the dev server status:
+
+### 👤 사용자 (오후 4:09:12)
+
+
+
+### 🤖 Claude (오후 4:09:22)
+
+There are port conflicts. Let me kill the existing processes and restart:
+
+### 👤 사용자 (오후 4:09:29)
+
+
 

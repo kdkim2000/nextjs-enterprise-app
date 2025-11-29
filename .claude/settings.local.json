@@ -141,7 +141,10 @@
       "Bash(if [ -f E:/apps/nextjs-enterprise-app/backend/.env ])",
       "Bash(cmd //c \"taskkill /F /PID 33344\")",
       "Bash(cmd //c \"taskkill /F /IM node.exe\")",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npm run migrate:conversations:*)",
+      "Bash(PGPASSWORD='AppUser2024!' psql -h localhost -p 5432 -U app_user -d nextjs_enterprise_app -f \"migration/insert_conversations_2025-11-29T09-19-12.sql\")",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []
