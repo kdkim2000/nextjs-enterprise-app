@@ -7,14 +7,11 @@ import SearchFilterFields from '@/components/common/SearchFilterFields';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import PageStateWrapper from '@/components/common/PageStateWrapper';
-import PostFormModal from '@/components/boards/PostFormModal';
 import BoardListView from '@/components/boards/BoardListView';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 import { useBoardManagement } from './hooks/useBoardManagement';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLocalizedName } from '@/hooks/useLocalizedName';
 import { buildSimpleDeleteItemsList } from '@/lib/utils/deleteItemsListBuilder';
 
 export default function BoardListPage() {
@@ -22,10 +19,6 @@ export default function BoardListPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const boardTypeId = params.boardTypeId as string;
-  const { user } = useAuth();
-
-  // Check if user is admin
-  const isAdmin = user?.role === 'admin';
 
   // Board permissions
   const { canWrite, canRead, boardType, loading: permLoading } = useBoardPermissions(boardTypeId);
@@ -43,10 +36,6 @@ export default function BoardListPage() {
     setAdvancedFilterOpen,
     successMessage,
     errorMessage,
-    modalOpen,
-    editingPost,
-    setEditingPost,
-    saveLoading,
     deleteDialogOpen,
     deleteTargetIds,
     deleteLoading,
@@ -58,12 +47,10 @@ export default function BoardListPage() {
     handleAdvancedFilterClose,
     handlePaginationModelChange,
     handleAdd,
-    handleSave,
     handleDelete,
     handleConfirmDelete,
     handleCancelDelete,
-    handlePostClick,
-    handleCloseModal
+    handlePostClick
   } = useBoardManagement({
     storageKey: `board-${boardTypeId}-page-state`,
     boardTypeId,
@@ -80,13 +67,6 @@ export default function BoardListPage() {
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
   );
-
-  // Get localized board name using the hook
-  const boardName = useLocalizedName({
-    object: boardType,
-    locale: currentLocale,
-    fallback: boardTypeId
-  });
 
   // Build delete items list using utility
   const deleteItemsList = useMemo(
@@ -164,42 +144,6 @@ export default function BoardListPage() {
             locale={currentLocale}
           />
         </Box>
-
-        {/* Post Form Modal for Creation/Edit */}
-        <PostFormModal
-          open={modalOpen}
-          onClose={handleCloseModal}
-          onSave={handleSave}
-          post={editingPost ? {
-            id: editingPost.id,
-            title: editingPost.title,
-            content: editingPost.content || '',
-            tags: editingPost.tags,
-            isSecret: editingPost.is_secret,
-            isPinned: editingPost.is_pinned,
-            showPopup: (editingPost as any).showPopup,
-            displayStartDate: (editingPost as any).displayStartDate,
-            displayEndDate: (editingPost as any).displayEndDate,
-            files: (editingPost as any).files
-          } as any : null}
-          onChange={(post) => setEditingPost({
-            ...editingPost,
-            id: post.id,
-            title: post.title,
-            content: post.content,
-            tags: post.tags,
-            is_secret: post.isSecret,
-            is_pinned: post.isPinned,
-            showPopup: post.showPopup,
-            displayStartDate: post.displayStartDate,
-            displayEndDate: post.displayEndDate,
-            files: (post as any).files
-          } as any)}
-          mode={editingPost?.id ? 'edit' : 'create'}
-          saveLoading={saveLoading}
-          boardSettings={boardType?.settings}
-          isAdmin={isAdmin}
-        />
 
         {/* Delete Confirmation Dialog */}
         <DeleteConfirmDialog

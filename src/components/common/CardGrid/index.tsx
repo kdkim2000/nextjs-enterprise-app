@@ -7,7 +7,10 @@ import {
   Paper,
   Typography,
   Pagination,
-  Skeleton
+  Skeleton,
+  Select,
+  MenuItem,
+  FormControl
 } from '@mui/material';
 import { SentimentDissatisfied } from '@mui/icons-material';
 
@@ -19,6 +22,9 @@ export interface GridColumns {
   lg?: number;
   xl?: number;
 }
+
+// Page size options
+export const DEFAULT_PAGE_SIZE_OPTIONS = [6, 12, 24, 48];
 
 // Card Grid Props
 export interface CardGridProps<T> {
@@ -35,6 +41,14 @@ export interface CardGridProps<T> {
     totalPages: number;
     onChange: (page: number) => void;
   };
+  // Page size
+  pageSize?: {
+    value: number;
+    options?: number[];
+    onChange: (size: number) => void;
+  };
+  // Total count for display
+  totalCount?: number;
   // Empty state
   emptyIcon?: ReactNode;
   emptyTitle?: string;
@@ -115,11 +129,15 @@ export default function CardGrid<T>({
   columns = { xs: 12, sm: 6, md: 4 },
   spacing = 2.5,
   pagination,
+  pageSize,
+  totalCount,
   emptyIcon,
   emptyTitle,
   emptyDescription,
   sx
 }: CardGridProps<T>) {
+  const pageSizeOptions = pageSize?.options || DEFAULT_PAGE_SIZE_OPTIONS;
+
   // Render loading skeletons
   if (loading) {
     return (
@@ -155,22 +173,67 @@ export default function CardGrid<T>({
         ))}
       </Grid>
 
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Pagination
-            count={pagination.totalPages}
-            page={pagination.page}
-            onChange={(_, value) => pagination.onChange(value)}
-            color="primary"
-            showFirstButton
-            showLastButton
-            sx={{
-              '& .MuiPaginationItem-root': {
-                borderRadius: 2
-              }
-            }}
-          />
+      {/* Pagination Area */}
+      {(pagination || pageSize) && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 3,
+            mt: 4,
+            flexWrap: 'wrap'
+          }}
+        >
+          {/* Page Size Selector */}
+          {pageSize && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                Show
+              </Typography>
+              <FormControl size="small">
+                <Select
+                  value={pageSize.value}
+                  onChange={(e) => pageSize.onChange(e.target.value as number)}
+                  sx={{
+                    minWidth: 70,
+                    '& .MuiSelect-select': {
+                      py: 0.5,
+                      fontSize: '0.875rem'
+                    }
+                  }}
+                >
+                  {pageSizeOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              {totalCount !== undefined && (
+                <Typography variant="body2" color="text.secondary">
+                  of {totalCount}
+                </Typography>
+              )}
+            </Box>
+          )}
+
+          {/* Pagination */}
+          {pagination && pagination.totalPages > 1 && (
+            <Pagination
+              count={pagination.totalPages}
+              page={pagination.page}
+              onChange={(_, value) => pagination.onChange(value)}
+              color="primary"
+              showFirstButton
+              showLastButton
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  borderRadius: 2
+                }
+              }}
+            />
+          )}
         </Box>
       )}
     </Box>
