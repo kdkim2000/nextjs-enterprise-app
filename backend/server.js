@@ -35,6 +35,8 @@ const attachmentRoutes = require('./routes/attachment');
 const qnaRoutes = require('./routes/qna');
 const attachmentTypeRoutes = require('./routes/attachmentType');
 const conversationRoutes = require('./routes/conversation');
+const dashboardRoutes = require('./routes/dashboard');
+const appSettingsRoutes = require('./routes/appSettings');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -120,6 +122,12 @@ app.use('/api/attachment-type', attachmentTypeRoutes);
 
 // Claude Code conversation routes (read-only)
 app.use('/api/conversation', conversationRoutes);
+
+// Dashboard routes
+app.use('/api/dashboard', dashboardRoutes);
+
+// App Settings routes
+app.use('/api/app-settings', appSettingsRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);
