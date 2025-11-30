@@ -7,6 +7,7 @@ import { I18nProviderClient } from '@/lib/i18n/client';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PermissionProvider } from '@/contexts/PermissionContext';
 import { MenuProvider } from '@/contexts/MenuContext';
+import { AppSettingsProvider } from '@/hooks/useAppSettings';
 import LanguageLoader from './LanguageLoader';
 import NoticePopup from '@/components/common/NoticePopup';
 import { lightTheme } from '@/theme';
@@ -22,30 +23,32 @@ export function ClientProviders({
 }) {
   return (
     <I18nProviderClient locale={locale}>
-      <ThemeProvider theme={lightTheme}>
-        <CssBaseline />
-        <AuthProvider>
-          <LanguageLoader />
-          <PermissionProvider>
-            <MenuProvider>
-              {children}
-              <NoticePopup />
-              <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-              />
-            </MenuProvider>
-          </PermissionProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <AppSettingsProvider>
+        <ThemeProvider theme={lightTheme}>
+          <CssBaseline />
+          <AuthProvider>
+            <LanguageLoader />
+            <PermissionProvider>
+              <MenuProvider>
+                {children}
+                <NoticePopup />
+                <ToastContainer
+                  position="top-right"
+                  autoClose={5000}
+                  hideProgressBar={false}
+                  newestOnTop
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="light"
+                />
+              </MenuProvider>
+            </PermissionProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </AppSettingsProvider>
     </I18nProviderClient>
   );
 }

@@ -28,6 +28,7 @@ import { useCurrentLocale, useChangeLocale, useI18n } from '@/lib/i18n/client';
 import { SUPPORTED_LANGUAGES, type LanguageCode } from '@/lib/i18n/languages';
 import { getAvatarUrl } from '@/lib/config';
 import { api } from '@/lib/axios';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -39,8 +40,13 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const changeLocale = useChangeLocale();
   const t = useI18n();
   const { user, logout } = useAuth();
+  const { getSetting, getLocalizedSetting } = useAppSettings();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // Get app name and logo from settings
+  const appName = getLocalizedSetting('app_name', t('common.appName'));
+  const appLogo = getSetting('app_logo');
 
   const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -134,9 +140,23 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           <MenuIcon />
         </IconButton>
 
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {t('common.appName')}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1 }}>
+          {appLogo && (
+            <Box
+              component="img"
+              src={appLogo}
+              alt="Logo"
+              sx={{
+                height: 32,
+                width: 'auto',
+                objectFit: 'contain'
+              }}
+            />
+          )}
+          <Typography variant="h6" component="div">
+            {appName}
+          </Typography>
+        </Box>
 
         <Box
           onClick={handleUserMenuClick}

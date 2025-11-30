@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Box, Typography, Container, Chip, Stack, Divider } from '@mui/material';
+import { Box, Typography, Container, Chip, Stack, Divider, Link as MuiLink } from '@mui/material';
 import { usePathname } from 'next/navigation';
 import { useMenu } from '@/hooks/useMenu';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -11,7 +12,16 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 export default function DashboardFooter() {
   const pathname = usePathname();
   const { currentMenu } = useMenu();
+  const { getSetting, getLocalizedSetting } = useAppSettings();
   const [currentTime, setCurrentTime] = React.useState(new Date());
+
+  // Get settings with defaults
+  const appName = getLocalizedSetting('app_name', 'Enterprise App');
+  const appVersion = getSetting('app_version', '1.0.0');
+  const copyrightText = getSetting('copyright_text', '© 2024 Enterprise Corp. All rights reserved.');
+  const privacyUrl = getSetting('privacy_policy_url', '/privacy');
+  const termsUrl = getSetting('terms_of_service_url', '/terms');
+  const supportEmail = getSetting('support_email', '');
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -107,11 +117,49 @@ export default function DashboardFooter() {
             <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
 
             <Typography variant="body2" color="text.secondary" fontWeight={500}>
-              Enterprise App v1.0.0
+              {appName} v{appVersion}
             </Typography>
 
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
+
+            {/* Footer Links */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <MuiLink
+                href={privacyUrl}
+                underline="hover"
+                color="text.secondary"
+                sx={{ fontSize: '0.75rem' }}
+              >
+                Privacy
+              </MuiLink>
+              <Typography variant="caption" color="text.secondary">|</Typography>
+              <MuiLink
+                href={termsUrl}
+                underline="hover"
+                color="text.secondary"
+                sx={{ fontSize: '0.75rem' }}
+              >
+                Terms
+              </MuiLink>
+              {supportEmail && (
+                <>
+                  <Typography variant="caption" color="text.secondary">|</Typography>
+                  <MuiLink
+                    href={`mailto:${supportEmail}`}
+                    underline="hover"
+                    color="text.secondary"
+                    sx={{ fontSize: '0.75rem' }}
+                  >
+                    {supportEmail}
+                  </MuiLink>
+                </>
+              )}
+            </Stack>
+
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
+
             <Typography variant="caption" color="text.secondary">
-              © 2024
+              {copyrightText}
             </Typography>
           </Stack>
         </Box>
