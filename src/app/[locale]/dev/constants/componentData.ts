@@ -167,6 +167,12 @@ export const componentCategories = [
         description: 'MUI icon selector dropdown with search functionality and icon preview',
         path: '/dev/components/icon-select',
         tags: ['Icon', 'Select', 'MUI', 'Search']
+      },
+      {
+        title: 'InlineEditRow',
+        description: 'Inline editing row for key-value pairs with toggles - Enter to save, Esc to cancel',
+        path: '/dev/components/inline-edit-row',
+        tags: ['Inline', 'Edit', 'KeyValue', 'Toggle']
       }
     ]
   },
@@ -341,9 +347,53 @@ export const componentCategories = [
     ]
   },
   {
+    category: 'Dashboard Components',
+    description: 'Reusable components for building dashboards and data visualization',
+    icon: Dashboard,
+    color: '#6366f1',
+    components: [
+      {
+        title: 'StatCard',
+        description: 'KPI/metric card with gradient accent, icon, value and trend indicator',
+        path: '/dev/components/stat-card',
+        tags: ['Card', 'KPI', 'Metrics', 'Dashboard']
+      },
+      {
+        title: 'FilterTabs',
+        description: 'Generic filter tab component with TypeScript generics for type-safe filtering',
+        path: '/dev/components/filter-tabs',
+        tags: ['Filter', 'Tabs', 'Generic', 'TypeScript']
+      },
+      {
+        title: 'ProgressBarList',
+        description: 'Progress bar list for displaying statistics with labels, values and percentages',
+        path: '/dev/components/progress-bar-list',
+        tags: ['Progress', 'List', 'Statistics', 'Chart']
+      },
+      {
+        title: 'ActivityTimeline',
+        description: 'Activity feed timeline with customizable type icons, colors and relative timestamps',
+        path: '/dev/components/activity-timeline',
+        tags: ['Timeline', 'Activity', 'Feed', 'Events']
+      },
+      {
+        title: 'RankedList',
+        description: 'Ranked item list with top highlighting and custom metric rendering',
+        path: '/dev/components/ranked-list',
+        tags: ['Ranked', 'List', 'Leaderboard', 'Top']
+      },
+      {
+        title: 'QuickActionGrid',
+        description: 'Quick action button grid with icons, descriptions and configurable columns',
+        path: '/dev/components/quick-action-grid',
+        tags: ['Actions', 'Grid', 'Navigation', 'Quick']
+      }
+    ]
+  },
+  {
     category: 'Layout Components',
     description: 'Page structure and navigation components',
-    icon: Dashboard,
+    icon: ViewModule,
     color: '#f57c00',
     components: [
       {
@@ -363,6 +413,12 @@ export const componentCategories = [
         description: 'Resizable split-pane layout with draggable divider for master-detail patterns',
         path: '/dev/components/master-detail-layout',
         tags: ['Layout', 'Split', 'Resizable', 'Panel']
+      },
+      {
+        title: 'CategoryNavPanel',
+        description: 'Category navigation panel with icons, colors, and statistics - ideal for settings, menus, folders',
+        path: '/dev/components/category-nav-panel',
+        tags: ['Navigation', 'Category', 'Panel', 'Stats']
       },
       {
         title: 'Empty State',

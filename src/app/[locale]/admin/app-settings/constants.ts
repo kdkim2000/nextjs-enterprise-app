@@ -2,7 +2,25 @@
  * App Settings Constants
  */
 
+import React from 'react';
+import {
+  Info,
+  Palette,
+  Language,
+  Security,
+  VpnKey,
+  Notifications,
+  CloudUpload,
+  Build,
+  Flag,
+  Business,
+  Settings
+} from '@mui/icons-material';
 import { CategoryInfo, CategoryType, MultiLangText } from './types';
+import { CategoryItem } from '@/components/common/CategoryNavPanel';
+
+// Re-export CategoryType for convenience
+export type { CategoryType } from './types';
 
 // Category information with icons and labels
 export const CATEGORIES: CategoryInfo[] = [
@@ -106,4 +124,32 @@ export const CATEGORY_COLORS: Record<CategoryType, string> = {
   operations: '#607d8b',
   feature_flags: '#e91e63',
   organization: '#3f51b5'
+};
+
+// Icon mapping for category icons
+export const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  Info,
+  Palette,
+  Language,
+  Security,
+  VpnKey,
+  Notifications,
+  CloudUpload,
+  Build,
+  Flag,
+  Business,
+  Settings
+};
+
+/**
+ * Convert CATEGORIES to CategoryItem format for CategoryNavPanel
+ */
+export const getCategoryItems = (locale: string): CategoryItem[] => {
+  return CATEGORIES.map(cat => ({
+    id: cat.id,
+    label: getLocalizedText(cat.label, locale),
+    icon: CATEGORY_ICONS[cat.icon] || Settings,
+    color: CATEGORY_COLORS[cat.id as CategoryType],
+    description: getLocalizedText(cat.description, locale)
+  }));
 };

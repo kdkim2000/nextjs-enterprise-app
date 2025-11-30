@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, ReactNode } from 'react';
 import {
   Box,
   Typography,
@@ -14,74 +14,159 @@ import {
   Select,
   MenuItem,
   FormControl,
-  CircularProgress
+  CircularProgress,
+  SxProps,
+  Theme
 } from '@mui/material';
 import {
   Save as SaveIcon,
   Delete as DeleteIcon,
   Lock as LockIcon,
-  Undo as UndoIcon,
-  ContentCopy as CopyIcon
+  Undo as UndoIcon
 } from '@mui/icons-material';
-import { AppSetting, CategoryType } from '../types';
-import { getLocalizedText, CATEGORY_COLORS } from '../constants';
 
-interface InlineSettingRowProps {
-  setting: AppSetting;
-  locale: string;
-  onSave: (key: string, value: string) => Promise<any>;
-  onDelete?: (setting: AppSetting) => void;
-  onToggleReady: (key: string, isReady: boolean) => void;
-  onToggleApplied: (key: string, isApplied: boolean) => void;
-  saving?: boolean;
+/**
+ * Value type for the field
+ */
+export type InlineEditValueType = 'string' | 'number' | 'boolean' | 'json' | 'password';
+
+/**
+ * Toggle configuration for status switches
+ */
+export interface ToggleConfig {
+  /** Current value */
+  value: boolean;
+  /** Callback when toggled */
+  onChange: (value: boolean) => void;
+  /** Tooltip when enabled */
+  enabledTooltip?: string;
+  /** Tooltip when disabled */
+  disabledTooltip?: string;
+  /** Whether this toggle is disabled */
+  disabled?: boolean;
+  /** Color when enabled */
+  color?: string;
 }
 
-export default function InlineSettingRow({
-  setting,
-  locale,
+/**
+ * Props for InlineEditRow
+ */
+interface InlineEditRowProps {
+  /** Unique identifier/key */
+  id: string;
+  /** Display label (shown in first column) */
+  label: string;
+  /** Description text */
+  description?: string;
+  /** Current value */
+  value: string;
+  /** Value type for appropriate input rendering */
+  valueType?: InlineEditValueType;
+  /** Whether this is a sensitive field (shows as password) */
+  isSensitive?: boolean;
+  /** Callback when value is saved */
+  onSave: (id: string, value: string) => Promise<any>;
+  /** Callback when delete is clicked */
+  onDelete?: () => void;
+  /** Array of toggle configurations */
+  toggles?: ToggleConfig[];
+  /** Whether currently saving */
+  saving?: boolean;
+  /** Label column width */
+  labelWidth?: number | string;
+  /** Type badge column width */
+  typeWidth?: number | string;
+  /** Whether to show type badge */
+  showType?: boolean;
+  /** Border color */
+  borderColor?: string;
+  /** Custom content to render after value input */
+  extraContent?: ReactNode;
+  /** Copy tooltip text */
+  copyTooltip?: string;
+  /** Save tooltip text */
+  saveTooltip?: string;
+  /** Revert tooltip text */
+  revertTooltip?: string;
+  /** Delete tooltip text */
+  deleteTooltip?: string;
+  /** Custom sx props */
+  sx?: SxProps<Theme>;
+}
+
+/**
+ * InlineEditRow - Reusable inline editing row for key-value pairs
+ *
+ * Features:
+ * - Supports string, number, boolean, json, password types
+ * - Enter to save, Escape to cancel
+ * - Multiple toggle switches support
+ * - Visual indication of modified state
+ *
+ * Use cases:
+ * - App settings
+ * - Environment variables
+ * - Configuration editors
+ * - Metadata editors
+ */
+export default function InlineEditRow({
+  id,
+  label,
+  description,
+  value,
+  valueType = 'string',
+  isSensitive = false,
   onSave,
   onDelete,
-  onToggleReady,
-  onToggleApplied,
-  saving = false
-}: InlineSettingRowProps) {
+  toggles = [],
+  saving = false,
+  labelWidth = 280,
+  typeWidth = 70,
+  showType = true,
+  borderColor,
+  extraContent,
+  copyTooltip = 'Copy',
+  saveTooltip = 'Save',
+  revertTooltip = 'Revert',
+  deleteTooltip = 'Delete',
+  sx
+}: InlineEditRowProps) {
   const theme = useTheme();
-  const categoryColor = CATEGORY_COLORS[setting.category as CategoryType] || theme.palette.primary.main;
 
-  const [editValue, setEditValue] = useState(setting.value || '');
+  const [editValue, setEditValue] = useState(value || '');
   const [isModified, setIsModified] = useState(false);
   const [localSaving, setLocalSaving] = useState(false);
 
-  // Sync value when setting changes from server
+  // Sync value when prop changes
   useEffect(() => {
-    setEditValue(setting.value || '');
+    setEditValue(value || '');
     setIsModified(false);
-  }, [setting.value]);
+  }, [value]);
 
   const handleValueChange = useCallback((newValue: string) => {
     setEditValue(newValue);
-    setIsModified(newValue !== (setting.value || ''));
-  }, [setting.value]);
+    setIsModified(newValue !== (value || ''));
+  }, [value]);
 
   const handleSave = useCallback(async () => {
     if (!isModified) return;
     setLocalSaving(true);
     try {
-      await onSave(setting.key, editValue);
+      await onSave(id, editValue);
       setIsModified(false);
     } finally {
       setLocalSaving(false);
     }
-  }, [isModified, setting.key, editValue, onSave]);
+  }, [isModified, id, editValue, onSave]);
 
   const handleRevert = useCallback(() => {
-    setEditValue(setting.value || '');
+    setEditValue(value || '');
     setIsModified(false);
-  }, [setting.value]);
+  }, [value]);
 
   const handleCopyKey = useCallback(() => {
-    navigator.clipboard.writeText(setting.key);
-  }, [setting.key]);
+    navigator.clipboard.writeText(id);
+  }, [id]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && isModified) {
@@ -95,20 +180,21 @@ export default function InlineSettingRow({
 
   // Get type chip color
   const getTypeChipColor = () => {
-    switch (setting.valueType) {
+    switch (valueType) {
       case 'boolean': return 'secondary';
       case 'number': return 'info';
       case 'json': return 'warning';
+      case 'password': return 'error';
       default: return 'default';
     }
   };
 
-  const description = getLocalizedText(setting.description, locale);
   const isLoading = saving || localSaving;
+  const effectiveBorderColor = borderColor || theme.palette.grey[400];
 
   // Render value input based on type
   const renderValueInput = () => {
-    if (setting.isSensitive) {
+    if (isSensitive || valueType === 'password') {
       return (
         <TextField
           fullWidth
@@ -128,7 +214,7 @@ export default function InlineSettingRow({
       );
     }
 
-    if (setting.valueType === 'boolean') {
+    if (valueType === 'boolean') {
       return (
         <FormControl size="small" sx={{ minWidth: 100 }}>
           <Select
@@ -144,7 +230,7 @@ export default function InlineSettingRow({
       );
     }
 
-    if (setting.valueType === 'number') {
+    if (valueType === 'number') {
       return (
         <TextField
           fullWidth
@@ -164,7 +250,7 @@ export default function InlineSettingRow({
       );
     }
 
-    if (setting.valueType === 'json') {
+    if (valueType === 'json') {
       return (
         <TextField
           fullWidth
@@ -205,13 +291,6 @@ export default function InlineSettingRow({
     );
   };
 
-  // Border color: Applied (green) > Ready (blue) > Not Ready (grey)
-  const getBorderColor = () => {
-    if (setting.isApplied) return theme.palette.success.main;
-    if (setting.isReady) return theme.palette.info.main;
-    return theme.palette.grey[400];
-  };
-
   return (
     <Box
       sx={{
@@ -220,7 +299,7 @@ export default function InlineSettingRow({
         gap: 2,
         p: 1.5,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        borderLeft: `3px solid ${getBorderColor()}`,
+        borderLeft: `3px solid ${effectiveBorderColor}`,
         backgroundColor: isModified
           ? alpha(theme.palette.warning.main, 0.05)
           : 'transparent',
@@ -229,13 +308,14 @@ export default function InlineSettingRow({
           backgroundColor: isModified
             ? alpha(theme.palette.warning.main, 0.08)
             : alpha(theme.palette.action.hover, 0.04)
-        }
+        },
+        ...sx
       }}
     >
-      {/* Key & Description */}
-      <Box sx={{ width: 280, flexShrink: 0 }}>
+      {/* Label & Description */}
+      <Box sx={{ width: labelWidth, flexShrink: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Tooltip title={getLocalizedText({ en: 'Copy key', ko: '키 복사', zh: '复制键', vi: 'Sao chép' }, locale)}>
+          <Tooltip title={copyTooltip}>
             <Typography
               variant="subtitle2"
               onClick={handleCopyKey}
@@ -248,111 +328,90 @@ export default function InlineSettingRow({
                 '&:hover': { color: theme.palette.primary.main }
               }}
             >
-              {setting.key}
+              {label}
             </Typography>
           </Tooltip>
-          {setting.isSensitive && (
-            <Tooltip title={getLocalizedText({ en: 'Sensitive', ko: '민감', zh: '敏感', vi: 'Nhạy cảm' }, locale)}>
+          {isSensitive && (
+            <Tooltip title="Sensitive">
               <LockIcon sx={{ fontSize: 14, color: theme.palette.warning.main }} />
             </Tooltip>
           )}
         </Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            lineHeight: 1.4,
-            fontSize: '0.7rem'
-          }}
-        >
-          {description}
-        </Typography>
+        {description && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              lineHeight: 1.4,
+              fontSize: '0.7rem'
+            }}
+          >
+            {description}
+          </Typography>
+        )}
       </Box>
 
       {/* Type Badge */}
-      <Box sx={{ width: 70, flexShrink: 0, pt: 0.5 }}>
-        <Chip
-          label={setting.valueType}
-          size="small"
-          color={getTypeChipColor() as any}
-          variant="outlined"
-          sx={{
-            fontSize: '0.65rem',
-            height: 20,
-            '& .MuiChip-label': { px: 0.75 }
-          }}
-        />
-      </Box>
+      {showType && (
+        <Box sx={{ width: typeWidth, flexShrink: 0, pt: 0.5 }}>
+          <Chip
+            label={valueType}
+            size="small"
+            color={getTypeChipColor() as any}
+            variant="outlined"
+            sx={{
+              fontSize: '0.65rem',
+              height: 20,
+              '& .MuiChip-label': { px: 0.75 }
+            }}
+          />
+        </Box>
+      )}
 
       {/* Value Input */}
       <Box sx={{ flex: 1, minWidth: 200 }}>
         {renderValueInput()}
       </Box>
 
-      {/* Ready Toggle */}
-      <Box sx={{ width: 50, flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
-        <Tooltip
-          title={
-            setting.isReady
-              ? getLocalizedText({ en: 'Ready', ko: '준비됨', zh: '已就绪', vi: 'Sẵn sàng' }, locale)
-              : getLocalizedText({ en: 'Not Ready', ko: '미준비', zh: '未就绪', vi: 'Chưa sẵn sàng' }, locale)
-          }
+      {/* Toggle Switches */}
+      {toggles.map((toggle, index) => (
+        <Box
+          key={index}
+          sx={{ width: 50, flexShrink: 0, display: 'flex', justifyContent: 'center' }}
         >
-          <Switch
-            size="small"
-            checked={setting.isReady}
-            onChange={(e) => onToggleReady(setting.key, e.target.checked)}
-            disabled={isLoading}
-            sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': {
-                color: theme.palette.info.main
-              },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                backgroundColor: theme.palette.info.main
-              }
-            }}
-          />
-        </Tooltip>
-      </Box>
+          <Tooltip
+            title={toggle.value ? (toggle.enabledTooltip || '') : (toggle.disabledTooltip || '')}
+          >
+            <Switch
+              size="small"
+              checked={toggle.value}
+              onChange={(e) => toggle.onChange(e.target.checked)}
+              disabled={isLoading || toggle.disabled}
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: toggle.color || theme.palette.primary.main
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: toggle.color || theme.palette.primary.main
+                }
+              }}
+            />
+          </Tooltip>
+        </Box>
+      ))}
 
-      {/* Applied Toggle */}
-      <Box sx={{ width: 50, flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
-        <Tooltip
-          title={
-            !setting.isReady
-              ? getLocalizedText({ en: 'Must be ready first', ko: '먼저 준비 상태로 변경 필요', zh: '需要先设为就绪', vi: 'Cần sẵn sàng trước' }, locale)
-              : setting.isApplied
-                ? getLocalizedText({ en: 'Applied', ko: '적용됨', zh: '已应用', vi: 'Đã áp dụng' }, locale)
-                : getLocalizedText({ en: 'Not Applied', ko: '미적용', zh: '未应用', vi: 'Chưa áp dụng' }, locale)
-          }
-        >
-          <Switch
-            size="small"
-            checked={setting.isApplied}
-            onChange={(e) => onToggleApplied(setting.key, e.target.checked)}
-            disabled={isLoading || !setting.isReady}
-            sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': {
-                color: theme.palette.success.main
-              },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                backgroundColor: theme.palette.success.main
-              }
-            }}
-          />
-        </Tooltip>
-      </Box>
+      {/* Extra Content */}
+      {extraContent}
 
       {/* Actions */}
       <Box sx={{ width: 60, flexShrink: 0, display: 'flex', justifyContent: 'center', gap: 0.25 }}>
-        {/* Save/Revert when modified */}
         {isModified ? (
           <>
-            <Tooltip title={getLocalizedText({ en: 'Save', ko: '저장', zh: '保存', vi: 'Lưu' }, locale)}>
+            <Tooltip title={saveTooltip}>
               <IconButton
                 size="small"
                 onClick={handleSave}
@@ -366,7 +425,7 @@ export default function InlineSettingRow({
                 {isLoading ? <CircularProgress size={16} /> : <SaveIcon sx={{ fontSize: 16 }} />}
               </IconButton>
             </Tooltip>
-            <Tooltip title={getLocalizedText({ en: 'Revert', ko: '취소', zh: '撤销', vi: 'Hủy' }, locale)}>
+            <Tooltip title={revertTooltip}>
               <IconButton
                 size="small"
                 onClick={handleRevert}
@@ -382,10 +441,10 @@ export default function InlineSettingRow({
             </Tooltip>
           </>
         ) : onDelete ? (
-          <Tooltip title={getLocalizedText({ en: 'Delete', ko: '삭제', zh: '删除', vi: 'Xóa' }, locale)}>
+          <Tooltip title={deleteTooltip}>
             <IconButton
               size="small"
-              onClick={() => onDelete(setting)}
+              onClick={onDelete}
               disabled={isLoading}
               sx={{
                 p: 0.5,
