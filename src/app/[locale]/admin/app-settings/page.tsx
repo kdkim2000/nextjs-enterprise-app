@@ -25,13 +25,13 @@ import EditDrawer from '@/components/common/EditDrawer';
 import FilterTabs, { FilterTab } from '@/components/common/FilterTabs';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
+import CategoryNavPanel, { CategoryStats } from '@/components/common/CategoryNavPanel';
+import InlineEditRow, { ToggleConfig } from '@/components/common/InlineEditRow';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useAppSettingsManagement } from './hooks/useAppSettingsManagement';
 import { AppSetting } from './types';
-import { CATEGORIES, getLocalizedText } from './constants';
-import InlineSettingRow from './components/InlineSettingRow';
+import { CATEGORIES, getLocalizedText, getCategoryItems, CATEGORY_COLORS, CategoryType } from './constants';
 import SettingFormFields, { SettingFormData } from './components/SettingFormFields';
-import CategoryListPanel from './components/CategoryListPanel';
 
 export default function AppSettingsPage() {
   const t = useI18n();
@@ -181,32 +181,54 @@ export default function AppSettingsPage() {
     }
   }, [settingToDelete, deleteSetting]);
 
-  // Category count getter
-  const getCategoryCount = (categoryId: string) => {
-    return (groupedSettings[categoryId] || []).length;
-  };
+  // Category items for CategoryNavPanel
+  const categoryItems = useMemo(() => getCategoryItems(locale), [locale]);
 
-  const getCategoryReadyCount = (categoryId: string) => {
-    return (groupedSettings[categoryId] || []).filter((s: any) => s.isReady).length;
-  };
+  // Category stats getter for CategoryNavPanel
+  const getCategoryStats = useCallback((categoryId: string): CategoryStats => {
+    const settings = groupedSettings[categoryId] || [];
+    return {
+      total: settings.length,
+      primary: settings.filter((s: any) => s.isReady).length,
+      secondary: settings.filter((s: any) => s.isApplied).length
+    };
+  }, [groupedSettings]);
 
-  const getCategoryAppliedCount = (categoryId: string) => {
-    return (groupedSettings[categoryId] || []).filter((s: any) => s.isApplied).length;
-  };
+  // Total stats for "All" item
+  const totalCategoryStats: CategoryStats = useMemo(() => ({
+    total: totalSettings,
+    primary: readySettings,
+    secondary: appliedSettings
+  }), [totalSettings, readySettings, appliedSettings]);
+
+  // Format stats for display
+  const formatCategoryStats = useCallback((stats: CategoryStats) => {
+    return `${stats.secondary}/${stats.primary}/${stats.total}`;
+  }, []);
+
+  const formatTotalCategoryStats = useCallback((stats: CategoryStats) => {
+    return locale === 'ko'
+      ? `총 ${stats.total.toLocaleString()} (준비: ${stats.primary?.toLocaleString()}, 적용: ${stats.secondary?.toLocaleString()})`
+      : `Total ${stats.total.toLocaleString()} (Ready: ${stats.primary?.toLocaleString()}, Applied: ${stats.secondary?.toLocaleString()})`;
+  }, [locale]);
 
   // Master Panel - Category Navigation
   const masterPanel = (
-    <CategoryListPanel
-      categories={CATEGORIES}
+    <CategoryNavPanel
+      title={getLocalizedText({ en: 'Categories', ko: '카테고리', zh: '分类', vi: 'Danh mục' }, locale)}
+      categories={categoryItems}
       selectedCategory={selectedCategory}
-      onSelectCategory={(categoryId: string) => setSelectedCategory(categoryId as '' | typeof selectedCategory)}
-      getCategoryCount={getCategoryCount}
-      getCategoryReadyCount={getCategoryReadyCount}
-      getCategoryAppliedCount={getCategoryAppliedCount}
-      totalCount={totalSettings}
-      readyCount={readySettings}
-      appliedCount={appliedSettings}
-      locale={locale}
+      onSelectCategory={(categoryId) => setSelectedCategory(categoryId as '' | typeof selectedCategory)}
+      getCategoryStats={getCategoryStats}
+      totalStats={totalCategoryStats}
+      allItem={{
+        label: getLocalizedText({ en: 'All Settings', ko: '전체 설정', zh: '全部设置', vi: 'Tất cả' }, locale),
+        icon: Settings
+      }}
+      formatStats={formatCategoryStats}
+      formatTotalStats={formatTotalCategoryStats}
+      showAllItem={true}
+      showStatsHeader={true}
     />
   );
 
@@ -325,18 +347,56 @@ export default function AppSettingsPage() {
         ) : (
           <Fade in>
             <Box>
-              {filteredSettings.map((setting) => (
-                <InlineSettingRow
-                  key={setting.key}
-                  setting={setting}
-                  locale={locale}
-                  onSave={handleInlineSave}
-                  onDelete={handleDeleteClick}
-                  onToggleReady={toggleReadyStatus}
-                  onToggleApplied={toggleAppliedStatus}
-                  saving={saveLoading}
-                />
-              ))}
+              {filteredSettings.map((setting) => {
+                // Create toggle configs for Ready and Applied switches
+                const toggleConfigs: ToggleConfig[] = [
+                  {
+                    value: setting.isReady,
+                    onChange: (value) => toggleReadyStatus(setting.key, value),
+                    enabledTooltip: getLocalizedText({ en: 'Ready', ko: '준비됨', zh: '已就绪', vi: 'Sẵn sàng' }, locale),
+                    disabledTooltip: getLocalizedText({ en: 'Not Ready', ko: '미준비', zh: '未就绪', vi: 'Chưa sẵn sàng' }, locale),
+                    color: theme.palette.info.main
+                  },
+                  {
+                    value: setting.isApplied,
+                    onChange: (value) => toggleAppliedStatus(setting.key, value),
+                    enabledTooltip: getLocalizedText({ en: 'Applied', ko: '적용됨', zh: '已应用', vi: 'Đã áp dụng' }, locale),
+                    disabledTooltip: !setting.isReady
+                      ? getLocalizedText({ en: 'Must be ready first', ko: '먼저 준비 상태로 변경 필요', zh: '需要先设为就绪', vi: 'Cần sẵn sàng trước' }, locale)
+                      : getLocalizedText({ en: 'Not Applied', ko: '미적용', zh: '未应用', vi: 'Chưa áp dụng' }, locale),
+                    disabled: !setting.isReady,
+                    color: theme.palette.success.main
+                  }
+                ];
+
+                // Get border color based on status
+                const borderColor = setting.isApplied
+                  ? theme.palette.success.main
+                  : setting.isReady
+                    ? theme.palette.info.main
+                    : theme.palette.grey[400];
+
+                return (
+                  <InlineEditRow
+                    key={setting.key}
+                    id={setting.key}
+                    label={setting.key}
+                    description={getLocalizedText(setting.description, locale)}
+                    value={setting.value || ''}
+                    valueType={setting.valueType as any}
+                    isSensitive={setting.isSensitive}
+                    onSave={handleInlineSave}
+                    onDelete={() => handleDeleteClick(setting)}
+                    toggles={toggleConfigs}
+                    saving={saveLoading}
+                    borderColor={borderColor}
+                    copyTooltip={getLocalizedText({ en: 'Copy key', ko: '키 복사', zh: '复制键', vi: 'Sao chép' }, locale)}
+                    saveTooltip={getLocalizedText({ en: 'Save', ko: '저장', zh: '保存', vi: 'Lưu' }, locale)}
+                    revertTooltip={getLocalizedText({ en: 'Revert', ko: '취소', zh: '撤销', vi: 'Hủy' }, locale)}
+                    deleteTooltip={getLocalizedText({ en: 'Delete', ko: '삭제', zh: '删除', vi: 'Xóa' }, locale)}
+                  />
+                );
+              })}
             </Box>
           </Fade>
         )}
