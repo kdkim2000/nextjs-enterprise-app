@@ -1,6 +1,14 @@
-version: '3.8'
-
 services:
+  postgres16:
+    image: postgres:16.11
+    container_name: pg16
+    env_file: .env
+    ports:
+      - "9090:5432"
+    volumes:
+      - pgdata_16_11:/var/lib/postgresql/data
+    restart: unless-stopped
+
   # Backend API Server
   backend:
     build:
@@ -62,6 +70,9 @@ services:
       - backend
     networks:
       - corenext-network
+      
+volumes:
+  pgdata_16_11:
 
 networks:
   corenext-network:

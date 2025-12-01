@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable standalone output for better Vercel deployment
-  // Note: Disabled due to Next.js 16 Turbopack issue with middleware.js.nft.json
-  output: 'standalone', // Enable for Docker deployment
+  // Enable standalone output for Docker deployment
+  output: 'standalone',
+
+  // Disable Turbopack for production build (middleware.js.nft.json issue in Next.js 16)
+  // This forces Webpack to be used instead
+  experimental: {
+    turbo: undefined, // Disable Turbopack
+  },
 
   // Image optimization
   images: {
