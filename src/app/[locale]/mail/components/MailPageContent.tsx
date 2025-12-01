@@ -194,6 +194,16 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     return counts?.[folder]?.unread || 0;
   };
 
+  // Helper to get first recipient display name
+  const getRecipientDisplay = (message: MailMessage): string => {
+    if (!message.recipients || message.recipients.length === 0) {
+      return t('mail.noRecipient');
+    }
+    const toRecipients = message.recipients.filter(r => r.type === 'to');
+    const firstRecipient = toRecipients[0] || message.recipients[0];
+    return firstRecipient.name || firstRecipient.email || t('mail.noRecipient');
+  };
+
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -316,7 +326,7 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
                             primary={
                               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Typography variant="body2" sx={{ fontWeight: message.is_read ? 400 : 600 }} noWrap>
-                                  {currentFolder === 'sent' || currentFolder === 'draft' ? (message.recipient_name || message.recipient_email || t('mail.noRecipient')) : (message.sender_name || message.sender_email || t('mail.unknown'))}
+                                  {currentFolder === 'sent' || currentFolder === 'draft' ? getRecipientDisplay(message) : (message.sender_name || message.sender_email || t('mail.unknown'))}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">{formatDate(message.sent_at || message.created_at)}</Typography>
                               </Box>
@@ -395,7 +405,14 @@ function MessageDetail({ message, currentFolder, onReply, onForward, onDelete, o
       <Typography variant="h6" gutterBottom>{message.subject || t('mail.noSubject')}</Typography>
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary">{t('mail.from')}: {message.sender_name || message.sender_email || t('mail.unknown')}</Typography>
-        <Typography variant="body2" color="text.secondary">{t('mail.to')}: {message.recipient_name || message.recipient_email || t('mail.unknown')}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t('mail.to')}: {message.recipients?.filter(r => r.type === 'to').map(r => r.name || r.email).join(', ') || t('mail.unknown')}
+        </Typography>
+        {message.recipients?.some(r => r.type === 'cc') && (
+          <Typography variant="body2" color="text.secondary">
+            CC: {message.recipients.filter(r => r.type === 'cc').map(r => r.name || r.email).join(', ')}
+          </Typography>
+        )}
         <Typography variant="body2" color="text.secondary">{t('mail.date')}: {formatDate(message.sent_at || message.created_at)}</Typography>
       </Box>
       <Divider sx={{ mb: 2 }} />

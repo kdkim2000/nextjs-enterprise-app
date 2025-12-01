@@ -15,7 +15,11 @@ import {
   FormControlLabel,
   Checkbox,
   Collapse,
-  useTheme
+  useTheme,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction
 } from '@mui/material';
 import {
   ArrowBack,
@@ -23,7 +27,10 @@ import {
   Save,
   Delete,
   ExpandMore,
-  ExpandLess
+  ExpandLess,
+  AttachFile,
+  InsertDriveFile,
+  Image as ImageIcon
 } from '@mui/icons-material';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { useHelp } from '@/hooks/useHelp';
@@ -31,6 +38,7 @@ import { useMailData, Recipient, RecipientType } from '../hooks/useMailData';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import UserAutocomplete from '@/components/common/UserAutocomplete';
+import api from '@/lib/axios';
 
 const PROGRAM_ID = 'PROG-MAIL-COMPOSE';
 
@@ -39,6 +47,19 @@ interface UserOption {
   username: string;
   name?: string;
   email?: string;
+}
+
+interface AttachmentFile {
+  id: string;
+  originalFilename: string;
+  fileSize: number;
+  mimeType: string;
+  isImage?: boolean;
+}
+
+interface AttachmentInfo {
+  id: string;
+  files: AttachmentFile[];
 }
 
 export default function MailComposePage() {
@@ -73,6 +94,11 @@ export default function MailComposePage() {
   const [bodyHtml, setBodyHtml] = useState('');
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(draftId);
   const [sendExternal, setSendExternal] = useState(false);
+
+  // Attachment state
+  const [attachment, setAttachment] = useState<AttachmentInfo | null>(null);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // UI state
   const [sending, setSending] = useState(false);
@@ -109,6 +135,71 @@ export default function MailComposePage() {
       setCcRecipients(prev => prev.filter(r => r.id !== userId));
     }
   }, []);
+
+  // File upload handler
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingFiles(true);
+    setErrorMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('attachmentTypeCode', 'MAIL');
+      if (attachment?.id) {
+        formData.append('attachmentId', attachment.id);
+      }
+      Array.from(files).forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await api.post('/attachment/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      const { attachment: newAttachment, uploadedFiles } = response.data;
+      setAttachment({
+        id: newAttachment.id,
+        files: [...(attachment?.files || []), ...uploadedFiles]
+      });
+    } catch (error) {
+      console.error('File upload failed:', error);
+      setErrorMessage(t('mail.attachmentUploadFailed'));
+    } finally {
+      setUploadingFiles(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [attachment, t]);
+
+  // File delete handler
+  const handleFileDelete = useCallback(async (fileId: string) => {
+    if (!attachment) return;
+
+    try {
+      await api.delete(`/attachment/file/${fileId}`);
+      setAttachment(prev => {
+        if (!prev) return null;
+        const updatedFiles = prev.files.filter(f => f.id !== fileId);
+        if (updatedFiles.length === 0) return null;
+        return { ...prev, files: updatedFiles };
+      });
+    } catch (error) {
+      console.error('File delete failed:', error);
+      setErrorMessage(t('mail.attachmentDeleteFailed'));
+    }
+  }, [attachment, t]);
+
+  // Format file size
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
 
   // Load reply/forward/draft data
   useEffect(() => {
@@ -164,6 +255,20 @@ export default function MailComposePage() {
               setBodyHtml(message.body_html || message.body || '');
               setSendExternal(message.send_external || false);
               setCurrentDraftId(draftId);
+              // Load attachment if exists
+              if (message.attachment_id) {
+                try {
+                  const attachRes = await api.get(`/attachment/${message.attachment_id}`);
+                  if (attachRes.data.attachment) {
+                    setAttachment({
+                      id: attachRes.data.attachment.id,
+                      files: attachRes.data.attachment.files || []
+                    });
+                  }
+                } catch (e) {
+                  console.error('Failed to load attachment:', e);
+                }
+              }
             }
           }
         }
@@ -199,6 +304,7 @@ export default function MailComposePage() {
         body: bodyHtml.replace(/<[^>]+>/g, ''),
         bodyHtml,
         draftId: currentDraftId || undefined,
+        attachmentId: attachment?.id,
         sendExternal
       });
       setSuccessMessage(t('mail.sendSuccess'));
@@ -229,6 +335,7 @@ export default function MailComposePage() {
         subject,
         body: bodyHtml.replace(/<[^>]+>/g, ''),
         bodyHtml,
+        attachmentId: attachment?.id,
         sendExternal
       };
 
@@ -399,19 +506,70 @@ export default function MailComposePage() {
           />
         </Box>
 
+        {/* Attachments */}
+        {attachment && attachment.files.length > 0 && (
+          <Box sx={{ px: 2, pb: 1, borderTop: `1px solid ${theme.palette.divider}` }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pt: 1, pb: 0.5 }}>
+              {t('mail.attachments')} ({attachment.files.length})
+            </Typography>
+            <List dense disablePadding>
+              {attachment.files.map((file) => (
+                <ListItem
+                  key={file.id}
+                  sx={{ py: 0.5, px: 1, bgcolor: 'action.hover', borderRadius: 1, mb: 0.5 }}
+                >
+                  <Box sx={{ mr: 1, color: 'text.secondary' }}>
+                    {file.isImage ? <ImageIcon fontSize="small" /> : <InsertDriveFile fontSize="small" />}
+                  </Box>
+                  <ListItemText
+                    primary={file.originalFilename}
+                    secondary={formatFileSize(file.fileSize)}
+                    primaryTypographyProps={{ variant: 'body2', noWrap: true }}
+                    secondaryTypographyProps={{ variant: 'caption' }}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton size="small" onClick={() => handleFileDelete(file.id)}>
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
+
         {/* Options & Actions */}
         <Divider />
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={sendExternal}
-                onChange={(e) => setSendExternal(e.target.checked)}
-                size="small"
-              />
-            }
-            label={<Typography variant="body2">{t('mail.sendExternal')}</Typography>}
-          />
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Attachment Button */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              multiple
+              style={{ display: 'none' }}
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip"
+            />
+            <Button
+              size="small"
+              startIcon={uploadingFiles ? <CircularProgress size={16} /> : <AttachFile />}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingFiles || sending}
+            >
+              {t('mail.attach')}
+            </Button>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={sendExternal}
+                  onChange={(e) => setSendExternal(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={<Typography variant="body2">{t('mail.sendExternal')}</Typography>}
+            />
+          </Box>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button variant="outlined" startIcon={<Save />} onClick={handleSaveDraft} disabled={saving || sending}>
               {saving ? t('common.saving') : t('mail.saveDraft')}
