@@ -30,7 +30,7 @@ docker/
 ├── frontend.Dockerfile     # Frontend 이미지
 ├── docker-compose.yml      # 전체 서비스 구성
 ├── nginx.conf              # Reverse proxy 설정
-├── .env.docker             # 환경변수 템플릿
+├── .env.example            # 환경변수 템플릿
 └── DEPLOYMENT.md           # 이 문서
 ```
 
@@ -54,7 +54,7 @@ docker build -f docker/frontend.Dockerfile -t corenext-frontend:latest .
 
 ```bash
 # 환경변수 설정
-cp docker/.env.docker docker/.env
+cp docker/.env.example docker/.env
 # .env 파일 수정 (비밀번호 등)
 
 # 서비스 실행
@@ -123,11 +123,11 @@ docker-compose -f docker/docker-compose.yml up -d
 
 ```env
 # Database
-DB_HOST=<REDACTED_IP>
-DB_PORT=9090
-DB_NAME=corenextdb
-DB_USER=corenext
-DB_PASSWORD=<REDACTED_PASSWORD>
+DB_HOST=<YOUR_DB_HOST>
+DB_PORT=<YOUR_DB_PORT>
+DB_NAME=<YOUR_DB_NAME>
+DB_USER=<YOUR_DB_USER>
+DB_PASSWORD=<YOUR_DB_PASSWORD>
 
 # JWT (운영환경에서는 새로 생성)
 JWT_SECRET=<새로운_비밀키>

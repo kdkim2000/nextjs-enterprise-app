@@ -88,7 +88,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=nextjs_enterprise_app
 DB_USER=app_user
-DB_PASSWORD=<REDACTED_PASSWORD>
+DB_PASSWORD=<YOUR_LOCAL_PASSWORD>
 
 # 변경 (원격 서버)
 DB_HOST=<REMOTE_HOST>

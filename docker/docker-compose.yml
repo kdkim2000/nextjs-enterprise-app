@@ -13,10 +13,10 @@ services:
     environment:
       - NODE_ENV=production
       - BACKEND_PORT=3001
-      - DB_HOST=<REDACTED_IP>
-      - DB_PORT=9090
-      - DB_NAME=corenextdb
-      - DB_USER=corenext
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
