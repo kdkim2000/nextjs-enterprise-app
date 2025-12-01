@@ -1,12 +1,17 @@
 # Backend Dockerfile
+# This project uses root package.json for backend dependencies
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Install build tools for native modules (bcrypt, etc.)
+RUN apk add --no-cache python3 make g++
+
+# Copy root package files
 COPY package*.json ./
-COPY backend/package*.json ./backend/
-RUN npm ci --only=production
+
+# Install all dependencies (backend uses root node_modules)
+RUN npm ci --omit=dev
 
 # Copy backend source
 COPY backend/ ./backend/
@@ -15,10 +20,12 @@ COPY backend/ ./backend/
 ENV NODE_ENV=production
 ENV BACKEND_PORT=3001
 
+WORKDIR /app/backend
+
 EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
-CMD ["node", "backend/server.js"]
+CMD ["node", "server.js"]

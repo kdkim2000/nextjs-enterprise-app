@@ -1,17 +1,25 @@
 # Frontend Dockerfile (Next.js)
 FROM node:20-alpine AS builder
 
+# Install build tools for native modules
+RUN apk add --no-cache python3 make g++ libc6-compat
+
 WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and build
+# Copy source
 COPY . .
-COPY .env.production .env.production
 
-# Build Next.js
+# Copy .env.production if exists (optional)
+# Environment variables should be passed via docker-compose
+RUN touch .env.production
+
+# Build Next.js with Webpack (not Turbopack) to avoid middleware.js.nft.json issue
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV TURBOPACK=0
 RUN npm run build
 
 # Production stage

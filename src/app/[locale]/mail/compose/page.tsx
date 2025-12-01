@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -11,56 +11,27 @@ import {
   Typography,
   Divider,
   CircularProgress,
-  Chip,
   FormControlLabel,
   Checkbox,
   Collapse,
   useTheme,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction
+  alpha
 } from '@mui/material';
 import {
   ArrowBack,
   Send,
   Save,
-  Delete,
-  ExpandMore,
-  ExpandLess,
-  AttachFile,
-  InsertDriveFile,
-  Image as ImageIcon
+  Delete
 } from '@mui/icons-material';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { useHelp } from '@/hooks/useHelp';
-import { useMailData, Recipient, RecipientType } from '../hooks/useMailData';
+import { useMailData, RecipientType } from '../hooks/useMailData';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import RichTextEditor from '@/components/common/RichTextEditor';
-import UserAutocomplete from '@/components/common/UserAutocomplete';
-import api from '@/lib/axios';
+import MultiUserSelect, { UserOption } from '@/components/common/MultiUserSelect';
+import AttachmentUpload from '@/components/common/AttachmentUpload';
 
 const PROGRAM_ID = 'PROG-MAIL-COMPOSE';
-
-interface UserOption {
-  id: string;
-  username: string;
-  name?: string;
-  email?: string;
-}
-
-interface AttachmentFile {
-  id: string;
-  originalFilename: string;
-  fileSize: number;
-  mimeType: string;
-  isImage?: boolean;
-}
-
-interface AttachmentInfo {
-  id: string;
-  files: AttachmentFile[];
-}
 
 export default function MailComposePage() {
   const theme = useTheme();
@@ -87,8 +58,8 @@ export default function MailComposePage() {
   const draftId = searchParams.get('draft');
 
   // Form state - multi-recipient
-  const [toRecipients, setToRecipients] = useState<Recipient[]>([]);
-  const [ccRecipients, setCcRecipients] = useState<Recipient[]>([]);
+  const [toRecipients, setToRecipients] = useState<UserOption[]>([]);
+  const [ccRecipients, setCcRecipients] = useState<UserOption[]>([]);
   const [showCc, setShowCc] = useState(false);
   const [subject, setSubject] = useState('');
   const [bodyHtml, setBodyHtml] = useState('');
@@ -96,9 +67,7 @@ export default function MailComposePage() {
   const [sendExternal, setSendExternal] = useState(false);
 
   // Attachment state
-  const [attachment, setAttachment] = useState<AttachmentInfo | null>(null);
-  const [uploadingFiles, setUploadingFiles] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [attachmentId, setAttachmentId] = useState<string | null>(null);
 
   // UI state
   const [sending, setSending] = useState(false);
@@ -106,100 +75,6 @@ export default function MailComposePage() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Add recipient helper
-  const addRecipient = useCallback((user: UserOption, type: RecipientType) => {
-    const newRecipient: Recipient = {
-      id: user.id,
-      name: user.name || user.username,
-      email: user.email || user.username,
-      type
-    };
-
-    if (type === 'to') {
-      if (!toRecipients.find(r => r.id === user.id)) {
-        setToRecipients(prev => [...prev, newRecipient]);
-      }
-    } else if (type === 'cc') {
-      if (!ccRecipients.find(r => r.id === user.id)) {
-        setCcRecipients(prev => [...prev, newRecipient]);
-      }
-    }
-  }, [toRecipients, ccRecipients]);
-
-  // Remove recipient helper
-  const removeRecipient = useCallback((userId: string, type: RecipientType) => {
-    if (type === 'to') {
-      setToRecipients(prev => prev.filter(r => r.id !== userId));
-    } else if (type === 'cc') {
-      setCcRecipients(prev => prev.filter(r => r.id !== userId));
-    }
-  }, []);
-
-  // File upload handler
-  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploadingFiles(true);
-    setErrorMessage(null);
-
-    try {
-      const formData = new FormData();
-      formData.append('attachmentTypeCode', 'MAIL');
-      if (attachment?.id) {
-        formData.append('attachmentId', attachment.id);
-      }
-      Array.from(files).forEach(file => {
-        formData.append('files', file);
-      });
-
-      const response = await api.post('/attachment/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      const { attachment: newAttachment, uploadedFiles } = response.data;
-      setAttachment({
-        id: newAttachment.id,
-        files: [...(attachment?.files || []), ...uploadedFiles]
-      });
-    } catch (error) {
-      console.error('File upload failed:', error);
-      setErrorMessage(t('mail.attachmentUploadFailed'));
-    } finally {
-      setUploadingFiles(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  }, [attachment, t]);
-
-  // File delete handler
-  const handleFileDelete = useCallback(async (fileId: string) => {
-    if (!attachment) return;
-
-    try {
-      await api.delete(`/attachment/file/${fileId}`);
-      setAttachment(prev => {
-        if (!prev) return null;
-        const updatedFiles = prev.files.filter(f => f.id !== fileId);
-        if (updatedFiles.length === 0) return null;
-        return { ...prev, files: updatedFiles };
-      });
-    } catch (error) {
-      console.error('File delete failed:', error);
-      setErrorMessage(t('mail.attachmentDeleteFailed'));
-    }
-  }, [attachment, t]);
-
-  // Format file size
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  };
 
   // Load reply/forward/draft data
   useEffect(() => {
@@ -216,9 +91,9 @@ export default function MailComposePage() {
               // Reply - add sender as recipient
               setToRecipients([{
                 id: message.sender_id,
+                username: message.sender_email || message.sender_name || '',
                 name: message.sender_name,
-                email: message.sender_email,
-                type: 'to'
+                email: message.sender_email
               }]);
               setSubject(`Re: ${message.subject || ''}`);
               setBodyHtml(`
@@ -245,29 +120,23 @@ export default function MailComposePage() {
             } else if (draftId) {
               // Draft - load existing draft data
               if (message.recipients) {
-                const to = message.recipients.filter(r => r.type === 'to');
-                const cc = message.recipients.filter(r => r.type === 'cc');
-                setToRecipients(to);
-                setCcRecipients(cc);
-                if (cc.length > 0) setShowCc(true);
+                const toUserOptions = message.recipients
+                  .filter(r => r.type === 'to')
+                  .map(r => ({ id: r.id, username: r.email || r.name || '', name: r.name, email: r.email }));
+                const ccUserOptions = message.recipients
+                  .filter(r => r.type === 'cc')
+                  .map(r => ({ id: r.id, username: r.email || r.name || '', name: r.name, email: r.email }));
+                setToRecipients(toUserOptions);
+                setCcRecipients(ccUserOptions);
+                if (ccUserOptions.length > 0) setShowCc(true);
               }
               setSubject(message.subject || '');
               setBodyHtml(message.body_html || message.body || '');
               setSendExternal(message.send_external || false);
               setCurrentDraftId(draftId);
-              // Load attachment if exists
+              // Set attachment ID if exists (AttachmentUpload will auto-fetch files)
               if (message.attachment_id) {
-                try {
-                  const attachRes = await api.get(`/attachment/${message.attachment_id}`);
-                  if (attachRes.data.attachment) {
-                    setAttachment({
-                      id: attachRes.data.attachment.id,
-                      files: attachRes.data.attachment.files || []
-                    });
-                  }
-                } catch (e) {
-                  console.error('Failed to load attachment:', e);
-                }
+                setAttachmentId(message.attachment_id);
               }
             }
           }
@@ -304,7 +173,7 @@ export default function MailComposePage() {
         body: bodyHtml.replace(/<[^>]+>/g, ''),
         bodyHtml,
         draftId: currentDraftId || undefined,
-        attachmentId: attachment?.id,
+        attachmentId: attachmentId || undefined,
         sendExternal
       });
       setSuccessMessage(t('mail.sendSuccess'));
@@ -335,7 +204,7 @@ export default function MailComposePage() {
         subject,
         body: bodyHtml.replace(/<[^>]+>/g, ''),
         bodyHtml,
-        attachmentId: attachment?.id,
+        attachmentId: attachmentId || undefined,
         sendExternal
       };
 
@@ -415,36 +284,38 @@ export default function MailComposePage() {
         </Box>
 
         {/* To Recipients */}
-        <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <Typography variant="body2" sx={{ width: 50, fontWeight: 500, pt: 1 }}>{t('mail.to')}:</Typography>
+        <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                minWidth: 40,
+                fontWeight: 500,
+                pt: 1,
+                color: 'text.secondary'
+              }}
+            >
+              {t('mail.to')}
+            </Typography>
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: toRecipients.length > 0 ? 1 : 0 }}>
-                {toRecipients.map(r => (
-                  <Chip
-                    key={r.id}
-                    label={r.name || r.email}
-                    size="small"
-                    onDelete={() => removeRecipient(r.id, 'to')}
-                  />
-                ))}
-              </Box>
-              <UserAutocomplete
-                value={null}
-                onChange={() => {}}
-                onUserSelect={(user) => {
-                  if (user) {
-                    addRecipient(user, 'to');
-                  }
-                }}
+              <MultiUserSelect
+                value={toRecipients}
+                onChange={setToRecipients}
                 placeholder={t('mail.addRecipient')}
-                clearOnSelect
+                error={toRecipients.length === 0 && errorMessage === t('mail.recipientRequired')}
               />
             </Box>
             <Button
               size="small"
+              variant={showCc ? 'contained' : 'text'}
               onClick={() => setShowCc(!showCc)}
-              endIcon={showCc ? <ExpandLess /> : <ExpandMore />}
+              sx={{
+                minWidth: 48,
+                height: 36,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 500
+              }}
             >
               CC
             </Button>
@@ -453,30 +324,24 @@ export default function MailComposePage() {
 
         {/* CC Recipients */}
         <Collapse in={showCc}>
-          <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-              <Typography variant="body2" sx={{ width: 50, fontWeight: 500, pt: 1 }}>CC:</Typography>
+          <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.action.hover, 0.3) }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  minWidth: 40,
+                  fontWeight: 500,
+                  pt: 1,
+                  color: 'text.secondary'
+                }}
+              >
+                CC
+              </Typography>
               <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: ccRecipients.length > 0 ? 1 : 0 }}>
-                  {ccRecipients.map(r => (
-                    <Chip
-                      key={r.id}
-                      label={r.name || r.email}
-                      size="small"
-                      onDelete={() => removeRecipient(r.id, 'cc')}
-                    />
-                  ))}
-                </Box>
-                <UserAutocomplete
-                  value={null}
-                  onChange={() => {}}
-                  onUserSelect={(user) => {
-                    if (user) {
-                      addRecipient(user, 'cc');
-                    }
-                  }}
+                <MultiUserSelect
+                  value={ccRecipients}
+                  onChange={setCcRecipients}
                   placeholder={t('mail.addCc')}
-                  clearOnSelect
                 />
               </Box>
             </Box>
@@ -506,59 +371,21 @@ export default function MailComposePage() {
           />
         </Box>
 
-        {/* Attachments */}
-        {attachment && attachment.files.length > 0 && (
-          <Box sx={{ px: 2, pb: 1, borderTop: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pt: 1, pb: 0.5 }}>
-              {t('mail.attachments')} ({attachment.files.length})
-            </Typography>
-            <List dense disablePadding>
-              {attachment.files.map((file) => (
-                <ListItem
-                  key={file.id}
-                  sx={{ py: 0.5, px: 1, bgcolor: 'action.hover', borderRadius: 1, mb: 0.5 }}
-                >
-                  <Box sx={{ mr: 1, color: 'text.secondary' }}>
-                    {file.isImage ? <ImageIcon fontSize="small" /> : <InsertDriveFile fontSize="small" />}
-                  </Box>
-                  <ListItemText
-                    primary={file.originalFilename}
-                    secondary={formatFileSize(file.fileSize)}
-                    primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton size="small" onClick={() => handleFileDelete(file.id)}>
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        )}
+        {/* Attachments - using common component */}
+        <Box sx={{ px: 2, py: 1.5, borderTop: `1px solid ${theme.palette.divider}` }}>
+          <AttachmentUpload
+            attachmentTypeCode="MAIL"
+            locale={locale}
+            onUploadComplete={(id) => setAttachmentId(id)}
+            compact
+            showDownload={false}
+          />
+        </Box>
 
         {/* Options & Actions */}
         <Divider />
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* Attachment Button */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              multiple
-              style={{ display: 'none' }}
-              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip"
-            />
-            <Button
-              size="small"
-              startIcon={uploadingFiles ? <CircularProgress size={16} /> : <AttachFile />}
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingFiles || sending}
-            >
-              {t('mail.attach')}
-            </Button>
             <FormControlLabel
               control={
                 <Checkbox
