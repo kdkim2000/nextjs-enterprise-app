@@ -1,26 +1,38 @@
 /**
- * Simplified Mail Data Hook
+ * Mail Data Hook v2 - Multi-recipient Support
  */
 import { useState, useCallback, useEffect } from 'react';
 import api from '@/lib/axios';
 
 export type FolderType = 'inbox' | 'sent' | 'draft' | 'trash';
+export type RecipientType = 'to' | 'cc' | 'bcc';
+
+export interface Recipient {
+  id: string;
+  name?: string;
+  email?: string;
+  type: RecipientType;
+}
 
 export interface MailMessage {
   id: string;
+  user_message_id?: string;
   sender_id: string;
-  sender_name: string;
-  sender_email: string;
-  recipient_id: string;
-  recipient_name: string;
-  recipient_email: string;
+  sender_name?: string;
+  sender_email?: string;
+  recipients?: Recipient[];
   subject: string;
   body: string;
   body_html?: string;
   preview?: string;
   folder: FolderType;
+  role?: string;
   is_read: boolean;
-  sent_at: string;
+  is_draft?: boolean;
+  attachment_id?: string;
+  send_external?: boolean;
+  external_status?: string;
+  sent_at?: string;
   created_at: string;
 }
 
@@ -36,6 +48,25 @@ interface Pagination {
   limit: number;
   total: number;
   totalPages: number;
+}
+
+export interface SendMessageData {
+  recipients: Recipient[];
+  subject: string;
+  body: string;
+  bodyHtml?: string;
+  draftId?: string;
+  attachmentId?: string;
+  sendExternal?: boolean;
+}
+
+export interface DraftData {
+  recipients?: Recipient[];
+  subject?: string;
+  body?: string;
+  bodyHtml?: string;
+  attachmentId?: string;
+  sendExternal?: boolean;
 }
 
 export function useMailData() {
@@ -55,7 +86,7 @@ export function useMailData() {
       params.append('folder', folder);
       if (options?.page) params.append('page', String(options.page));
       if (options?.search) params.append('search', options.search);
-      
+
       const response = await api.get(`/mail/messages?${params}`);
       setMessages(response.data.data);
       setPagination(response.data.pagination);
@@ -67,9 +98,14 @@ export function useMailData() {
   }, [currentFolder]);
 
   // Fetch single message
-  const getMessage = useCallback(async (id: string) => {
-    const response = await api.get(`/mail/messages/${id}`);
-    return response.data.data;
+  const getMessage = useCallback(async (id: string): Promise<MailMessage | null> => {
+    try {
+      const response = await api.get(`/mail/messages/${id}`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Failed to get message:', error);
+      return null;
+    }
   }, []);
 
   // Fetch folder counts
@@ -83,19 +119,26 @@ export function useMailData() {
   }, []);
 
   // Create draft
-  const createDraft = useCallback(async (data: Partial<MailMessage>) => {
+  const createDraft = useCallback(async (data: DraftData): Promise<MailMessage> => {
     const response = await api.post('/mail/draft', data);
     return response.data.data;
   }, []);
 
   // Update draft
-  const updateDraft = useCallback(async (id: string, data: Partial<MailMessage>) => {
+  const updateDraft = useCallback(async (id: string, data: DraftData): Promise<MailMessage> => {
     const response = await api.put(`/mail/draft/${id}`, data);
     return response.data.data;
   }, []);
 
+  // Delete draft
+  const deleteDraft = useCallback(async (id: string): Promise<void> => {
+    await api.delete(`/mail/draft/${id}`);
+    setMessages(prev => prev.filter(m => m.id !== id));
+    await fetchCounts();
+  }, [fetchCounts]);
+
   // Send message
-  const sendMessage = useCallback(async (data: { recipientId?: string; recipientName?: string; recipientEmail?: string; subject: string; body: string; bodyHtml?: string; draftId?: string }) => {
+  const sendMessage = useCallback(async (data: SendMessageData) => {
     const response = await api.post('/mail/send', data);
     await fetchCounts();
     return response.data.data;
@@ -183,6 +226,7 @@ export function useMailData() {
     fetchCounts,
     createDraft,
     updateDraft,
+    deleteDraft,
     sendMessage,
     moveToTrash,
     restoreFromTrash,

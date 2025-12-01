@@ -11,22 +11,35 @@ import {
   Typography,
   Divider,
   CircularProgress,
+  Chip,
+  FormControlLabel,
+  Checkbox,
+  Collapse,
   useTheme
 } from '@mui/material';
 import {
   ArrowBack,
   Send,
   Save,
-  Delete
+  Delete,
+  ExpandMore,
+  ExpandLess
 } from '@mui/icons-material';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { useHelp } from '@/hooks/useHelp';
-import { useMailData } from '../hooks/useMailData';
+import { useMailData, Recipient, RecipientType } from '../hooks/useMailData';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import UserAutocomplete from '@/components/common/UserAutocomplete';
 
 const PROGRAM_ID = 'PROG-MAIL-COMPOSE';
+
+interface UserOption {
+  id: string;
+  username: string;
+  name?: string;
+  email?: string;
+}
 
 export default function MailComposePage() {
   const theme = useTheme();
@@ -52,13 +65,14 @@ export default function MailComposePage() {
   const forwardId = searchParams.get('forward');
   const draftId = searchParams.get('draft');
 
-  // Form state - simplified: single recipient only
-  const [recipientId, setRecipientId] = useState<string | null>(null);
-  const [recipientName, setRecipientName] = useState('');
-  const [recipientEmail, setRecipientEmail] = useState('');
+  // Form state - multi-recipient
+  const [toRecipients, setToRecipients] = useState<Recipient[]>([]);
+  const [ccRecipients, setCcRecipients] = useState<Recipient[]>([]);
+  const [showCc, setShowCc] = useState(false);
   const [subject, setSubject] = useState('');
   const [bodyHtml, setBodyHtml] = useState('');
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(draftId);
+  const [sendExternal, setSendExternal] = useState(false);
 
   // UI state
   const [sending, setSending] = useState(false);
@@ -66,6 +80,35 @@ export default function MailComposePage() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Add recipient helper
+  const addRecipient = useCallback((user: UserOption, type: RecipientType) => {
+    const newRecipient: Recipient = {
+      id: user.id,
+      name: user.name || user.username,
+      email: user.email || user.username,
+      type
+    };
+
+    if (type === 'to') {
+      if (!toRecipients.find(r => r.id === user.id)) {
+        setToRecipients(prev => [...prev, newRecipient]);
+      }
+    } else if (type === 'cc') {
+      if (!ccRecipients.find(r => r.id === user.id)) {
+        setCcRecipients(prev => [...prev, newRecipient]);
+      }
+    }
+  }, [toRecipients, ccRecipients]);
+
+  // Remove recipient helper
+  const removeRecipient = useCallback((userId: string, type: RecipientType) => {
+    if (type === 'to') {
+      setToRecipients(prev => prev.filter(r => r.id !== userId));
+    } else if (type === 'cc') {
+      setCcRecipients(prev => prev.filter(r => r.id !== userId));
+    }
+  }, []);
 
   // Load reply/forward/draft data
   useEffect(() => {
@@ -79,10 +122,13 @@ export default function MailComposePage() {
           const message = await getMessage(messageId);
           if (message) {
             if (replyToId) {
-              // Reply
-              setRecipientId(message.sender_id);
-              setRecipientName(message.sender_name || '');
-              setRecipientEmail(message.sender_email || '');
+              // Reply - add sender as recipient
+              setToRecipients([{
+                id: message.sender_id,
+                name: message.sender_name,
+                email: message.sender_email,
+                type: 'to'
+              }]);
               setSubject(`Re: ${message.subject || ''}`);
               setBodyHtml(`
                 <br/><br/>
@@ -107,11 +153,16 @@ export default function MailComposePage() {
               `);
             } else if (draftId) {
               // Draft - load existing draft data
-              setRecipientId(message.recipient_id);
-              setRecipientName(message.recipient_name || '');
-              setRecipientEmail(message.recipient_email || '');
+              if (message.recipients) {
+                const to = message.recipients.filter(r => r.type === 'to');
+                const cc = message.recipients.filter(r => r.type === 'cc');
+                setToRecipients(to);
+                setCcRecipients(cc);
+                if (cc.length > 0) setShowCc(true);
+              }
               setSubject(message.subject || '');
               setBodyHtml(message.body_html || message.body || '');
+              setSendExternal(message.send_external || false);
               setCurrentDraftId(draftId);
             }
           }
@@ -126,10 +177,8 @@ export default function MailComposePage() {
     loadData();
   }, [replyToId, forwardId, draftId, getMessage]);
 
-  
-
   const handleSend = async () => {
-    if (!recipientId) {
+    if (toRecipients.length === 0) {
       setErrorMessage(t('mail.recipientRequired'));
       return;
     }
@@ -139,14 +188,18 @@ export default function MailComposePage() {
     setErrorMessage(null);
 
     try {
+      const allRecipients = [
+        ...toRecipients.map(r => ({ ...r, type: 'to' as RecipientType })),
+        ...ccRecipients.map(r => ({ ...r, type: 'cc' as RecipientType }))
+      ];
+
       await sendMessage({
-        recipientId: recipientId,
-        recipientName,
-        recipientEmail,
+        recipients: allRecipients,
         subject,
         body: bodyHtml.replace(/<[^>]+>/g, ''),
         bodyHtml,
-        draftId: currentDraftId || undefined
+        draftId: currentDraftId || undefined,
+        sendExternal
       });
       setSuccessMessage(t('mail.sendSuccess'));
       setTimeout(() => {
@@ -166,13 +219,17 @@ export default function MailComposePage() {
     setErrorMessage(null);
 
     try {
+      const allRecipients = [
+        ...toRecipients.map(r => ({ ...r, type: 'to' as RecipientType })),
+        ...ccRecipients.map(r => ({ ...r, type: 'cc' as RecipientType }))
+      ];
+
       const draftData = {
-        recipientId: recipientId || undefined,
-        recipientName: recipientName || undefined,
-        recipientEmail: recipientEmail || undefined,
+        recipients: allRecipients,
         subject,
         body: bodyHtml.replace(/<[^>]+>/g, ''),
-        bodyHtml
+        bodyHtml,
+        sendExternal
       };
 
       if (currentDraftId) {
@@ -250,36 +307,74 @@ export default function MailComposePage() {
           <IconButton onClick={handleDiscard} color="error"><Delete /></IconButton>
         </Box>
 
-        {/* Recipient */}
+        {/* To Recipients */}
         <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{ width: 50, fontWeight: 500 }}>{t('mail.to')}:</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+            <Typography variant="body2" sx={{ width: 50, fontWeight: 500, pt: 1 }}>{t('mail.to')}:</Typography>
             <Box sx={{ flex: 1 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: toRecipients.length > 0 ? 1 : 0 }}>
+                {toRecipients.map(r => (
+                  <Chip
+                    key={r.id}
+                    label={r.name || r.email}
+                    size="small"
+                    onDelete={() => removeRecipient(r.id, 'to')}
+                  />
+                ))}
+              </Box>
               <UserAutocomplete
-                value={recipientId}
-                onChange={(userId) => {
-                  if (!userId) {
-                    setRecipientId(null);
-                    setRecipientName('');
-                    setRecipientEmail('');
-                  }
-                }}
+                value={null}
+                onChange={() => {}}
                 onUserSelect={(user) => {
                   if (user) {
-                    setRecipientId(user.id);
-                    setRecipientName(user.name || user.username);
-                    setRecipientEmail(user.username);
-                  } else {
-                    setRecipientId(null);
-                    setRecipientName('');
-                    setRecipientEmail('');
+                    addRecipient(user, 'to');
                   }
                 }}
-                placeholder={t('mail.selectRecipient')}
+                placeholder={t('mail.addRecipient')}
+                clearOnSelect
               />
             </Box>
+            <Button
+              size="small"
+              onClick={() => setShowCc(!showCc)}
+              endIcon={showCc ? <ExpandLess /> : <ExpandMore />}
+            >
+              CC
+            </Button>
           </Box>
         </Box>
+
+        {/* CC Recipients */}
+        <Collapse in={showCc}>
+          <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+              <Typography variant="body2" sx={{ width: 50, fontWeight: 500, pt: 1 }}>CC:</Typography>
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: ccRecipients.length > 0 ? 1 : 0 }}>
+                  {ccRecipients.map(r => (
+                    <Chip
+                      key={r.id}
+                      label={r.name || r.email}
+                      size="small"
+                      onDelete={() => removeRecipient(r.id, 'cc')}
+                    />
+                  ))}
+                </Box>
+                <UserAutocomplete
+                  value={null}
+                  onChange={() => {}}
+                  onUserSelect={(user) => {
+                    if (user) {
+                      addRecipient(user, 'cc');
+                    }
+                  }}
+                  placeholder={t('mail.addCc')}
+                  clearOnSelect
+                />
+              </Box>
+            </Box>
+          </Box>
+        </Collapse>
 
         {/* Subject */}
         <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
@@ -304,20 +399,32 @@ export default function MailComposePage() {
           />
         </Box>
 
-        {/* Actions */}
+        {/* Options & Actions */}
         <Divider />
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button variant="outlined" startIcon={<Save />} onClick={handleSaveDraft} disabled={saving || sending}>
-            {saving ? t('common.saving') : t('mail.saveDraft' as any)}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={sending ? <CircularProgress size={20} /> : <Send />}
-            onClick={handleSend}
-            disabled={sending || saving || !recipientId}
-          >
-            {sending ? t('common.sending') : t('mail.send' as any)}
-          </Button>
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={sendExternal}
+                onChange={(e) => setSendExternal(e.target.checked)}
+                size="small"
+              />
+            }
+            label={<Typography variant="body2">{t('mail.sendExternal')}</Typography>}
+          />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button variant="outlined" startIcon={<Save />} onClick={handleSaveDraft} disabled={saving || sending}>
+              {saving ? t('common.saving') : t('mail.saveDraft')}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={sending ? <CircularProgress size={20} /> : <Send />}
+              onClick={handleSend}
+              disabled={sending || saving || toRecipients.length === 0}
+            >
+              {sending ? t('common.sending') : t('mail.send')}
+            </Button>
+          </Box>
         </Box>
       </Paper>
     </StandardCrudPageLayout>

@@ -1,6 +1,6 @@
 /**
- * Simplified Mail Routes
- * 단순 사내 메일 API
+ * Mail Routes v2
+ * Multi-recipient Support Mail API
  */
 const express = require('express');
 const router = express.Router();
@@ -53,6 +53,18 @@ router.put('/draft/:id', async (req, res) => {
   } catch (error) {
     console.error('Update draft error:', error);
     res.status(500).json({ error: 'Failed to update draft' });
+  }
+});
+
+// DELETE /api/mail/draft/:id - Delete draft permanently
+router.delete('/draft/:id', async (req, res) => {
+  try {
+    const deleted = await mailService.deleteDraft(req.params.id, req.user.userId);
+    if (!deleted) return res.status(404).json({ error: 'Draft not found' });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete draft error:', error);
+    res.status(500).json({ error: 'Failed to delete draft' });
   }
 });
 

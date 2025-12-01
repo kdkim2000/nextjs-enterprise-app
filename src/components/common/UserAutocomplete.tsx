@@ -23,6 +23,7 @@ export interface UserAutocompleteProps {
   helperText?: string;
   fullWidth?: boolean;
   sx?: any;
+  clearOnSelect?: boolean;
 }
 
 export default function UserAutocomplete({
@@ -36,7 +37,8 @@ export default function UserAutocomplete({
   error = false,
   helperText,
   fullWidth = true,
-  sx
+  sx,
+  clearOnSelect = false
 }: UserAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
