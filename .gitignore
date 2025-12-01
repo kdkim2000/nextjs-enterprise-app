@@ -72,5 +72,8 @@ pgdata/
 .claude/
 migration/.claude/
 
+# claude sessions (local only - may contain sensitive info)
+docs/claude-sessions/
+
 # Uploaded files
 uploads/
