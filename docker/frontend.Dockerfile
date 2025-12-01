@@ -14,20 +14,15 @@ RUN npm ci
 COPY . .
 
 # Copy .env.production if exists (optional)
-# Environment variables should be passed via docker-compose
 RUN touch .env.production
 
-# Build Next.js
+# Build Next.js - create middleware.js.nft.json before build to prevent error
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build || true
+RUN mkdir -p .next/server && echo '{"version":1,"files":[]}' > .next/server/middleware.js.nft.json
+RUN npm run build
 
-# Workaround for Next.js 16 middleware.js.nft.json issue with standalone output
-RUN if [ ! -f .next/server/middleware.js.nft.json ]; then \
-      echo '{"version":1,"files":[]}' > .next/server/middleware.js.nft.json; \
-    fi
-
-# Verify build completed
-RUN test -d .next/standalone || (echo "Build failed: standalone directory not found" && exit 1)
+# Verify standalone build exists
+RUN ls -la .next/standalone/ && test -f .next/standalone/server.js
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -41,10 +36,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built assets
-COPY --from=builder /app/public ./public
+# Copy built assets from standalone
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+# Set ownership
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
