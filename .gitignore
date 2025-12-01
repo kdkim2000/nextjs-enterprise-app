@@ -57,6 +57,7 @@ migration/*.log
 migration/test-connection.js
 migration/.env
 migration/.env.*
+migration/insert_conversations*.sql
 
 # database backups
 migration/*.dump
