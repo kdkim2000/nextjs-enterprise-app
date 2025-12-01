@@ -66,8 +66,8 @@ backup/
 .pgpass
 pgdata/
 
-# claude settings
-.claude/settings.local.json
+# claude settings (local only)
+.claude/
 migration/.claude/
 
 # Uploaded files
