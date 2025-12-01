@@ -180,15 +180,16 @@ async function deleteMenu(menuId) {
 
 /**
  * Get user accessible menus based on role permissions
+ * Uses role_program_mappings (program_code stores programs.code)
  * @param {string} userId - User ID
  * @returns {Promise<Array>} Array of accessible menu objects
  */
 async function getUserMenus(userId) {
   const query = `
     SELECT DISTINCT m.* FROM menus m
-    INNER JOIN role_menu_mappings rmm ON m.id = rmm.menu_id
-    INNER JOIN user_role_mappings urm ON rmm.role_id = urm.role_id
-    WHERE urm.user_id = $1
+    INNER JOIN user_role_mappings urm ON urm.user_id = $1
+    INNER JOIN role_program_mappings rpm ON m.program_id = rpm.program_code AND rpm.role_id = urm.role_id
+    WHERE rpm.can_view = true
     ORDER BY m.level, m."order", m.code
   `;
 

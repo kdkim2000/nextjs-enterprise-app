@@ -28,7 +28,7 @@ async function getUserProgramPermissions(userId, programCode) {
     // Get program permissions for user's roles
     const allRoleProgramMappings = await mappingService.getAllRoleProgramMappings();
     const programPermissions = allRoleProgramMappings.filter(
-      rpm => userRoleIds.includes(rpm.role_id) && rpm.program_id === program.id
+      rpm => userRoleIds.includes(rpm.role_id) && rpm.program_code === program.code
     );
 
     // If no program permissions found, deny access
@@ -194,15 +194,15 @@ async function getUserAccessibleProgramsAsync(userId) {
     const programPermissionsMap = new Map();
 
     userProgramMappings.forEach(rpm => {
-      const programId = rpm.program_id;
-      const existing = programPermissionsMap.get(programId) || {
+      const programCode = rpm.program_code;
+      const existing = programPermissionsMap.get(programCode) || {
         canView: false,
         canCreate: false,
         canUpdate: false,
         canDelete: false
       };
 
-      programPermissionsMap.set(programId, {
+      programPermissionsMap.set(programCode, {
         canView: existing.canView || rpm.can_view,
         canCreate: existing.canCreate || rpm.can_create,
         canUpdate: existing.canUpdate || rpm.can_update,
@@ -212,13 +212,13 @@ async function getUserAccessibleProgramsAsync(userId) {
 
     // Map to programs with permissions
     const accessiblePrograms = allPrograms
-      .filter(program => programPermissionsMap.has(program.id))
+      .filter(program => programPermissionsMap.has(program.code))
       .map(program => ({
         id: program.id,
         code: program.code,
         name: program.name_en || program.name,
         category: program.category,
-        permissions: programPermissionsMap.get(program.id)
+        permissions: programPermissionsMap.get(program.code)
       }));
 
     // Cache for sync calls

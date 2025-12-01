@@ -16,6 +16,10 @@ build
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
+
+# Migration backups
+migration/backup/
 
 # Runtime data
 backend/data/*.json
