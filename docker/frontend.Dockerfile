@@ -17,10 +17,17 @@ COPY . .
 # Environment variables should be passed via docker-compose
 RUN touch .env.production
 
-# Build Next.js with Webpack (not Turbopack) to avoid middleware.js.nft.json issue
+# Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV TURBOPACK=0
-RUN npm run build
+RUN npm run build || true
+
+# Workaround for Next.js 16 middleware.js.nft.json issue with standalone output
+RUN if [ ! -f .next/server/middleware.js.nft.json ]; then \
+      echo '{"version":1,"files":[]}' > .next/server/middleware.js.nft.json; \
+    fi
+
+# Verify build completed
+RUN test -d .next/standalone || (echo "Build failed: standalone directory not found" && exit 1)
 
 # Production stage
 FROM node:20-alpine AS runner

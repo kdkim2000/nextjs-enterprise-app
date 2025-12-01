@@ -4,12 +4,6 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker deployment
   output: 'standalone',
 
-  // Disable Turbopack for production build (middleware.js.nft.json issue in Next.js 16)
-  // This forces Webpack to be used instead
-  experimental: {
-    turbo: undefined, // Disable Turbopack
-  },
-
   // Image optimization
   images: {
     remotePatterns: [
