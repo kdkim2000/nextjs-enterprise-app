@@ -37,6 +37,7 @@ const attachmentTypeRoutes = require('./routes/attachmentType');
 const conversationRoutes = require('./routes/conversation');
 const dashboardRoutes = require('./routes/dashboard');
 const appSettingsRoutes = require('./routes/appSettings');
+const mailRoutes = require('./routes/mail');
 
 // Import middleware
 const { loggerMiddleware } = require('./middleware/logger');
@@ -128,6 +129,9 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // App Settings routes
 app.use('/api/app-settings', appSettingsRoutes);
+
+// Mail routes
+app.use('/api/mail', mailRoutes);
 
 // API Documentation
 app.use('/api-docs', swaggerRoutes);

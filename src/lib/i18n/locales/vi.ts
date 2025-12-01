@@ -399,5 +399,29 @@ export default {
       title: 'Cách Sử dụng Hệ thống Chủ đề',
       description: 'Tất cả các tính năng chủ đề được tự động áp dụng khi sử dụng các thành phần MUI. Không cần thành phần wrapper!'
     }
+  },
+  mail: {
+    compose: 'Soạn thư',
+    inbox: 'Hộp thư đến',
+    sent: 'Đã gửi',
+    draft: 'Bản nháp',
+    starred: 'Gắn dấu sao',
+    trash: 'Thùng rác',
+    to: 'Đến',
+    cc: 'CC',
+    bcc: 'BCC',
+    subject: 'Chủ đề',
+    attachments: 'Tệp đính kèm',
+    send: 'Gửi',
+    saveDraft: 'Lưu nháp',
+    discard: 'Hủy bỏ',
+    reply: 'Trả lời',
+    replyAll: 'Trả lời tất cả',
+    forward: 'Chuyển tiếp',
+    markAsRead: 'Đánh dấu đã đọc',
+    markAsUnread: 'Đánh dấu chưa đọc',
+    moveTo: 'Di chuyển đến',
+    noMessages: 'Không có thư',
+    selectMessage: 'Chọn một thư để đọc'
   }
 } as const;

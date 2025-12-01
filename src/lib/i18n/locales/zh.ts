@@ -399,5 +399,29 @@ export default {
       title: '如何使用主题系统',
       description: '使用MUI组件时，所有主题功能都会自动应用。无需包装组件！'
     }
+  },
+  mail: {
+    compose: '写邮件',
+    inbox: '收件箱',
+    sent: '已发送',
+    draft: '草稿箱',
+    starred: '星标邮件',
+    trash: '已删除',
+    to: '收件人',
+    cc: '抄送',
+    bcc: '密送',
+    subject: '主题',
+    attachments: '附件',
+    send: '发送',
+    saveDraft: '保存草稿',
+    discard: '放弃',
+    reply: '回复',
+    replyAll: '全部回复',
+    forward: '转发',
+    markAsRead: '标记为已读',
+    markAsUnread: '标记为未读',
+    moveTo: '移动到',
+    noMessages: '没有邮件',
+    selectMessage: '选择一封邮件阅读'
   }
 } as const;

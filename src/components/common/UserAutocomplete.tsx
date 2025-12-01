@@ -14,6 +14,7 @@ export interface User {
 export interface UserAutocompleteProps {
   value: string | null;
   onChange: (userId: string | null) => void;
+  onUserSelect?: (user: User | null) => void;
   label?: string;
   placeholder?: string;
   required?: boolean;
@@ -21,18 +22,21 @@ export interface UserAutocompleteProps {
   error?: boolean;
   helperText?: string;
   fullWidth?: boolean;
+  sx?: any;
 }
 
 export default function UserAutocomplete({
   value,
   onChange,
+  onUserSelect,
   label = 'User',
   placeholder = 'Search by username or name...',
   required = false,
   disabled = false,
   error = false,
   helperText,
-  fullWidth = true
+  fullWidth = true,
+  sx
 }: UserAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
@@ -117,6 +121,7 @@ export default function UserAutocomplete({
   const handleChange = (_event: any, newValue: User | null) => {
     setSelectedUser(newValue);
     onChange(newValue ? newValue.id : null);
+    onUserSelect?.(newValue);
   };
 
   // Get option label
@@ -127,6 +132,7 @@ export default function UserAutocomplete({
   return (
     <Autocomplete
       fullWidth={fullWidth}
+      sx={sx}
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
