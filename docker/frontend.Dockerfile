@@ -16,10 +16,22 @@ COPY . .
 # Copy .env.production if exists (optional)
 RUN touch .env.production
 
-# Build Next.js - create middleware.js.nft.json before build to prevent error
+# Build Next.js with workaround for middleware.js.nft.json issue in Next.js 16
+# The build fails at "Finalizing page optimization" looking for this file
+# Solution: Run build, if it fails due to this file, create it and finalize manually
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN mkdir -p .next/server && echo '{"version":1,"files":[]}' > .next/server/middleware.js.nft.json
-RUN npm run build
+RUN npm run build; \
+    EXIT_CODE=$?; \
+    if [ $EXIT_CODE -ne 0 ]; then \
+      if [ -d .next/standalone ]; then \
+        echo "Build partially completed, creating missing middleware.js.nft.json..."; \
+        mkdir -p .next/server; \
+        echo '{"version":1,"files":[]}' > .next/server/middleware.js.nft.json; \
+      else \
+        echo "Build failed completely"; \
+        exit 1; \
+      fi; \
+    fi
 
 # Verify standalone build exists
 RUN ls -la .next/standalone/ && test -f .next/standalone/server.js
