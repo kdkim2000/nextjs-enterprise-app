@@ -25,10 +25,10 @@ const { execSync } = require('child_process');
 
 // Database Configuration
 const DB_CONFIG = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || '5432',
-  database: process.env.DB_NAME || 'nextjs_enterprise_app',
-  user: process.env.DB_USER || 'app_user',
+  host: process.env.DB_HOST || '123.37.36.45',
+  port: process.env.DB_PORT || '9090',
+  database: process.env.DB_NAME || 'corenextdb',
+  user: process.env.DB_USER || 'corenext',
   password: process.env.DB_PASSWORD || '<REDACTED_PASSWORD>'
 };
 
