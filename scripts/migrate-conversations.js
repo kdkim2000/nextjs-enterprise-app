@@ -38,6 +38,38 @@ const PROJECT_DIR = path.join(CLAUDE_DIR, 'projects', 'E--apps-nextjs-enterprise
 const OUTPUT_DIR = path.join(__dirname, '..', 'docs', 'claude-sessions');
 const TRACKING_FILE = path.join(__dirname, '..', '.migrated-sessions.json');
 
+// Sensitive data patterns to redact
+const SENSITIVE_PATTERNS = [
+  // Specific passwords
+  { pattern: /CoreNext2025#/g, replacement: '<REDACTED_PASSWORD>' },
+  { pattern: /AppUser2024!/g, replacement: '<REDACTED_PASSWORD>' },
+  { pattern: /admin123/g, replacement: '<TEST_PASSWORD>' },
+  { pattern: /password123/g, replacement: '<TEST_PASSWORD>' },
+  { pattern: /PostgreSQL2024!/g, replacement: '<REDACTED_PASSWORD>' },
+  // IP addresses (specific server)
+  { pattern: /123\.37\.36\.45/g, replacement: '<REDACTED_IP>' },
+  // Generic patterns
+  { pattern: /DB_PASSWORD\s*=\s*['"]?[^'"\s\n]+['"]?/gi, replacement: 'DB_PASSWORD=<REDACTED>' },
+  { pattern: /PGPASSWORD\s*=\s*['"]?[^'"\s\n]+['"]?/gi, replacement: 'PGPASSWORD=<REDACTED>' },
+  { pattern: /JWT_SECRET\s*=\s*['"]?[^'"\s\n]+['"]?/gi, replacement: 'JWT_SECRET=<REDACTED>' },
+  { pattern: /JWT_REFRESH_SECRET\s*=\s*['"]?[^'"\s\n]+['"]?/gi, replacement: 'JWT_REFRESH_SECRET=<REDACTED>' },
+  // Password in connection strings
+  { pattern: /password\s*[:=]\s*['"]?[A-Za-z0-9!@#$%^&*()_+\-=]+['"]?/gi, replacement: 'password=<REDACTED>' },
+];
+
+/**
+ * Sanitize sensitive data from content
+ */
+function sanitizeSensitiveData(content) {
+  if (!content || typeof content !== 'string') return content;
+
+  let sanitized = content;
+  for (const { pattern, replacement } of SENSITIVE_PATTERNS) {
+    sanitized = sanitized.replace(pattern, replacement);
+  }
+  return sanitized;
+}
+
 // Parse command line arguments
 const args = process.argv.slice(2);
 const dbOnly = args.includes('--db-only');
@@ -269,7 +301,7 @@ function generateTitle(messages) {
   const firstUserMessage = messages.find(m => m.role === 'user');
   if (!firstUserMessage) return 'Untitled Session';
 
-  const content = ensureString(firstUserMessage.content);
+  const content = sanitizeSensitiveData(ensureString(firstUserMessage.content));
   let title = content.substring(0, 100);
   // 줄바꿈 제거
   title = title.replace(/[\r\n]+/g, ' ').trim();
@@ -353,7 +385,7 @@ function convertToMarkdown(messages, metadata, title) {
 
   for (const msg of messages) {
     const timestamp = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('ko-KR') : '';
-    const content = ensureString(msg.content);
+    const content = sanitizeSensitiveData(ensureString(msg.content));
 
     if (msg.role === 'user') {
       md += `### 👤 사용자 ${timestamp ? `(${timestamp})` : ''}\n\n`;
@@ -423,7 +455,8 @@ function generateInsertSQL(messages, metadata, title) {
   messages.forEach((msg, index) => {
     const msgId = uuidv4();
     const content = ensureString(msg.content);
-    const escapedContent = content.replace(/'/g, "''").replace(/\\/g, '\\\\');
+    const sanitizedContent = sanitizeSensitiveData(content);
+    const escapedContent = sanitizedContent.replace(/'/g, "''").replace(/\\/g, '\\\\');
     const timestamp = msg.timestamp ? new Date(msg.timestamp).toISOString() : startTime;
 
     sql += `INSERT INTO conversation_messages (id, conversation_id, role, content, "order", created_at) VALUES (\n`;
