@@ -5,7 +5,11 @@ import {
   TextField,
   Divider,
   Grid,
-  Typography
+  Typography,
+  FormControlLabel,
+  Switch,
+  Box,
+  Chip
 } from '@mui/material';
 import AvatarUpload from '@/components/common/AvatarUpload';
 import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
@@ -33,6 +37,8 @@ export interface UserFormData {
   avatarUrl?: string;
   avatar_image?: string; // Base64 encoded image
   lastPasswordChanged?: string;
+  mfaEnabled?: boolean;
+  ssoEnabled?: boolean;
 }
 
 export interface UserFormFieldsProps {
@@ -59,7 +65,7 @@ export default function UserFormFields({
 }: UserFormFieldsProps) {
   if (!user) return null;
 
-  const handleChange = (field: keyof UserFormData, value: string) => {
+  const handleChange = (field: keyof UserFormData, value: string | boolean) => {
     onChange({ ...user, [field]: value });
   };
 
@@ -260,6 +266,91 @@ export default function UserFormFields({
           />
         </Grid>
       </Grid>
+
+      {/* Security Settings Section - Only for existing users */}
+      {user.id && (
+        <>
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Security Settings
+          </Typography>
+
+          <Grid container spacing={2}>
+            {/* MFA Enabled */}
+            <Grid item xs={12} sm={6}>
+              <Box sx={{
+                p: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                bgcolor: user.mfaEnabled ? 'success.50' : 'grey.50'
+              }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={user.mfaEnabled || false}
+                      onChange={(e) => handleChange('mfaEnabled', e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>MFA (Multi-Factor Authentication)</span>
+                      <Chip
+                        label={user.mfaEnabled ? 'Enabled' : 'Disabled'}
+                        size="small"
+                        color={user.mfaEnabled ? 'success' : 'default'}
+                      />
+                    </Box>
+                  }
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                  {user.mfaEnabled
+                    ? 'User must verify with email code when logging in'
+                    : 'User can login with password only'}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* SSO Enabled */}
+            <Grid item xs={12} sm={6}>
+              <Box sx={{
+                p: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                bgcolor: user.ssoEnabled ? 'info.50' : 'grey.50'
+              }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={user.ssoEnabled || false}
+                      onChange={(e) => handleChange('ssoEnabled', e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>SSO (Single Sign-On)</span>
+                      <Chip
+                        label={user.ssoEnabled ? 'Enabled' : 'Disabled'}
+                        size="small"
+                        color={user.ssoEnabled ? 'info' : 'default'}
+                      />
+                    </Box>
+                  }
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                  {user.ssoEnabled
+                    ? 'User can login via corporate SSO provider'
+                    : 'User must login with local credentials'}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </>
+      )}
 
       {/* Role Assignment Section */}
       <Divider sx={{ my: 3 }} />

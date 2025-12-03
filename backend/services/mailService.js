@@ -281,11 +281,13 @@ class MailService {
 
         // Create inbox entries for each recipient
         for (const recipient of recipients) {
-          if (recipient.id && recipient.id !== userId) {
+          if (recipient.id) {
+            // Create inbox entry for recipient (including self-mail)
+            // UNIQUE constraint is on (message_id, user_id, folder) so sender can have both sent and inbox
             await client.query(`
               INSERT INTO mail_user_messages (message_id, user_id, role, folder, is_read)
               VALUES ($1, $2, $3, 'inbox', false)
-              ON CONFLICT (message_id, user_id) DO NOTHING
+              ON CONFLICT (message_id, user_id, folder) DO NOTHING
             `, [messageId, recipient.id, recipient.type || 'to']);
           }
         }

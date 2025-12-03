@@ -354,6 +354,44 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     fetchUsers(newModel.page, newModel.pageSize, useQuickSearch);
   }, [fetchUsers, quickSearch, setPaginationModel]);
 
+  // Toggle field handler (for MFA/SSO quick toggle)
+  const handleToggleField = useCallback(async (id: string | number, field: string, value: boolean) => {
+    try {
+      const response = await api.put(`/user/${id}`, { [field]: value });
+      setUsers(users.map((u) => (u.id === id ? { ...u, [field]: value } : u)));
+      await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
+    } catch (err) {
+      console.error('Failed to toggle field:', err);
+      await showErrorMessage('CRUD_USER_SAVE_FAIL');
+    }
+  }, [users, setUsers, showSuccessMessage, showErrorMessage]);
+
+  // Inline row update handler
+  const handleRowUpdate = useCallback(async (newRow: any, oldRow: any) => {
+    // Find changed fields
+    const changes: Record<string, any> = {};
+    Object.keys(newRow).forEach(key => {
+      if (newRow[key] !== oldRow[key]) {
+        changes[key] = newRow[key];
+      }
+    });
+
+    if (Object.keys(changes).length === 0) {
+      return oldRow; // No changes
+    }
+
+    try {
+      const response = await api.put(`/user/${newRow.id}`, changes);
+      setUsers(users.map((u) => (u.id === newRow.id ? { ...u, ...changes } : u)));
+      await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
+      return { ...oldRow, ...changes };
+    } catch (err) {
+      console.error('Failed to update row:', err);
+      await showErrorMessage('CRUD_USER_SAVE_FAIL');
+      throw err; // Throw to revert changes
+    }
+  }, [users, setUsers, showSuccessMessage, showErrorMessage]);
+
   // Load departments on mount
   useEffect(() => {
     fetchDepartments();
@@ -410,6 +448,8 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
+    handleToggleField,
+    handleRowUpdate,
     setDialogOpen,
     fetchDepartments
   };

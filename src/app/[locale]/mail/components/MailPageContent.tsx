@@ -82,13 +82,7 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     deletePermanently,
     markAsRead,
     bulkAction
-  } = useMailData();
-
-  useEffect(() => {
-    if (initialFolder && initialFolder !== currentFolder) {
-      setCurrentFolder(initialFolder);
-    }
-  }, [initialFolder]);
+  } = useMailData(initialFolder);
 
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [searchInput, setSearchInput] = useState('');
