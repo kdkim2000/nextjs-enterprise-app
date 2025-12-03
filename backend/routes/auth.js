@@ -61,7 +61,7 @@ router.post('/login', authLimiter, async (req, res) => {
     // Generate tokens
     const token = generateToken({
       userId: user.id,
-      username: user.username,
+      username: user.loginid,
       role: user.role
     });
 
@@ -129,7 +129,7 @@ router.post('/verify-mfa', mfaLimiter, async (req, res) => {
     // Generate tokens
     const token = generateToken({
       userId: user.id,
-      username: user.username,
+      username: user.loginid,
       role: user.role
     });
 
@@ -273,7 +273,7 @@ router.post('/refresh', async (req, res) => {
     // Generate new access token
     const token = generateToken({
       userId: user.id,
-      username: user.username,
+      username: user.loginid,
       role: user.role
     });
 

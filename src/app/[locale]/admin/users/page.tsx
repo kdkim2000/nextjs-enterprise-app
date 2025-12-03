@@ -84,14 +84,16 @@ export default function UserManagementPage() {
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
     handlePaginationModelChange,
+    handleToggleField,
+    handleRowUpdate,
     setDialogOpen
   } = useUserManagement();
 
   // Memoized computed values
   const columns = useMemo(() => {
     console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
-    return createColumns(t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable);
-  }, [t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable]);
+    return createColumns(t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable, handleToggleField);
+  }, [t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable, handleToggleField]);
   const filterFields = useMemo(() => createFilterFields(t, currentLocale, allDepartments), [t, currentLocale, allDepartments]);
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
@@ -164,6 +166,8 @@ export default function UserManagementPage() {
             onRowsChange={(rows) => setUsers(rows as User[])}
             {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
             {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+            {...(gridPermissions.editable && { onEdit: handleEdit })}
+            {...(gridPermissions.editable && { onRowUpdate: handleRowUpdate })}
             onRefresh={handleRefresh}
             checkboxSelection={gridPermissions.checkboxSelection}
             editable={gridPermissions.editable}

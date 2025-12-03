@@ -11,7 +11,8 @@ import {
   GridToolbarColumnsButton,
   GridToolbarDensitySelector,
   GridRowSelectionModel,
-  GridCellParams
+  GridCellParams,
+  GridRowModel
 } from '@mui/x-data-grid';
 import {
   Box,
@@ -43,6 +44,7 @@ interface ExcelDataGridProps {
   onDelete?: (ids: (string | number)[]) => void;
   onRefresh?: () => void;
   onRowClick?: (params: any) => void;
+  onRowUpdate?: (newRow: any, oldRow: any) => Promise<any>;
   loading?: boolean;
   editable?: boolean;
   checkboxSelection?: boolean;
@@ -285,6 +287,7 @@ export default function ExcelDataGrid({
   onDelete,
   onRefresh,
   onRowClick,
+  onRowUpdate,
   loading = false,
   editable = false,
   checkboxSelection = true,
@@ -434,12 +437,46 @@ export default function ExcelDataGrid({
 
   const handleCellDoubleClick = useCallback(
     (params: GridCellParams) => {
-      if (editable && onEdit && params.field !== '__check__') {
+      // Skip if cell is editable (let inline edit handle it)
+      const column = columns.find(c => c.field === params.field);
+      if (column?.editable) return;
+
+      if (editable && onEdit && params.field !== '__check__' && params.field !== 'actions') {
         onEdit(params.id);
       }
     },
-    [editable, onEdit]
+    [editable, onEdit, columns]
   );
+
+  // Handle inline row updates
+  const processRowUpdate = useCallback(
+    async (newRow: GridRowModel, oldRow: GridRowModel) => {
+      if (onRowUpdate) {
+        try {
+          const updatedRow = await onRowUpdate(newRow, oldRow);
+          return updatedRow;
+        } catch (error) {
+          console.error('Row update error:', error);
+          toast.error('Failed to update');
+          return oldRow; // Revert on error
+        }
+      }
+      // If no onRowUpdate handler, just update local state
+      if (onRowsChange) {
+        const updatedRows = rows.map((row) =>
+          row.id === newRow.id ? newRow : row
+        );
+        onRowsChange(updatedRows);
+      }
+      return newRow;
+    },
+    [onRowUpdate, onRowsChange, rows]
+  );
+
+  const handleProcessRowUpdateError = useCallback((error: Error) => {
+    console.error('Row update error:', error);
+    toast.error('Failed to update row');
+  }, []);
 
   return (
     <Box sx={{ height: height || '100%', width: '100%' }}>
@@ -453,6 +490,8 @@ export default function ExcelDataGrid({
         rowSelectionModel={selectionModel}
         onCellDoubleClick={handleCellDoubleClick}
         onRowClick={onRowClick}
+        processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={handleProcessRowUpdateError}
         slots={{
           toolbar: CustomToolbar as any
         }}

@@ -21,6 +21,7 @@ export interface UserOption {
   username: string;
   name?: string;
   email?: string;
+  employee_number?: string;
 }
 
 export interface MultiUserSelectProps {
@@ -39,7 +40,7 @@ export default function MultiUserSelect({
   value = [],
   onChange,
   label,
-  placeholder = 'Search users...',
+  placeholder = 'Search by name, email, ID, or employee #...',
   disabled = false,
   error = false,
   helperText,
@@ -53,6 +54,7 @@ export default function MultiUserSelect({
   const [inputValue, setInputValue] = useState('');
 
   // Search users with debounce
+  // Supports: email, name (Korean/English), login ID, employee number
   const searchUsers = useCallback(
     debounce(async (searchTerm: string) => {
       if (!searchTerm || searchTerm.length < 2) {
@@ -63,14 +65,15 @@ export default function MultiUserSelect({
 
       setLoading(true);
       try {
-        const response = await api.get(
-          `/user?username=${searchTerm}&name=${searchTerm}&email=${searchTerm}&page=1&limit=30`
-        );
+        // Use 'search' parameter for full-text search across multiple fields:
+        // loginid, email, name_ko, name_en, employee_number
+        const response = await api.get(`/user?search=${encodeURIComponent(searchTerm)}&page=1&limit=30`);
         const users: UserOption[] = (response.users || []).map((u: any) => ({
           id: u.id,
-          username: u.username,
-          name: u.name,
-          email: u.email
+          username: u.loginid || u.username || u.id,
+          name: u.name || u.name_ko || u.name_en,
+          email: u.email,
+          employee_number: u.employee_number
         }));
         // Filter out already selected users
         const selectedIds = new Set(value.map(v => v.id));
@@ -101,14 +104,12 @@ export default function MultiUserSelect({
   };
 
   const getInitials = (user: UserOption) => {
-    if (user.name) {
-      return user.name.charAt(0).toUpperCase();
-    }
-    return user.username.charAt(0).toUpperCase();
+    const displayName = user.name || user.username || user.email || user.id || '?';
+    return displayName.charAt(0).toUpperCase();
   };
 
   const getDisplayName = (user: UserOption) => {
-    return user.name || user.username;
+    return user.name || user.username || user.email || user.id || 'Unknown';
   };
 
   return (
@@ -129,7 +130,7 @@ export default function MultiUserSelect({
       filterOptions={(x) => x}
       noOptionsText={
         inputValue.length < 2
-          ? 'Type at least 2 characters'
+          ? 'Type at least 2 characters to search'
           : 'No users found'
       }
       renderTags={(tagValue, getTagProps) =>
@@ -175,6 +176,13 @@ export default function MultiUserSelect({
       }
       renderOption={(props, option) => {
         const { key, ...rest } = props as any;
+        // Build subtitle with available info
+        const subtitleParts = [];
+        if (option.email) subtitleParts.push(option.email);
+        if (option.username) subtitleParts.push(`@${option.username}`);
+        if (option.employee_number) subtitleParts.push(`#${option.employee_number}`);
+        const subtitle = subtitleParts.join(' · ');
+
         return (
           <Box
             component="li"
@@ -217,7 +225,7 @@ export default function MultiUserSelect({
                 sx={{ lineHeight: 1.2 }}
                 noWrap
               >
-                {option.email || option.username}
+                {subtitle}
               </Typography>
             </Box>
           </Box>

@@ -6,7 +6,7 @@ services:
     ports:
       - "9090:5432"
     volumes:
-      - pgdata_16_11:/var/lib/postgresql/data
+      - pg16_pgdata_16_11:/var/lib/postgresql/data
     restart: unless-stopped
 
   # Backend API Server
@@ -31,7 +31,7 @@ services:
     networks:
       - corenext-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://123.37.36.45:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -70,9 +70,10 @@ services:
       - backend
     networks:
       - corenext-network
-      
+
 volumes:
-  pgdata_16_11:
+  pg16_pgdata_16_11:
+    external: true
 
 networks:
   corenext-network:

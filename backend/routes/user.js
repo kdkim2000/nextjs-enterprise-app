@@ -37,6 +37,7 @@ function transformMenuToAPI(dbMenu) {
 router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async (req, res) => {
   try {
     const {
+      search,  // General search across multiple fields (full-text search)
       loginid,
       username,
       name_ko,
@@ -63,14 +64,17 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
     const limitNum = parseInt(limit);
     const offset = (pageNum - 1) * limitNum;
 
-    // Build search string (backward compatible with single search field)
-    // If specific fields are provided, combine them for search
-    const searchTerms = [loginid, username, name_ko, name_en, name, email, employee_number, phone_number, mobile_number, position].filter(Boolean);
-    const search = searchTerms.length > 0 ? searchTerms[0] : null; // For now, use first non-empty term
+    // Use 'search' parameter directly for full-text search
+    // If not provided, fall back to first specific field value for backward compatibility
+    let searchTerm = search;
+    if (!searchTerm) {
+      const searchTerms = [loginid, username, name_ko, name_en, name, email, employee_number, phone_number, mobile_number, position].filter(Boolean);
+      searchTerm = searchTerms.length > 0 ? searchTerms[0] : null;
+    }
 
     // Get users from database
     const users = await userService.getAllUsers({
-      search,
+      search: searchTerm,
       loginid,
       name_ko,
       name_en,
@@ -89,7 +93,7 @@ router.get('/', authenticateToken, requireProgramAccess('PROG-USER-LIST'), async
 
     // Get total count for pagination
     const totalCount = await userService.getUserCount({
-      search,
+      search: searchTerm,
       loginid,
       name_ko,
       name_en,
@@ -337,7 +341,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
     // Users can view their own profile without permission check
     if (req.user.userId !== id) {
       const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
-      const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
+      const permissions = await getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
       if (!permissions.hasAccess) {
         return res.status(403).json({ error: 'Access denied' });
       }
@@ -483,13 +487,13 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     if (!isSelf) {
       const { getUserProgramPermissions } = require('../middleware/permissionMiddleware');
-      const permissions = getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
+      const permissions = await getUserProgramPermissions(req.user.userId, 'PROG-USER-LIST');
       if (!permissions.canUpdate) {
         return res.status(403).json({ error: 'Update permission required' });
       }
     }
 
-    const { name, email, role, department, status, avatarUrl, avatar_image } = req.body;
+    const { name, email, role, department, status, avatarUrl, avatar_image, mfaEnabled, ssoEnabled } = req.body;
 
     // Check email uniqueness
     if (email) {
@@ -510,10 +514,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (avatarUrl !== undefined) updates.profileImage = avatarUrl;
     if (avatar_image !== undefined) updates.avatar_image = avatar_image;
 
-    // Only admins can change role and status
+    // Only admins can change role, status, and security settings
     if (!isSelf) {
       if (role) updates.role = role;
       if (status) updates.status = status;
+      if (mfaEnabled !== undefined) updates.mfa_enabled = mfaEnabled;
+      if (ssoEnabled !== undefined) updates.sso_enabled = ssoEnabled;
     }
 
     const updatedUser = await userService.updateUser(id, updates);

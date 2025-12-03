@@ -69,14 +69,15 @@ export interface DraftData {
   sendExternal?: boolean;
 }
 
-export function useMailData() {
+export function useMailData(initialFolder: FolderType = 'inbox') {
   const [messages, setMessages] = useState<MailMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 50, total: 0, totalPages: 0 });
   const [counts, setCounts] = useState<FolderCounts | null>(null);
-  const [currentFolder, setCurrentFolder] = useState<FolderType>('inbox');
+  const [currentFolder, setCurrentFolder] = useState<FolderType>(initialFolder);
   const [selectedMessage, setSelectedMessage] = useState<MailMessage | null>(null);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]);
+  const [initialized, setInitialized] = useState(false);
 
   // Fetch messages
   const fetchMessages = useCallback(async (folder: FolderType = currentFolder, options?: { page?: number; search?: string }) => {
@@ -202,10 +203,22 @@ export function useMailData() {
     setSelectedMessages([]);
   }, []);
 
-  // Load initial data
+  // Load initial data on mount
   useEffect(() => {
-    fetchMessages(currentFolder);
-    fetchCounts();
+    if (!initialized) {
+      fetchMessages(currentFolder);
+      fetchCounts();
+      setInitialized(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reload when folder changes (after initialization)
+  useEffect(() => {
+    if (initialized) {
+      fetchMessages(currentFolder);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFolder]);
 
   return {
