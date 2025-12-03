@@ -62,18 +62,29 @@ app.use(securityHeaders);
 app.use(attachResponseHelpers);
 
 // 3. CORS
+const allowedOrigins = [
+  // Localhost variations
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+  /^http:\/\/\[::1\](:\d+)?$/,
+  // Production server IP
+  /^http:\/\/123\.37\.36\.45(:\d+)?$/,
+  // Allow HTTPS as well
+  /^https:\/\/123\.37\.36\.45(:\d+)?$/,
+];
+
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl, or same-origin requests via proxy)
     if (!origin) return callback(null, true);
 
-    // Allow localhost on any port
-    if (origin.match(/^http:\/\/localhost:\d+$/) ||
-        origin.match(/^http:\/\/127\.0\.0\.1:\d+$/) ||
-        origin.match(/^http:\/\/\[::1\]:\d+$/)) {
+    // Check against allowed origins
+    const isAllowed = allowedOrigins.some(pattern => pattern.test(origin));
+    if (isAllowed) {
       return callback(null, true);
     }
 
+    console.warn(`CORS blocked origin: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true
