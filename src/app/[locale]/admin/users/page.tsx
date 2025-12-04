@@ -67,10 +67,12 @@ export default function UserManagementPage() {
     resetPasswordDialogOpen,
     resetPasswordUser,
     resetPasswordLoading,
+    formIsValid,
     // Handlers
     handleAdd,
     handleEdit,
     handleSave,
+    handleValidationChange,
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
@@ -191,6 +193,7 @@ export default function UserManagementPage() {
         title={!editingUser?.id ? t('common.create') + ' Users' : t('common.edit') + ' Users'}
         onSave={handleSave}
         saveLoading={saveLoading}
+        saveDisabled={!editingUser?.id && !formIsValid}
         saveLabel={t('common.save')}
         cancelLabel={t('common.cancel')}
         width={{ xs: '100%', sm: 600, md: 800, lg: 900 }}
@@ -198,6 +201,7 @@ export default function UserManagementPage() {
         <UserFormFields
           user={editingUser as UserFormData}
           onChange={(user) => setEditingUser(user as User)}
+          onValidationChange={handleValidationChange}
           usernameLabel={t('auth.username')}
           emailLabel={t('auth.email')}
           departments={allDepartments}

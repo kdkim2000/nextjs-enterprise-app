@@ -392,23 +392,26 @@ async function createUser(userData) {
     RETURNING *
   `;
 
+  // Convert empty strings to null for optional fields
+  const emptyToNull = (val) => (val === '' || val === undefined) ? null : val;
+
   const params = [
     id,
     finalLoginId,
     email,
     password,
     finalNameKo,
-    name_en,
-    employee_number,
+    emptyToNull(name_en),
+    emptyToNull(employee_number),
     finalSystemKey,
-    finalPhoneNumber,
-    mobile_number,
-    user_category,
-    position,
-    department,
-    status,
+    emptyToNull(finalPhoneNumber),
+    emptyToNull(mobile_number),
+    user_category || 'regular',
+    emptyToNull(position),
+    emptyToNull(department),
+    status || 'active',
     mfaEnabled,
-    profileImage,
+    emptyToNull(profileImage),
     userData.avatar_image || null, // Base64 encoded image
   ];
 

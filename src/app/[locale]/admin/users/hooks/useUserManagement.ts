@@ -164,18 +164,35 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     }
   }, [quickSearch, searchCriteria, setUsers, setRowCount, showErrorMessage]);
 
+  // Form validation state
+  const [formIsValid, setFormIsValid] = useState(false);
+
+  // Validation callback for UserFormFields
+  const handleValidationChange = useCallback((isValid: boolean) => {
+    setFormIsValid(isValid);
+  }, []);
+
   // User CRUD operations
   const handleAdd = useCallback(() => {
     setEditingUser({
       id: '',
       loginid: '',
       name_ko: '',
+      name_en: '',
       email: '',
+      employee_number: '',
+      phone_number: '',
+      mobile_number: '',
+      user_category: 'regular', // Default to 'regular' (required by DB constraint)
+      position: '',
       role: 'user',
       department: '',
       status: 'active',
-      password: ''
+      password: '',
+      mfaEnabled: false,
+      ssoEnabled: false
     });
+    setFormIsValid(false);
     setDialogOpen(true);
   }, []);
 
@@ -183,24 +200,79 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     const user = users.find((u) => u.id === id);
     if (user) {
       setEditingUser(user);
+      setFormIsValid(true); // Existing user should be valid
       setDialogOpen(true);
     }
   }, [users]);
 
+  // Frontend validation helper
+  const validateUser = (user: User): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    const isNew = !user.id;
+
+    // Required fields
+    const loginid = user.loginid || (user as any).username || '';
+    if (!loginid) {
+      errors.push('Login ID is required');
+    } else if (loginid.length < 3 || loginid.length > 50) {
+      errors.push('Login ID must be 3-50 characters');
+    }
+
+    if (isNew && (!user.password || user.password.length < 8)) {
+      errors.push('Password must be at least 8 characters');
+    }
+
+    const name_ko = user.name_ko || (user as any).name || '';
+    if (!name_ko) {
+      errors.push('Korean name is required');
+    }
+
+    if (!user.email) {
+      errors.push('Email is required');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+      errors.push('Invalid email format');
+    }
+
+    // user_category must be one of allowed values
+    const validCategories = ['regular', 'contractor', 'temporary', 'external', 'admin'];
+    const userCategory = user.user_category || 'regular';
+    if (!validCategories.includes(userCategory)) {
+      errors.push('Invalid user category');
+    }
+
+    return { isValid: errors.length === 0, errors };
+  };
+
   const handleSave = useCallback(async () => {
     if (!editingUser) return;
+
+    // Validate before save
+    const validation = validateUser(editingUser);
+    if (!validation.isValid) {
+      await showErrorMessage('VALID_INVALID_INPUT');
+      console.error('Validation errors:', validation.errors);
+      return;
+    }
 
     try {
       setSaveLoading(true);
 
+      // Prepare user data with proper defaults
+      const userData = {
+        ...editingUser,
+        user_category: editingUser.user_category || 'regular',
+        status: editingUser.status || 'active',
+        role: editingUser.role || 'user'
+      };
+
       if (!editingUser.id) {
         // Add new user
-        const response = await api.post('/user', editingUser);
+        const response = await api.post('/user', userData);
         setUsers([...users, response.user]);
         await showSuccessMessage('CRUD_USER_CREATE_SUCCESS');
       } else {
         // Update existing user
-        const response = await api.put(`/user/${editingUser.id}`, editingUser);
+        const response = await api.put(`/user/${editingUser.id}`, userData);
         setUsers(users.map((u) => (u.id === editingUser.id ? response.user : u)));
         await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
       }
@@ -208,8 +280,21 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       setDialogOpen(false);
       setEditingUser(null);
     } catch (err) {
-      const _error = err as { response?: { data?: { error?: string } } };
-      await showErrorMessage('CRUD_USER_SAVE_FAIL');
+      const error = err as { response?: { data?: { error?: string } } };
+      const errorMessage = error.response?.data?.error;
+
+      // Show specific error message if available
+      if (errorMessage) {
+        if (errorMessage.includes('Login ID already exists')) {
+          await showErrorMessage('CRUD_USER_DUPLICATE_LOGINID');
+        } else if (errorMessage.includes('Email already exists')) {
+          await showErrorMessage('CRUD_USER_DUPLICATE_EMAIL');
+        } else {
+          await showErrorMessage('CRUD_USER_SAVE_FAIL');
+        }
+      } else {
+        await showErrorMessage('CRUD_USER_SAVE_FAIL');
+      }
       console.error('Failed to save user:', err);
     } finally {
       setSaveLoading(false);
@@ -428,11 +513,13 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     resetPasswordDialogOpen,
     resetPasswordUser,
     resetPasswordLoading,
+    formIsValid,
 
     // Handlers
     handleAdd,
     handleEdit,
     handleSave,
+    handleValidationChange,
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
