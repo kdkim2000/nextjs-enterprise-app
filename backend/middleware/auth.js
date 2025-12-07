@@ -7,11 +7,17 @@ const path = require('path');
 
 /**
  * Middleware to verify JWT token
+ * Supports both Authorization header and query parameter (for file downloads)
  */
 async function authenticateToken(req, res, next) {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    // Check Authorization header first, then query parameter (for file downloads)
+    let token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token && req.query.token) {
+      token = req.query.token; // Support ?token=xxx for file downloads
+    }
 
     if (!token) {
       console.log(`[Auth] No token provided for ${req.method} ${req.path}`);

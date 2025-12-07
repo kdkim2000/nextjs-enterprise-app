@@ -19,6 +19,7 @@ export interface EditDrawerProps {
   children: React.ReactNode;
   onSave: () => void;
   saveLoading?: boolean;
+  saveDisabled?: boolean;
   saveLabel?: string;
   cancelLabel?: string;
   width?: number | string | { xs?: string | number; sm?: string | number; md?: string | number; lg?: string | number; xl?: string | number };
@@ -31,6 +32,7 @@ export default function EditDrawer({
   children,
   onSave,
   saveLoading = false,
+  saveDisabled = false,
   saveLabel = 'Save',
   cancelLabel = 'Cancel',
   width = { xs: '100%', sm: 500 }
@@ -88,7 +90,7 @@ export default function EditDrawer({
           <Button
             variant="contained"
             onClick={onSave}
-            disabled={saveLoading}
+            disabled={saveLoading || saveDisabled}
           >
             {saveLoading ? <CircularProgress size={20} /> : saveLabel}
           </Button>

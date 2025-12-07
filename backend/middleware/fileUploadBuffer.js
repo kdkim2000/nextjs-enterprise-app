@@ -32,10 +32,24 @@ const DEFAULT_ALLOWED_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'text/plain',
   'text/csv',
+  'text/html',
+  'text/markdown',
+  'text/rtf',
+  'application/rtf',
+  'application/json',
+  'application/xml',
+  'text/xml',
   'application/zip',
   'application/x-zip-compressed',
   'application/x-rar-compressed',
   'application/x-7z-compressed',
+  'application/gzip',
+  'application/x-gzip',
+  'application/x-tar',
+  'application/x-hwp',
+  'application/haansofthwp',
+  'application/vnd.hancom.hwp',
+  'application/octet-stream', // Allow general binary for unknown types (HWP, etc.)
 ];
 
 /**
@@ -44,8 +58,10 @@ const DEFAULT_ALLOWED_MIME_TYPES = [
 const DEFAULT_ALLOWED_EXTENSIONS = [
   '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg',
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-  '.txt', '.csv',
-  '.zip', '.rar', '.7z',
+  '.txt', '.csv', '.rtf',
+  '.html', '.htm', '.md', '.json', '.xml',
+  '.hwp', '.hwpx',
+  '.zip', '.rar', '.7z', '.tar', '.gz',
 ];
 
 /**

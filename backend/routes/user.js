@@ -379,15 +379,35 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'), async (req, res) => {
   try {
-    const { username, password, name, email, role, department, status, avatarUrl, avatar_image } = req.body;
+    const {
+      username, loginid, // Support both loginid and username (backward compatibility)
+      password,
+      name, name_ko, name_en, // Support name_ko/name_en and legacy name field
+      email,
+      role,
+      department,
+      status,
+      avatarUrl,
+      avatar_image,
+      employee_number,
+      phone_number,
+      mobile_number,
+      user_category,
+      position
+    } = req.body;
 
-    if (!username || !password || !name || !email) {
+    // Use loginid or fall back to username for backward compatibility
+    const finalLoginId = loginid || username;
+    // Use name_ko or fall back to name for backward compatibility
+    const finalName = name_ko || name;
+
+    if (!finalLoginId || !password || !finalName || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Check if username or email already exists
-    if (await userService.usernameExists(username)) {
-      return res.status(400).json({ error: 'Username already exists' });
+    // Check if loginid or email already exists
+    if (await userService.loginidExists(finalLoginId)) {
+      return res.status(400).json({ error: 'Login ID already exists' });
     }
     if (await userService.emailExists(email)) {
       return res.status(400).json({ error: 'Email already exists' });
@@ -396,18 +416,18 @@ router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Split name into first and last name
-    const nameParts = name.trim().split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.slice(1).join(' ') || '';
-
     const newUser = await userService.createUser({
       id: uuidv4(),
-      username,
+      loginid: finalLoginId,
       password: hashedPassword,
-      firstName,
-      lastName,
+      name_ko: finalName,
+      name_en: name_en || '',
       email,
+      employee_number: employee_number || '',
+      phone_number: phone_number || '',
+      mobile_number: mobile_number || '',
+      user_category: user_category || 'regular',
+      position: position || '',
       department: department || '',
       status: status || 'active',
       mfaEnabled: false,
@@ -429,7 +449,26 @@ router.post('/', authenticateToken, requirePermission('PROG-USER-LIST', 'create'
     res.status(201).json({ user: safeUser });
   } catch (error) {
     console.error('Create user error:', error);
-    res.status(500).json({ error: 'Failed to create user' });
+    // Handle database constraint violations
+    if (error.code === '23505') {
+      // Unique constraint violation
+      const detail = error.detail || '';
+      if (detail.includes('loginid')) {
+        return res.status(400).json({ error: 'Login ID already exists' });
+      }
+      if (detail.includes('email')) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+      if (detail.includes('system_key')) {
+        return res.status(400).json({ error: 'System key conflict. Please try again.' });
+      }
+      return res.status(400).json({ error: 'Duplicate value exists' });
+    }
+    if (error.code === '23514') {
+      // Check constraint violation (e.g., user_category)
+      return res.status(400).json({ error: 'Invalid value for user category or status' });
+    }
+    res.status(500).json({ error: 'Failed to create user', details: process.env.NODE_ENV === 'development' ? error.message : undefined });
   }
 });
 

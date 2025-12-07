@@ -2,6 +2,67 @@ const mappingService = require('../services/mappingService');
 const programService = require('../services/programService');
 
 /**
+ * Check if user has admin privileges
+ * Supports both legacy (users.role) and RBAC (user_role_mappings) systems
+ * @param {Object} req - Express request object with req.user set by authenticateToken
+ * @returns {Promise<boolean>} - true if user has admin access
+ */
+async function isUserAdmin(req) {
+  // Check legacy role field first (from users.role column)
+  if (req.user?.role === 'admin') {
+    console.log('[isUserAdmin] User has legacy admin role');
+    return true;
+  }
+
+  // Check RBAC - if user has role-001 (admin role) assigned
+  try {
+    const userId = req.user?.userId;
+    console.log('[isUserAdmin] Checking RBAC for userId:', userId);
+    if (!userId) {
+      console.log('[isUserAdmin] No userId found');
+      return false;
+    }
+
+    const userRoleMappings = await mappingService.getUserRoleMappingsByUserId(userId, true);
+    console.log('[isUserAdmin] User role mappings count:', userRoleMappings?.length || 0);
+
+    if (!userRoleMappings || userRoleMappings.length === 0) {
+      console.log('[isUserAdmin] No role mappings found');
+      return false;
+    }
+
+    const hasAdminRole = userRoleMappings.some(m =>
+      m.is_active && (m.role_id === 'role-001' || m.role_name === 'admin')
+    );
+    console.log('[isUserAdmin] Has admin role:', hasAdminRole);
+    return hasAdminRole;
+  } catch (error) {
+    console.error('[isUserAdmin] Error checking admin role:', error.message);
+    console.error('[isUserAdmin] Error stack:', error.stack);
+    return false;
+  }
+}
+
+/**
+ * Middleware to require admin access
+ * @returns {Function} Express middleware
+ */
+function requireAdmin() {
+  return async (req, res, next) => {
+    try {
+      const hasAdminAccess = await isUserAdmin(req);
+      if (!hasAdminAccess) {
+        return res.status(403).json({ error: 'Forbidden: Admin access required' });
+      }
+      next();
+    } catch (error) {
+      console.error('Error checking admin access:', error);
+      res.status(500).json({ error: 'Failed to check admin access' });
+    }
+  };
+}
+
+/**
  * Get user's aggregated permissions for a program
  * @param {string} userId - User ID
  * @param {string} programCode - Program code (e.g., 'PROG-USER-LIST')
@@ -247,6 +308,8 @@ async function getUserAccessibleProgramsAsync(userId) {
 })();
 
 module.exports = {
+  isUserAdmin,
+  requireAdmin,
   getUserProgramPermissions,
   getUserProgramPermissionsSync,
   requireProgramAccess,

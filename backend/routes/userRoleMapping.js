@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { isUserAdmin } = require('../middleware/permissionMiddleware');
 const mappingService = require('../services/mappingService');
 const userService = require('../services/userService');
 const roleService = require('../services/roleService');
@@ -137,7 +138,15 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/user-role-mapping
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    let hasAdminAccess;
+    try {
+      hasAdminAccess = await isUserAdmin(req);
+    } catch (adminCheckError) {
+      console.error('Error in isUserAdmin check:', adminCheckError);
+      return res.status(500).json({ error: 'Failed to verify admin permissions', details: adminCheckError.message });
+    }
+
+    if (!hasAdminAccess) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
@@ -186,14 +195,26 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(201).json({ mapping: enrichedMapping });
   } catch (error) {
     console.error('Create user-role mapping error:', error);
-    res.status(500).json({ error: error.message || 'Failed to create user-role mapping' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({
+      error: error.message || 'Failed to create user-role mapping',
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+    });
   }
 });
 
 // PUT /api/user-role-mapping
 router.put('/', authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    let hasAdminAccess;
+    try {
+      hasAdminAccess = await isUserAdmin(req);
+    } catch (adminCheckError) {
+      console.error('Error in isUserAdmin check:', adminCheckError);
+      return res.status(500).json({ error: 'Failed to verify admin permissions', details: adminCheckError.message });
+    }
+
+    if (!hasAdminAccess) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
@@ -227,7 +248,15 @@ router.put('/', authenticateToken, async (req, res) => {
 // DELETE /api/user-role-mapping
 router.delete('/', authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    let hasAdminAccess;
+    try {
+      hasAdminAccess = await isUserAdmin(req);
+    } catch (adminCheckError) {
+      console.error('Error in isUserAdmin check:', adminCheckError);
+      return res.status(500).json({ error: 'Failed to verify admin permissions', details: adminCheckError.message });
+    }
+
+    if (!hasAdminAccess) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 

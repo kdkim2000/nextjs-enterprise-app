@@ -8,6 +8,8 @@ services:
     volumes:
       - pg16_pgdata_16_11:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - corenext-network
 
   # Backend API Server
   backend:
@@ -21,20 +23,23 @@ services:
     environment:
       - NODE_ENV=production
       - BACKEND_PORT=3001
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+      - DB_HOST=postgres16
+      - DB_PORT=5432
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    depends_on:
+      - postgres16
     networks:
       - corenext-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://123.37.36.45:3001/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
 
   # Frontend Next.js Server
   frontend:

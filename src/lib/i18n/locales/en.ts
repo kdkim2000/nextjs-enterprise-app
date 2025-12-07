@@ -406,7 +406,8 @@ export default {
     sendExternal: 'Also send to external email',
     attach: 'Attach',
     attachmentUploadFailed: 'Failed to upload attachment',
-    attachmentDeleteFailed: 'Failed to delete attachment'
+    attachmentDeleteFailed: 'Failed to delete attachment',
+    messageNotFound: 'Message not found'
   },
   themeDemo: {
     title: 'Theme System Demo',

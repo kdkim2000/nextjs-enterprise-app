@@ -29,7 +29,7 @@ const DB_CONFIG = {
   port: process.env.DB_PORT || '9090',
   database: process.env.DB_NAME || 'corenextdb',
   user: process.env.DB_USER || 'corenext',
-  password: process.env.DB_PASSWORD || '<REDACTED_PASSWORD>'
+  password: process.env.DB_PASSWORD || 'CoreNext2025#'
 };
 
 // Configuration
@@ -483,12 +483,25 @@ function executeSqlToDb(sqlContent) {
     // 임시 SQL 파일 저장
     fs.writeFileSync(tempSqlPath, sqlContent, 'utf8');
 
-    // psql 명령어 실행 (Windows 호환: env로 PGPASSWORD 전달)
+    // psql 명령어 실행
     console.log('\n🔄 Executing SQL to database...');
-    execSync(`psql -h ${DB_CONFIG.host} -p ${DB_CONFIG.port} -U ${DB_CONFIG.user} -d ${DB_CONFIG.database} -f "${tempSqlPath}"`, {
+
+    // Windows에서는 set 명령어 사용, Unix에서는 환경변수 직접 설정
+    const isWindows = process.platform === 'win32';
+    let command;
+
+    if (isWindows) {
+      // Windows: set "PGPASSWORD=..." && psql ... (특수문자 포함 패스워드 지원)
+      command = `set "PGPASSWORD=${DB_CONFIG.password}" && psql -h ${DB_CONFIG.host} -p ${DB_CONFIG.port} -U ${DB_CONFIG.user} -d ${DB_CONFIG.database} -f "${tempSqlPath}"`;
+    } else {
+      // Unix/Linux/Mac: PGPASSWORD=... psql ...
+      command = `PGPASSWORD="${DB_CONFIG.password}" psql -h ${DB_CONFIG.host} -p ${DB_CONFIG.port} -U ${DB_CONFIG.user} -d ${DB_CONFIG.database} -f "${tempSqlPath}"`;
+    }
+
+    execSync(command, {
       stdio: 'pipe',
       encoding: 'utf8',
-      env: { ...process.env, PGPASSWORD: DB_CONFIG.password }
+      shell: true
     });
 
     console.log('✅ Database updated successfully');
