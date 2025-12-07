@@ -306,7 +306,7 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
         {pagination.totalPages > 0 && (
           <>
             <Typography variant="caption" sx={{ mx: 1, color: 'text.secondary' }}>
-              {pagination.total > 0 ? `${((pagination.page - 1) * pagination.pageSize) + 1}-${Math.min(pagination.page * pagination.pageSize, pagination.total)} / ${pagination.total}` : '0'}
+              {pagination.total > 0 ? `${((pagination.page - 1) * pagination.limit) + 1}-${Math.min(pagination.page * pagination.limit, pagination.total)} / ${pagination.total}` : '0'}
             </Typography>
             <IconButton
               onClick={() => handlePageChange(pagination.page - 1)}
