@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Note: standalone disabled due to Next.js 16 middleware.js.nft.json bug
-  // Using 'next start' instead of standalone server.js
-  // output: 'standalone',
+  // Enable standalone output for Docker deployment
+  output: 'standalone',
 
   // Image optimization
   images: {
