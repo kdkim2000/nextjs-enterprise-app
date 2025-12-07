@@ -406,7 +406,8 @@ export default {
     sendExternal: '외부 이메일로도 발송',
     attach: '첨부',
     attachmentUploadFailed: '파일 업로드에 실패했습니다',
-    attachmentDeleteFailed: '파일 삭제에 실패했습니다'
+    attachmentDeleteFailed: '파일 삭제에 실패했습니다',
+    messageNotFound: '메시지를 찾을 수 없습니다'
   },
   themeDemo: {
     title: '테마 시스템 데모',

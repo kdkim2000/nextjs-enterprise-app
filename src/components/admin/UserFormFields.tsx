@@ -11,9 +11,7 @@ import {
   Box,
   Chip,
   Alert,
-  InputAdornment,
-  Tooltip,
-  IconButton
+  InputAdornment
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -22,12 +20,10 @@ import {
   Smartphone as SmartphoneIcon,
   Badge as BadgeIcon,
   Lock as LockIcon,
-  Info as InfoIcon,
   Key as KeyIcon,
   Business as BusinessIcon
 } from '@mui/icons-material';
 import AvatarUpload from '@/components/common/AvatarUpload';
-import UserRoleAssignment from '@/components/admin/UserRoleAssignment';
 import CodeSelect from '@/components/common/CodeSelect';
 import DepartmentTreeSelect from '@/components/common/DepartmentTreeSelect';
 
@@ -557,19 +553,6 @@ export default function UserFormFields({
         </>
       )}
 
-      {/* Role Assignment Section */}
-      <Divider sx={{ my: 3 }} />
-
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Role Assignment
-      </Typography>
-
-      <UserRoleAssignment
-        userId={user.id}
-        onRolesChange={(roleIds) => {
-          console.log('[UserFormFields] Roles changed:', roleIds);
-        }}
-      />
     </>
   );
 }

@@ -15,23 +15,21 @@ import {
   Checkbox,
   Collapse,
   useTheme,
-  alpha
+  alpha,
+  Alert
 } from '@mui/material';
 import {
   ArrowBack,
   Send,
   Save,
-  Delete
+  Delete,
+  AttachFile as AttachFileIcon
 } from '@mui/icons-material';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
-import { useHelp } from '@/hooks/useHelp';
 import { useMailData, RecipientType } from '../hooks/useMailData';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import MultiUserSelect, { UserOption } from '@/components/common/MultiUserSelect';
 import AttachmentUpload from '@/components/common/AttachmentUpload';
-
-const PROGRAM_ID = 'PROG-MAIL-COMPOSE';
 
 export default function MailComposePage() {
   const theme = useTheme();
@@ -39,16 +37,6 @@ export default function MailComposePage() {
   const locale = useCurrentLocale();
   const searchParams = useSearchParams();
   const t = useI18n() as unknown as (key: string) => string;
-
-  const {
-    helpOpen,
-    setHelpOpen,
-    helpExists,
-    isAdmin,
-    canManageHelp,
-    navigateToHelpEdit,
-    language
-  } = useHelp({ programId: PROGRAM_ID });
 
   const { sendMessage, getMessage, createDraft, updateDraft } = useMailData();
 
@@ -68,6 +56,8 @@ export default function MailComposePage() {
 
   // Attachment state
   const [attachmentId, setAttachmentId] = useState<string | null>(null);
+  const [showAttachments, setShowAttachments] = useState(false);
+  const [attachmentCount, setAttachmentCount] = useState(0);
 
   // UI state
   const [sending, setSending] = useState(false);
@@ -137,6 +127,7 @@ export default function MailComposePage() {
               // Set attachment ID if exists (AttachmentUpload will auto-fetch files)
               if (message.attachment_id) {
                 setAttachmentId(message.attachment_id);
+                setShowAttachments(true); // Auto-expand if draft has attachments
               }
             }
           }
@@ -236,64 +227,41 @@ export default function MailComposePage() {
 
   if (loading) {
     return (
-      <StandardCrudPageLayout
-        useMenu
-        showBreadcrumb
-        showQuickSearch={false}
-        showAdvancedFilter={false}
-        programId={PROGRAM_ID}
-        helpOpen={helpOpen}
-        onHelpOpenChange={setHelpOpen}
-        isAdmin={isAdmin}
-        helpExists={helpExists}
-        canManageHelp={canManageHelp}
-        onHelpEdit={navigateToHelpEdit}
-        language={language}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-          <CircularProgress />
-        </Box>
-      </StandardCrudPageLayout>
+      <Box sx={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
   return (
-    <StandardCrudPageLayout
-      useMenu
-      showBreadcrumb
-      showQuickSearch={false}
-      showAdvancedFilter={false}
-      programId={PROGRAM_ID}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-    >
-      <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Header */}
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <IconButton onClick={handleDiscard}><ArrowBack /></IconButton>
-          <Typography variant="h6">{getPageTitle()}</Typography>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Alert Messages */}
+      {successMessage && (
+        <Alert severity="success" sx={{ mx: 1, mt: 1 }} onClose={() => setSuccessMessage(null)}>
+          {successMessage}
+        </Alert>
+      )}
+      {errorMessage && (
+        <Alert severity="error" sx={{ mx: 1, mt: 1 }} onClose={() => setErrorMessage(null)}>
+          {errorMessage}
+        </Alert>
+      )}
+
+      <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', m: 0.5, borderRadius: 1 }}>
+        {/* Header - Compact */}
+        <Box sx={{ px: 1.5, py: 1, display: 'flex', alignItems: 'center', gap: 1, borderBottom: `1px solid ${theme.palette.divider}` }}>
+          <IconButton onClick={handleDiscard} size="small"><ArrowBack fontSize="small" /></IconButton>
+          <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{getPageTitle()}</Typography>
           <Box sx={{ flex: 1 }} />
-          <IconButton onClick={handleDiscard} color="error"><Delete /></IconButton>
+          <IconButton onClick={handleDiscard} color="error" size="small"><Delete fontSize="small" /></IconButton>
         </Box>
 
-        {/* To Recipients */}
-        <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+        {/* To Recipients - Compact */}
+        <Box sx={{ px: 1.5, py: 1, borderBottom: `1px solid ${theme.palette.divider}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
             <Typography
               variant="body2"
-              sx={{
-                minWidth: 40,
-                fontWeight: 500,
-                pt: 1,
-                color: 'text.secondary'
-              }}
+              sx={{ minWidth: 32, fontWeight: 500, pt: 0.75, color: 'text.secondary', fontSize: '0.8rem' }}
             >
               {t('mail.to')}
             </Typography>
@@ -309,31 +277,20 @@ export default function MailComposePage() {
               size="small"
               variant={showCc ? 'contained' : 'text'}
               onClick={() => setShowCc(!showCc)}
-              sx={{
-                minWidth: 48,
-                height: 36,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 500
-              }}
+              sx={{ minWidth: 40, height: 32, borderRadius: 1, textTransform: 'none', fontWeight: 500, fontSize: '0.75rem' }}
             >
               CC
             </Button>
           </Box>
         </Box>
 
-        {/* CC Recipients */}
+        {/* CC Recipients - Compact */}
         <Collapse in={showCc}>
-          <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.action.hover, 0.3) }}>
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+          <Box sx={{ px: 1.5, py: 1, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.action.hover, 0.3) }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
               <Typography
                 variant="body2"
-                sx={{
-                  minWidth: 40,
-                  fontWeight: 500,
-                  pt: 1,
-                  color: 'text.secondary'
-                }}
+                sx={{ minWidth: 32, fontWeight: 500, pt: 0.75, color: 'text.secondary', fontSize: '0.8rem' }}
               >
                 CC
               </Typography>
@@ -348,8 +305,8 @@ export default function MailComposePage() {
           </Box>
         </Collapse>
 
-        {/* Subject */}
-        <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
+        {/* Subject - Compact */}
+        <Box sx={{ px: 1.5, py: 1, borderBottom: `1px solid ${theme.palette.divider}` }}>
           <TextField
             fullWidth
             placeholder={t('mail.subject')}
@@ -357,35 +314,53 @@ export default function MailComposePage() {
             onChange={(e) => setSubject(e.target.value)}
             variant="standard"
             InputProps={{ disableUnderline: true }}
-            sx={{ '& input': { fontSize: '1.1rem' } }}
+            sx={{ '& input': { fontSize: '1rem' } }}
           />
         </Box>
 
-        {/* Body */}
-        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        {/* Body - Takes remaining space */}
+        <Box sx={{ flex: 1, minHeight: 0, p: 1 }}>
           <RichTextEditor
             value={bodyHtml}
             onChange={setBodyHtml}
             placeholder={t('mail.writeMessage')}
-            minHeight={400}
+            fullHeight
           />
         </Box>
 
-        {/* Attachments - using common component */}
-        <Box sx={{ px: 2, py: 1.5, borderTop: `1px solid ${theme.palette.divider}` }}>
-          <AttachmentUpload
-            attachmentTypeCode="MAIL"
-            locale={locale}
-            onUploadComplete={(id) => setAttachmentId(id)}
-            compact
-            showDownload={false}
-          />
-        </Box>
+        {/* Attachments - Collapsible */}
+        <Collapse in={showAttachments}>
+          <Box sx={{ px: 1.5, py: 1, borderTop: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.action.hover, 0.3) }}>
+            <AttachmentUpload
+              attachmentTypeCode="MAIL"
+              locale={locale}
+              onUploadComplete={(id) => setAttachmentId(id)}
+              onFileCountChange={(count) => setAttachmentCount(count)}
+              compact
+              showDownload={false}
+            />
+          </Box>
+        </Collapse>
 
-        {/* Options & Actions */}
+        {/* Options & Actions - Compact */}
         <Divider />
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ px: 1.5, py: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Attachment Toggle Button */}
+            <Button
+              size="small"
+              variant={showAttachments ? 'contained' : 'outlined'}
+              startIcon={<AttachFileIcon fontSize="small" />}
+              onClick={() => setShowAttachments(!showAttachments)}
+              sx={{
+                minWidth: 'auto',
+                px: 1.5,
+                textTransform: 'none',
+                fontSize: '0.75rem'
+              }}
+            >
+              {t('mail.attach')}{attachmentCount > 0 ? ` (${attachmentCount})` : ''}
+            </Button>
             <FormControlLabel
               control={
                 <Checkbox
@@ -394,16 +369,18 @@ export default function MailComposePage() {
                   size="small"
                 />
               }
-              label={<Typography variant="body2">{t('mail.sendExternal')}</Typography>}
+              label={<Typography variant="body2" sx={{ fontSize: '0.8rem' }}>{t('mail.sendExternal')}</Typography>}
+              sx={{ mr: 0, ml: 1 }}
             />
           </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="outlined" startIcon={<Save />} onClick={handleSaveDraft} disabled={saving || sending}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" size="small" startIcon={<Save fontSize="small" />} onClick={handleSaveDraft} disabled={saving || sending}>
               {saving ? t('common.saving') : t('mail.saveDraft')}
             </Button>
             <Button
               variant="contained"
-              startIcon={sending ? <CircularProgress size={20} /> : <Send />}
+              size="small"
+              startIcon={sending ? <CircularProgress size={16} /> : <Send fontSize="small" />}
               onClick={handleSend}
               disabled={sending || saving || toRecipients.length === 0}
             >
@@ -412,6 +389,6 @@ export default function MailComposePage() {
           </Box>
         </Box>
       </Paper>
-    </StandardCrudPageLayout>
+    </Box>
   );
 }

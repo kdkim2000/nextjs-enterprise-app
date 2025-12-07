@@ -119,6 +119,8 @@ export interface AttachmentUploadProps {
   error?: boolean;
   /** Compact mode for smaller UI */
   compact?: boolean;
+  /** Callback when file count changes */
+  onFileCountChange?: (count: number) => void;
 }
 
 // ==========================================
@@ -165,7 +167,8 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   accept,
   helperText,
   error = false,
-  compact = false
+  compact = false,
+  onFileCountChange
 }) => {
   const theme = useTheme();
 
@@ -222,7 +225,11 @@ const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
     if (onChange && attachment?.files) {
       onChange(attachment.files);
     }
-  }, [attachment?.files, onChange]);
+    // Notify file count change
+    if (onFileCountChange) {
+      onFileCountChange(attachment?.files?.length || 0);
+    }
+  }, [attachment?.files, onChange, onFileCountChange]);
 
   // Build accept config from attachment type settings
   const acceptConfig = useMemo(

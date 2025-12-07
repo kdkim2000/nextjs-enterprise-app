@@ -1,54 +1,47 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Paper,
-  Button,
-  Tabs,
-  Tab,
-  TextField,
   IconButton,
-  InputAdornment,
+  InputBase,
   Badge,
   Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   Checkbox,
   Divider,
   CircularProgress,
+  Tooltip,
   useTheme,
-  useMediaQuery
+  alpha
 } from '@mui/material';
 import {
-  Add as AddIcon,
+  Create as ComposeIcon,
   Refresh as RefreshIcon,
   Search as SearchIcon,
   Inbox as InboxIcon,
   Send as SendIcon,
   Drafts as DraftsIcon,
   Delete as DeleteIcon,
-  ArrowBack as ArrowBackIcon,
-  Reply as ReplyIcon,
-  Forward as ForwardIcon,
   DeleteOutline as DeleteOutlineIcon,
-  RestoreFromTrash as RestoreIcon,
   MarkEmailRead as MarkReadIcon,
-  MarkEmailUnread as MarkUnreadIcon
+  MarkEmailUnread as MarkUnreadIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  Close as CloseIcon,
+  AttachFile as AttachFileIcon
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 import { useMailData, FolderType, MailMessage } from '../hooks/useMailData';
 
-// Folder tabs configuration (simplified - no starred)
-const FOLDER_TABS = [
-  { value: 'inbox' as const, labelKey: 'mail.inbox' as const, icon: <InboxIcon /> },
-  { value: 'sent' as const, labelKey: 'mail.sent' as const, icon: <SendIcon /> },
-  { value: 'draft' as const, labelKey: 'mail.draft' as const, icon: <DraftsIcon /> },
-  { value: 'trash' as const, labelKey: 'mail.trash' as const, icon: <DeleteIcon /> },
-] as const;
+// Folder configuration
+const FOLDERS: { value: FolderType; icon: React.ReactNode }[] = [
+  { value: 'inbox', icon: <InboxIcon fontSize="small" /> },
+  { value: 'sent', icon: <SendIcon fontSize="small" /> },
+  { value: 'draft', icon: <DraftsIcon fontSize="small" /> },
+  { value: 'trash', icon: <DeleteIcon fontSize="small" /> },
+];
 
 interface MailPageContentProps {
   initialFolder?: FolderType;
@@ -59,7 +52,6 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
   const router = useRouter();
   const locale = useCurrentLocale();
   const t = useI18n() as unknown as (key: string) => string;
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const {
     messages,
@@ -68,29 +60,21 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     counts,
     currentFolder,
     setCurrentFolder,
-    selectedMessage,
-    setSelectedMessage,
     selectedMessages,
     toggleMessageSelection,
     selectAllMessages,
     clearSelection,
     fetchMessages,
-    getMessage,
     fetchCounts,
-    moveToTrash,
-    restoreFromTrash,
-    deletePermanently,
-    markAsRead,
     bulkAction
   } = useMailData(initialFolder);
 
-  const [loadingDetail, setLoadingDetail] = useState(false);
   const [searchInput, setSearchInput] = useState('');
-  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
-  const handleTabChange = useCallback((_event: React.SyntheticEvent, newValue: FolderType) => {
-    setCurrentFolder(newValue);
-    const folderPath = newValue === 'inbox' ? '/mail' : `/mail/${newValue}`;
+  const handleFolderChange = useCallback((folder: FolderType) => {
+    setCurrentFolder(folder);
+    const folderPath = folder === 'inbox' ? '/mail/inbox' : `/mail/${folder}`;
     router.push(`/${locale}${folderPath}`);
   }, [router, locale, setCurrentFolder]);
 
@@ -98,56 +82,16 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     router.push(`/${locale}/mail/compose`);
   }, [router, locale]);
 
-  const handleSelectMessage = useCallback(async (message: MailMessage) => {
-    setLoadingDetail(true);
-    try {
-      const fullMessage = await getMessage(message.id);
-      setSelectedMessage(fullMessage);
-      if (isMobile) setMobileView('detail');
-    } catch (error) {
-      console.error('Failed to load message:', error);
-    } finally {
-      setLoadingDetail(false);
+  // Navigate to detail page instead of inline view
+  const handleOpenMessage = useCallback((message: MailMessage) => {
+    if (currentFolder === 'draft') {
+      // Draft messages go to compose page for editing
+      router.push(`/${locale}/mail/compose?draft=${message.id}`);
+    } else {
+      // Other messages go to view page
+      router.push(`/${locale}/mail/view/${message.id}?folder=${currentFolder}`);
     }
-  }, [getMessage, setSelectedMessage, isMobile]);
-
-  const handleReply = useCallback(() => {
-    if (selectedMessage) {
-      router.push(`/${locale}/mail/compose?replyTo=${selectedMessage.id}`);
-    }
-  }, [selectedMessage, router, locale]);
-
-  const handleForward = useCallback(() => {
-    if (selectedMessage) {
-      router.push(`/${locale}/mail/compose?forward=${selectedMessage.id}`);
-    }
-  }, [selectedMessage, router, locale]);
-
-  const handleDelete = useCallback(async () => {
-    if (selectedMessage) {
-      if (currentFolder === 'trash') {
-        await deletePermanently(selectedMessage.id);
-      } else {
-        await moveToTrash(selectedMessage.id);
-      }
-      setSelectedMessage(null);
-      if (isMobile) setMobileView('list');
-    }
-  }, [selectedMessage, currentFolder, deletePermanently, moveToTrash, setSelectedMessage, isMobile]);
-
-  const handleRestore = useCallback(async () => {
-    if (selectedMessage && currentFolder === 'trash') {
-      await restoreFromTrash(selectedMessage.id);
-      setSelectedMessage(null);
-      if (isMobile) setMobileView('list');
-    }
-  }, [selectedMessage, currentFolder, restoreFromTrash, setSelectedMessage, isMobile]);
-
-  const handleToggleRead = useCallback(async () => {
-    if (selectedMessage) {
-      await markAsRead(selectedMessage.id, !selectedMessage.is_read);
-    }
-  }, [selectedMessage, markAsRead]);
+  }, [router, locale, currentFolder]);
 
   const handleSearch = useCallback(() => {
     fetchMessages(currentFolder, { search: searchInput });
@@ -165,11 +109,6 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     fetchMessages(currentFolder, { search: searchInput });
     fetchCounts();
   }, [fetchMessages, fetchCounts, currentFolder, searchInput]);
-
-  const handleBack = useCallback(() => {
-    setMobileView('list');
-    setSelectedMessage(null);
-  }, [setSelectedMessage]);
 
   const handleBulkDelete = useCallback(async () => {
     const action = currentFolder === 'trash' ? 'delete' : 'trash';
@@ -195,7 +134,15 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     }
     const toRecipients = message.recipients.filter(r => r.type === 'to');
     const firstRecipient = toRecipients[0] || message.recipients[0];
-    return firstRecipient.name || firstRecipient.email || t('mail.noRecipient');
+    const name = firstRecipient.name || firstRecipient.email || t('mail.noRecipient');
+    // Add count if multiple recipients
+    const count = message.recipients.length;
+    return count > 1 ? `${name} (+${count - 1})` : name;
+  };
+
+  // Get sender display for inbox/trash
+  const getSenderDisplay = (message: MailMessage): string => {
+    return message.sender_name || message.sender_email || t('mail.unknown');
   };
 
   const formatDate = (dateStr: string) => {
@@ -205,216 +152,384 @@ export default function MailPageContent({ initialFolder = 'inbox' }: MailPageCon
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
     }
-    return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+    // Same year
+    if (date.getFullYear() === now.getFullYear()) {
+      return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+    }
+    return date.toLocaleDateString(locale, { year: '2-digit', month: 'short', day: 'numeric' });
   };
 
-  const listWidth = isMobile ? '100%' : selectedMessage ? 400 : '100%';
+  // Icon button style
+  const iconBtnSx = {
+    borderRadius: 1,
+    '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.08) }
+  };
+
+  const activeFolderSx = {
+    bgcolor: alpha(theme.palette.primary.main, 0.12),
+    color: 'primary.main',
+    '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.16) }
+  };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 1 }}>
-      {/* Top Toolbar */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 0.5 }}>
+      {/* Minimal Top Toolbar */}
       <Paper
         elevation={0}
         sx={{
-          p: 1,
+          px: 1,
+          py: 0.5,
           display: 'flex',
           alignItems: 'center',
-          gap: 2,
-          flexWrap: 'wrap',
-          borderRadius: 2,
-          border: `1px solid ${theme.palette.divider}`
+          gap: 0.5,
+          borderRadius: 1,
+          bgcolor: 'background.paper',
+          borderBottom: `1px solid ${theme.palette.divider}`
         }}
       >
-        <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleCompose} sx={{ minWidth: 120 }}>
-          {t('mail.compose')}
-        </Button>
+        {/* Compose Button */}
+        <Tooltip title={t('mail.compose')}>
+          <IconButton
+            onClick={handleCompose}
+            sx={{
+              ...iconBtnSx,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': { bgcolor: 'primary.dark' },
+              mr: 1
+            }}
+          >
+            <ComposeIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
 
-        <Tabs value={currentFolder} onChange={handleTabChange} variant="scrollable" scrollButtons="auto" sx={{ flex: 1, minWidth: 0 }}>
-          {FOLDER_TABS.map((tab) => (
-            <Tab
-              key={tab.value}
-              value={tab.value}
-              icon={<Badge badgeContent={getUnreadCount(tab.value)} color="error" max={99}>{tab.icon}</Badge>}
-              iconPosition="start"
-              label={t(tab.labelKey)}
-              sx={{ minHeight: 48 }}
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+        {/* Folder Icons */}
+        {FOLDERS.map((folder) => (
+          <Tooltip key={folder.value} title={t(`mail.${folder.value}`)}>
+            <IconButton
+              onClick={() => handleFolderChange(folder.value)}
+              sx={{
+                ...iconBtnSx,
+                ...(currentFolder === folder.value && activeFolderSx)
+              }}
+            >
+              <Badge
+                badgeContent={getUnreadCount(folder.value)}
+                color="error"
+                max={99}
+                sx={{ '& .MuiBadge-badge': { fontSize: 10, height: 16, minWidth: 16 } }}
+              >
+                {folder.icon}
+              </Badge>
+            </IconButton>
+          </Tooltip>
+        ))}
+
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+        {/* Bulk Actions (shown when items selected) */}
+        {selectedMessages.length > 0 ? (
+          <>
+            <Typography variant="caption" sx={{ mx: 1, color: 'text.secondary' }}>
+              {selectedMessages.length}
+            </Typography>
+            <Tooltip title={t('common.delete')}>
+              <IconButton onClick={handleBulkDelete} sx={iconBtnSx} size="small">
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('mail.markRead')}>
+              <IconButton onClick={handleBulkMarkRead} sx={iconBtnSx} size="small">
+                <MarkReadIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('mail.markUnread')}>
+              <IconButton onClick={handleBulkMarkUnread} sx={iconBtnSx} size="small">
+                <MarkUnreadIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('common.cancel')}>
+              <IconButton onClick={clearSelection} sx={iconBtnSx} size="small">
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </>
+        ) : (
+          <Tooltip title={t('common.refresh')}>
+            <IconButton onClick={handleRefresh} sx={iconBtnSx} size="small">
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        {/* Spacer */}
+        <Box sx={{ flex: 1 }} />
+
+        {/* Search */}
+        {searchExpanded ? (
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: alpha(theme.palette.action.selected, 0.5),
+            borderRadius: 1,
+            px: 1,
+            py: 0.25
+          }}>
+            <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 0.5 }} />
+            <InputBase
+              placeholder={t('common.search')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={handleSearchKeyPress}
+              autoFocus
+              sx={{ fontSize: 14, width: 160 }}
             />
-          ))}
-        </Tabs>
+            <IconButton
+              size="small"
+              onClick={() => { setSearchExpanded(false); setSearchInput(''); handleRefresh(); }}
+              sx={{ ml: 0.5 }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        ) : (
+          <Tooltip title={t('common.search')}>
+            <IconButton onClick={() => setSearchExpanded(true)} sx={iconBtnSx} size="small">
+              <SearchIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
 
-        <TextField
-          size="small"
-          placeholder={t('common.search')}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          onKeyPress={handleSearchKeyPress}
-          sx={{ width: 200 }}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
-        />
-        <IconButton onClick={handleRefresh} size="small"><RefreshIcon /></IconButton>
+        {/* Pagination Info */}
+        {pagination.totalPages > 0 && (
+          <>
+            <Typography variant="caption" sx={{ mx: 1, color: 'text.secondary' }}>
+              {pagination.total > 0 ? `${((pagination.page - 1) * pagination.pageSize) + 1}-${Math.min(pagination.page * pagination.pageSize, pagination.total)} / ${pagination.total}` : '0'}
+            </Typography>
+            <IconButton
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              sx={iconBtnSx}
+              size="small"
+            >
+              <ChevronLeftIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages}
+              sx={iconBtnSx}
+              size="small"
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </>
+        )}
       </Paper>
 
-      {/* Bulk Action Toolbar */}
-      {selectedMessages.length > 0 && (
-        <Paper
-          elevation={0}
-          sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1, borderRadius: 2, border: `1px solid ${theme.palette.divider}`, bgcolor: theme.palette.action.selected }}
+      {/* Gmail-style Mail List */}
+      <Paper
+        elevation={0}
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 1,
+          overflow: 'hidden',
+          border: `1px solid ${theme.palette.divider}`,
+          minHeight: 0
+        }}
+      >
+        {/* List Header with Select All */}
+        <Box
+          sx={{
+            px: 1,
+            py: 0.5,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: 'background.paper'
+          }}
         >
-          <Typography variant="body2" sx={{ mr: 2 }}>{selectedMessages.length} {t('common.selected')}</Typography>
-          <Button size="small" onClick={clearSelection}>{t('common.cancel')}</Button>
-          <Button size="small" startIcon={<DeleteOutlineIcon />} onClick={handleBulkDelete}>{t('common.delete')}</Button>
-          <Button size="small" startIcon={<MarkReadIcon />} onClick={handleBulkMarkRead}>{t('mail.markRead')}</Button>
-          <Button size="small" startIcon={<MarkUnreadIcon />} onClick={handleBulkMarkUnread}>{t('mail.markUnread')}</Button>
-        </Paper>
-      )}
+          <Checkbox
+            checked={selectedMessages.length === messages.length && messages.length > 0}
+            indeterminate={selectedMessages.length > 0 && selectedMessages.length < messages.length}
+            onChange={(e) => e.target.checked ? selectAllMessages() : clearSelection()}
+            size="small"
+            sx={{ p: 0.5 }}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+            {currentFolder === 'sent' || currentFolder === 'draft' ? t('mail.to') : t('mail.from')}
+          </Typography>
+        </Box>
 
-      {/* Mail Content */}
-      <Box sx={{ display: 'flex', flex: 1, bgcolor: 'background.default', borderRadius: 2, overflow: 'hidden', border: `1px solid ${theme.palette.divider}`, minHeight: 0 }}>
-        {/* Mobile Detail View */}
-        {isMobile && mobileView === 'detail' && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            <Box sx={{ p: 1, borderBottom: `1px solid ${theme.palette.divider}` }}>
-              <IconButton onClick={handleBack}><ArrowBackIcon /></IconButton>
+        {/* Message List */}
+        <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+          {loadingMessages ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 200 }}>
+              <CircularProgress size={32} />
             </Box>
-            <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-              {loadingDetail ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
-              ) : selectedMessage ? (
-                <MessageDetail message={selectedMessage} currentFolder={currentFolder} onReply={handleReply} onForward={handleForward} onDelete={handleDelete} onRestore={handleRestore} onToggleRead={handleToggleRead} t={t} formatDate={formatDate} />
-              ) : null}
+          ) : messages.length === 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 200, gap: 1 }}>
+              <InboxIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
+              <Typography variant="body2" color="text.secondary">{t('mail.noMessages')}</Typography>
             </Box>
-          </Box>
-        )}
-
-        {/* Mail List */}
-        {(!isMobile || mobileView === 'list') && (
-          <Box sx={{ width: listWidth, flexShrink: selectedMessage ? 0 : 1, display: 'flex', flexDirection: 'column', borderRight: selectedMessage && !isMobile ? `1px solid ${theme.palette.divider}` : 'none', transition: 'width 0.2s ease' }}>
-            <Box sx={{ p: 1, borderBottom: `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
-              <Checkbox
-                checked={selectedMessages.length === messages.length && messages.length > 0}
-                indeterminate={selectedMessages.length > 0 && selectedMessages.length < messages.length}
-                onChange={(e) => e.target.checked ? selectAllMessages() : clearSelection()}
-                size="small"
+          ) : (
+            messages.map((message) => (
+              <GmailStyleRow
+                key={message.id}
+                message={message}
+                currentFolder={currentFolder}
+                isSelected={selectedMessages.includes(message.id)}
+                onToggleSelect={() => toggleMessageSelection(message.id)}
+                onClick={() => handleOpenMessage(message)}
+                getSenderDisplay={getSenderDisplay}
+                getRecipientDisplay={getRecipientDisplay}
+                formatDate={formatDate}
+                t={t}
               />
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>{pagination.total} {t('common.items')}</Typography>
-            </Box>
-
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
-              {loadingMessages ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
-              ) : messages.length === 0 ? (
-                <Box sx={{ p: 4, textAlign: 'center' }}><Typography color="text.secondary">{t('mail.noMessages')}</Typography></Box>
-              ) : (
-                <List disablePadding>
-                  {messages.map((message) => (
-                    <React.Fragment key={message.id}>
-                      <ListItem disablePadding secondaryAction={
-                        <Checkbox checked={selectedMessages.includes(message.id)} onChange={() => toggleMessageSelection(message.id)} onClick={(e) => e.stopPropagation()} size="small" />
-                      }>
-                        <ListItemButton
-                          selected={selectedMessage?.id === message.id}
-                          onClick={() => handleSelectMessage(message)}
-                          sx={{ bgcolor: message.is_read ? 'transparent' : 'action.hover', '&.Mui-selected': { bgcolor: 'primary.light', '&:hover': { bgcolor: 'primary.light' } } }}
-                        >
-                          <ListItemText
-                            primary={
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="body2" sx={{ fontWeight: message.is_read ? 400 : 600 }} noWrap>
-                                  {currentFolder === 'sent' || currentFolder === 'draft' ? getRecipientDisplay(message) : (message.sender_name || message.sender_email || t('mail.unknown'))}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">{formatDate(message.sent_at || message.created_at)}</Typography>
-                              </Box>
-                            }
-                            secondary={<Typography variant="body2" color="text.secondary" noWrap sx={{ fontWeight: message.is_read ? 400 : 500 }}>{message.subject || t('mail.noSubject')}</Typography>}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                      <Divider />
-                    </React.Fragment>
-                  ))}
-                </List>
-              )}
-            </Box>
-
-            {pagination.totalPages > 1 && (
-              <Box sx={{ p: 1, borderTop: `1px solid ${theme.palette.divider}`, display: 'flex', justifyContent: 'center', gap: 1 }}>
-                <Button size="small" disabled={pagination.page <= 1} onClick={() => handlePageChange(pagination.page - 1)}>{t('common.prev')}</Button>
-                <Typography variant="body2" sx={{ alignSelf: 'center' }}>{pagination.page} / {pagination.totalPages}</Typography>
-                <Button size="small" disabled={pagination.page >= pagination.totalPages} onClick={() => handlePageChange(pagination.page + 1)}>{t('common.next')}</Button>
-              </Box>
-            )}
-          </Box>
-        )}
-
-        {/* Desktop Detail */}
-        {!isMobile && selectedMessage && (
-          <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-            {loadingDetail ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
-            ) : (
-              <MessageDetail message={selectedMessage} currentFolder={currentFolder} onReply={handleReply} onForward={handleForward} onDelete={handleDelete} onRestore={handleRestore} onToggleRead={handleToggleRead} t={t} formatDate={formatDate} />
-            )}
-          </Box>
-        )}
-      </Box>
+            ))
+          )}
+        </Box>
+      </Paper>
     </Box>
   );
 }
 
-interface MessageDetailProps {
+// Gmail-style single row component
+interface GmailStyleRowProps {
   message: MailMessage;
   currentFolder: FolderType;
-  onReply: () => void;
-  onForward: () => void;
-  onDelete: () => void;
-  onRestore: () => void;
-  onToggleRead: () => void;
-  t: any; // useI18n return type
-  formatDate: (date: string) => string;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+  onClick: () => void;
+  getSenderDisplay: (message: MailMessage) => string;
+  getRecipientDisplay: (message: MailMessage) => string;
+  formatDate: (dateStr: string) => string;
+  t: (key: string) => string;
 }
 
-function MessageDetail({ message, currentFolder, onReply, onForward, onDelete, onRestore, onToggleRead, t, formatDate }: MessageDetailProps) {
+function GmailStyleRow({
+  message,
+  currentFolder,
+  isSelected,
+  onToggleSelect,
+  onClick,
+  getSenderDisplay,
+  getRecipientDisplay,
+  formatDate,
+  t
+}: GmailStyleRowProps) {
+  const theme = useTheme();
+  const isUnread = !message.is_read;
+
+  // Determine who to display (sender for inbox/trash, recipient for sent/draft)
+  const displayName = currentFolder === 'sent' || currentFolder === 'draft'
+    ? getRecipientDisplay(message)
+    : getSenderDisplay(message);
+
+  // Subject and preview
+  const subject = message.subject || t('mail.noSubject');
+  const preview = message.body ? message.body.substring(0, 100).replace(/\s+/g, ' ') : '';
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        {currentFolder !== 'draft' && (
-          <>
-            <Button size="small" startIcon={<ReplyIcon />} onClick={onReply}>{t('mail.reply')}</Button>
-            <Button size="small" startIcon={<ForwardIcon />} onClick={onForward}>{t('mail.forward')}</Button>
-          </>
-        )}
-        {currentFolder === 'trash' ? (
-          <>
-            <Button size="small" startIcon={<RestoreIcon />} onClick={onRestore}>{t('mail.restore')}</Button>
-            <Button size="small" color="error" startIcon={<DeleteOutlineIcon />} onClick={onDelete}>{t('mail.deletePermanently')}</Button>
-          </>
-        ) : (
-          <Button size="small" startIcon={<DeleteOutlineIcon />} onClick={onDelete}>{t('common.delete')}</Button>
-        )}
-        <Button size="small" startIcon={message.is_read ? <MarkUnreadIcon /> : <MarkReadIcon />} onClick={onToggleRead}>
-          {message.is_read ? t('mail.markUnread') : t('mail.markRead')}
-        </Button>
-      </Box>
-      <Divider sx={{ mb: 2 }} />
-      <Typography variant="h6" gutterBottom>{message.subject || t('mail.noSubject')}</Typography>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary">{t('mail.from')}: {message.sender_name || message.sender_email || t('mail.unknown')}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {t('mail.to')}: {message.recipients?.filter(r => r.type === 'to').map(r => r.name || r.email).join(', ') || t('mail.unknown')}
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        px: 1,
+        py: 0.75,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        bgcolor: isUnread ? alpha(theme.palette.primary.main, 0.03) : 'transparent',
+        cursor: 'pointer',
+        transition: 'background-color 0.15s',
+        '&:hover': {
+          bgcolor: alpha(theme.palette.action.hover, 0.5)
+        }
+      }}
+      onClick={onClick}
+    >
+      {/* Checkbox */}
+      <Checkbox
+        checked={isSelected}
+        onChange={onToggleSelect}
+        onClick={(e) => e.stopPropagation()}
+        size="small"
+        sx={{ p: 0.5, mr: 0.5 }}
+      />
+
+      {/* Sender/Recipient - Fixed width */}
+      <Typography
+        variant="body2"
+        sx={{
+          width: 180,
+          minWidth: 180,
+          fontWeight: isUnread ? 600 : 400,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          mr: 2
+        }}
+      >
+        {displayName}
+      </Typography>
+
+      {/* Subject + Preview - Flexible */}
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: isUnread ? 600 : 400,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            maxWidth: '40%'
+          }}
+        >
+          {subject}
         </Typography>
-        {message.recipients?.some(r => r.type === 'cc') && (
-          <Typography variant="body2" color="text.secondary">
-            CC: {message.recipients.filter(r => r.type === 'cc').map(r => r.name || r.email).join(', ')}
-          </Typography>
+        {preview && (
+          <>
+            <Typography variant="body2" color="text.secondary" sx={{ mx: 0.5 }}>-</Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flex: 1,
+                minWidth: 0
+              }}
+            >
+              {preview}
+            </Typography>
+          </>
         )}
-        <Typography variant="body2" color="text.secondary">{t('mail.date')}: {formatDate(message.sent_at || message.created_at)}</Typography>
       </Box>
-      <Divider sx={{ mb: 2 }} />
-      {message.body_html ? (
-        <Box sx={{ '& img': { maxWidth: '100%' } }} dangerouslySetInnerHTML={{ __html: message.body_html }} />
-      ) : (
-        <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{message.body}</Typography>
+
+      {/* Attachment indicator */}
+      {message.attachment_id && (
+        <AttachFileIcon
+          sx={{ fontSize: 16, color: 'text.secondary', mx: 0.5 }}
+        />
       )}
+
+      {/* Date - Fixed width */}
+      <Typography
+        variant="caption"
+        sx={{
+          width: 70,
+          textAlign: 'right',
+          color: isUnread ? 'text.primary' : 'text.secondary',
+          fontWeight: isUnread ? 600 : 400,
+          flexShrink: 0
+        }}
+      >
+        {formatDate(message.sent_at || message.created_at)}
+      </Typography>
     </Box>
   );
 }

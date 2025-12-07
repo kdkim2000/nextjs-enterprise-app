@@ -78,7 +78,11 @@ async function getAllUserRoleMappings(options = {}) {
 
 async function createUserRoleMapping(data) {
   const { userId, roleId, assignedBy, expiresAt, isActive } = data;
-  const mappingId = `URM-${userId}-${roleId}-${Date.now()}`;
+  // Generate shorter ID to fit varchar(50) - use last 8 chars of timestamp
+  const timestamp = Date.now().toString().slice(-8);
+  const shortUserId = userId.length > 12 ? userId.slice(0, 12) : userId;
+  const shortRoleId = roleId.replace('role-', 'R');
+  const mappingId = `URM-${shortUserId}-${shortRoleId}-${timestamp}`;
   const query = `
     INSERT INTO user_role_mappings (id, user_id, role_id, assigned_by, assigned_at, expires_at, is_active, updated_at)
     VALUES ($1, $2, $3, $4, NOW(), $5, $6, NOW())

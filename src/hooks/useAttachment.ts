@@ -256,7 +256,8 @@ export function useAttachment(options: UseAttachmentOptions) {
       console.error('[useAttachment] Upload failed:', {
         errorMessage,
         responseData: error.response?.data,
-        status: (err as any)?.response?.status
+        status: (err as any)?.response?.status,
+        fullError: err
       });
 
       // Update progress to error
@@ -329,7 +330,7 @@ export function useAttachment(options: UseAttachmentOptions) {
   const downloadFile = useCallback(async (fileId: string) => {
     try {
       // Use window.open for download
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       window.open(`${baseUrl}/attachment/file/${fileId}/download?token=${token}`, '_blank');
     } catch (err) {

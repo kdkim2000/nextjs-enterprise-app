@@ -186,7 +186,7 @@ export default function MultiUserSelect({
         return (
           <Box
             component="li"
-            key={key}
+            key={option.id}
             {...rest}
             sx={{
               py: 1,

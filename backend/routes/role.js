@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { isUserAdmin } = require('../middleware/permissionMiddleware');
 const roleService = require('../services/roleService');
 const userService = require('../services/userService');
 
@@ -91,7 +92,8 @@ router.get('/', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.role !== 'admin') {
+    const hasAdminAccess = await isUserAdmin(req);
+    if (!hasAdminAccess) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
@@ -154,7 +156,8 @@ router.post('/', authenticateToken, async (req, res) => {
 router.put('/', authenticateToken, async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.role !== 'admin') {
+    const hasAdminAccess = await isUserAdmin(req);
+    if (!hasAdminAccess) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 
@@ -219,7 +222,8 @@ router.put('/', authenticateToken, async (req, res) => {
 router.delete('/', authenticateToken, async (req, res) => {
   try {
     // Check if user is admin
-    if (req.user.role !== 'admin') {
+    const hasAdminAccess = await isUserAdmin(req);
+    if (!hasAdminAccess) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });
     }
 

@@ -158,6 +158,8 @@ export interface RichTextEditorProps {
   helperText?: string;
   /** Character limit (0 = unlimited) */
   characterLimit?: number;
+  /** Fill available height (100%) instead of using minHeight */
+  fullHeight?: boolean;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -169,7 +171,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   disabled = false,
   error = false,
   helperText,
-  characterLimit = 0
+  characterLimit = 0,
+  fullHeight = false
 }) => {
   const theme = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -460,13 +463,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const characterCount = editor.storage.characterCount;
 
   return (
-    <Box>
+    <Box sx={fullHeight ? { height: '100%', display: 'flex', flexDirection: 'column' } : undefined}>
       <Paper
         variant="outlined"
         sx={{
           borderColor: error ? 'error.main' : 'divider',
           borderRadius: 1,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          ...(fullHeight && {
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0
+          })
         }}
       >
         {/* Toolbar */}
@@ -903,13 +912,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onDrop={handleDrop}
           sx={{
             p: 2,
-            minHeight,
-            maxHeight,
+            ...(fullHeight ? {
+              flex: 1,
+              minHeight: 0,
+              height: '100%'
+            } : {
+              minHeight,
+              maxHeight
+            }),
             overflowY: 'auto',
             position: 'relative',
             '& .ProseMirror': {
               outline: 'none',
-              minHeight: typeof minHeight === 'number' ? minHeight - 32 : 'auto',
+              minHeight: fullHeight ? '100%' : (typeof minHeight === 'number' ? minHeight - 32 : 'auto'),
               '& p.is-editor-empty:first-child::before': {
                 color: 'text.disabled',
                 content: 'attr(data-placeholder)',
