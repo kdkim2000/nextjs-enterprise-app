@@ -47,8 +47,11 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copy necessary files from builder
-COPY --from=builder /app/public ./public
+# 1. Copy standalone output (includes server.js and .next with BUILD_ID)
 COPY --from=builder /app/.next/standalone ./
+# 2. Copy public folder
+COPY --from=builder /app/public ./public
+# 3. Copy static files into the standalone .next directory
 COPY --from=builder /app/.next/static ./.next/static
 
 # Copy backend data directory structure
