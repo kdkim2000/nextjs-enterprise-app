@@ -46,13 +46,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
-# 1. Copy standalone output (includes server.js and .next with BUILD_ID)
-COPY --from=builder /app/.next/standalone ./
-# 2. Copy public folder
+# Copy necessary files from builder (using next start instead of standalone)
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
 COPY --from=builder /app/public ./public
-# 3. Copy static files into the standalone .next directory
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy backend data directory structure
 COPY --from=builder /app/backend ./backend
@@ -60,7 +59,8 @@ COPY --from=builder /app/backend ./backend
 # Create data directory and set permissions
 RUN mkdir -p /app/data && \
     chown -R nextjs:nodejs /app/data && \
-    chown -R nextjs:nodejs /app/backend
+    chown -R nextjs:nodejs /app/backend && \
+    chown -R nextjs:nodejs /app/.next
 
 # Switch to non-root user
 USER nextjs
@@ -76,5 +76,5 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the application using next start
+CMD ["npx", "next", "start"]
