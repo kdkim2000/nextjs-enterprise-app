@@ -14,8 +14,6 @@
 # 모니터링 포함 실행:
 #   docker-compose --profile monitoring up -d
 
-version: '3.8'
-
 services:
   # ===== Infrastructure =====
 
