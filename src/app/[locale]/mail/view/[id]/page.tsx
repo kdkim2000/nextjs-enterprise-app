@@ -71,22 +71,13 @@ export default function MailViewPage() {
     attachmentTypeCode: 'MAIL'
   });
 
-  // Load message and find index in list
+  // Load message (getMessage already marks as read on backend)
   useEffect(() => {
     const loadMessage = async () => {
       setLoading(true);
       try {
-        const fullMessage = await getMessage(messageId);
+        const fullMessage = await getMessage(messageId, folder);
         setMessage(fullMessage);
-
-        // Mark as read if unread
-        if (fullMessage && !fullMessage.is_read) {
-          await markAsRead(messageId, true);
-        }
-
-        // Find current index in messages list
-        const idx = messages.findIndex(m => m.id === messageId);
-        setCurrentIndex(idx);
       } catch (error) {
         console.error('Failed to load message:', error);
       } finally {
@@ -97,7 +88,13 @@ export default function MailViewPage() {
     if (messageId) {
       loadMessage();
     }
-  }, [messageId, getMessage, markAsRead, messages]);
+  }, [messageId, folder, getMessage]);
+
+  // Find index in messages list (separate effect to avoid dependency loops)
+  useEffect(() => {
+    const idx = messages.findIndex(m => m.id === messageId);
+    setCurrentIndex(idx);
+  }, [messageId, messages]);
 
   // Load attachments when message has attachment_id
   useEffect(() => {

@@ -82,14 +82,16 @@
     "fabc8d4e-0929-49e5-9ca1-deb4f168104b",
     "fec39afd-84ea-4920-a287-a13fec2820fa",
     "fecedcfc-95f2-401d-9db9-78d651d11036",
-    "2f7ae87e-8cc9-4dd0-b61f-51173207fc5f"
+    "2f7ae87e-8cc9-4dd0-b61f-51173207fc5f",
+    "16d10df5-9efd-4730-82aa-cb00e3c747c8",
+    "626c8f31-0467-4a1d-bd17-1306ca0df1f9"
   ],
-  "lastMigration": "2025-12-04T21:51:16.381Z",
-  "totalMigrated": 83,
+  "lastMigration": "2025-12-07T18:33:34.314Z",
+  "totalMigrated": 85,
   "stats": {
     "byCategory": {
       "general": 5,
-      "bug-fix": 64,
+      "bug-fix": 66,
       "refactor": 2,
       "feature": 2,
       "debugging": 9,
@@ -97,12 +99,12 @@
     },
     "byDifficulty": {
       "medium": 5,
-      "hard": 73,
+      "hard": 75,
       "easy": 5
     },
     "byMonth": {
       "2025-11": 77,
-      "2025-12": 6
+      "2025-12": 8
     }
   }
 }

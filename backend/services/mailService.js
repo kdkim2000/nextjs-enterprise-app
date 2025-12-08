@@ -77,8 +77,9 @@ class MailService {
     };
   }
 
-  async getMessage(messageId, userId) {
-    const result = await pool.query(`
+  async getMessage(messageId, userId, folder = null) {
+    // Build query - if folder is specified, use it to get the correct user_message
+    let query = `
       SELECT
         um.id as user_message_id,
         um.folder,
@@ -102,15 +103,27 @@ class MailService {
       JOIN mail_messages m ON um.message_id = m.id
       LEFT JOIN users u ON m.sender_id = u.id
       WHERE m.id = $1 AND um.user_id = $2 AND um.is_deleted = false
-    `, [messageId, userId]);
+    `;
+
+    const params = [messageId, userId];
+    if (folder) {
+      query += ` AND um.folder = $3`;
+      params.push(folder);
+    }
+
+    const result = await pool.query(query, params);
 
     if (result.rows.length === 0) return null;
 
     const message = result.rows[0];
 
-    // Mark as read if inbox
+    // Mark as read if inbox and unread
     if (message.folder === 'inbox' && !message.is_read) {
-      await this.markAsRead(messageId, userId);
+      await pool.query(`
+        UPDATE mail_user_messages
+        SET is_read = true, read_at = NOW(), updated_at = NOW()
+        WHERE message_id = $1 AND user_id = $2 AND folder = 'inbox'
+      `, [messageId, userId]);
       message.is_read = true;
     }
 
@@ -386,7 +399,8 @@ class MailService {
   // ===== Read Status =====
 
   async markAsRead(messageId, userId, isRead = true) {
-    const result = await pool.query(`
+    // Update read status
+    const updateResult = await pool.query(`
       UPDATE mail_user_messages
       SET is_read = $3,
           read_at = CASE WHEN $3 THEN NOW() ELSE NULL END,
@@ -394,7 +408,13 @@ class MailService {
       WHERE message_id = $1 AND user_id = $2
       RETURNING *
     `, [messageId, userId, isRead]);
-    return result.rows[0];
+
+    if (updateResult.rows.length === 0) {
+      return null;
+    }
+
+    // Return full message info for frontend state sync
+    return await this.getMessage(messageId, userId);
   }
 
   // ===== Folder Counts =====

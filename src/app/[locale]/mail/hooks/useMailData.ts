@@ -98,17 +98,6 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
     }
   }, [currentFolder]);
 
-  // Fetch single message
-  const getMessage = useCallback(async (id: string): Promise<MailMessage | null> => {
-    try {
-      const response = await api.get(`/mail/messages/${id}`);
-      return response.data.data;
-    } catch (error) {
-      console.error('Failed to get message:', error);
-      return null;
-    }
-  }, []);
-
   // Fetch folder counts
   const fetchCounts = useCallback(async () => {
     try {
@@ -118,6 +107,27 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
       console.error('Failed to fetch counts:', error);
     }
   }, []);
+
+  // Fetch single message (also updates local state for read status sync)
+  const getMessage = useCallback(async (id: string, folder?: FolderType): Promise<MailMessage | null> => {
+    try {
+      const url = folder ? `/mail/messages/${id}?folder=${folder}` : `/mail/messages/${id}`;
+      const response = await api.get(url);
+      const message = response.data.data;
+
+      // Sync read status to messages list (backend marks as read automatically)
+      if (message && message.is_read) {
+        setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: true } : m));
+        // Also refresh counts since unread count may have changed
+        fetchCounts();
+      }
+
+      return message;
+    } catch (error) {
+      console.error('Failed to get message:', error);
+      return null;
+    }
+  }, [fetchCounts]);
 
   // Create draft
   const createDraft = useCallback(async (data: DraftData): Promise<MailMessage> => {
