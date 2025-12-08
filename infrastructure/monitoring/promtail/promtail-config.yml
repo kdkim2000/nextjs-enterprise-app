@@ -1,0 +1,93 @@
+# Promtail 설정 - Docker 컨테이너 로그 수집
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Docker 컨테이너 로그 수집
+  - job_name: containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: containerlogs
+          __path__: /var/lib/docker/containers/*/*log
+
+    pipeline_stages:
+      # Docker JSON 로그 파싱
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            time: time
+            container_id: attrs.container_id
+
+      # 컨테이너 ID에서 짧은 ID 추출
+      - regex:
+          expression: '^(?P<container_id_short>.{12})'
+          source: container_id
+
+      # 출력 필드를 로그 라인으로 사용
+      - output:
+          source: output
+
+      # 타임스탬프 파싱
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+
+      # 레이블 추가
+      - labels:
+          stream:
+          container_id_short:
+
+  # 시스템 로그 (선택적)
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\S+\s+\S+)\s+(?P<hostname>\S+)\s+(?P<process>\S+):\s+(?P<message>.*)$'
+
+      - labels:
+          hostname:
+          process:
+
+      - output:
+          source: message
+
+  # Nginx 액세스 로그 (선택적)
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          __path__: /var/log/nginx/access.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<request>[^"]*)" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^"]*)" "(?P<http_user_agent>[^"]*)"'
+
+      - labels:
+          status:
+          remote_addr:
+
+      - metrics:
+          http_response_status:
+            type: Counter
+            description: "HTTP response status codes"
+            source: status
+            config:
+              action: inc

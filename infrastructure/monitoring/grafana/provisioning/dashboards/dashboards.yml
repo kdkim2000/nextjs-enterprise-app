@@ -1,0 +1,14 @@
+# Grafana 대시보드 자동 프로비저닝
+apiVersion: 1
+
+providers:
+  - name: 'Enterprise App Dashboards'
+    orgId: 1
+    folder: 'Enterprise App'
+    folderUid: 'enterprise-app'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

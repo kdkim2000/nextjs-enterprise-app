@@ -1,0 +1,90 @@
+# Prometheus 설정
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'enterprise-app'
+
+# Alertmanager 설정 (선택적)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# 알림 규칙 파일
+rule_files:
+  - /etc/prometheus/alert.rules.yml
+
+# 스크랩 설정
+scrape_configs:
+  # Prometheus 자체 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # APISIX 메트릭
+  - job_name: 'apisix'
+    static_configs:
+      - targets: ['apisix:9091']
+    metrics_path: /apisix/prometheus/metrics
+
+  # Nginx 메트릭 (nginx-prometheus-exporter 사용 시)
+  # - job_name: 'nginx'
+  #   static_configs:
+  #     - targets: ['nginx-exporter:9113']
+
+  # Redis 메트릭
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: /metrics
+
+  # Node.js 서비스 메트릭 (prom-client 사용 시)
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:3011']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  - job_name: 'admin-service'
+    static_configs:
+      - targets: ['admin-service:3012']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  - job_name: 'content-service'
+    static_configs:
+      - targets: ['content-service:3013']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  - job_name: 'communication-service'
+    static_configs:
+      - targets: ['communication-service:3014']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  - job_name: 'common-service'
+    static_configs:
+      - targets: ['common-service:3015']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  - job_name: 'legacy-backend'
+    static_configs:
+      - targets: ['legacy-backend:3001']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # Docker 컨테이너 메트릭 (cAdvisor 사용 시)
+  # - job_name: 'cadvisor'
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
+
+  # Loki 메트릭
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+    metrics_path: /metrics
