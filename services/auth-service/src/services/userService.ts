@@ -3,7 +3,7 @@
  */
 
 import { query } from '../utils/database';
-import { User, UserInfo } from '../types';
+import { User } from '../types';
 import { getLogger } from '@enterprise/shared';
 
 const logger = getLogger('auth-service:userService');
@@ -14,9 +14,10 @@ const logger = getLogger('auth-service:userService');
 export const getUserByUsername = async (username: string): Promise<User | null> => {
   const sql = `
     SELECT
-      id, loginid, password, name, email, role,
-      department, position, phone, status,
-      mfa_enabled, last_login, created_at, updated_at
+      id, loginid, password, name_ko, name_en, email, role,
+      department, position, phone_number, mobile_number, status,
+      mfa_enabled, sso_enabled, last_login, created_at, updated_at,
+      employee_number, avatar_url
     FROM users
     WHERE loginid = $1
   `;
@@ -31,9 +32,10 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
 export const getUserById = async (userId: string): Promise<User | null> => {
   const sql = `
     SELECT
-      id, loginid, password, name, email, role,
-      department, position, phone, status,
-      mfa_enabled, last_login, created_at, updated_at
+      id, loginid, password, name_ko, name_en, email, role,
+      department, position, phone_number, mobile_number, status,
+      mfa_enabled, sso_enabled, last_login, created_at, updated_at,
+      employee_number, avatar_url
     FROM users
     WHERE id = $1
   `;
@@ -48,9 +50,10 @@ export const getUserById = async (userId: string): Promise<User | null> => {
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   const sql = `
     SELECT
-      id, loginid, password, name, email, role,
-      department, position, phone, status,
-      mfa_enabled, last_login, created_at, updated_at
+      id, loginid, password, name_ko, name_en, email, role,
+      department, position, phone_number, mobile_number, status,
+      mfa_enabled, sso_enabled, last_login, created_at, updated_at,
+      employee_number, avatar_url
     FROM users
     WHERE email = $1
   `;
@@ -74,30 +77,30 @@ export const updateLastLogin = async (userId: string): Promise<void> => {
 export const createUser = async (userData: {
   loginid: string;
   password: string;
-  name: string;
-  email: string;
+  name_ko?: string;
+  name_en?: string;
+  email?: string;
   role?: string;
   department?: string;
   position?: string;
-  phone?: string;
 }): Promise<User> => {
   const sql = `
     INSERT INTO users (
-      loginid, password, name, email, role,
-      department, position, phone, status, mfa_enabled
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', false)
+      id, loginid, password, name_ko, name_en, email, role,
+      department, position, status, mfa_enabled
+    ) VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, $8, 'active', false)
     RETURNING *
   `;
 
   const result = await query(sql, [
     userData.loginid,
     userData.password,
-    userData.name,
-    userData.email,
+    userData.name_ko || null,
+    userData.name_en || null,
+    userData.email || null,
     userData.role || 'user',
     userData.department || null,
     userData.position || null,
-    userData.phone || null,
   ]);
 
   logger.info(`Created new user: ${userData.loginid}`);
@@ -122,35 +125,3 @@ export const emailExists = async (email: string): Promise<boolean> => {
   return (result.rowCount ?? 0) > 0;
 };
 
-/**
- * Convert User to UserInfo (safe for client)
- */
-export const toUserInfo = (user: User): UserInfo => {
-  return {
-    id: user.id,
-    loginid: user.loginid,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    department: user.department,
-    position: user.position,
-  };
-};
-
-/**
- * Get user permissions (from role_program_mappings)
- */
-export const getUserPermissions = async (userId: string): Promise<string[]> => {
-  const sql = `
-    SELECT DISTINCT pm.code as program_code
-    FROM user_role_mappings urm
-    JOIN role_program_mappings rpm ON urm.role_id = rpm.role_id
-    JOIN programs pm ON rpm.program_id = pm.id
-    WHERE urm.user_id = $1
-      AND urm.is_active = true
-      AND rpm.can_view = true
-  `;
-
-  const result = await query(sql, [userId]);
-  return result.rows.map((row: { program_code: string }) => row.program_code);
-};

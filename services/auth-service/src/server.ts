@@ -2,6 +2,9 @@
  * Auth Service - 인증 마이크로서비스
  */
 
+// Load environment variables FIRST (before any other imports that use env vars)
+import 'dotenv/config';
+
 import express, { Request, Response, NextFunction, ErrorRequestHandler, RequestHandler } from 'express';
 import cors from 'cors';
 import {
@@ -12,9 +15,6 @@ import {
   requestLogger,
 } from '@enterprise/shared';
 import authRoutes from './routes/auth';
-
-// Load environment variables
-import 'dotenv/config';
 
 // 환경 설정 로드
 const config = loadAppConfig('auth-service');

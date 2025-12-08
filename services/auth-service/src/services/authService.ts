@@ -25,8 +25,6 @@ import {
   getUserByUsername,
   getUserById,
   updateLastLogin,
-  toUserInfo,
-  getUserPermissions,
   createUser,
   usernameExists,
   emailExists,
@@ -37,6 +35,19 @@ const logger = getLogger('auth-service:auth');
 
 // MFA expiration in seconds (5 minutes)
 const MFA_EXPIRY_SECONDS = 300;
+
+/**
+ * Helper: Convert User to UserInfo (safe for client)
+ */
+const toUserInfo = (user: User): UserInfo => ({
+  id: user.id,
+  loginid: user.loginid,
+  name: user.name_ko || user.name_en || user.loginid,
+  email: user.email,
+  role: user.role,
+  department: user.department,
+  position: user.position,
+});
 
 /**
  * Login user
@@ -222,7 +233,7 @@ export const refreshAccessToken = async (
   const tokenPayload = {
     userId: user.id,
     loginid: user.loginid,
-    role: user.role,
+    role: user.role || 'user',
   };
 
   const newAccessToken = generateAccessToken(tokenPayload);
@@ -277,11 +288,11 @@ export const logout = async (accessToken: string, refreshToken?: string): Promis
 export const register = async (userData: {
   username: string;
   password: string;
-  name: string;
-  email: string;
+  name_ko?: string;
+  name_en?: string;
+  email?: string;
   department?: string;
   position?: string;
-  phone?: string;
 }): Promise<{ user: UserInfo }> => {
   // Check if username exists
   if (await usernameExists(userData.username)) {
@@ -289,7 +300,7 @@ export const register = async (userData: {
   }
 
   // Check if email exists
-  if (await emailExists(userData.email)) {
+  if (userData.email && await emailExists(userData.email)) {
     throw new Error('Email already exists');
   }
 
@@ -300,11 +311,11 @@ export const register = async (userData: {
   const user = await createUser({
     loginid: userData.username,
     password: hashedPassword,
-    name: userData.name,
+    name_ko: userData.name_ko,
+    name_en: userData.name_en,
     email: userData.email,
     department: userData.department,
     position: userData.position,
-    phone: userData.phone,
   });
 
   logger.info(`New user registered: ${userData.username}`);
@@ -332,10 +343,14 @@ export const validateToken = async (token: string): Promise<UserInfo | null> => 
       return null;
     }
 
-    const permissions = await getUserPermissions(user.id);
     return {
-      ...toUserInfo(user),
-      permissions,
+      id: user.id,
+      loginid: user.loginid,
+      name: user.name_ko || user.name_en || user.loginid,
+      email: user.email,
+      role: user.role,
+      department: user.department,
+      position: user.position,
     };
   } catch {
     return null;
@@ -349,21 +364,26 @@ export const getCurrentUser = async (userId: string): Promise<UserInfo | null> =
   const user = await getUserById(userId);
   if (!user) return null;
 
-  const permissions = await getUserPermissions(userId);
   return {
-    ...toUserInfo(user),
-    permissions,
+    id: user.id,
+    loginid: user.loginid,
+    name: user.name_ko || user.name_en || user.loginid,
+    email: user.email,
+    role: user.role,
+    department: user.department,
+    position: user.position,
   };
 };
 
 /**
  * Helper: Generate tokens for user
+ * 기존 backend/routes/auth.js의 응답 형식과 동일하게 반환
  */
 async function generateTokensForUser(user: User): Promise<LoginResponse> {
   const tokenPayload = {
     userId: user.id,
     loginid: user.loginid,
-    role: user.role,
+    role: user.role || 'user',
   };
 
   const accessToken = generateAccessToken(tokenPayload);
@@ -375,15 +395,24 @@ async function generateTokensForUser(user: User): Promise<LoginResponse> {
   // Store refresh token in Redis
   await storeRefreshToken(user.id, refreshToken);
 
-  // Get permissions
-  const permissions = await getUserPermissions(user.id);
-
+  // 기존 backend와 동일한 user 응답 형식
   return {
     accessToken,
     refreshToken,
     user: {
-      ...toUserInfo(user),
-      permissions,
+      id: user.id,
+      loginid: user.loginid,
+      name: user.name_ko || user.name_en || user.loginid,
+      name_ko: user.name_ko,
+      name_en: user.name_en,
+      email: user.email,
+      role: user.role,
+      department: user.department,
+      position: user.position,
+      avatarUrl: user.avatar_url,
+      employee_number: user.employee_number,
+      phone_number: user.phone_number,
+      mobile_number: user.mobile_number,
     },
   };
 }

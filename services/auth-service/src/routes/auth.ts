@@ -210,13 +210,13 @@ router.post('/logout', async (req: Request, res: Response) => {
  */
 router.post('/register', registerLimiter, async (req: Request, res: Response) => {
   try {
-    const { username, password, name, email, department, position, phone } = req.body;
+    const { username, password, name_ko, name_en, email, department, position } = req.body;
 
     // Validation
-    if (!username || !password || !name || !email) {
+    if (!username || !password) {
       res.status(400).json({
         success: false,
-        message: 'Username, password, name, and email are required',
+        message: 'Username and password are required',
       });
       return;
     }
@@ -232,11 +232,11 @@ router.post('/register', registerLimiter, async (req: Request, res: Response) =>
     const result = await register({
       username,
       password,
-      name,
+      name_ko,
+      name_en,
       email,
       department,
       position,
-      phone,
     });
 
     logger.info(`New user registered: ${username}`);

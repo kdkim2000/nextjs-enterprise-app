@@ -6,17 +6,22 @@ export interface User {
   id: string;
   loginid: string;
   password: string;
-  name: string;
-  email: string;
-  role: string;
+  name_ko?: string;
+  name_en?: string;
+  email?: string;
+  role?: string;
   department?: string;
   position?: string;
-  phone?: string;
-  status: string;
-  mfa_enabled: boolean;
+  phone_number?: string;
+  mobile_number?: string;
+  status?: string;
+  mfa_enabled?: boolean;
+  sso_enabled?: boolean;
   last_login?: Date;
-  created_at: Date;
-  updated_at: Date;
+  created_at?: Date;
+  updated_at?: Date;
+  employee_number?: string;
+  avatar_url?: string;
 }
 
 export interface LoginRequest {
@@ -35,11 +40,17 @@ export interface LoginResponse {
 export interface UserInfo {
   id: string;
   loginid: string;
-  name: string;
-  email: string;
-  role: string;
+  name: string;  // name_ko or name_en
+  name_ko?: string;
+  name_en?: string;
+  email?: string;
+  role?: string;
   department?: string;
   position?: string;
+  avatarUrl?: string;
+  employee_number?: string;
+  phone_number?: string;
+  mobile_number?: string;
   permissions?: string[];
 }
 
