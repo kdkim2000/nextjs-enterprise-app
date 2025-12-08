@@ -8,8 +8,8 @@ import { JwtPayload } from './auth';
 /**
  * 인증된 요청 (JWT 페이로드 포함)
  */
-export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
+export interface AuthenticatedRequest extends Omit<Request, 'user'> {
+  user?: JwtPayload & { type?: string };
 }
 
 /**

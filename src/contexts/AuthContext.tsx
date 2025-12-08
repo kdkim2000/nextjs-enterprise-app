@@ -1,13 +1,15 @@
 'use client';
 
- 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import axios from 'axios';
 import { AuthState } from '@/types/auth';
 import { api } from '@/lib/axios';
+import { getApiConfig, getEnvironment } from '@/lib/api/config';
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<any>;
-  verifyMFA: (userId: string, code: string) => Promise<void>;
+  verifyMFA: (mfaToken: string, code: string) => Promise<void>;
+  resendMFA: (mfaToken: string) => Promise<{ devCode?: string }>;
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
   ssoLogin: () => Promise<void>;
@@ -15,6 +17,19 @@ interface AuthContextType extends AuthState {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Get Auth API base URL based on environment
+ */
+const getAuthApiUrl = (): string => {
+  const config = getApiConfig();
+  const env = getEnvironment();
+
+  if (env === 'development') {
+    return config.auth; // Direct call to auth service
+  }
+  return ''; // Relative path via API Gateway
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
@@ -24,6 +39,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
     isLoading: true
   });
+
+  // Create auth API client
+  const authApi = useMemo(() => {
+    const baseUrl = getAuthApiUrl();
+    return {
+      post: async (url: string, data?: any) => {
+        const fullUrl = baseUrl ? `${baseUrl}${url}` : url;
+        const response = await axios.post(fullUrl, data, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(typeof window !== 'undefined' && localStorage.getItem('accessToken')
+              ? { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+              : {})
+          }
+        });
+        return response.data;
+      }
+    };
+  }, []);
 
   // Initialize auth from localStorage
   useEffect(() => {
@@ -58,28 +92,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (username: string, password: string) => {
     try {
-      const response = await api.post('/auth/login', { username, password });
+      const response = await authApi.post('/auth/login', { username, password });
 
-      if (response.mfaRequired) {
-        // MFA required - return MFA info to component
+      // Check for MFA required
+      if (response.requireMFA || response.data?.requireMFA) {
         return {
           mfaRequired: true,
-          userId: response.userId,
-          email: response.email,
-          devCode: response.devCode
+          mfaToken: response.mfaToken || response.data?.mfaToken,
+          message: response.message
         };
       }
 
-      // No MFA - complete login
-      const { token, refreshToken, user } = response;
+      // Extract data from response (handle both old and new API format)
+      const data = response.data || response;
+      const accessToken = data.accessToken || data.token;
+      const refreshToken = data.refreshToken;
+      const user = data.user;
 
-      localStorage.setItem('accessToken', token);
+      if (!accessToken || !user) {
+        throw new Error('Invalid response from server');
+      }
+
+      localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
 
       setAuthState({
         user,
-        token,
+        token: accessToken,
         refreshToken,
         isAuthenticated: true,
         isLoading: false
@@ -88,36 +128,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     } catch (error: any) {
       console.error('Login error:', error);
-      throw error;
+      const message = error.response?.data?.message || error.message || 'Login failed';
+      throw new Error(message);
     }
-  }, []);
+  }, [authApi]);
 
-  const verifyMFA = useCallback(async (userId: string, code: string) => {
+  const verifyMFA = useCallback(async (mfaToken: string, code: string) => {
     try {
-      const response = await api.post('/auth/verify-mfa', { userId, code });
+      const response = await authApi.post('/auth/verify-mfa', { mfaToken, code });
 
-      const { token, refreshToken, user } = response;
+      const data = response.data || response;
+      const accessToken = data.accessToken || data.token;
+      const refreshToken = data.refreshToken;
+      const user = data.user;
 
-      localStorage.setItem('accessToken', token);
+      if (!accessToken || !user) {
+        throw new Error('Invalid response from server');
+      }
+
+      localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
 
       setAuthState({
         user,
-        token,
+        token: accessToken,
         refreshToken,
         isAuthenticated: true,
         isLoading: false
       });
     } catch (error: any) {
       console.error('MFA verification error:', error);
-      throw error;
+      const message = error.response?.data?.message || error.message || 'MFA verification failed';
+      throw new Error(message);
     }
-  }, []);
+  }, [authApi]);
+
+  const resendMFA = useCallback(async (mfaToken: string) => {
+    try {
+      const response = await authApi.post('/auth/resend-mfa', { mfaToken });
+      return {
+        devCode: response.devCode || response.data?.devCode
+      };
+    } catch (error: any) {
+      console.error('Resend MFA error:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to resend MFA code';
+      throw new Error(message);
+    }
+  }, [authApi]);
 
   const logout = useCallback(async () => {
     try {
-      await api.post('/auth/logout');
+      const token = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      if (token) {
+        await authApi.post('/auth/logout', { refreshToken });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -133,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: false
       });
     }
-  }, []);
+  }, [authApi]);
 
   const refreshAccessToken = useCallback(async () => {
     try {
@@ -142,34 +209,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No refresh token available');
       }
 
-      const response = await api.post('/auth/refresh', {
+      const response = await authApi.post('/auth/refresh', {
         refreshToken: currentRefreshToken
       });
 
-      const { token } = response;
-      localStorage.setItem('accessToken', token);
+      const data = response.data || response;
+      const newAccessToken = data.accessToken || data.token;
+      const newRefreshToken = data.refreshToken;
 
-      setAuthState((prev) => ({ ...prev, token }));
+      if (newAccessToken) {
+        localStorage.setItem('accessToken', newAccessToken);
+      }
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
+
+      setAuthState((prev) => ({
+        ...prev,
+        token: newAccessToken,
+        refreshToken: newRefreshToken || prev.refreshToken
+      }));
     } catch (error) {
       console.error('Token refresh error:', error);
       await logout();
       throw error;
     }
-  }, [logout]);
+  }, [authApi, logout]);
 
   const ssoLogin = useCallback(async () => {
     try {
       const response = await api.post('/auth/sso');
 
-      const { token, refreshToken, user } = response;
+      const data = response.data || response;
+      const accessToken = data.accessToken || data.token;
+      const refreshToken = data.refreshToken;
+      const user = data.user;
 
-      localStorage.setItem('accessToken', token);
+      localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
 
       setAuthState({
         user,
-        token,
+        token: accessToken,
         refreshToken,
         isAuthenticated: true,
         isLoading: false
@@ -192,6 +274,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...authState,
     login,
     verifyMFA,
+    resendMFA,
     logout,
     refreshAccessToken,
     ssoLogin,

@@ -75,7 +75,7 @@ export function getDatabase(): IDatabase<any> {
     dbInstance = pgp(config);
     logger.info(`Database configured: ${config.host}:${config.port}/${config.database}`);
   }
-  return dbInstance;
+  return dbInstance!;
 }
 
 /**
