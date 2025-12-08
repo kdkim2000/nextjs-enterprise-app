@@ -12,7 +12,12 @@ RUN npm install && npm run build
 # 서비스 빌드
 WORKDIR /app/service
 COPY services/auth-service/package*.json ./
-RUN npm install
+
+# npm install 후 shared 패키지 심볼릭 링크 생성
+RUN npm install --ignore-scripts && \
+    rm -rf node_modules/@enterprise/shared && \
+    mkdir -p node_modules/@enterprise && \
+    ln -s /app/shared node_modules/@enterprise/shared
 
 COPY services/auth-service/src ./src
 COPY services/auth-service/tsconfig.json ./
