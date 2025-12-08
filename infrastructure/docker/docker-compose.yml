@@ -66,6 +66,7 @@ services:
     expose:
       - "9080"
       - "9091"
+      - "9092"
     volumes:
       - ../apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ../apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
@@ -73,11 +74,11 @@ services:
     networks:
       - corenext-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9080/apisix/status"]
+      test: ["CMD", "curl", "-sf", "http://localhost:9092/v1/healthcheck"]
       interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 15s
+      retries: 5
+      start_period: 20s
 
   # Redis (Auth Service용 세션/토큰 관리)
   redis:
