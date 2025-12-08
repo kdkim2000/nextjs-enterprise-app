@@ -3,10 +3,10 @@
 
 # ===== Consumers (JWT 사용자) =====
 consumers:
-  - username: web-client
+  - username: web_client
     plugins:
       jwt-auth:
-        key: user-key
+        key: user_key
         secret: "${JWT_SECRET:-your-jwt-secret-key-change-in-production}"
         algorithm: HS256
 
