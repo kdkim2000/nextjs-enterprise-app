@@ -1,0 +1,40 @@
+# APISIX 기본 설정 - 서버 운영 환경
+
+apisix:
+  node_listen: 9080
+  enable_ipv6: false
+  enable_admin: true
+  admin_key:
+    - name: admin
+      key: edd1c9f034335f136f87ad84b625c8f1  # 프로덕션에서는 변경 필요
+      role: admin
+
+deployment:
+  admin:
+    admin_listen:
+      ip: 0.0.0.0
+      port: 9180
+    https_admin: false
+
+  etcd:
+    host:
+      - "http://etcd:2379"
+    prefix: "/apisix"
+    timeout: 30
+
+# 플러그인 설정
+plugins:
+  - jwt-auth
+  - key-auth
+  - cors
+  - limit-req
+  - limit-count
+  - prometheus
+  - proxy-rewrite
+  - response-rewrite
+
+plugin_attr:
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091

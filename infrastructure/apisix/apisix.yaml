@@ -1,0 +1,149 @@
+# APISIX 라우팅 설정 - 서버 운영 환경 (Standalone Mode)
+
+routes:
+  # ===== Auth Service =====
+  - uri: /auth/*
+    name: auth-service
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "auth-service:3011": 1
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+        allow_credential: true
+
+  # ===== Admin Service =====
+  - uri: /admin/*
+    name: admin-service
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "admin-service:3012": 1
+    plugins:
+      jwt-auth:
+        key: user-key
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+
+  # ===== Content Service =====
+  - uri: /content/*
+    name: content-service
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "content-service:3013": 1
+    plugins:
+      jwt-auth:
+        key: user-key
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+
+  # ===== Communication Service =====
+  - uri: /comm/*
+    name: communication-service
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "communication-service:3014": 1
+    plugins:
+      jwt-auth:
+        key: user-key
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+
+  # ===== Common Service =====
+  - uri: /common/*
+    name: common-service
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "common-service:3015": 1
+    plugins:
+      jwt-auth:
+        key: user-key
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+
+  # ===== Legacy Backend (마이그레이션 중) =====
+  - uri: /api/*
+    name: legacy-backend
+    priority: -1  # 낮은 우선순위
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "legacy-backend:3001": 1
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "Authorization,Content-Type"
+
+  # ===== Health Check =====
+  - uri: /apisix/health
+    name: health-check
+    upstream:
+      type: roundrobin
+      nodes:
+        "127.0.0.1:9080": 1
+    plugins:
+      proxy-rewrite:
+        uri: "/apisix/status"
+
+# Global Rate Limiting (선택적)
+# global_rules:
+#   - id: 1
+#     plugins:
+#       limit-req:
+#         rate: 100
+#         burst: 50
+#         key: remote_addr
+#         rejected_code: 429
+
+#END

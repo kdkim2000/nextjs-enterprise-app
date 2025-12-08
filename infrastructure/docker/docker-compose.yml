@@ -1,0 +1,203 @@
+# Docker Compose - 서버 운영 환경
+# 로컬 개발에서는 사용하지 않음 (Node.js 직접 실행)
+
+version: '3.8'
+
+services:
+  # ===== Infrastructure =====
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - apisix
+      - frontend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    volumes:
+      - etcd_data:/bitnami/etcd
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  apisix:
+    image: apache/apisix:3.8.0-debian
+    container_name: apisix
+    ports:
+      - "9080:9080"
+      - "9180:9180"
+    volumes:
+      - ../apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ../apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    depends_on:
+      - etcd
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ===== Frontend =====
+
+  frontend:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_ENV=production
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ===== Backend Services =====
+
+  # Legacy Backend (마이그레이션 중 사용)
+  legacy-backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: legacy-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  auth-service:
+    build:
+      context: ../../services/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      - NODE_ENV=production
+      - PORT=3011
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  admin-service:
+    build:
+      context: ../../services/admin-service
+      dockerfile: Dockerfile
+    container_name: admin-service
+    environment:
+      - NODE_ENV=production
+      - PORT=3012
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - AUTH_SERVICE_URL=http://auth-service:3011
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  content-service:
+    build:
+      context: ../../services/content-service
+      dockerfile: Dockerfile
+    container_name: content-service
+    environment:
+      - NODE_ENV=production
+      - PORT=3013
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - COMMON_SERVICE_URL=http://common-service:3015
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  communication-service:
+    build:
+      context: ../../services/communication-service
+      dockerfile: Dockerfile
+    container_name: communication-service
+    environment:
+      - NODE_ENV=production
+      - PORT=3014
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - ADMIN_SERVICE_URL=http://admin-service:3012
+      - COMMON_SERVICE_URL=http://common-service:3015
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  common-service:
+    build:
+      context: ../../services/common-service
+      dockerfile: Dockerfile
+    container_name: common-service
+    environment:
+      - NODE_ENV=production
+      - PORT=3015
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - uploads_data:/app/uploads
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  etcd_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  app-network:
+    driver: bridge
