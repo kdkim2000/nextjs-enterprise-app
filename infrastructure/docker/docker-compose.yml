@@ -276,27 +276,43 @@ services:
       retries: 3
       start_period: 10s
 
-  # ===== 향후 추가될 서비스 (주석 처리) =====
+  # Admin Service (MSA - 사용자/역할/메뉴 관리 담당)
+  admin-service:
+    build:
+      context: ../..
+      dockerfile: services/admin-service/Dockerfile
+    container_name: corenext-admin-service
+    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
+    expose:
+      - "3012"
+    environment:
+      - NODE_ENV=production
+      - PORT=3012
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - AUTH_SERVICE_URL=http://corenext-auth-service:3011
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  # admin-service:
-  #   build:
-  #     context: ../..
-  #     dockerfile: services/admin-service/Dockerfile
-  #   container_name: corenext-admin-service
-  #   ports:
-  #     - "3012:3012"
-  #   environment:
-  #     - NODE_ENV=production
-  #     - PORT=3012
-  #     - DB_HOST=${DB_HOST:-123.37.36.45}
-  #     - DB_PORT=${DB_PORT:-9090}
-  #     - DB_NAME=${DB_NAME:-corenextdb}
-  #     - DB_USER=${DB_USER:-corenext}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - AUTH_SERVICE_URL=http://corenext-auth-service:3011
-  #   restart: unless-stopped
-  #   networks:
-  #     - corenext-network
+  # ===== 향후 추가될 서비스 (주석 처리) =====
 
   # content-service:
   #   ...

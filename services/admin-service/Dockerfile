@@ -1,57 +1,40 @@
 # Admin Service Dockerfile
-# Production Build
 
-FROM node:20-alpine AS base
+FROM node:20-alpine AS builder
 
-# Dependencies stage
-FROM base AS deps
 WORKDIR /app
 
-# Copy shared library first
-COPY shared /shared
-WORKDIR /shared
-RUN npm ci --only=production && npm run build
+# shared 패키지 복사 및 빌드
+COPY shared /app/shared
+WORKDIR /app/shared
+RUN npm install && npm run build
 
-# Copy service package files
-WORKDIR /app
-COPY services/admin-service/package.json services/admin-service/package-lock.json* ./
-RUN npm ci --only=production
+# 서비스 빌드
+WORKDIR /app/service
+COPY services/admin-service/package*.json ./
 
-# Builder stage
-FROM base AS builder
-WORKDIR /app
+# npm install 후 shared 패키지 심볼릭 링크 생성
+RUN npm install --ignore-scripts && \
+    rm -rf node_modules/@enterprise/shared && \
+    mkdir -p node_modules/@enterprise && \
+    ln -s /app/shared node_modules/@enterprise/shared
 
-# Copy shared library
-COPY --from=deps /shared /shared
-
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy source
-COPY services/admin-service .
-
-# Build TypeScript
+COPY services/admin-service/src ./src
+COPY services/admin-service/tsconfig.json ./
 RUN npm run build
 
-# Production stage
-FROM base AS runner
+# Production 이미지
+FROM node:20-alpine
+
 WORKDIR /app
 
-ENV NODE_ENV=production
+# shared 복사
+COPY --from=builder /app/shared /app/shared
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 service
-
-# Copy shared library
-COPY --from=deps --chown=service:nodejs /shared /shared
-
-# Copy necessary files
-COPY --from=builder --chown=service:nodejs /app/dist ./dist
-COPY --from=builder --chown=service:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=service:nodejs /app/package.json ./
-
-USER service
+# 서비스 복사
+COPY --from=builder /app/service/dist ./dist
+COPY --from=builder /app/service/node_modules ./node_modules
+COPY --from=builder /app/service/package.json ./
 
 EXPOSE 3012
 
