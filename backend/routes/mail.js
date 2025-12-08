@@ -24,7 +24,8 @@ router.get('/messages', async (req, res) => {
 // GET /api/mail/messages/:id - Get single message
 router.get('/messages/:id', async (req, res) => {
   try {
-    const message = await mailService.getMessage(req.params.id, req.user.userId);
+    const { folder } = req.query;
+    const message = await mailService.getMessage(req.params.id, req.user.userId, folder);
     if (!message) return res.status(404).json({ error: 'Message not found' });
     res.json({ data: message });
   } catch (error) {

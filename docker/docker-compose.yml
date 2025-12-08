@@ -30,6 +30,10 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      # Attachments storage - mount VM storage for persistence
+      # VM: /data/uploads -> Container: /app/backend/uploads
+      - /data/uploads:/app/backend/uploads
     depends_on:
       - postgres16
     networks:
