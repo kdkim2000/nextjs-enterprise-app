@@ -37,7 +37,7 @@ routes:
         allow_origins: "*"
         allow_methods: "POST,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
         max_age: 3600
       limit-req:
         rate: 10
@@ -62,7 +62,7 @@ routes:
         allow_origins: "*"
         allow_methods: "POST,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 5
         burst: 2
@@ -85,7 +85,7 @@ routes:
         allow_origins: "*"
         allow_methods: "POST,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 20
         burst: 10
@@ -112,7 +112,7 @@ routes:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 50
         burst: 20
@@ -139,7 +139,7 @@ routes:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 100
         burst: 50
@@ -169,7 +169,7 @@ routes:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 100
         burst: 50
@@ -196,7 +196,7 @@ routes:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 100
         burst: 50
@@ -223,7 +223,7 @@ routes:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 100
         burst: 50
@@ -251,7 +251,7 @@ routes:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "Authorization,Content-Type,X-Request-ID"
-        allow_credential: true
+        allow_credential: false
       limit-req:
         rate: 200
         burst: 100
