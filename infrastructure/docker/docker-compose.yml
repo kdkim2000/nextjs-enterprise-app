@@ -61,7 +61,7 @@ services:
 
   # etcd (APISIX 설정 저장소)
   etcd:
-    image: bitnami/etcd:3.5
+    image: bitnami/etcd:3.5.17
     container_name: corenext-etcd
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
