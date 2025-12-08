@@ -59,46 +59,16 @@ services:
     networks:
       - corenext-network
 
-  # etcd (APISIX 설정 저장소)
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.9
-    container_name: corenext-etcd
-    environment:
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
-      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
-      - ETCD_DATA_DIR=/etcd-data
-      - ALLOW_NONE_AUTHENTICATION=yes
-    volumes:
-      - etcd_data:/etcd-data
-    expose:
-      - "2379"
-    restart: unless-stopped
-    networks:
-      - corenext-network
-    healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health", "--endpoints=http://localhost:2379"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  # APISIX API Gateway
+  # APISIX API Gateway (Standalone Mode - YAML 설정 사용)
   apisix:
     image: apache/apisix:3.8.0-debian
     container_name: corenext-apisix
     expose:
       - "9080"
       - "9091"
-    ports:
-      # Admin API (개발용 - 운영환경에서는 제거 권장)
-      - "127.0.0.1:9180:9180"
     volumes:
       - ../apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ../apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
-    environment:
-      - APISIX_ADMIN_KEY=${APISIX_ADMIN_KEY:-edd1c9f034335f136f87ad84b625c8f1}
-    depends_on:
-      etcd:
-        condition: service_healthy
     restart: unless-stopped
     networks:
       - corenext-network
@@ -107,7 +77,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
 
   # Redis (Auth Service용 세션/토큰 관리)
   redis:
@@ -341,7 +311,6 @@ volumes:
   # docker volume create pg16_pgdata_16_11
   pg16_pgdata_16_11:
     external: true
-  etcd_data:
   redis_data:
   uploads_data:
   prometheus_data:

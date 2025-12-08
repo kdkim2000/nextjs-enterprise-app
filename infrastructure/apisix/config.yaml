@@ -10,20 +10,8 @@ apisix:
       role: admin
 
 deployment:
-  admin:
-    admin_listen:
-      ip: 0.0.0.0
-      port: 9180
-    https_admin: false
-
-  etcd:
-    host:
-      - "http://etcd:2379"
-    prefix: "/apisix"
-    timeout: 30
-
-  role: traditional
-  role_traditional:
+  role: data_plane
+  role_data_plane:
     config_provider: yaml
 
 # 플러그인 설정
