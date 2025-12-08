@@ -7,11 +7,39 @@
 #   docker-compose logs -f auth-service     # 로그 확인
 #
 # 환경변수: .env 파일에서 로드
+#
+# 볼륨 초기 설정 (최초 1회):
+#   docker volume create pg16_pgdata_16_11
+#
+# 모니터링 포함 실행:
+#   docker-compose --profile monitoring up -d
 
 version: '3.8'
 
 services:
   # ===== Infrastructure =====
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16.11
+    container_name: corenext-postgres
+    environment:
+      - POSTGRES_DB=${DB_NAME:-corenextdb}
+      - POSTGRES_USER=${DB_USER:-corenext}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "9090:5432"
+    volumes:
+      - pg16_pgdata_16_11:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-corenext} -d ${DB_NAME:-corenextdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # Nginx Reverse Proxy
   nginx:
@@ -154,8 +182,8 @@ services:
     environment:
       - NODE_ENV=production
       - BACKEND_PORT=3001
-      - DB_HOST=${DB_HOST:-123.37.36.45}
-      - DB_PORT=${DB_PORT:-9090}
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
       - DB_NAME=${DB_NAME:-corenextdb}
       - DB_USER=${DB_USER:-corenext}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -164,6 +192,9 @@ services:
     volumes:
       # 첨부파일 저장소 - VM 스토리지 마운트
       - /data/uploads:/app/backend/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - corenext-network
@@ -185,8 +216,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3011
-      - DB_HOST=${DB_HOST:-123.37.36.45}
-      - DB_PORT=${DB_PORT:-9090}
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
       - DB_NAME=${DB_NAME:-corenextdb}
       - DB_USER=${DB_USER:-corenext}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -196,6 +227,8 @@ services:
       - REDIS_URL=redis://corenext-redis:6379
       - CORS_ORIGINS=http://localhost:3000,https://your-domain.com
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
@@ -240,6 +273,10 @@ services:
   #   ...
 
 volumes:
+  # PostgreSQL 데이터 볼륨 (외부 볼륨 - 최초 1회 생성 필요)
+  # docker volume create pg16_pgdata_16_11
+  pg16_pgdata_16_11:
+    external: true
   redis_data:
   uploads_data:
   prometheus_data:
