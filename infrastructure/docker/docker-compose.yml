@@ -51,11 +51,61 @@ services:
       - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      - frontend
-      - backend
+      apisix:
+        condition: service_healthy
+      frontend:
+        condition: service_started
     restart: unless-stopped
     networks:
       - corenext-network
+
+  # etcd (APISIX 설정 저장소)
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: corenext-etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    volumes:
+      - etcd_data:/bitnami/etcd
+    expose:
+      - "2379"
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # APISIX API Gateway
+  apisix:
+    image: apache/apisix:3.8.0-debian
+    container_name: corenext-apisix
+    expose:
+      - "9080"
+      - "9091"
+    ports:
+      # Admin API (개발용 - 운영환경에서는 제거 권장)
+      - "127.0.0.1:9180:9180"
+    volumes:
+      - ../apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ../apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    environment:
+      - APISIX_ADMIN_KEY=${APISIX_ADMIN_KEY:-edd1c9f034335f136f87ad84b625c8f1}
+    depends_on:
+      etcd:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9080/apisix/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # Redis (Auth Service용 세션/토큰 관리)
   redis:
@@ -289,6 +339,7 @@ volumes:
   # docker volume create pg16_pgdata_16_11
   pg16_pgdata_16_11:
     external: true
+  etcd_data:
   redis_data:
   uploads_data:
   prometheus_data:
