@@ -1,0 +1,26 @@
+{
+  "name": "@enterprise/shared",
+  "version": "1.0.0",
+  "description": "Shared libraries for microservices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "pg-promise": "^11.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.0",
+    "winston": "^3.18.0",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/bcrypt": "^5.0.2",
+    "typescript": "^5.0.0",
+    "rimraf": "^5.0.0"
+  }
+}

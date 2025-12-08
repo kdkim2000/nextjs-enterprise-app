@@ -1,0 +1,25 @@
+{
+  "name": "@enterprise/communication-service",
+  "version": "1.0.0",
+  "description": "Communication microservice (mail, messages)",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@enterprise/shared": "file:../../shared",
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}
