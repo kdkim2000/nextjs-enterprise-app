@@ -1,9 +1,102 @@
 # APISIX 라우팅 설정 - 서버 운영 환경 (Standalone Mode)
+# JWT 인증 및 Rate Limiting 적용
 
+# ===== Consumers (JWT 사용자) =====
+consumers:
+  - username: web-client
+    plugins:
+      jwt-auth:
+        key: user-key
+        secret: "${JWT_SECRET:-your-jwt-secret-key-change-in-production}"
+        algorithm: HS256
+
+# ===== Global Rules =====
+global_rules:
+  - id: 1
+    plugins:
+      # Request ID 추가
+      request-id:
+        header_name: X-Request-ID
+        include_in_response: true
+
+# ===== Routes =====
 routes:
-  # ===== Auth Service =====
-  - uri: /auth/*
+  # ===== Auth Service (공개 API - JWT 불필요) =====
+  - id: 1
+    uri: /auth/login
+    name: auth-login
+    methods:
+      - POST
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "auth-service:3011": 1
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "POST,OPTIONS"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+        max_age: 3600
+      limit-req:
+        rate: 10
+        burst: 5
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
+        rejected_msg: "Too many login attempts. Please try again later."
+
+  - id: 2
+    uri: /auth/register
+    name: auth-register
+    methods:
+      - POST
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "auth-service:3011": 1
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "POST,OPTIONS"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 5
+        burst: 2
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
+
+  - id: 3
+    uri: /auth/refresh
+    name: auth-refresh
+    methods:
+      - POST
+      - OPTIONS
+    upstream:
+      type: roundrobin
+      nodes:
+        "auth-service:3011": 1
+    plugins:
+      cors:
+        allow_origins: "*"
+        allow_methods: "POST,OPTIONS"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 20
+        burst: 10
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
+
+  - id: 4
+    uri: /auth/*
     name: auth-service
+    priority: -1
     methods:
       - GET
       - POST
@@ -18,11 +111,18 @@ routes:
       cors:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allow_headers: "Authorization,Content-Type"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
         allow_credential: true
+      limit-req:
+        rate: 50
+        burst: 20
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
 
-  # ===== Admin Service =====
-  - uri: /admin/*
+  # ===== Admin Service (JWT 필요) =====
+  - id: 10
+    uri: /admin/*
     name: admin-service
     methods:
       - GET
@@ -35,15 +135,24 @@ routes:
       nodes:
         "admin-service:3012": 1
     plugins:
-      jwt-auth:
-        key: user-key
       cors:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allow_headers: "Authorization,Content-Type"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 100
+        burst: 50
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
+      # JWT 인증 (주석 처리 - Auth Service가 자체 검증)
+      # jwt-auth:
+      #   key: user-key
 
-  # ===== Content Service =====
-  - uri: /content/*
+  # ===== Content Service (JWT 필요) =====
+  - id: 20
+    uri: /content/*
     name: content-service
     methods:
       - GET
@@ -56,15 +165,21 @@ routes:
       nodes:
         "content-service:3013": 1
     plugins:
-      jwt-auth:
-        key: user-key
       cors:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allow_headers: "Authorization,Content-Type"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 100
+        burst: 50
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
 
-  # ===== Communication Service =====
-  - uri: /comm/*
+  # ===== Communication Service (JWT 필요) =====
+  - id: 30
+    uri: /comm/*
     name: communication-service
     methods:
       - GET
@@ -77,15 +192,21 @@ routes:
       nodes:
         "communication-service:3014": 1
     plugins:
-      jwt-auth:
-        key: user-key
       cors:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allow_headers: "Authorization,Content-Type"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 100
+        burst: 50
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
 
-  # ===== Common Service =====
-  - uri: /common/*
+  # ===== Common Service (JWT 필요) =====
+  - id: 40
+    uri: /common/*
     name: common-service
     methods:
       - GET
@@ -98,17 +219,23 @@ routes:
       nodes:
         "common-service:3015": 1
     plugins:
-      jwt-auth:
-        key: user-key
       cors:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allow_headers: "Authorization,Content-Type"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 100
+        burst: 50
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
 
   # ===== Legacy Backend (마이그레이션 중) =====
-  - uri: /api/*
+  - id: 100
+    uri: /api/*
     name: legacy-backend
-    priority: -1  # 낮은 우선순위
+    priority: -100
     methods:
       - GET
       - POST
@@ -123,10 +250,18 @@ routes:
       cors:
         allow_origins: "*"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allow_headers: "Authorization,Content-Type"
+        allow_headers: "Authorization,Content-Type,X-Request-ID"
+        allow_credential: true
+      limit-req:
+        rate: 200
+        burst: 100
+        key_type: "var"
+        key: "remote_addr"
+        rejected_code: 429
 
   # ===== Health Check =====
-  - uri: /apisix/health
+  - id: 999
+    uri: /apisix/health
     name: health-check
     upstream:
       type: roundrobin
@@ -135,15 +270,5 @@ routes:
     plugins:
       proxy-rewrite:
         uri: "/apisix/status"
-
-# Global Rate Limiting (선택적)
-# global_rules:
-#   - id: 1
-#     plugins:
-#       limit-req:
-#         rate: 100
-#         burst: 50
-#         key: remote_addr
-#         rejected_code: 429
 
 #END

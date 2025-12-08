@@ -6,7 +6,7 @@ apisix:
   enable_admin: true
   admin_key:
     - name: admin
-      key: edd1c9f034335f136f87ad84b625c8f1  # 프로덕션에서는 변경 필요
+      key: "${APISIX_ADMIN_KEY:-edd1c9f034335f136f87ad84b625c8f1}"  # 프로덕션에서는 환경변수로 변경
       role: admin
 
 deployment:
@@ -22,6 +22,10 @@ deployment:
     prefix: "/apisix"
     timeout: 30
 
+  role: traditional
+  role_traditional:
+    config_provider: yaml
+
 # 플러그인 설정
 plugins:
   - jwt-auth
@@ -29,12 +33,24 @@ plugins:
   - cors
   - limit-req
   - limit-count
+  - limit-conn
   - prometheus
   - proxy-rewrite
   - response-rewrite
+  - ip-restriction
+  - consumer-restriction
+  - real-ip
+  - request-id
+  - opentelemetry
 
 plugin_attr:
   prometheus:
     export_addr:
       ip: "0.0.0.0"
       port: 9091
+
+  # Real IP 설정 (Nginx 뒤에서 실행될 때)
+  real-ip:
+    header: "X-Forwarded-For"
+    recursive: true
+    source: "http_x_forwarded_for"
