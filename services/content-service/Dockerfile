@@ -10,12 +10,12 @@ WORKDIR /app
 # Copy shared library first
 COPY shared /shared
 WORKDIR /shared
-RUN npm ci --only=production && npm run build
+RUN npm install --omit=dev && npm run build
 
 # Copy service package files
 WORKDIR /app
 COPY services/content-service/package.json services/content-service/package-lock.json* ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Builder stage
 FROM base AS builder
