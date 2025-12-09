@@ -2,7 +2,7 @@
  * Mail Data Hook v2 - Multi-recipient Support
  */
 import { useState, useCallback, useEffect } from 'react';
-import api from '@/lib/axios';
+import { commApi } from '@/lib/axios';
 
 export type FolderType = 'inbox' | 'sent' | 'draft' | 'trash';
 export type RecipientType = 'to' | 'cc' | 'bcc';
@@ -88,9 +88,9 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
       if (options?.page) params.append('page', String(options.page));
       if (options?.search) params.append('search', options.search);
 
-      const response = await api.get(`/mail/messages?${params}`);
-      setMessages(response.data.data);
-      setPagination(response.data.pagination);
+      const response = await commApi.get(`/comm/mail/messages?${params}`);
+      setMessages(response.data);
+      setPagination(response.pagination);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     } finally {
@@ -101,8 +101,8 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
   // Fetch folder counts
   const fetchCounts = useCallback(async () => {
     try {
-      const response = await api.get('/mail/counts');
-      setCounts(response.data.data);
+      const response = await commApi.get('/comm/mail/counts');
+      setCounts(response.data);
     } catch (error) {
       console.error('Failed to fetch counts:', error);
     }
@@ -111,9 +111,9 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
   // Fetch single message (also updates local state for read status sync)
   const getMessage = useCallback(async (id: string, folder?: FolderType): Promise<MailMessage | null> => {
     try {
-      const url = folder ? `/mail/messages/${id}?folder=${folder}` : `/mail/messages/${id}`;
-      const response = await api.get(url);
-      const message = response.data.data;
+      const url = folder ? `/comm/mail/messages/${id}?folder=${folder}` : `/comm/mail/messages/${id}`;
+      const response = await commApi.get(url);
+      const message = response.data;
 
       // Sync read status to messages list (backend marks as read automatically)
       if (message && message.is_read) {
@@ -131,61 +131,61 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
 
   // Create draft
   const createDraft = useCallback(async (data: DraftData): Promise<MailMessage> => {
-    const response = await api.post('/mail/draft', data);
-    return response.data.data;
+    const response = await commApi.post('/comm/mail/draft', data);
+    return response.data;
   }, []);
 
   // Update draft
   const updateDraft = useCallback(async (id: string, data: DraftData): Promise<MailMessage> => {
-    const response = await api.put(`/mail/draft/${id}`, data);
-    return response.data.data;
+    const response = await commApi.put(`/comm/mail/draft/${id}`, data);
+    return response.data;
   }, []);
 
   // Delete draft
   const deleteDraft = useCallback(async (id: string): Promise<void> => {
-    await api.delete(`/mail/draft/${id}`);
+    await commApi.delete(`/comm/mail/draft/${id}`);
     setMessages(prev => prev.filter(m => m.id !== id));
     await fetchCounts();
   }, [fetchCounts]);
 
   // Send message
   const sendMessage = useCallback(async (data: SendMessageData) => {
-    const response = await api.post('/mail/send', data);
+    const response = await commApi.post('/comm/mail/send', data);
     await fetchCounts();
-    return response.data.data;
+    return response.data;
   }, [fetchCounts]);
 
   // Move to trash
   const moveToTrash = useCallback(async (id: string) => {
-    await api.put(`/mail/messages/${id}/trash`);
+    await commApi.put(`/comm/mail/messages/${id}/trash`);
     setMessages(prev => prev.filter(m => m.id !== id));
     await fetchCounts();
   }, [fetchCounts]);
 
   // Restore from trash
   const restoreFromTrash = useCallback(async (id: string) => {
-    await api.put(`/mail/messages/${id}/restore`);
+    await commApi.put(`/comm/mail/messages/${id}/restore`);
     setMessages(prev => prev.filter(m => m.id !== id));
     await fetchCounts();
   }, [fetchCounts]);
 
   // Delete permanently
   const deletePermanently = useCallback(async (id: string) => {
-    await api.delete(`/mail/messages/${id}`);
+    await commApi.delete(`/comm/mail/messages/${id}`);
     setMessages(prev => prev.filter(m => m.id !== id));
     await fetchCounts();
   }, [fetchCounts]);
 
   // Mark as read/unread
   const markAsRead = useCallback(async (id: string, isRead = true) => {
-    await api.put(`/mail/messages/${id}/read`, { isRead });
+    await commApi.put(`/comm/mail/messages/${id}/read`, { isRead });
     setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: isRead } : m));
     await fetchCounts();
   }, [fetchCounts]);
 
   // Bulk action
   const bulkAction = useCallback(async (messageIds: string[], action: string) => {
-    await api.post('/mail/bulk', { messageIds, action });
+    await commApi.post('/comm/mail/bulk', { messageIds, action });
     if (action === 'trash' || action === 'delete') {
       setMessages(prev => prev.filter(m => !messageIds.includes(m.id)));
     }

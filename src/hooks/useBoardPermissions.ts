@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { apiClient } from '@/lib/api/client';
+import { contentApiClient } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface BoardType {
@@ -73,10 +73,10 @@ export function useBoardPermissions(boardTypeIdOrCode?: string): BoardPermission
         const isLegacyId = boardTypeIdOrCode.startsWith('BOARD-TYPE-');
 
         const endpoint = (isUUID || isLegacyId)
-          ? `/board-type/${boardTypeIdOrCode}`
-          : `/board-type/code/${boardTypeIdOrCode}`;
+          ? `/content/board-types/${boardTypeIdOrCode}`
+          : `/content/board-types/code/${boardTypeIdOrCode}`;
 
-        const response = await apiClient.get(endpoint);
+        const response = await contentApiClient.get(endpoint);
 
         if (response.success && response.data) {
           setBoardType(response.data);

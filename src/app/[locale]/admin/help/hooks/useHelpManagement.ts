@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { api } from '@/lib/axios';
+import { contentApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -75,7 +75,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
         // Check if help content exists for this page
         try {
-          const response = await api.get('/help?programId=PROG-HELP-MGMT&language=en');
+          const response = await contentApi.get('/content/help?programId=PROG-HELP-MGMT&language=en');
           setHelpExists(!!response.help);
         } catch (error) {
           setHelpExists(false);
@@ -139,7 +139,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/help?${params.toString()}`);
+      const response = await contentApi.get(`/content/help?${params.toString()}`);
       setHelps(response.helps || []);
 
       // Update row count for DataGrid
@@ -191,12 +191,12 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
       if (!editingHelp.id) {
         // Add new help
-        const response = await api.post('/help', editingHelp);
+        const response = await contentApi.post('/content/help', editingHelp);
         setHelps([...helps, response.help]);
         await showSuccessMessage('CRUD_HELP_CREATE_SUCCESS');
       } else {
         // Update existing help
-        const response = await api.put('/help', editingHelp);
+        const response = await contentApi.put(`/content/help/${editingHelp.id}`, editingHelp);
         setHelps(helps.map((h) => (h.id === editingHelp.id ? response.help : h)));
         await showSuccessMessage('CRUD_HELP_UPDATE_SUCCESS');
       }
@@ -223,7 +223,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
       // Delete helps from API
       for (const id of selectedForDelete) {
-        await api.delete(`/help?id=${id}`);
+        await contentApi.delete(`/content/help/${id}`);
       }
 
       // Remove from local state

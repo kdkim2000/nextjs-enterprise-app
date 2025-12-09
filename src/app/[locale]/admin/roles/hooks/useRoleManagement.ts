@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { Role } from '@/types/role';
@@ -83,7 +83,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
     try {
       setSearching(true);
 
-      const response = await api.get('/role');
+      const response = await adminApi.get('/admin/roles');
       const allRoles = response.roles || [];
 
       let filtered = [];
@@ -178,7 +178,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
 
       // Delete roles from API
       for (const id of selectedForDelete) {
-        await api.delete(`/role?id=${id}`);
+        await adminApi.delete(`/admin/roles/${id}`);
       }
 
       // Remove from local state
@@ -206,12 +206,12 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
 
       if (roleData.id) {
         // Update existing role
-        const response = await api.put('/role', roleData);
+        const response = await adminApi.put(`/admin/roles/${roleData.id}`, roleData);
         setRoles(roles.map((r) => (r.id === roleData.id ? response.role : r)));
         await showSuccessMessage('CRUD_ROLE_UPDATE_SUCCESS');
       } else {
         // Create new role
-        const response = await api.post('/role', roleData);
+        const response = await adminApi.post('/admin/roles', roleData);
         setRoles([...roles, response.role]);
         await showSuccessMessage('CRUD_ROLE_CREATE_SUCCESS');
       }

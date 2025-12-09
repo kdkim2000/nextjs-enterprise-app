@@ -18,7 +18,7 @@ import EmptyState from '@/components/common/EmptyState';
 import PageContainer from '@/components/common/PageContainer';
 import RouteGuard from '@/components/auth/RouteGuard';
 import { GridColDef } from '@mui/x-data-grid';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useProgramId } from '@/hooks/useProgramId';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
@@ -160,7 +160,7 @@ export default function LogsPage() {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/log?${params.toString()}`);
+      const response = await commonApi.get(`/common/logs?${params.toString()}`);
       setLogs(response.logs || []);
 
       // Update row count for DataGrid

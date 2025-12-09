@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { api } from '@/lib/axios';
+import { commApi } from '@/lib/axios';
 import { useAutoHideMessage } from './useAutoHideMessage';
 import { MultiLangField } from '@/lib/i18n/multiLang';
 
@@ -50,8 +50,8 @@ export function useMessage(options: UseMessageOptions = {}) {
         return messageCache.current.get(code)!;
       }
 
-      // Fetch from API
-      const message = await api.get<Message>(`/message/code/${code}`);
+      // Fetch from API - using communication service
+      const message = await commApi.get<Message>(`/comm/messages/code/${code}`);
 
       // Cache the message
       messageCache.current.set(code, message);

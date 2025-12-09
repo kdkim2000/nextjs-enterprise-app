@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { commonApi, contentApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -78,7 +78,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
         // Check if help content exists for this page
         try {
-          const response = await api.get('/help?programId=PROG-CODE-MGMT&language=en');
+          const response = await contentApi.get('/content/help?programId=PROG-CODE-MGMT&language=en');
           setHelpExists(!!response.help);
         } catch (error) {
           setHelpExists(false);
@@ -118,7 +118,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/code?${params.toString()}`);
+      const response = await commonApi.get(`/common/codes??${params.toString()}`);
       setCodes(response.codes || []);
 
       // Update row count for DataGrid
@@ -202,12 +202,12 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
       if (!editingCode.id) {
         // Add new code
-        const response = await api.post('/code', payload);
+        const response = await commonApi.post('/common/codes', payload);
         setCodes([...codes, response.code]);
         await showSuccessMessage('CRUD_CODE_CREATE_SUCCESS');
       } else {
         // Update existing code
-        const response = await api.put(`/code/${editingCode.id}`, payload);
+        const response = await commonApi.put(`/common/codes/${editingCode.id}`, payload);
         setCodes(codes.map((c) => (c.id === editingCode.id ? response.code : c)));
         await showSuccessMessage('CRUD_CODE_UPDATE_SUCCESS');
       }
@@ -234,7 +234,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
       // Delete codes from API
       for (const id of selectedForDelete) {
-        await api.delete(`/code/${id}`);
+        await commonApi.delete(`/common/codes/${id}`);
       }
 
       // Remove from local state

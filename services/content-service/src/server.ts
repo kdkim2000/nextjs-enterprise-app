@@ -1,8 +1,26 @@
 /**
  * Content Service - 콘텐츠 마이크로서비스
+ * BoardType, Post, Comment, Q&A, Help 관리 담당
  */
 
-import express from 'express';
+// Load environment variables FIRST
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Explicitly load .env file
+const envPath = path.resolve(__dirname, '../.env');
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  // Try from current working directory
+  dotenv.config();
+}
+console.log('Environment loaded:', {
+  DB_HOST: process.env.DB_HOST,
+  DB_PORT: process.env.DB_PORT,
+  PORT: process.env.PORT,
+});
+
+import express, { Request, Response, NextFunction, ErrorRequestHandler, RequestHandler } from 'express';
 import cors from 'cors';
 import {
   loadAppConfig,
@@ -11,41 +29,70 @@ import {
   notFoundHandler,
   requestLogger,
 } from '@enterprise/shared';
+import {
+  boardTypeRoutes,
+  postRoutes,
+  commentRoutes,
+  qnaRoutes,
+  helpRoutes
+} from './routes';
 
+// 환경 설정 로드
 const config = loadAppConfig('content-service');
 const logger = getLogger('content-service');
 
+// Express 앱 생성
 const app = express();
 
-app.use(cors({ origin: config.cors.origins, credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(requestLogger);
+// Trust proxy (for rate limiting behind reverse proxy)
+app.set('trust proxy', 1);
 
-// Health Check
+// 미들웨어
+app.use(cors({
+  origin: config.cors.origins,
+  credentials: true,
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger as unknown as RequestHandler);
+
+// Health Check (root level)
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     service: 'content-service',
     timestamp: new Date().toISOString(),
+    version: '1.0.0',
   });
 });
 
-// Routes
-// TODO: Phase 4에서 구현
-// app.use('/content/board-types', boardTypeRoutes);
-// app.use('/content/posts', postRoutes);
-// app.use('/content/comments', commentRoutes);
-// app.use('/content/qna', qnaRoutes);
-// app.use('/content/help', helpRoutes);
+// Metrics endpoint for Prometheus
+app.get('/metrics', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.send(`# HELP content_service_up Content service status
+# TYPE content_service_up gauge
+content_service_up 1
+`);
+});
 
-app.use(notFoundHandler);
-app.use(errorHandler);
+// Content Routes
+app.use('/content/board-types', boardTypeRoutes);
+app.use('/content/posts', postRoutes);
+app.use('/content/comments', commentRoutes);
+app.use('/content/qna', qnaRoutes);
+app.use('/content/help', helpRoutes);
 
+// 에러 핸들링
+app.use(notFoundHandler as unknown as RequestHandler);
+app.use(errorHandler as unknown as ErrorRequestHandler);
+
+// 서버 시작
 const PORT = config.port || 3013;
 
 app.listen(PORT, () => {
   logger.info(`Content Service started on port ${PORT}`);
+  logger.info(`Environment: ${config.env}`);
+  logger.info(`Database: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
 });
 
 export default app;

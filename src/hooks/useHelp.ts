@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/axios';
+import { contentApi } from '@/lib/axios';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { usePermissionControl } from './usePermissionControl';
 
@@ -105,7 +105,7 @@ export function useHelp({ programId, autoCheck = true }: UseHelpOptions): UseHel
 
       // Check if help content exists for this program
       try {
-        const response = await api.get(`/help?programId=${programId}&language=${locale}`);
+        const response = await contentApi.get(`/content/help?programId=${programId}&language=${locale}`);
         setHelpExists(!!response.help);
       } catch {
         // If API returns 404 or error, help doesn't exist

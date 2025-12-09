@@ -157,6 +157,8 @@ export const api = {
  * Create API client for specific service
  */
 export const createServiceApi = (baseUrl: string) => {
+  console.log('[createServiceApi] Creating instance with baseUrl:', baseUrl);
+
   const instance = axios.create({
     baseURL: baseUrl,
     timeout: 30000,
@@ -170,9 +172,12 @@ export const createServiceApi = (baseUrl: string) => {
     (config) => {
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('accessToken');
+        console.log('[createServiceApi] Request to:', config.url, 'Token exists:', !!token);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+      } else {
+        console.log('[createServiceApi] Request to:', config.url, 'SSR mode - no window');
       }
       return config;
     },
@@ -196,4 +201,227 @@ export const createServiceApi = (baseUrl: string) => {
     delete: <T = any>(url: string, config?: AxiosRequestConfig) =>
       instance.delete<T>(url, config).then((res) => res.data),
   };
+};
+
+// Service-specific API clients with lazy initialization
+let _adminApiInstance: ReturnType<typeof createServiceApi> | null = null;
+let _authApiInstance: ReturnType<typeof createServiceApi> | null = null;
+let _contentApiInstance: ReturnType<typeof createServiceApi> | null = null;
+let _commonApiInstance: ReturnType<typeof createServiceApi> | null = null;
+let _commApiInstance: ReturnType<typeof createServiceApi> | null = null;
+
+const getAdminBaseUrl = (): string => {
+  const config = getApiConfig();
+  const env = getEnvironment();
+  if (env === 'development') {
+    return config.admin;
+  }
+  return '';
+};
+
+const getAuthServiceUrl = (): string => {
+  const config = getApiConfig();
+  const env = getEnvironment();
+  if (env === 'development') {
+    return config.auth;
+  }
+  return '';
+};
+
+const getContentBaseUrl = (): string => {
+  const config = getApiConfig();
+  const env = getEnvironment();
+  if (env === 'development') {
+    return config.content;
+  }
+  return '';
+};
+
+const getCommonBaseUrl = (): string => {
+  const config = getApiConfig();
+  const env = getEnvironment();
+  if (env === 'development') {
+    return config.common;
+  }
+  return '';
+};
+
+const getCommBaseUrl = (): string => {
+  const config = getApiConfig();
+  const env = getEnvironment();
+  if (env === 'development') {
+    return config.comm;
+  }
+  return '';
+};
+
+// Admin service API client (for menus, users, roles, permissions)
+// Lazy initialization to ensure proper URL resolution at runtime
+export const adminApi = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_adminApiInstance) {
+      _adminApiInstance = createServiceApi(getAdminBaseUrl());
+    }
+    return _adminApiInstance.get<T>(url, config);
+  },
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_adminApiInstance) {
+      _adminApiInstance = createServiceApi(getAdminBaseUrl());
+    }
+    return _adminApiInstance.post<T>(url, data, config);
+  },
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_adminApiInstance) {
+      _adminApiInstance = createServiceApi(getAdminBaseUrl());
+    }
+    return _adminApiInstance.put<T>(url, data, config);
+  },
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_adminApiInstance) {
+      _adminApiInstance = createServiceApi(getAdminBaseUrl());
+    }
+    return _adminApiInstance.patch<T>(url, data, config);
+  },
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_adminApiInstance) {
+      _adminApiInstance = createServiceApi(getAdminBaseUrl());
+    }
+    return _adminApiInstance.delete<T>(url, config);
+  },
+};
+
+// Auth service API client
+export const authApi = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_authApiInstance) {
+      _authApiInstance = createServiceApi(getAuthServiceUrl());
+    }
+    return _authApiInstance.get<T>(url, config);
+  },
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_authApiInstance) {
+      _authApiInstance = createServiceApi(getAuthServiceUrl());
+    }
+    return _authApiInstance.post<T>(url, data, config);
+  },
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_authApiInstance) {
+      _authApiInstance = createServiceApi(getAuthServiceUrl());
+    }
+    return _authApiInstance.put<T>(url, data, config);
+  },
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_authApiInstance) {
+      _authApiInstance = createServiceApi(getAuthServiceUrl());
+    }
+    return _authApiInstance.patch<T>(url, data, config);
+  },
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_authApiInstance) {
+      _authApiInstance = createServiceApi(getAuthServiceUrl());
+    }
+    return _authApiInstance.delete<T>(url, config);
+  },
+};
+
+// Content service API client (for posts, boards, comments)
+export const contentApi = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_contentApiInstance) {
+      _contentApiInstance = createServiceApi(getContentBaseUrl());
+    }
+    return _contentApiInstance.get<T>(url, config);
+  },
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_contentApiInstance) {
+      _contentApiInstance = createServiceApi(getContentBaseUrl());
+    }
+    return _contentApiInstance.post<T>(url, data, config);
+  },
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_contentApiInstance) {
+      _contentApiInstance = createServiceApi(getContentBaseUrl());
+    }
+    return _contentApiInstance.put<T>(url, data, config);
+  },
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_contentApiInstance) {
+      _contentApiInstance = createServiceApi(getContentBaseUrl());
+    }
+    return _contentApiInstance.patch<T>(url, data, config);
+  },
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_contentApiInstance) {
+      _contentApiInstance = createServiceApi(getContentBaseUrl());
+    }
+    return _contentApiInstance.delete<T>(url, config);
+  },
+};
+
+// Common service API client (for dashboard, logs, settings)
+export const commonApi = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_commonApiInstance) {
+      _commonApiInstance = createServiceApi(getCommonBaseUrl());
+    }
+    return _commonApiInstance.get<T>(url, config);
+  },
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_commonApiInstance) {
+      _commonApiInstance = createServiceApi(getCommonBaseUrl());
+    }
+    return _commonApiInstance.post<T>(url, data, config);
+  },
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_commonApiInstance) {
+      _commonApiInstance = createServiceApi(getCommonBaseUrl());
+    }
+    return _commonApiInstance.put<T>(url, data, config);
+  },
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_commonApiInstance) {
+      _commonApiInstance = createServiceApi(getCommonBaseUrl());
+    }
+    return _commonApiInstance.patch<T>(url, data, config);
+  },
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_commonApiInstance) {
+      _commonApiInstance = createServiceApi(getCommonBaseUrl());
+    }
+    return _commonApiInstance.delete<T>(url, config);
+  },
+};
+
+// Communication service API client (for mail, messages, conversations)
+export const commApi = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_commApiInstance) {
+      _commApiInstance = createServiceApi(getCommBaseUrl());
+    }
+    return _commApiInstance.get<T>(url, config);
+  },
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_commApiInstance) {
+      _commApiInstance = createServiceApi(getCommBaseUrl());
+    }
+    return _commApiInstance.post<T>(url, data, config);
+  },
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_commApiInstance) {
+      _commApiInstance = createServiceApi(getCommBaseUrl());
+    }
+    return _commApiInstance.put<T>(url, data, config);
+  },
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_commApiInstance) {
+      _commApiInstance = createServiceApi(getCommBaseUrl());
+    }
+    return _commApiInstance.patch<T>(url, data, config);
+  },
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_commApiInstance) {
+      _commApiInstance = createServiceApi(getCommBaseUrl());
+    }
+    return _commApiInstance.delete<T>(url, config);
+  },
 };

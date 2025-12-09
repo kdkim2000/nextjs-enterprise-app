@@ -24,7 +24,7 @@ import {
   CheckCircle,
   Error as ErrorIcon
 } from '@mui/icons-material';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import { useI18n } from '@/lib/i18n/client';
 
 interface FileUploadProps {
@@ -97,7 +97,7 @@ export default function FileUpload({
       formData.append('file', fileWithProgress.file);
 
       // Upload with progress tracking
-      const response = await api.post<{ file: UploadedFile }>('/file/upload', formData, {
+      const response = await commonApi.post<{ file: UploadedFile }>('/common/file/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },

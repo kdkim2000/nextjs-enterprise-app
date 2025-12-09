@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export interface CodeOption {
@@ -56,7 +56,7 @@ export function useCodeOptions(codeType: string, locale: string = 'en', autoFetc
       setLoading(true);
       setError(null);
 
-      const response = await api.get(`/code/type/${codeType}`);
+      const response = await commonApi.get(`/common/codes/type/${codeType}`);
       const fetchedCodes: Code[] = response.codes || [];
 
       // Transform codes to options format
@@ -139,7 +139,7 @@ export function useMultipleCodeOptions(codeTypes: string[], locale: string = 'en
 
       const promises = codeTypes.map(async (codeType) => {
         try {
-          const response = await api.get(`/code/type/${codeType}`);
+          const response = await commonApi.get(`/common/codes/type/${codeType}`);
           const fetchedCodes: Code[] = response.codes || [];
 
           const options: CodeOption[] = fetchedCodes

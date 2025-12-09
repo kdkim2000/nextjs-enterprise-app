@@ -18,6 +18,7 @@ console.log('Environment loaded:', {
   DB_HOST: process.env.DB_HOST,
   DB_PORT: process.env.DB_PORT,
   PORT: process.env.PORT,
+  JWT_SECRET: process.env.JWT_SECRET ? `${process.env.JWT_SECRET.substring(0, 10)}...` : 'NOT SET',
 });
 
 import express, { Request, Response, NextFunction, ErrorRequestHandler, RequestHandler } from 'express';
@@ -29,7 +30,7 @@ import {
   notFoundHandler,
   requestLogger,
 } from '@enterprise/shared';
-import { userRoutes, roleRoutes, menuRoutes } from './routes';
+import { userRoutes, roleRoutes, menuRoutes, departmentRoutes, userRoleMappingRoutes, programRoutes, roleProgramMappingRoutes } from './routes';
 
 // 환경 설정 로드
 const config = loadAppConfig('admin-service');
@@ -73,6 +74,10 @@ admin_service_up 1
 app.use('/admin/users', userRoutes);
 app.use('/admin/roles', roleRoutes);
 app.use('/admin/menus', menuRoutes);
+app.use('/admin/departments', departmentRoutes);
+app.use('/admin/user-role-mappings', userRoleMappingRoutes);
+app.use('/admin/programs', programRoutes);
+app.use('/admin/role-program-mappings', roleProgramMappingRoutes);
 
 // 에러 핸들링
 app.use(notFoundHandler as unknown as RequestHandler);

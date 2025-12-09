@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef, useMemo } from 'react';
 import { MenuItem } from '@/types/menu';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { useAuth } from './AuthContext';
 import { usePathname } from 'next/navigation';
 
@@ -45,13 +45,16 @@ export function MenuProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true);
-      const response = await api.get('/menu/user-menus');
+      const response = await adminApi.get('/admin/menus/user-menus');
       setMenus(response.menus || []);
       setError(null);
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setError(error.message || 'Failed to fetch menus');
-      console.error('Error fetching menus:', err);
+      const error = err as { message?: string; response?: { status?: number } };
+      // Only log non-401 errors (401 is expected when not authenticated)
+      if ((err as any)?.response?.status !== 401) {
+        setError(error.message || 'Failed to fetch menus');
+        console.error('Error fetching menus:', err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,10 +68,13 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await api.get('/user/favorite-menus');
+      const response = await adminApi.get('/admin/users/favorite-menus');
       setFavoriteMenus(response.menus || []);
     } catch (err: unknown) {
-      console.error('Error fetching favorite menus:', err);
+      // Only log non-401 errors (401 is expected when not authenticated)
+      if ((err as any)?.response?.status !== 401) {
+        console.error('Error fetching favorite menus:', err);
+      }
       // Set empty array on error to prevent UI issues
       setFavoriteMenus([]);
     }
@@ -82,10 +88,13 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await api.get('/user/recent-menus');
+      const response = await adminApi.get('/admin/users/recent-menus');
       setRecentMenus(response.menus || []);
     } catch (err: unknown) {
-      console.error('Error fetching recent menus:', err);
+      // Only log non-401 errors (401 is expected when not authenticated)
+      if ((err as any)?.response?.status !== 401) {
+        console.error('Error fetching recent menus:', err);
+      }
       // Set empty array on error to prevent UI issues
       setRecentMenus([]);
     }
@@ -93,6 +102,11 @@ export function MenuProvider({ children }: { children: ReactNode }) {
 
   // Get menu by path with deduplication
   const getMenuByPath = useCallback(async (path: string): Promise<MenuItem | null> => {
+    // Skip if not authenticated
+    if (!isAuthenticated || !user) {
+      return null;
+    }
+
     // Prevent duplicate fetches for the same path
     if (path === lastFetchedPathRef.current) {
       return null; // Return null to avoid setting state
@@ -107,25 +121,29 @@ export function MenuProvider({ children }: { children: ReactNode }) {
       isFetchingByPathRef.current = true;
       lastFetchedPathRef.current = path;
 
-      const response = await api.get('/menu/by-path', {
+      const response = await adminApi.get('/admin/menus/by-path', {
         params: { path }
       });
       const menu = response.menu || null;
       setCurrentMenu(menu);
       return menu;
     } catch (err: unknown) {
-      console.error('Error fetching menu by path:', err);
+      // Only log non-401 errors (401 is expected when not authenticated)
+      const error = err as { response?: { status?: number } };
+      if (error.response?.status !== 401) {
+        console.error('Error fetching menu by path:', err);
+      }
       lastFetchedPathRef.current = ''; // Reset on error
       return null;
     } finally {
       isFetchingByPathRef.current = false;
     }
-  }, []); // Empty deps - stable function
+  }, [isAuthenticated, user]); // Depend on auth state
 
   // Add menu to favorites
   const addToFavorites = useCallback(async (menuId: string) => {
     try {
-      await api.post('/user/favorite-menus', { menuId });
+      await adminApi.post('/admin/users/favorite-menus', { menuId });
       await fetchFavoriteMenus();
     } catch (err: unknown) {
       console.error('Error adding to favorites:', err);
@@ -136,7 +154,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   // Remove menu from favorites
   const removeFromFavorites = useCallback(async (menuId: string) => {
     try {
-      await api.delete(`/user/favorite-menus/${menuId}`);
+      await adminApi.delete(`/admin/users/favorite-menus/${menuId}`);
       await fetchFavoriteMenus();
     } catch (err: unknown) {
       console.error('Error removing from favorites:', err);

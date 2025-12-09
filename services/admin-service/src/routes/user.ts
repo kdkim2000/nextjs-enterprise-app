@@ -8,9 +8,354 @@ import { v4 as uuidv4 } from 'uuid';
 import { getLogger } from '@enterprise/shared';
 import { authenticateToken, requireAdmin } from '../middleware/authMiddleware';
 import * as userService from '../services/userService';
+import * as menuService from '../services/menuService';
+import * as preferencesService from '../services/preferencesService';
+import * as permissionService from '../services/permissionService';
+import { transformMultiLangFields } from '../utils/multiLangTransform';
 
 const router = Router();
 const logger = getLogger('admin-service:user-routes');
+
+// Helper function to transform database menu to API format
+function transformMenuToAPI(dbMenu: any): any {
+  if (!dbMenu) return null;
+
+  const transformed = transformMultiLangFields(dbMenu, ['name', 'description']);
+
+  return {
+    id: transformed.id,
+    code: transformed.code,
+    name: transformed.name,
+    path: transformed.path,
+    icon: transformed.icon,
+    order: transformed.order || 0,
+    parentId: transformed.parent_id,
+    level: transformed.level || 0,
+    programId: transformed.program_id,
+    description: transformed.description
+  };
+}
+
+/**
+ * GET /admin/users/preferences - Get user preferences
+ */
+router.get('/preferences', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'AUTH_002',
+          message: 'Invalid access token - userId missing',
+        }
+      });
+    }
+
+    // Get user's MFA status
+    const user = await userService.getUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'RES_101',
+          message: 'User not found',
+        }
+      });
+    }
+
+    // Get preferences from database
+    let preferences = await preferencesService.getUserPreferences(userId);
+
+    if (!preferences) {
+      return res.json({
+        success: true,
+        preferences: {
+          favoriteMenus: [],
+          recentMenus: [],
+          language: 'en',
+          theme: 'light',
+          rowsPerPage: 10,
+          emailNotifications: true,
+          systemNotifications: true,
+          sessionTimeout: 30,
+          mfaEnabled: user.mfa_enabled || false
+        }
+      });
+    }
+
+    const apiPreferences = {
+      favoriteMenus: preferences.favorite_menus || [],
+      recentMenus: preferences.recent_menus || [],
+      language: preferences.language || 'en',
+      theme: preferences.theme || 'light',
+      rowsPerPage: preferences.rows_per_page || 10,
+      emailNotifications: preferences.email_notifications !== false,
+      systemNotifications: preferences.system_notifications !== false,
+      sessionTimeout: preferences.session_timeout || 30,
+      mfaEnabled: user.mfa_enabled || false
+    };
+
+    res.json({
+      success: true,
+      preferences: apiPreferences
+    });
+  } catch (error: any) {
+    logger.error('Get preferences error:', error);
+    res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
+});
+
+/**
+ * PUT /admin/users/preferences - Update user preferences
+ */
+router.put('/preferences', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const {
+      language,
+      theme,
+      rowsPerPage,
+      emailNotifications,
+      systemNotifications,
+      sessionTimeout,
+      favoriteMenus,
+      recentMenus
+    } = req.body;
+
+    const updateData: any = { userId };
+
+    if (language !== undefined) updateData.language = language;
+    if (theme !== undefined) updateData.theme = theme;
+    if (rowsPerPage !== undefined) updateData.rowsPerPage = rowsPerPage;
+    if (emailNotifications !== undefined) updateData.emailNotifications = emailNotifications;
+    if (systemNotifications !== undefined) updateData.systemNotifications = systemNotifications;
+    if (sessionTimeout !== undefined) updateData.sessionTimeout = sessionTimeout;
+    if (favoriteMenus !== undefined) updateData.favoriteMenus = favoriteMenus;
+    if (recentMenus !== undefined) updateData.recentMenus = recentMenus;
+
+    const updated = await preferencesService.createUserPreferences(updateData);
+
+    res.json(updated);
+  } catch (error: any) {
+    logger.error('Update preferences error:', error);
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
+/**
+ * GET /admin/users/favorite-menus - Get favorite menus with details
+ */
+router.get('/favorite-menus', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const preferences = await preferencesService.getUserPreferences(userId);
+
+    const favoriteMenuIds = preferences?.favorite_menus || [];
+
+    if (!favoriteMenuIds.length) {
+      return res.json({ menus: [] });
+    }
+
+    const allMenus = await menuService.getAllMenus({});
+    const favoriteMenus = allMenus
+      .filter(m => favoriteMenuIds.includes(m.id))
+      .map(transformMenuToAPI);
+
+    res.json({ menus: favoriteMenus });
+  } catch (error: any) {
+    logger.error('Get favorite menus error:', error);
+    res.status(500).json({ error: 'Failed to fetch favorite menus' });
+  }
+});
+
+/**
+ * POST /admin/users/favorite-menus - Add menu to favorites
+ */
+router.post('/favorite-menus', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const { menuId } = req.body;
+
+    if (!menuId) {
+      return res.status(400).json({ error: 'Menu ID required' });
+    }
+
+    let preferences = await preferencesService.getUserPreferences(userId);
+    const favoriteMenus = preferences?.favorite_menus || [];
+
+    if (!favoriteMenus.includes(menuId)) {
+      favoriteMenus.push(menuId);
+      await preferencesService.createUserPreferences({
+        userId,
+        favoriteMenus
+      });
+    }
+
+    res.json({ message: 'Menu added to favorites', favoriteMenus });
+  } catch (error: any) {
+    logger.error('Add favorite menu error:', error);
+    res.status(500).json({ error: 'Failed to add favorite menu' });
+  }
+});
+
+/**
+ * DELETE /admin/users/favorite-menus/:menuId - Remove menu from favorites
+ */
+router.delete('/favorite-menus/:menuId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const { menuId } = req.params;
+
+    const preferences = await preferencesService.getUserPreferences(userId);
+    if (!preferences) {
+      return res.status(404).json({ error: 'Preferences not found' });
+    }
+
+    const favoriteMenus = (preferences.favorite_menus || []).filter((id: string) => id !== menuId);
+
+    await preferencesService.createUserPreferences({
+      userId,
+      favoriteMenus
+    });
+
+    res.json({ message: 'Menu removed from favorites', favoriteMenus });
+  } catch (error: any) {
+    logger.error('Remove favorite menu error:', error);
+    res.status(500).json({ error: 'Failed to remove favorite menu' });
+  }
+});
+
+/**
+ * GET /admin/users/recent-menus - Get recent menus with details
+ */
+router.get('/recent-menus', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const preferences = await preferencesService.getUserPreferences(userId);
+
+    const recentMenuIds = preferences?.recent_menus || [];
+
+    if (!recentMenuIds.length) {
+      return res.json({ menus: [] });
+    }
+
+    const allMenus = await menuService.getAllMenus({});
+    const recentMenus = allMenus
+      .filter(m => recentMenuIds.includes(m.id))
+      .map(transformMenuToAPI);
+
+    res.json({ menus: recentMenus });
+  } catch (error: any) {
+    logger.error('Get recent menus error:', error);
+    res.status(500).json({ error: 'Failed to fetch recent menus' });
+  }
+});
+
+/**
+ * GET /admin/users/permissions - Get user's program permissions
+ */
+router.get('/permissions', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const accessiblePrograms = await permissionService.getUserAccessiblePrograms(userId);
+
+    const permissions = accessiblePrograms.map(program => ({
+      programCode: program.code,
+      programId: program.id,
+      programName: program.name,
+      canView: program.permissions.canView,
+      canCreate: program.permissions.canCreate,
+      canUpdate: program.permissions.canUpdate,
+      canDelete: program.permissions.canDelete
+    }));
+
+    res.json({ permissions });
+  } catch (error: any) {
+    logger.error('Get permissions error:', error);
+    res.status(500).json({ error: 'Failed to get permissions' });
+  }
+});
+
+/**
+ * PUT /admin/users/profile - Update current user's profile
+ */
+router.put('/profile', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID required' });
+    }
+
+    const { name_ko, name_en, email, department, phone_number, mobile_number, avatar_url, avatar_image } = req.body;
+
+    // Check email uniqueness
+    if (email) {
+      if (await userService.emailExists(email, userId)) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+    }
+
+    const updates: any = {};
+    if (name_ko !== undefined) updates.name_ko = name_ko;
+    if (name_en !== undefined) updates.name_en = name_en;
+    if (email !== undefined) updates.email = email;
+    if (department !== undefined) updates.department = department;
+    if (phone_number !== undefined) updates.phone_number = phone_number;
+    if (mobile_number !== undefined) updates.mobile_number = mobile_number;
+    if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+    if (avatar_image !== undefined) updates.avatar_image = avatar_image;
+
+    const updatedUser = await userService.updateUser(userId, updates);
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { password, mfa_enabled, sso_enabled, avatar_url: dbAvatarUrl, avatar_image: dbAvatarImage, last_login, created_at, updated_at, ...rest } = updatedUser;
+    const safeUser = {
+      ...rest,
+      mfaEnabled: mfa_enabled,
+      ssoEnabled: sso_enabled,
+      avatarUrl: dbAvatarUrl,
+      avatar_image: dbAvatarImage,
+      lastLogin: last_login,
+      createdAt: created_at,
+      updatedAt: updated_at
+    };
+
+    res.json({ user: safeUser });
+  } catch (error: any) {
+    logger.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
 
 /**
  * GET /admin/users - Get all users with pagination

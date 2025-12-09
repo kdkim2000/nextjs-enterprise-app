@@ -27,7 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale, useI18n } from '@/lib/i18n/client';
 import { SUPPORTED_LANGUAGES, type LanguageCode } from '@/lib/i18n/languages';
 import { getAvatarUrl } from '@/lib/config';
-import { api } from '@/lib/axios';
+import { authApi } from '@/lib/axios';
 import { useAppSettings } from '@/hooks/useAppSettings';
 
 interface DashboardHeaderProps {
@@ -85,7 +85,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
     // Save to backend asynchronously
     try {
-      await api.put('/user/preferences', {
+      await authApi.patch('/auth/user-settings/general', {
         language: newLocale
       });
       console.log(`[DashboardHeader] Language preference saved: ${newLocale}`);

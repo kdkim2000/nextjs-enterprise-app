@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material';
 import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 
 export interface UserSelectorProps {
   label: string;
@@ -61,7 +61,7 @@ export default function UserSelector({
   const loadUserInfo = async (userId: string) => {
     try {
       setLoading(true);
-      const response = await api.get('/user', { params: { id: userId } });
+      const response = await adminApi.get('/admin/users', { params: { id: userId } });
       if (response.user) {
         setSelectedUser(response.user);
       }

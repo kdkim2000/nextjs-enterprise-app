@@ -31,7 +31,7 @@ import {
   Notifications as NotificationsIcon
 } from '@mui/icons-material';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
-import { apiClient } from '@/lib/api/client';
+import { contentApiClient } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 import RichTextEditor from '@/components/common/RichTextEditor';
 import AttachmentUpload from '@/components/common/AttachmentUpload';
@@ -123,10 +123,10 @@ export default function PostFormPage({
 
         // Fetch board type - determine if boardTypeId is UUID/legacy ID or code
         const endpoint = isUUIDOrLegacyId(boardTypeId)
-          ? `/board-type/${boardTypeId}`
-          : `/board-type/code/${boardTypeId}`;
+          ? `/content/board-types/${boardTypeId}`
+          : `/content/board-types/code/${boardTypeId}`;
 
-        const boardTypeResponse = await apiClient.get(endpoint);
+        const boardTypeResponse = await contentApiClient.get(endpoint);
         if (boardTypeResponse.success && boardTypeResponse.data) {
           setBoardType(boardTypeResponse.data);
         } else {
@@ -136,7 +136,7 @@ export default function PostFormPage({
 
         // Fetch post data in edit mode
         if (mode === 'edit' && postId) {
-          const postResponse = await apiClient.get(`/post/${postId}`);
+          const postResponse = await contentApiClient.get(`/content/posts/${postId}`);
           if (postResponse.success && postResponse.data) {
             // API returns post data under data.post or directly under data
             const postData = postResponse.data.post || postResponse.data;
@@ -201,13 +201,13 @@ export default function PostFormPage({
       let finalPostId: string;
 
       if (mode === 'create') {
-        postResponse = await apiClient.post('/post', postData);
+        postResponse = await contentApiClient.post('/content/posts', postData);
         if (!postResponse.success) {
           throw new Error(postResponse.error || 'Failed to create post');
         }
         finalPostId = postResponse.data.post.id;
       } else {
-        postResponse = await apiClient.put(`/post/${postId}`, postData);
+        postResponse = await contentApiClient.put(`/content/posts/${postId}`, postData);
         if (!postResponse.success) {
           throw new Error(postResponse.error || 'Failed to update post');
         }

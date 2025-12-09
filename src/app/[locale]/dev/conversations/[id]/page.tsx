@@ -47,7 +47,7 @@ import {
   difficultyColors
 } from '@/components/common/Badge';
 import { formatDate } from '@/lib/utils/date';
-import axiosInstance from '@/lib/axios';
+import { commApi } from '@/lib/axios';
 
 // Types
 interface Message {
@@ -114,10 +114,10 @@ export default function ConversationDetailPage({ params }: { params: Promise<{ i
       setLoading(true);
       setError(null);
       try {
-        const response = await axiosInstance.get(`/conversation/${id}`);
-        setData(response.data);
+        const response = await commApi.get(`/comm/conversations/${id}`);
+        setData(response);
         // Filter out empty messages for initial expansion
-        const nonEmptyIndices = response.data.messages
+        const nonEmptyIndices = response.messages
           .map((msg: Message, idx: number) => (msg.content && msg.content.trim() ? idx : -1))
           .filter((idx: number) => idx !== -1);
         setExpandedMessages(new Set<number>(nonEmptyIndices));

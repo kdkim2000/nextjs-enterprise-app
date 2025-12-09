@@ -35,7 +35,7 @@ import {
   AdminPanelSettings
 } from '@mui/icons-material';
 import { useCurrentLocale } from '@/lib/i18n/client';
-import { apiClient } from '@/lib/api/client';
+import { contentApiClient } from '@/lib/api/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 
 interface Post {
@@ -85,7 +85,7 @@ export default function AdminBoardListPage() {
           params.append('search', search);
         }
 
-        const response = await apiClient.get(`/post/board/${boardType.id}?${params}`);
+        const response = await contentApiClient.get(`/content/posts/board/${boardType.id}?${params}`);
         if (response.success && response.data?.posts) {
           setPosts(response.data.posts.map((post: any) => ({
             id: post.id,

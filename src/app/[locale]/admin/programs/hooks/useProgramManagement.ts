@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -95,10 +95,10 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const url = `/program?${params.toString()}`;
+      const url = `/admin/programs?${params.toString()}`;
       console.log('[useProgramManagement] API URL:', url);
 
-      const response = await api.get(url);
+      const response = await adminApi.get(url);
       console.log('[useProgramManagement] API response:', response);
 
       // Programs now use MultiLangField format directly
@@ -196,13 +196,13 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       if (!editingProgram.id) {
         // Add new program
-        const response = await api.post('/program', apiData);
+        const response = await adminApi.post('/admin/programs', apiData);
 
         setPrograms([...programs, response.program]);
         await showSuccessMessage('CRUD_PROGRAM_CREATE_SUCCESS');
       } else {
         // Update existing program
-        const response = await api.put(`/program/${editingProgram.id}`, apiData);
+        const response = await adminApi.put(`/admin/programs/${editingProgram.id}`, apiData);
 
         setPrograms(programs.map((p) => (p.id === editingProgram.id ? response.program : p)));
         await showSuccessMessage('CRUD_PROGRAM_UPDATE_SUCCESS');
@@ -230,7 +230,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       // Delete programs from API
       for (const id of selectedForDelete) {
-        await api.delete(`/program/${id}`);
+        await adminApi.delete(`/admin/programs/${id}`);
       }
 
       // Remove from local state

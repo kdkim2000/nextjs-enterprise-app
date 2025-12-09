@@ -28,11 +28,14 @@ export const authenticateToken = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
+    logger.info(`[Auth] Request to ${req.path}, Auth header exists: ${!!authHeader}`);
+
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.slice(7)
       : (req.query.token as string);
 
     if (!token) {
+      logger.info(`[Auth] No token provided for ${req.path}`);
       res.status(401).json({
         success: false,
         message: 'Access token required',
@@ -40,12 +43,14 @@ export const authenticateToken = async (
       return;
     }
 
+    logger.info(`[Auth] Token received, length: ${token.length}`);
     const payload = verifyAccessToken(token);
+    logger.info(`[Auth] Token verified for user: ${payload.userId}`);
     req.user = payload;
 
     next();
   } catch (error: any) {
-    logger.warn('Token verification failed:', error.message);
+    logger.warn(`[Auth] Token verification failed for ${req.path}:`, error.message);
 
     if (error.name === 'TokenExpiredError') {
       res.status(401).json({

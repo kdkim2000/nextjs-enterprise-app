@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { AuthState } from '@/types/auth';
-import { api } from '@/lib/axios';
+import { authApi as authApiClient } from '@/lib/axios';
 import { getApiConfig, getEnvironment } from '@/lib/api/config';
 
 interface AuthContextType extends AuthState {
@@ -238,7 +238,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const ssoLogin = useCallback(async () => {
     try {
-      const response = await api.post('/auth/sso');
+      const response = await authApiClient.post('/auth/sso');
 
       const data = response.data || response;
       const accessToken = data.accessToken || data.token;

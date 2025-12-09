@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Autocomplete, TextField, CircularProgress, Box, Typography } from '@mui/material';
 import { debounce } from '@mui/material/utils';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 
 export interface User {
   id: string;
@@ -52,7 +52,7 @@ export default function UserAutocomplete({
       const fetchUserById = async () => {
         try {
           // Use search endpoint instead of direct ID lookup to avoid 403
-          const response = await api.get(`/user?id=${value}&page=1&limit=1`);
+          const response = await adminApi.get(`/admin/users?id=${value}&page=1&limit=1`);
           if (response.users && response.users.length > 0) {
             const user: User = {
               id: response.users[0].id,
@@ -92,7 +92,7 @@ export default function UserAutocomplete({
 
       setLoading(true);
       try {
-        const response = await api.get(`/user?username=${searchTerm}&name=${searchTerm}&email=${searchTerm}&page=1&limit=50`);
+        const response = await adminApi.get(`/admin/users?username=${searchTerm}&name=${searchTerm}&email=${searchTerm}&page=1&limit=50`);
         const users: User[] = (response.users || []).map((u: any) => ({
           id: u.id,
           username: u.username,

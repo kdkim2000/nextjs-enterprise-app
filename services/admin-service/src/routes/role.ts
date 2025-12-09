@@ -152,15 +152,12 @@ router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Resp
 });
 
 /**
- * PUT /admin/roles - Update a role
+ * PUT /admin/roles/:id - Update a role
  */
-router.put('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { id, name, displayName, description, roleType, manager, representative, isActive, isSystem } = req.body;
-
-    if (!id) {
-      return res.status(400).json({ error: 'Role ID is required' });
-    }
+    const { id } = req.params;
+    const { name, displayName, description, roleType, manager, representative, isActive, isSystem } = req.body;
 
     // Validate roleType if provided
     if (roleType && !['management', 'general'].includes(roleType)) {
@@ -212,18 +209,14 @@ router.put('/', authenticateToken, requireAdmin, async (req: Request, res: Respo
 });
 
 /**
- * DELETE /admin/roles - Delete a role
+ * DELETE /admin/roles/:id - Delete a role
  */
-router.delete('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { id } = req.query;
-
-    if (!id) {
-      return res.status(400).json({ error: 'Role ID is required' });
-    }
+    const { id } = req.params;
 
     // Find role to delete
-    const role = await roleService.getRoleById(id as string);
+    const role = await roleService.getRoleById(id);
     if (!role) {
       return res.status(404).json({ error: 'Role not found' });
     }
@@ -241,7 +234,7 @@ router.delete('/', authenticateToken, requireAdmin, async (req: Request, res: Re
       });
     }
 
-    await roleService.deleteRole(id as string);
+    await roleService.deleteRole(id);
 
     logger.info(`Role deleted: ${role.name}`);
     res.json({

@@ -11,7 +11,7 @@ import {
   FormControlLabel,
   Switch
 } from '@mui/material';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 
 export interface UserRoleMappingFormData {
   id?: string;
@@ -64,8 +64,8 @@ export default function UserRoleMappingFormFields({
       setLoading(true);
       try {
         const [usersResponse, rolesResponse] = await Promise.all([
-          api.get('/user'),
-          api.get('/role')
+          adminApi.get('/admin/users'),
+          adminApi.get('/admin/roles')
         ]);
         setUsers(usersResponse.users || []);
         setRoles(rolesResponse.roles || []);

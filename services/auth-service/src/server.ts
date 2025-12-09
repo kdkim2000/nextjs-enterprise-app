@@ -15,6 +15,7 @@ import {
   requestLogger,
 } from '@enterprise/shared';
 import authRoutes from './routes/auth';
+import userSettingsRoutes from './routes/userSettings';
 
 // 환경 설정 로드
 const config = loadAppConfig('auth-service');
@@ -57,6 +58,7 @@ auth_service_up 1
 
 // Auth Routes
 app.use('/auth', authRoutes);
+app.use('/auth/user-settings', userSettingsRoutes);
 
 // 에러 핸들링
 app.use(notFoundHandler as unknown as RequestHandler);

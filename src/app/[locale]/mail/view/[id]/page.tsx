@@ -38,7 +38,7 @@ import {
 import { useAttachment, formatFileSize, AttachmentFile } from '@/hooks/useAttachment';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 import { useMailData, MailMessage, FolderType } from '../../hooks/useMailData';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 
 export default function MailViewPage() {
   const theme = useTheme();
@@ -101,7 +101,7 @@ export default function MailViewPage() {
     const loadAttachments = async () => {
       if (message?.attachment_id) {
         try {
-          const response = await api.get(`/attachment/${message.attachment_id}`);
+          const response = await commonApi.get(`/common/attachments/${message.attachment_id}`);
           if (response.attachment?.files) {
             setAttachmentFiles(response.attachment.files);
           }
