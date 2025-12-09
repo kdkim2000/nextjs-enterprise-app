@@ -212,47 +212,27 @@ let _commApiInstance: ReturnType<typeof createServiceApi> | null = null;
 
 const getAdminBaseUrl = (): string => {
   const config = getApiConfig();
-  const env = getEnvironment();
-  if (env === 'development') {
-    return config.admin;
-  }
-  return '';
+  return config.admin;
 };
 
 const getAuthServiceUrl = (): string => {
   const config = getApiConfig();
-  const env = getEnvironment();
-  if (env === 'development') {
-    return config.auth;
-  }
-  return '';
+  return config.auth;
 };
 
 const getContentBaseUrl = (): string => {
   const config = getApiConfig();
-  const env = getEnvironment();
-  if (env === 'development') {
-    return config.content;
-  }
-  return '';
+  return config.content;
 };
 
 const getCommonBaseUrl = (): string => {
   const config = getApiConfig();
-  const env = getEnvironment();
-  if (env === 'development') {
-    return config.common;
-  }
-  return '';
+  return config.common;
 };
 
 const getCommBaseUrl = (): string => {
   const config = getApiConfig();
-  const env = getEnvironment();
-  if (env === 'development') {
-    return config.comm;
-  }
-  return '';
+  return config.comm;
 };
 
 // Admin service API client (for menus, users, roles, permissions)
