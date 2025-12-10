@@ -3,29 +3,19 @@
 
 FROM node:20-alpine AS base
 
-# Dependencies stage
-FROM base AS deps
-WORKDIR /app
-
-# Copy shared library first
-COPY shared /shared
-WORKDIR /shared
-RUN npm install --omit=dev && npm run build
-
-# Copy service package files
-WORKDIR /app
-COPY services/content-service/package.json services/content-service/package-lock.json* ./
-RUN npm install --omit=dev
-
-# Builder stage
+# Builder stage - includes devDependencies for compilation
 FROM base AS builder
 WORKDIR /app
 
-# Copy shared library
-COPY --from=deps /shared /shared
+# Copy and build shared library first
+COPY shared /shared
+WORKDIR /shared
+RUN npm install && npm run build
 
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
+# Copy service files and install ALL dependencies (including dev)
+WORKDIR /app
+COPY services/content-service/package.json services/content-service/package-lock.json* ./
+RUN npm install
 
 # Copy source
 COPY services/content-service .
@@ -43,13 +33,15 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 service
 
-# Copy shared library
-COPY --from=deps --chown=service:nodejs /shared /shared
+# Copy shared library (only dist needed)
+COPY --from=builder --chown=service:nodejs /shared /shared
 
-# Copy necessary files
+# Copy built files
 COPY --from=builder --chown=service:nodejs /app/dist ./dist
-COPY --from=builder --chown=service:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=service:nodejs /app/package.json ./
+
+# Install production dependencies only
+RUN npm install --omit=dev
 
 USER service
 

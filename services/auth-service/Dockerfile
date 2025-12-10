@@ -1,40 +1,58 @@
 # Auth Service Dockerfile
+# Production Build
 
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS base
 
+# Builder stage - includes devDependencies for compilation
+FROM base AS builder
 WORKDIR /app
 
-# shared 패키지 복사 및 빌드
-COPY shared /app/shared
-WORKDIR /app/shared
+# Copy and build shared library first
+COPY shared /shared
+WORKDIR /shared
 RUN npm install && npm run build
 
-# 서비스 빌드
-WORKDIR /app/service
-COPY services/auth-service/package*.json ./
+# Copy service files and install ALL dependencies (including dev)
+WORKDIR /app
+COPY services/auth-service/package.json services/auth-service/package-lock.json* ./
 
-# npm install 후 shared 패키지 심볼릭 링크 생성
-RUN npm install --ignore-scripts && \
+# Install dependencies and link shared package
+RUN npm install && \
     rm -rf node_modules/@enterprise/shared && \
     mkdir -p node_modules/@enterprise && \
-    ln -s /app/shared node_modules/@enterprise/shared
+    ln -s /shared node_modules/@enterprise/shared
 
+# Copy source
 COPY services/auth-service/src ./src
 COPY services/auth-service/tsconfig.json ./
+
+# Build TypeScript
 RUN npm run build
 
-# Production 이미지
-FROM node:20-alpine
-
+# Production stage
+FROM base AS runner
 WORKDIR /app
 
-# shared 복사
-COPY --from=builder /app/shared /app/shared
+ENV NODE_ENV=production
 
-# 서비스 복사
-COPY --from=builder /app/service/dist ./dist
-COPY --from=builder /app/service/node_modules ./node_modules
-COPY --from=builder /app/service/package.json ./
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 service
+
+# Copy shared library (only dist needed)
+COPY --from=builder --chown=service:nodejs /shared /shared
+
+# Copy built files
+COPY --from=builder --chown=service:nodejs /app/dist ./dist
+COPY --from=builder --chown=service:nodejs /app/package.json ./
+
+# Install production dependencies only and link shared
+RUN npm install --omit=dev && \
+    rm -rf node_modules/@enterprise/shared && \
+    mkdir -p node_modules/@enterprise && \
+    ln -s /shared node_modules/@enterprise/shared
+
+USER service
 
 EXPOSE 3011
 
