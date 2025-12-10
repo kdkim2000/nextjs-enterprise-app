@@ -8,7 +8,6 @@ import * as path from 'path';
 
 const envPath = path.resolve(__dirname, '../.env');
 dotenv.config({ path: envPath });
-// Fallback to current directory
 if (!process.env.DB_HOST) {
   dotenv.config();
 }
@@ -25,9 +24,11 @@ import {
   attachmentRouter,
   attachmentTypeRouter,
   logRouter,
+  logAnalyticsRouter,
   appSettingsRouter,
   dashboardRouter
 } from './routes';
+import swaggerSpec from './swagger';
 
 const config = loadAppConfig('common-service');
 const logger = getLogger('common-service');
@@ -63,12 +64,43 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Swagger
+app.get('/docs/json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+app.get('/docs', (req, res) => {
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Common Service API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: '/docs/json',
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+      layout: 'BaseLayout'
+    });
+  </script>
+</body>
+</html>
+  `);
+});
+
 // Routes
 app.use('/common/codes', codeRouter);
 app.use('/common/code-types', codeTypeRouter);
 app.use('/common/attachments', attachmentRouter);
 app.use('/common/attachment-types', attachmentTypeRouter);
 app.use('/common/logs', logRouter);
+app.use('/common/log-analytics', logAnalyticsRouter);
 app.use('/common/app-settings', appSettingsRouter);
 app.use('/common/dashboard', dashboardRouter);
 
@@ -96,12 +128,14 @@ const PORT = config.port || 3015;
 app.listen(PORT, () => {
   logger.info(`Common Service started on port ${PORT}`);
   logger.info(`Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+  logger.info(`Swagger docs: http://localhost:${PORT}/docs`);
   logger.info(`Available endpoints:`);
   logger.info(`  - /common/codes`);
   logger.info(`  - /common/code-types`);
   logger.info(`  - /common/attachments`);
   logger.info(`  - /common/attachment-types`);
   logger.info(`  - /common/logs`);
+  logger.info(`  - /common/log-analytics`);
   logger.info(`  - /common/app-settings`);
   logger.info(`  - /common/dashboard`);
 });

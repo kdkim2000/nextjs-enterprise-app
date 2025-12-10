@@ -11,7 +11,6 @@ import * as path from 'path';
 const envPath = path.resolve(__dirname, '../.env');
 const result = dotenv.config({ path: envPath });
 if (result.error) {
-  // Try from current working directory
   dotenv.config();
 }
 console.log('Environment loaded:', {
@@ -30,6 +29,7 @@ import {
   requestLogger,
 } from '@enterprise/shared';
 import { mailRoutes, messageRoutes, conversationRoutes } from './routes';
+import swaggerSpec from './swagger';
 
 // 환경 설정 로드
 const config = loadAppConfig('communication-service');
@@ -38,10 +38,8 @@ const logger = getLogger('communication-service');
 // Express 앱 생성
 const app = express();
 
-// Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
 
-// 미들웨어
 app.use(cors({
   origin: config.cors.origins,
   credentials: true,
@@ -50,7 +48,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger as unknown as RequestHandler);
 
-// Health Check (root level)
+// Health Check
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
@@ -60,13 +58,43 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Metrics endpoint for Prometheus
+// Metrics endpoint
 app.get('/metrics', (req, res) => {
   res.set('Content-Type', 'text/plain');
   res.send(`# HELP communication_service_up Communication service status
 # TYPE communication_service_up gauge
 communication_service_up 1
 `);
+});
+
+// Swagger
+app.get('/docs/json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+app.get('/docs', (req, res) => {
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Communication Service API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: '/docs/json',
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+      layout: 'BaseLayout'
+    });
+  </script>
+</body>
+</html>
+  `);
 });
 
 // Communication Routes
@@ -85,6 +113,7 @@ app.listen(PORT, () => {
   logger.info(`Communication Service started on port ${PORT}`);
   logger.info(`Environment: ${config.env}`);
   logger.info(`Database: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+  logger.info(`Swagger docs: http://localhost:${PORT}/docs`);
 });
 
 export default app;

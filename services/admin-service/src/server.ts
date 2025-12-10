@@ -11,7 +11,6 @@ import * as path from 'path';
 const envPath = path.resolve(__dirname, '../.env');
 const result = dotenv.config({ path: envPath });
 if (result.error) {
-  // Try from current working directory
   dotenv.config();
 }
 console.log('Environment loaded:', {
@@ -31,6 +30,7 @@ import {
   requestLogger,
 } from '@enterprise/shared';
 import { userRoutes, roleRoutes, menuRoutes, departmentRoutes, userRoleMappingRoutes, programRoutes, roleProgramMappingRoutes } from './routes';
+import swaggerSpec from './swagger';
 
 // 환경 설정 로드
 const config = loadAppConfig('admin-service');
@@ -70,6 +70,37 @@ admin_service_up 1
 `);
 });
 
+// Swagger JSON endpoint
+app.get('/docs/json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Swagger UI HTML
+app.get('/docs', (req, res) => {
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Service API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: '/docs/json',
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+      layout: 'BaseLayout'
+    });
+  </script>
+</body>
+</html>
+  `);
+});
+
 // Admin Routes
 app.use('/admin/users', userRoutes);
 app.use('/admin/roles', roleRoutes);
@@ -90,6 +121,7 @@ app.listen(PORT, () => {
   logger.info(`Admin Service started on port ${PORT}`);
   logger.info(`Environment: ${config.env}`);
   logger.info(`Database: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+  logger.info(`Swagger docs: http://localhost:${PORT}/docs`);
 });
 
 export default app;

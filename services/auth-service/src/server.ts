@@ -16,6 +16,7 @@ import {
 } from '@enterprise/shared';
 import authRoutes from './routes/auth';
 import userSettingsRoutes from './routes/userSettings';
+import swaggerSpec from './swagger';
 
 // 환경 설정 로드
 const config = loadAppConfig('auth-service');
@@ -48,12 +49,42 @@ app.get('/health', (req, res) => {
 
 // Metrics endpoint for Prometheus
 app.get('/metrics', (req, res) => {
-  // TODO: Implement proper Prometheus metrics with prom-client
   res.set('Content-Type', 'text/plain');
   res.send(`# HELP auth_service_up Auth service status
 # TYPE auth_service_up gauge
 auth_service_up 1
 `);
+});
+
+// Swagger JSON endpoint
+app.get('/docs/json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Swagger UI HTML (simple built-in viewer)
+app.get('/docs', (req, res) => {
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Service API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: '/docs/json',
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+      layout: 'BaseLayout'
+    });
+  </script>
+</body>
+</html>
+  `);
 });
 
 // Auth Routes
@@ -72,6 +103,7 @@ app.listen(PORT, () => {
   logger.info(`Environment: ${config.env}`);
   logger.info(`Database: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
   logger.info(`Redis: ${process.env.REDIS_URL || 'redis://localhost:6379'}`);
+  logger.info(`Swagger docs: http://localhost:${PORT}/docs`);
 });
 
 export default app;

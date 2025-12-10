@@ -257,3 +257,143 @@ export async function getAllLogs(filters: LogQueryOptions = {}): Promise<Log[]> 
   const { limit, offset, ...restFilters } = filters;
   return getLogs({ ...restFilters, limit: 100000, offset: 0 });
 }
+
+/**
+ * Get detailed log analytics similar to legacy logAnalytics.js
+ */
+export async function getDetailedLogAnalytics(options: {
+  startDate?: string;
+  endDate?: string;
+} = {}): Promise<{
+  summary: {
+    totalRequests: number;
+    errorRate: string;
+    avgResponseTime: string;
+    slowRequestCount: number;
+  };
+  methodStats: Record<string, number>;
+  statusStats: Record<string, number>;
+  topEndpoints: Array<{ endpoint: string; count: number }>;
+  topUsers: Array<{ userId: string; count: number }>;
+  timeSeriesData: Array<{ hour: string; count: number; errors: number }>;
+  recentErrors: any[];
+}> {
+  const { startDate, endDate } = options;
+
+  let whereClause = '1=1';
+  const params: any[] = [];
+  let paramIndex = 1;
+
+  if (startDate) {
+    whereClause += ` AND timestamp >= $${paramIndex}`;
+    params.push(startDate);
+    paramIndex++;
+  }
+
+  if (endDate) {
+    whereClause += ` AND timestamp <= $${paramIndex}`;
+    params.push(endDate);
+    paramIndex++;
+  }
+
+  const logsResult = await query(
+    `SELECT * FROM logs WHERE ${whereClause} ORDER BY timestamp DESC LIMIT 10000`,
+    params
+  );
+  const logs = logsResult.rows;
+  const totalRequests = logs.length;
+
+  const methodStats: Record<string, number> = {};
+  logs.forEach((log: any) => {
+    methodStats[log.method] = (methodStats[log.method] || 0) + 1;
+  });
+
+  const statusStats: Record<string, number> = {};
+  logs.forEach((log: any) => {
+    const category = String(Math.floor(log.status_code / 100)) + 'xx';
+    statusStats[category] = (statusStats[category] || 0) + 1;
+  });
+
+  const errorLogs = logs.filter((log: any) => log.status_code >= 400);
+  const errorRate = totalRequests > 0
+    ? (errorLogs.length / totalRequests * 100).toFixed(2)
+    : '0';
+
+  const endpointCounts: Record<string, number> = {};
+  logs.forEach((log: any) => {
+    const endpoint = `${log.method} ${log.path}`;
+    endpointCounts[endpoint] = (endpointCounts[endpoint] || 0) + 1;
+  });
+  const topEndpoints = Object.entries(endpointCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([endpoint, count]) => ({ endpoint, count }));
+
+  const userCounts: Record<string, number> = {};
+  logs.forEach((log: any) => {
+    if (log.user_id && log.user_id !== 'anonymous') {
+      userCounts[log.user_id] = (userCounts[log.user_id] || 0) + 1;
+    }
+  });
+  const topUsers = Object.entries(userCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([userId, count]) => ({ userId, count }));
+
+  let totalDuration = 0;
+  logs.forEach((log: any) => {
+    const duration = parseInt(String(log.duration).replace('ms', ''));
+    if (!isNaN(duration)) {
+      totalDuration += duration;
+    }
+  });
+  const avgResponseTime = totalRequests > 0 ? Math.round(totalDuration / totalRequests) : 0;
+
+  const slowRequests = logs.filter((log: any) => {
+    const duration = parseInt(String(log.duration).replace('ms', ''));
+    return !isNaN(duration) && duration > 1000;
+  });
+
+  const now = new Date();
+  const timeSeriesData: Array<{ hour: string; count: number; errors: number }> = [];
+  for (let i = 23; i >= 0; i--) {
+    const hourStart = new Date(now.getTime() - i * 60 * 60 * 1000);
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+    const hourLogs = logs.filter((log: any) => {
+      const logTime = new Date(log.timestamp);
+      return logTime >= hourStart && logTime < hourEnd;
+    });
+    timeSeriesData.push({
+      hour: hourStart.toISOString(),
+      count: hourLogs.length,
+      errors: hourLogs.filter((l: any) => l.status_code >= 400).length
+    });
+  }
+
+  const recentErrors = errorLogs.slice(0, 20).map((log: any) => ({
+    id: log.id,
+    timestamp: log.timestamp,
+    method: log.method,
+    path: log.path,
+    statusCode: log.status_code,
+    duration: log.duration,
+    userId: log.user_id,
+    ip: log.ip,
+    userAgent: log.user_agent
+  }));
+
+  return {
+    summary: {
+      totalRequests,
+      errorRate: errorRate + '%',
+      avgResponseTime: avgResponseTime + 'ms',
+      slowRequestCount: slowRequests.length
+    },
+    methodStats,
+    statusStats,
+    topEndpoints,
+    topUsers,
+    timeSeriesData,
+    recentErrors
+  };
+}
