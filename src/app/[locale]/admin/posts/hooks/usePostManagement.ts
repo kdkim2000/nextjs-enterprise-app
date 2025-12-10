@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Post, PostSearchCriteria } from '../types';
 import { buildQueryParams } from '../utils';
-import { apiClient } from '@/lib/api/client';
+import { contentApiClient } from '@/lib/api/client';
 
 export const usePostManagement = () => {
   // State
@@ -24,7 +24,7 @@ export const usePostManagement = () => {
   // Fetch board types for filter
   const fetchBoardTypes = useCallback(async () => {
     try {
-      const response = await apiClient.get('/board-type/all');
+      const response = await contentApiClient.get('/content/board-types/all');
       if (response.success) {
         setBoardTypes(response.data || []);
       }
@@ -38,7 +38,7 @@ export const usePostManagement = () => {
     try {
       setSearching(true);
       const queryString = buildQueryParams(quickSearch, searchCriteria, paginationModel);
-      const response = await apiClient.get(`/post?${queryString}`);
+      const response = await contentApiClient.get(`/content/posts?${queryString}`);
 
       if (response.success) {
         setPosts(response.data.items || []);
@@ -77,7 +77,7 @@ export const usePostManagement = () => {
   const handleApprove = useCallback(
     async (post: Post) => {
       try {
-        const response = await apiClient.post(`/post/${post.id}/approve`);
+        const response = await contentApiClient.post(`/content/posts/${post.id}/approve`);
         if (response.success) {
           setSuccessMessage('Post approved successfully');
           fetchPosts();
@@ -96,8 +96,8 @@ export const usePostManagement = () => {
     async (post: Post) => {
       try {
         const response = post.is_pinned
-          ? await apiClient.post(`/post/${post.id}/unpin`)
-          : await apiClient.post(`/post/${post.id}/pin`);
+          ? await contentApiClient.post(`/content/posts/${post.id}/unpin`)
+          : await contentApiClient.post(`/content/posts/${post.id}/pin`);
 
         if (response.success) {
           setSuccessMessage(post.is_pinned ? 'Post unpinned successfully' : 'Post pinned successfully');
@@ -123,7 +123,7 @@ export const usePostManagement = () => {
       setDeleteLoading(true);
 
       for (const id of selectedForDelete) {
-        const response = await apiClient.delete(`/post/${id}`);
+        const response = await contentApiClient.delete(`/content/posts/${id}`);
         if (!response.success) {
           throw new Error(response.error || `Failed to delete post ${id}`);
         }

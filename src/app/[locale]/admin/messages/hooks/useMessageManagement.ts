@@ -2,10 +2,18 @@ import { useState, useCallback, useEffect } from 'react';
 import { GridRowSelectionModel, GridPaginationModel } from '@mui/x-data-grid';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
-import { api } from '@/lib/axios';
+import { commApi } from '@/lib/axios';
 import { Message } from '../types';
 import { MessageFormData } from '@/components/admin/MessageFormFields';
 import { SearchCriteria } from '../utils';
+
+// Use commApi with standardized response wrapper
+const api = {
+  get: async (url: string) => commApi.get(`/comm/messages${url}`),
+  post: async (url: string, data?: any) => commApi.post(`/comm/messages${url}`, data),
+  put: async (url: string, data?: any) => commApi.put(`/comm/messages${url}`, data),
+  delete: async (url: string) => commApi.delete(`/comm/messages${url}`)
+};
 
 export function useMessageManagement() {
   // State
@@ -48,7 +56,7 @@ export function useMessageManagement() {
       setSearching(true);
       clearMessages();
 
-      const data = await api.get('/message');
+      const data = await api.get('');
       let fetchedMessages = data.messages || [];
 
       // Apply advanced filter if exists
@@ -195,11 +203,11 @@ export function useMessageManagement() {
 
       if (editingMessage.id) {
         // Update existing message
-        await api.put(`/message/${editingMessage.id}`, editingMessage);
+        await api.put(`/${editingMessage.id}`, editingMessage);
         await showSuccessMessage('CRUD_MESSAGE_UPDATE_SUCCESS');
       } else {
         // Create new message
-        await api.post('/message', editingMessage);
+        await api.post('', editingMessage);
         await showSuccessMessage('CRUD_MESSAGE_CREATE_SUCCESS');
       }
 
@@ -226,7 +234,7 @@ export function useMessageManagement() {
 
       // Delete all selected messages
       await Promise.all(
-        selectedForDelete.map((id) => api.delete(`/message/${id}`))
+        selectedForDelete.map((id) => api.delete(`/${id}`))
       );
 
       await fetchMessages(quickSearch);

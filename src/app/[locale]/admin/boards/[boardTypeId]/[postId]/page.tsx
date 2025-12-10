@@ -35,7 +35,7 @@ import {
   Visibility,
   Comment as CommentIcon
 } from '@mui/icons-material';
-import { apiClient } from '@/lib/api/client';
+import { contentApiClient, commonApiClient } from '@/lib/api/client';
 
 interface Post {
   id: string;
@@ -95,7 +95,7 @@ export default function PostDetailPage() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.get(`/post/${postId}`);
+        const response = await contentApiClient.get(`/content/posts/${postId}`);
         if (response.success) {
           setPost(response.data);
           // Check if current user is author
@@ -117,7 +117,7 @@ export default function PostDetailPage() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await apiClient.get(`/comment/post/${postId}`);
+        const response = await contentApiClient.get(`/content/comments/post/${postId}`);
         if (response.success) {
           setComments(response.data || []);
         }
@@ -134,7 +134,7 @@ export default function PostDetailPage() {
   useEffect(() => {
     const fetchAttachments = async () => {
       try {
-        const response = await apiClient.get(`/api/attachment/post/${postId}`);
+        const response = await commonApiClient.get(`/common/attachments/post/${postId}`);
         if (response.success) {
           setAttachments(response.data || []);
         }
@@ -150,8 +150,8 @@ export default function PostDetailPage() {
   const handleLike = async () => {
     try {
       const response = liked
-        ? await apiClient.post(`/post/${postId}/unlike`)
-        : await apiClient.post(`/post/${postId}/like`);
+        ? await contentApiClient.post(`/content/posts/${postId}/unlike`)
+        : await contentApiClient.post(`/content/posts/${postId}/like`);
 
       if (response.success) {
         setLiked(!liked);
@@ -173,7 +173,7 @@ export default function PostDetailPage() {
 
     try {
       setSubmittingComment(true);
-      const response = await apiClient.post('/comment', {
+      const response = await contentApiClient.post('/content/comments', {
         postId,
         content: newComment
       });
@@ -181,7 +181,7 @@ export default function PostDetailPage() {
       if (response.success) {
         setNewComment('');
         // Refetch comments
-        const commentsResponse = await apiClient.get(`/comment/post/${postId}`);
+        const commentsResponse = await contentApiClient.get(`/content/comments/post/${postId}`);
         if (commentsResponse.success) {
           setComments(commentsResponse.data || []);
         }
@@ -209,7 +209,7 @@ export default function PostDetailPage() {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      const response = await apiClient.delete(`/post/${postId}`);
+      const response = await contentApiClient.delete(`/content/posts/${postId}`);
       if (response.success) {
         router.push(`/admin/boards/${boardTypeId}`);
       }

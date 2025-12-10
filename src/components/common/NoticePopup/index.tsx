@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
 import SafeHtmlRenderer from '@/components/common/SafeHtmlRenderer';
-import { apiClient } from '@/lib/api/client';
+import { contentApi } from '@/lib/axios';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Notice {
@@ -69,7 +69,8 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
     const fetchNotifications = async () => {
       try {
         console.log('[NoticePopup] Fetching popup notifications...');
-        const response = await apiClient.get<{ notifications: Notice[] }>('/post/popup-notifications');
+        // Use content-service API: /content/posts/popup-notifications
+        const response = await contentApi.get<{ success: boolean; data: { notifications: Notice[] } }>('/content/posts/popup-notifications');
         console.log('[NoticePopup] Response:', response);
 
         if (response.success && response.data?.notifications && response.data.notifications.length > 0) {

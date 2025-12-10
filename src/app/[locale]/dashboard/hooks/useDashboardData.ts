@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import api from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import {
   DashboardSummary,
   ActivityTrendItem,
@@ -87,21 +87,26 @@ export function useDashboardData(): UseDashboardDataReturn {
     const days = getDays(dateRange);
 
     // Helper to safely fetch data
+    // Note: commonApi.get() already returns response.data, not the full response
     const safeFetch = async <T>(
-      fetcher: () => Promise<{ data: T }>,
+      fetcher: () => Promise<T>,
       defaultValue: T
     ): Promise<T> => {
       try {
-        const res = await fetcher();
-        return res.data;
+        const data = await fetcher();
+        return data;
       } catch (err) {
-        console.error('Dashboard API error:', err);
+        // Only log non-401 errors (401 is expected when not authenticated)
+        if ((err as any)?.response?.status !== 401) {
+          console.error('Dashboard API error:', err);
+        }
         return defaultValue;
       }
     };
 
     try {
       // Fetch all data in parallel with individual error handling
+      // Using common-service API: /common/dashboard/...
       const [
         summaryData,
         activityData,
@@ -116,18 +121,18 @@ export function useDashboardData(): UseDashboardDataReturn {
         loginStatsData,
         menuUsageData
       ] = await Promise.all([
-        safeFetch(() => api.get('/dashboard/summary'), null),
-        safeFetch(() => api.get(`/dashboard/activity-trend?days=${days}`), []),
-        safeFetch(() => api.get('/dashboard/user-status'), []),
-        safeFetch(() => api.get('/dashboard/department-stats?limit=8'), []),
-        safeFetch(() => api.get('/dashboard/board-activity'), []),
-        safeFetch(() => api.get('/dashboard/system-performance?hours=24'), []),
-        safeFetch(() => api.get('/dashboard/http-status'), []),
-        safeFetch(() => api.get('/dashboard/top-posts?limit=5'), []),
-        safeFetch(() => api.get('/dashboard/error-endpoints?limit=5'), []),
-        safeFetch(() => api.get('/dashboard/recent-activity?limit=10'), []),
-        safeFetch(() => api.get(`/dashboard/login-stats?days=${days}`), []),
-        safeFetch(() => api.get('/dashboard/menu-usage?limit=10'), [])
+        safeFetch(() => commonApi.get('/common/dashboard/summary'), null),
+        safeFetch(() => commonApi.get(`/common/dashboard/activity-trend?days=${days}`), []),
+        safeFetch(() => commonApi.get('/common/dashboard/user-status'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/department-stats?limit=8'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/board-activity'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/system-performance?hours=24'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/http-status'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/top-posts?limit=5'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/error-endpoints?limit=5'), []),
+        safeFetch(() => commonApi.get('/common/dashboard/recent-activity?limit=10'), []),
+        safeFetch(() => commonApi.get(`/common/dashboard/login-stats?days=${days}`), []),
+        safeFetch(() => commonApi.get('/common/dashboard/menu-usage?limit=10'), [])
       ]);
 
       // Single setState call with all data - prevents multiple re-renders

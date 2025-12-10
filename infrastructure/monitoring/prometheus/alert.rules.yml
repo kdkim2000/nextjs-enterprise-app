@@ -1,0 +1,87 @@
+# Prometheus 알림 규칙
+groups:
+  - name: service_alerts
+    rules:
+      # 서비스 다운 알림
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "서비스 다운: {{ $labels.instance }}"
+          description: "{{ $labels.job }} 서비스가 1분 이상 응답하지 않습니다."
+
+      # 높은 에러율
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (job)
+          /
+          sum(rate(http_requests_total[5m])) by (job)
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 에러율: {{ $labels.job }}"
+          description: "{{ $labels.job }}의 에러율이 5%를 초과했습니다 (현재: {{ $value | humanizePercentage }})"
+
+      # 느린 응답 시간
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "느린 응답 시간: {{ $labels.job }}"
+          description: "{{ $labels.job }}의 95% 응답 시간이 2초를 초과했습니다."
+
+  - name: infrastructure_alerts
+    rules:
+      # APISIX 높은 지연시간
+      - alert: APISIXHighLatency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(apisix_http_latency_bucket[5m])) by (le)
+          ) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "APISIX 높은 지연시간"
+          description: "APISIX의 99% 지연시간이 1초를 초과했습니다."
+
+      # APISIX 높은 요청량
+      - alert: APISIXHighRequestRate
+        expr: sum(rate(apisix_http_status[1m])) > 1000
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "APISIX 높은 요청량"
+          description: "APISIX의 요청량이 분당 1000건을 초과했습니다."
+
+      # Redis 메모리 사용량
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis 메모리 사용량 높음"
+          description: "Redis 메모리 사용량이 80%를 초과했습니다."
+
+  - name: rate_limit_alerts
+    rules:
+      # Rate Limit 초과
+      - alert: RateLimitExceeded
+        expr: sum(rate(apisix_http_status{code="429"}[5m])) by (route) > 10
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Rate Limit 초과: {{ $labels.route }}"
+          description: "{{ $labels.route }}에서 Rate Limit 초과가 빈번하게 발생하고 있습니다."

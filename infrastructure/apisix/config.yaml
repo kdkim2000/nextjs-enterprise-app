@@ -1,0 +1,43 @@
+# APISIX 기본 설정 - 서버 운영 환경
+
+apisix:
+  node_listen: 9080
+  enable_ipv6: false
+  enable_control: true
+  control:
+    ip: "0.0.0.0"
+    port: 9092
+
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
+
+# 플러그인 설정
+plugins:
+  - jwt-auth
+  - key-auth
+  - cors
+  - limit-req
+  - limit-count
+  - limit-conn
+  - prometheus
+  - proxy-rewrite
+  - response-rewrite
+  - ip-restriction
+  - consumer-restriction
+  - real-ip
+  - request-id
+  - opentelemetry
+
+plugin_attr:
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091
+
+  # Real IP 설정 (Nginx 뒤에서 실행될 때)
+  real-ip:
+    header: "X-Forwarded-For"
+    recursive: true
+    source: "http_x_forwarded_for"

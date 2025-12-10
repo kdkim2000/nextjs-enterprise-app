@@ -131,17 +131,24 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
 
-      // NEXT_PUBLIC_API_URL이 "/api"인 경우 (Docker/Nginx 환경)와
-      // "http://localhost:3001/api"인 경우 (로컬 개발 환경) 모두 지원
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
+      // MSA 환경: common-service (3015) 또는 API Gateway를 통해 접근
+      // NEXT_PUBLIC_COMMON_SERVICE_URL이 설정되어 있으면 사용, 아니면 기본 API URL 사용
+      const commonServiceUrl = process.env.NEXT_PUBLIC_COMMON_SERVICE_URL
+        || process.env.NEXT_PUBLIC_API_URL
+        || "/api";
 
-      const response = await fetch(`${apiUrl}/app-settings/public`, {
+      // MSA 경로: /common/app-settings/public
+      const apiPath = commonServiceUrl.includes('/common')
+        ? '/app-settings/public'
+        : '/common/app-settings/public';
+
+      const response = await fetch(`${commonServiceUrl}${apiPath}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // ✅ CORS + 인증 대비
-        cache: "no-store", // ✅ 클라이언트 캐시 문제 방지
+        credentials: "include",
+        cache: "no-store",
       });
 
       // ✅ 실패 원인 정확히 로그 출력

@@ -16,7 +16,7 @@ import CodeFormFields, { CodeFormData } from '@/components/admin/CodeFormFields'
 import CodeTypeFormFields, { CodeTypeFormData } from '@/components/admin/CodeTypeFormFields';
 import CodeTypeList from './components/CodeTypeList';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useCodeOptions } from '@/hooks/useCodeOptions';
@@ -88,7 +88,7 @@ export default function CodesPage() {
   // Fetch code types
   const fetchCodeTypes = useCallback(async () => {
     try {
-      const response = await api.get('/code-type');
+      const response = await commonApi.get('/common/code-types');
       setCodeTypes(response.codeTypes || []);
     } catch (error) {
       console.error('Failed to fetch code types:', error);
@@ -106,7 +106,7 @@ export default function CodesPage() {
 
     try {
       setLoading(true);
-      const response = await api.get(`/code/type/${selectedCodeType.code}`);
+      const response = await commonApi.get(`/common/codes/type/${selectedCodeType.code}`);
       setCodes(response.codes || []);
       setFilteredCodes(response.codes || []);
     } catch (error) {
@@ -214,10 +214,10 @@ export default function CodesPage() {
       };
 
       if (!editingCodeType.id) {
-        await api.post('/code-type', payload);
+        await commonApi.post('/common/code-types', payload);
         showSuccess('Code type created successfully');
       } else {
-        await api.put(`/code-type/${editingCodeType.id}`, payload);
+        await commonApi.put(`/common/code-types/${editingCodeType.id}`, payload);
         showSuccess('Code type updated successfully');
       }
 
@@ -235,7 +235,7 @@ export default function CodesPage() {
     if (!codeTypeToDelete) return;
 
     try {
-      const response = await api.delete(`/code-type/${codeTypeToDelete.id}`);
+      const response = await commonApi.delete(`/common/code-types/${codeTypeToDelete.id}`);
       const deletedCodesCount = response.deletedCodesCount || 0;
 
       if (deletedCodesCount > 0) {
@@ -333,10 +333,10 @@ export default function CodesPage() {
       };
 
       if (!editingCode.id) {
-        await api.post('/code', payload);
+        await commonApi.post('/common/codes', payload);
         showSuccess('Code created successfully');
       } else {
-        await api.put(`/code/${editingCode.id}`, payload);
+        await commonApi.put(`/common/codes/${editingCode.id}`, payload);
         showSuccess('Code updated successfully');
       }
 
@@ -358,7 +358,7 @@ export default function CodesPage() {
   const handleConfirmDeleteCodes = useCallback(async () => {
     try {
       for (const id of selectedCodesForDelete) {
-        await api.delete(`/code/${id}`);
+        await commonApi.delete(`/common/codes/${id}`);
       }
 
       const count = selectedCodesForDelete.length;

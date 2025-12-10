@@ -60,3 +60,17 @@ logs
 .turbo
 *.tsbuildinfo
 next-env.d.ts
+
+# Infrastructure scripts (빌드 시 불필요)
+infrastructure/scripts
+
+# Backups
+backups
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+__tests__
+__mocks__

@@ -78,3 +78,17 @@ docs/claude-sessions/
 
 # Uploaded files
 uploads/
+
+# Services (MSA)
+services/*/node_modules/
+services/*/dist/
+services/*/*.log
+services/*/package-lock.json
+
+# Shared library
+shared/node_modules/
+shared/dist/
+
+# Infrastructure
+infrastructure/*/data/
+infrastructure/*/logs/

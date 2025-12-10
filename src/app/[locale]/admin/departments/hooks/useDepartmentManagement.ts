@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -70,7 +70,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
   const fetchUsers = useCallback(async () => {
     try {
       // Fetch all users using the simplified endpoint (no pagination)
-      const response = await api.get('/user/all');
+      const response = await adminApi.get('/admin/users/all');
       setAllUsers(response.users || []);
     } catch (error: any) {
       // If user doesn't have permission to view users (403), silently set empty array
@@ -112,7 +112,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/department?${params.toString()}`);
+      const response = await adminApi.get(`/admin/departments?${params.toString()}`);
       setDepartments(response.departments || []);
 
       // Update row count for DataGrid
@@ -184,12 +184,12 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
 
       if (!editingDepartment.id) {
         // Add new department
-        const response = await api.post('/department', payload);
+        const response = await adminApi.post('/admin/departments', payload);
         setDepartments([...departments, response.department]);
         await showSuccessMessage('CRUD_DEPARTMENT_CREATE_SUCCESS');
       } else {
         // Update existing department
-        const response = await api.put(`/department/${editingDepartment.id}`, payload);
+        const response = await adminApi.put(`/admin/departments/${editingDepartment.id}`, payload);
         setDepartments(departments.map((d) => (d.id === editingDepartment.id ? response.department : d)));
         await showSuccessMessage('CRUD_DEPARTMENT_UPDATE_SUCCESS');
       }
@@ -216,7 +216,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
 
       // Delete departments from API
       for (const id of selectedForDelete) {
-        await api.delete(`/department/${id}`);
+        await adminApi.delete(`/admin/departments/${id}`);
       }
 
       // Remove from local state

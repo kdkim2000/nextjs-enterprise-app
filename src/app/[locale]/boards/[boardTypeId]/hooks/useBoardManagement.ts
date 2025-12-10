@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiClient } from '@/lib/api/client';
+import { contentApiClient } from '@/lib/api/client';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -96,9 +96,9 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       params.append('limit', pageSize.toString());
 
       // Use boardType.id instead of boardTypeId (which is the code)
-      const url = `/post/board/${boardType.id}?${params.toString()}`;
+      const url = `/content/posts/board/${boardType.id}?${params.toString()}`;
       console.log('Fetching posts from:', url);
-      const response = await apiClient.get(url);
+      const response = await contentApiClient.get(url);
       console.log('API Response:', response);
 
       if (response.success && response.data?.posts) {
@@ -220,7 +220,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       setDeleteLoading(true);
 
       // Delete posts one by one
-      const deletePromises = deleteTargetIds.map(id => apiClient.delete(`/post/${id}`));
+      const deletePromises = deleteTargetIds.map(id => contentApiClient.delete(`/content/posts/${id}`));
       const results = await Promise.allSettled(deletePromises);
 
       // Count successes and failures

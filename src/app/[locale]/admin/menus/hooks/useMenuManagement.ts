@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -94,7 +94,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   const fetchMenus = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/menu/all');
+      const response = await adminApi.get('/admin/menus/all');
       const menuList = response.menus || [];
       setAllMenus(menuList);
 
@@ -173,11 +173,11 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       if (editingMenu.id) {
         // Update existing menu
-        await api.put(`/menu/${editingMenu.id}`, menuData);
+        await adminApi.put(`/admin/menus/${editingMenu.id}`, menuData);
         await showSuccessMessage('CRUD_MENU_UPDATE_SUCCESS');
       } else {
         // Add new menu
-        await api.post('/menu', menuData);
+        await adminApi.post('/admin/menus', menuData);
         await showSuccessMessage('CRUD_MENU_CREATE_SUCCESS');
       }
 
@@ -206,7 +206,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       // Delete menus from API
       for (const id of selectedForDelete) {
-        await api.delete(`/menu/${id}`);
+        await adminApi.delete(`/admin/menus/${id}`);
       }
 
       // Refresh menus

@@ -101,7 +101,7 @@ import {
   Highlight as HighlightIcon,
   LinkOff
 } from '@mui/icons-material';
-import axiosInstance from '@/lib/axios';
+import { contentApi } from '@/lib/axios';
 
 // Create lowlight instance with common languages
 const lowlight = createLowlight(common);
@@ -195,14 +195,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       formData.append('attachmentTypeCode', 'IMAGE_ONLY');
       formData.append('referenceType', 'editor');
 
-      const response = await axiosInstance.post('/attachment/upload', formData);
+      const response = await contentApi.post('/content/attachment/upload', formData);
 
-      if (response.data?.uploadedFiles && response.data.uploadedFiles.length > 0) {
-        const uploadedFile = response.data.uploadedFiles[0];
+      if (response?.uploadedFiles && response.uploadedFiles.length > 0) {
+        const uploadedFile = response.uploadedFiles[0];
         const fileUrl = `/api/attachment/file/${uploadedFile.id}/view`;
         return fileUrl;
       }
-      console.error('Image upload failed:', response.data?.errors || 'Unknown error');
+      console.error('Image upload failed:', response?.errors || 'Unknown error');
       return null;
     } catch (error: any) {
       console.error('Error uploading image:', error.message);

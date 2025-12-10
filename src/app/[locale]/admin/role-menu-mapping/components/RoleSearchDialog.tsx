@@ -23,7 +23,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Search, Close } from '@mui/icons-material';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { Role } from '../types';
 
 export interface RoleSearchDialogProps {
@@ -73,7 +73,7 @@ export default function RoleSearchDialog({
   const fetchRoles = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/role');
+      const response = await adminApi.get('/admin/roles');
       const allRoles = response.roles || [];
       // 활성 역할만 필터링 및 이미 매핑된 역할 제외
       const activeRoles = allRoles.filter(

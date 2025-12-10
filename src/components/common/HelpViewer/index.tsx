@@ -27,7 +27,7 @@ import {
   HelpOutline as HelpIcon,
   Edit as EditIcon
 } from '@mui/icons-material';
-import { api } from '@/lib/axios';
+import { contentApi } from '@/lib/axios';
 import { HelpContent } from '@/types/help';
 
 interface HelpViewerProps {
@@ -50,13 +50,13 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get(`/help?programId=${programId}&language=${language}`);
+      const response = await contentApi.get(`/content/help?programId=${programId}&language=${language}`);
       setHelpContent(response.help || null);
 
       // If no help content found, fetch default template (help-001) for reference
       if (!response.help) {
         try {
-          const templateResponse = await api.get('/help?programId=PROG-USER-LIST&language=en&includeAll=true');
+          const templateResponse = await contentApi.get('/content/help?programId=PROG-USER-LIST&language=en&includeAll=true');
           setDefaultTemplate(templateResponse.help || null);
         } catch (templateErr) {
           console.error('Failed to fetch default template:', templateErr);
@@ -119,7 +119,7 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
         status: 'draft'
       };
 
-      await api.post('/help', newHelp);
+      await contentApi.post('/content/help', newHelp);
 
       // Navigate to help management page to edit the newly created help
       const locale = language || 'en';

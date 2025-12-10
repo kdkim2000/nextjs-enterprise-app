@@ -38,7 +38,7 @@ import {
   difficultyColors
 } from '@/components/common/Badge';
 import { formatDate } from '@/lib/utils/date';
-import axiosInstance from '@/lib/axios';
+import { commApi } from '@/lib/axios';
 
 // Types
 interface Conversation {
@@ -233,11 +233,11 @@ export default function ConversationsPage() {
     const fetchInitialData = async () => {
       try {
         const [statsRes, filtersRes] = await Promise.all([
-          axiosInstance.get('/conversation/stats'),
-          axiosInstance.get('/conversation/filters')
+          commApi.get('/comm/conversations/stats'),
+          commApi.get('/comm/conversations/filters')
         ]);
-        setStats(statsRes.data);
-        setFilterOptions(filtersRes.data);
+        setStats(statsRes);
+        setFilterOptions(filtersRes);
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
       }
@@ -258,10 +258,10 @@ export default function ConversationsPage() {
       if (difficulty) params.append('difficulty', difficulty);
       if (branch) params.append('branch', branch);
 
-      const response = await axiosInstance.get(`/conversation?${params.toString()}`);
-      setConversations(response.data.data);
-      setTotalPages(response.data.pagination.totalPages);
-      setTotal(response.data.pagination.total);
+      const response = await commApi.get(`/comm/conversations?${params.toString()}`);
+      setConversations(response.data || []);
+      setTotalPages(response.pagination?.totalPages || 1);
+      setTotal(response.pagination?.total || 0);
     } catch (err) {
       setError('Failed to load conversations');
       console.error(err);
@@ -348,7 +348,7 @@ export default function ConversationsPage() {
 
     setDeleting(true);
     try {
-      await axiosInstance.delete(`/conversation/${deleteTargetId}`);
+      await commApi.delete(`/comm/conversations/${deleteTargetId}`);
       setSnackbar({ open: true, message: 'Conversation deleted successfully', severity: 'success' });
       fetchConversations();
     } catch (err) {
@@ -366,7 +366,7 @@ export default function ConversationsPage() {
 
     setDeleting(true);
     try {
-      await axiosInstance.delete('/conversation/batch', { data: { ids: Array.from(selectedIds) } });
+      await commApi.delete('/comm/conversations/batch', { data: { ids: Array.from(selectedIds) } });
       setSnackbar({
         open: true,
         message: `${selectedIds.size} conversation(s) deleted successfully`,

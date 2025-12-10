@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChangeLocale, useCurrentLocale } from '@/lib/i18n/client';
 import { isLanguageSupported, type LanguageCode } from '@/lib/i18n/languages';
-import { api } from '@/lib/axios';
+import { authApi } from '@/lib/axios';
 
 /**
  * LanguageLoader - Automatically loads and applies user's preferred language after login
@@ -36,16 +36,16 @@ export default function LanguageLoader() {
       }
 
       try {
-        // Fetch user preferences from backend
-        // Note: api.get() already returns response.data
-        const response = await api.get('/user/preferences');
+        // Fetch user preferences from backend (auth-service)
+        // Note: authApi.get() already returns response.data
+        const response = await authApi.get('/auth/user-settings');
 
-        // Extract preferences from response (not response.data)
-        const { preferences } = response;
+        // Extract settings from response - settings.general.language
+        const { settings } = response;
 
         // Check if user has a saved language preference
-        if (preferences?.language) {
-          const savedLanguage = preferences.language;
+        if (settings?.general?.language) {
+          const savedLanguage = settings.general.language;
 
           // Only change if different from current and is a supported language
           if (savedLanguage !== currentLocale && isLanguageSupported(savedLanguage)) {
@@ -54,14 +54,11 @@ export default function LanguageLoader() {
           }
         }
       } catch (error: any) {
-        // Handle authentication errors gracefully
-        if (error?.response?.status === 403 || error?.response?.status === 401) {
-          console.log('[LanguageLoader] Authentication required - user preferences not loaded');
-          // Token might be expired/invalid - let axios interceptor handle refresh
-        } else {
+        // Handle authentication errors silently (expected when not authenticated)
+        // Only log non-auth errors for debugging
+        if (error?.response?.status !== 403 && error?.response?.status !== 401) {
           console.error('[LanguageLoader] Failed to load user preferences:', {
             error: error?.message,
-            response: error?.response?.data,
             status: error?.response?.status
           });
         }

@@ -1,0 +1,428 @@
+# Docker Compose - 서버 운영 환경
+# 기존 docker/docker-compose.yml 기반으로 MSA 구조 확장
+#
+# 사용법:
+#   docker-compose up -d                    # 전체 서비스 시작
+#   docker-compose up -d backend frontend   # 특정 서비스만 시작
+#   docker-compose logs -f auth-service     # 로그 확인
+#
+# 환경변수: .env 파일에서 로드
+#
+# 볼륨 초기 설정 (최초 1회):
+#   docker volume create pg16_pgdata_16_11
+#
+# 모니터링 포함 실행:
+#   docker-compose --profile monitoring up -d
+
+services:
+  # ===== Infrastructure =====
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16.11
+    container_name: corenext-postgres
+    environment:
+      - POSTGRES_DB=${DB_NAME:-corenextdb}
+      - POSTGRES_USER=${DB_USER:-corenext}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    # 개발용: 외부 접근 허용 (운영환경에서는 expose만 사용 권장)
+    ports:
+      - "9090:5432"
+    volumes:
+      - pg16_pgdata_16_11:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-corenext} -d ${DB_NAME:-corenextdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: corenext-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - corenext-network
+
+  # APISIX API Gateway (임시 비활성화 - 추후 활성화 예정)
+  # apisix:
+  #   image: apache/apisix:3.8.0-debian
+  #   container_name: corenext-apisix
+  #   expose:
+  #     - "9080"
+  #     - "9091"
+  #     - "9092"
+  #   volumes:
+  #     - ../apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+  #     - ../apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+  #   restart: unless-stopped
+  #   networks:
+  #     - corenext-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-sf", "http://localhost:9092/v1/healthcheck"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 20s
+
+  # Redis (Auth Service용 세션/토큰 관리)
+  redis:
+    image: redis:7-alpine
+    container_name: corenext-redis
+    # 보안: 외부 노출 제거 - 내부 네트워크에서만 접근
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    # 보안: Redis 비밀번호 인증 활성화
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-RedisSecure2025!}
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-RedisSecure2025!}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ===== Monitoring (선택사항) =====
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: corenext-prometheus
+    # 보안: 내부 네트워크에서만 접근 (Grafana를 통해 조회)
+    expose:
+      - "9090"
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: corenext-grafana
+    # 보안: localhost에서만 접근 가능 (Nginx 프록시 통해 외부 노출)
+    ports:
+      - "127.0.0.1:3100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      # 보안: 반드시 .env에서 강력한 비밀번호 설정 필요
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      # 보안: 추가 보안 설정
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      - GF_SNAPSHOTS_EXTERNAL_ENABLED=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    profiles:
+      - monitoring
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: corenext-loki
+    # 보안: 내부 네트워크에서만 접근
+    expose:
+      - "3100"
+    volumes:
+      - ../monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    profiles:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: corenext-promtail
+    volumes:
+      - ../monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    profiles:
+      - monitoring
+
+  # ===== Application Services =====
+
+  # Frontend Next.js Server
+  frontend:
+    build:
+      context: ../..
+      dockerfile: docker/frontend.Dockerfile
+    container_name: corenext-frontend
+    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_AUTH_API_URL=/auth
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+
+  # Legacy Backend (기존 모놀리식 - 점진적 마이그레이션 중)
+  backend:
+    build:
+      context: ../..
+      dockerfile: docker/backend.Dockerfile
+    container_name: corenext-backend
+    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
+    expose:
+      - "3001"
+    environment:
+      - NODE_ENV=production
+      - BACKEND_PORT=3001
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      # 첨부파일 저장소 - VM 스토리지 마운트
+      - /data/uploads:/app/backend/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Auth Service (MSA - 인증 담당)
+  auth-service:
+    build:
+      context: ../..
+      dockerfile: services/auth-service/Dockerfile
+    container_name: corenext-auth-service
+    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
+    expose:
+      - "3011"
+    environment:
+      - NODE_ENV=production
+      - PORT=3011
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - REDIS_ENABLED=true
+      # 보안: Redis 비밀번호 포함 URL
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-RedisSecure2025!}@corenext-redis:6379
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Admin Service (MSA - 사용자/역할/메뉴 관리 담당)
+  admin-service:
+    build:
+      context: ../..
+      dockerfile: services/admin-service/Dockerfile
+    container_name: corenext-admin-service
+    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
+    expose:
+      - "3012"
+    environment:
+      - NODE_ENV=production
+      - PORT=3012
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - AUTH_SERVICE_URL=http://corenext-auth-service:3011
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Content Service (MSA - 게시판/콘텐츠 관리 담당)
+  content-service:
+    build:
+      context: ../..
+      dockerfile: services/content-service/Dockerfile
+    container_name: corenext-content-service
+    expose:
+      - "3013"
+    environment:
+      - NODE_ENV=production
+      - PORT=3013
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    volumes:
+      - /data/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3013/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Communication Service (MSA - 메일/메시지/대화 관리 담당)
+  communication-service:
+    build:
+      context: ../..
+      dockerfile: services/communication-service/Dockerfile
+    container_name: corenext-communication-service
+    expose:
+      - "3014"
+    environment:
+      - NODE_ENV=production
+      - PORT=3014
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3014/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Common Service (MSA - 공통 기능 담당: 코드/설정/첨부파일 등)
+  common-service:
+    build:
+      context: ../..
+      dockerfile: services/common-service/Dockerfile
+    container_name: corenext-common-service
+    expose:
+      - "3015"
+    environment:
+      - NODE_ENV=production
+      - PORT=3015
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    volumes:
+      - /data/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3015/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  # PostgreSQL 데이터 볼륨 (외부 볼륨 - 최초 1회 생성 필요)
+  # docker volume create pg16_pgdata_16_11
+  pg16_pgdata_16_11:
+    external: true
+  redis_data:
+  uploads_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+
+networks:
+  corenext-network:
+    driver: bridge

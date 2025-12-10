@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -73,7 +73,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   // Fetch all departments for dropdown
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await api.get('/department/all');
+      const response = await adminApi.get('/admin/departments/all');
       const departments = response.departments || [];
 
       // Transform department data to include name object for multi-language support
@@ -144,7 +144,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/user?${params.toString()}`);
+      const response = await adminApi.get(`/admin/users?${params.toString()}`);
       setUsers(response.users || []);
 
       // Update row count for DataGrid
@@ -267,12 +267,12 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
       if (!editingUser.id) {
         // Add new user
-        const response = await api.post('/user', userData);
+        const response = await adminApi.post('/admin/users', userData);
         setUsers([...users, response.user]);
         await showSuccessMessage('CRUD_USER_CREATE_SUCCESS');
       } else {
         // Update existing user
-        const response = await api.put(`/user/${editingUser.id}`, userData);
+        const response = await adminApi.put(`/admin/users/${editingUser.id}`, userData);
         setUsers(users.map((u) => (u.id === editingUser.id ? response.user : u)));
         await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
       }
@@ -312,7 +312,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
       // Delete users from API
       for (const id of selectedForDelete) {
-        await api.delete(`/user/${id}`);
+        await adminApi.delete(`/admin/users/${id}`);
       }
 
       // Remove from local state
@@ -353,7 +353,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
     try {
       setResetPasswordLoading(true);
-      await api.post(`/user/${resetPasswordUser.id}/reset-password`, { newPassword });
+      await adminApi.post(`/admin/users/${resetPasswordUser.id}/reset-password`, { newPassword });
 
       const resetMethod = useDefault ? 'to default password' : 'successfully';
       await showSuccessMessage('USER_PASSWORD_RESET_SUCCESS', {
@@ -442,7 +442,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   // Toggle field handler (for MFA/SSO quick toggle)
   const handleToggleField = useCallback(async (id: string | number, field: string, value: boolean) => {
     try {
-      const response = await api.put(`/user/${id}`, { [field]: value });
+      const response = await adminApi.put(`/admin/users/${id}`, { [field]: value });
       setUsers(users.map((u) => (u.id === id ? { ...u, [field]: value } : u)));
       await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
     } catch (err) {
@@ -466,7 +466,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
     }
 
     try {
-      const response = await api.put(`/user/${newRow.id}`, changes);
+      const response = await adminApi.put(`/admin/users/${newRow.id}`, changes);
       setUsers(users.map((u) => (u.id === newRow.id ? { ...u, ...changes } : u)));
       await showSuccessMessage('CRUD_USER_UPDATE_SUCCESS');
       return { ...oldRow, ...changes };

@@ -14,7 +14,7 @@ import MasterDetailLayout from '@/components/common/MasterDetailLayout';
 import RoleList from './components/RoleList';
 import UserSearchDialog, { User } from '@/components/common/UserSearchDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 import { useMessage } from '@/hooks/useMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useProgramId } from '@/hooks/useProgramId';
@@ -70,8 +70,8 @@ export default function UserRoleMappingPage() {
   const fetchRoles = useCallback(async () => {
     try {
       const [rolesResponse, mappingsResponse] = await Promise.all([
-        api.get('/role'),
-        api.get('/user-role-mapping', { params: { includeDetails: 'true' } })
+        adminApi.get('/admin/roles'),
+        adminApi.get('/admin/user-role-mappings', { params: { includeDetails: 'true' } })
       ]);
 
       const activeRoles = (rolesResponse.roles || []).filter((r: Role) => r.isActive);
@@ -94,7 +94,7 @@ export default function UserRoleMappingPage() {
     try {
       setLoading(true);
       // Fetch all mappings (active + inactive) for the role
-      const response = await api.get('/user-role-mapping', {
+      const response = await adminApi.get('/admin/user-role-mappings', {
         params: { roleId: selectedRole.id, includeDetails: 'true' }
       });
       const allRoleMappings = response.mappings || [];
@@ -158,7 +158,7 @@ export default function UserRoleMappingPage() {
 
       // Create mappings for each selected user
       for (const user of users) {
-        await api.post('/user-role-mapping', {
+        await adminApi.post('/admin/user-role-mappings', {
           userId: user.id,
           roleId: selectedRole.id,
           isActive: true
@@ -182,7 +182,7 @@ export default function UserRoleMappingPage() {
     try {
       setDeleting(true);
       for (const id of selectedMappingsForDelete) {
-        await api.delete('/user-role-mapping', { params: { id } });
+        await adminApi.delete(`/admin/user-role-mappings/${id}`);
       }
 
       const count = selectedMappingsForDelete.length;

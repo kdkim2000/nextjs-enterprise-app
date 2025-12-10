@@ -10,7 +10,7 @@ import {
   IconButton
 } from '@mui/material';
 import { PhotoCamera, Delete } from '@mui/icons-material';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import { getAvatarUrl } from '@/lib/config';
 
 export interface AvatarUploadProps {
@@ -96,7 +96,7 @@ export default function AvatarUpload({
           formData.append('referenceId', userId);
         }
 
-        const response = await api.post('/attachment/upload', formData, {
+        const response = await commonApi.post('/common/attachments/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

@@ -34,7 +34,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useChangeLocale } from '@/lib/i18n/client';
-import { api } from '@/lib/axios';
+import { adminApi, authApi } from '@/lib/axios';
 import { useMessage } from '@/hooks/useMessage';
 import PageHeader from '@/components/common/PageHeader';
 import RouteGuard from '@/components/auth/RouteGuard';
@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
   const loadDepartments = async () => {
     try {
-      const response = await api.get('/department/all');
+      const response = await adminApi.get('/admin/departments/all');
       setDepartments(response.departments || []);
     } catch (error) {
       console.error('Failed to load departments:', error);
@@ -149,20 +149,20 @@ export default function SettingsPage() {
 
   const loadPreferences = async () => {
     try {
-      // Note: api.get() already returns response.data
-      const response = await api.get('/user/preferences');
-      const { preferences } = response;
+      // Note: authApi.get() already returns response.data
+      const response = await authApi.get('/auth/user-settings');
+      const settings = response.settings;
 
-      if (preferences) {
+      if (settings) {
         setPreferences({
-          language: preferences.language || locale,
-          theme: preferences.theme || 'light',
-          rowsPerPage: preferences.rowsPerPage || 10,
-          emailNotifications: preferences.emailNotifications ?? true,
-          systemNotifications: preferences.systemNotifications ?? true,
-          sessionTimeout: preferences.sessionTimeout || 30
+          language: settings.general?.language || locale,
+          theme: settings.appearance?.theme || 'light',
+          rowsPerPage: settings.dataGrid?.rowsPerPage || 10,
+          emailNotifications: settings.notifications?.emailNotifications ?? true,
+          systemNotifications: settings.notifications?.systemNotifications ?? true,
+          sessionTimeout: settings.advanced?.sessionTimeout || 30
         });
-        setMfaEnabled(preferences.mfaEnabled || false);
+        setMfaEnabled(settings.privacy?.mfaEnabled || false);
       }
     } catch (error) {
       console.error('Failed to load preferences:', error);
@@ -184,7 +184,7 @@ export default function SettingsPage() {
   const handleProfileUpdate = async () => {
     setLoading(true);
     try {
-      const response = await api.put('/user/profile', profileData);
+      const response = await adminApi.put('/admin/users/profile', profileData);
       // Update user in AuthContext
       if (response.user && updateUser) {
         updateUser(response.user);
@@ -211,7 +211,7 @@ export default function SettingsPage() {
 
     setLoading(true);
     try {
-      await api.post('/user/change-password', {
+      await authApi.post('/auth/change-password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
@@ -228,7 +228,7 @@ export default function SettingsPage() {
   const handleMfaToggle = async (enabled: boolean) => {
     setLoading(true);
     try {
-      await api.post('/user/mfa-toggle', { enabled });
+      await authApi.patch('/auth/user-settings/privacy', { mfaEnabled: enabled });
       setMfaEnabled(enabled);
       const status = enabled ? 'enabled' : 'disabled';
       await showSuccessMessage('SETTINGS_MFA_TOGGLE_SUCCESS', { status });
@@ -243,7 +243,17 @@ export default function SettingsPage() {
   const handlePreferencesUpdate = async () => {
     setLoading(true);
     try {
-      await api.put('/user/preferences', preferences);
+      // Update user settings using auth-service (sectional updates)
+      await authApi.put('/auth/user-settings', {
+        general: { language: preferences.language },
+        appearance: { theme: preferences.theme },
+        dataGrid: { rowsPerPage: preferences.rowsPerPage },
+        notifications: {
+          emailNotifications: preferences.emailNotifications,
+          systemNotifications: preferences.systemNotifications
+        },
+        advanced: { sessionTimeout: preferences.sessionTimeout }
+      });
 
       // Apply language change
       if (preferences.language !== locale) {

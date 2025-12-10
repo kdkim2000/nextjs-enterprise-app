@@ -22,7 +22,7 @@ import {
   Delete as DeleteIcon,
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 
 interface Role {
   id: string;
@@ -64,7 +64,7 @@ export default function UserRoleAssignment({
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const data = await api.get<{ roles: Role[] }>('/role');
+        const data = await adminApi.get<{ roles: Role[] }>('/admin/roles');
         const activeRoles = (data.roles || []).filter(r => r.isActive);
         console.log('[UserRoleAssignment] Fetched roles:', activeRoles.length);
         setAllRoles(activeRoles);
@@ -83,7 +83,7 @@ export default function UserRoleAssignment({
       const fetchUserRoles = async () => {
         try {
           setLoading(true);
-          const data = await api.get<{ mappings: UserRoleMapping[] }>('/user-role-mapping', {
+          const data = await adminApi.get<{ mappings: UserRoleMapping[] }>('/admin/user-role-mappings', {
             params: { userId, includeDetails: 'true' }
           });
           console.log('[UserRoleAssignment] Fetched mappings:', data);
@@ -123,14 +123,14 @@ export default function UserRoleAssignment({
       setAddingRoleId(roleId);
       setError(null);
 
-      await api.post('/user-role-mapping', {
+      await adminApi.post('/admin/user-role-mappings', {
         userId,
         roleId,
         isActive: true
       });
 
       // Refresh user roles
-      const data = await api.get<{ mappings: UserRoleMapping[] }>('/user-role-mapping', {
+      const data = await adminApi.get<{ mappings: UserRoleMapping[] }>('/admin/user-role-mappings', {
         params: { userId, includeDetails: 'true' }
       });
       const activeMappings = (data.mappings || []).filter(m => m.isActive);
@@ -154,9 +154,7 @@ export default function UserRoleAssignment({
       setRemovingRoleId(mappingId);
       setError(null);
 
-      await api.delete('/user-role-mapping', {
-        params: { id: mappingId }
-      });
+      await adminApi.delete(`/admin/user-role-mappings/${mappingId}`);
 
       // Update local state
       setUserRoles(prev => prev.filter(ur => ur.id !== mappingId));

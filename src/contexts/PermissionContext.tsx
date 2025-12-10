@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { api } from '@/lib/axios';
+import { adminApi } from '@/lib/axios';
 
 export interface ProgramPermission {
   programCode: string;
@@ -39,8 +39,8 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true);
-      // api.get already returns response.data, not the full response object
-      const data = await api.get<{ permissions: any[] }>('/user/permissions');
+      // adminApi.get already returns response.data, not the full response object
+      const data = await adminApi.get<{ permissions: any[] }>('/admin/users/permissions');
 
       // Add defensive check for response data
       if (!data) {
@@ -63,8 +63,11 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
       });
 
       setPermissions(permMap);
-    } catch (error) {
-      console.error('Failed to fetch permissions:', error);
+    } catch (error: any) {
+      // Only log non-401 errors (401 is expected when not authenticated)
+      if (error?.response?.status !== 401) {
+        console.error('Failed to fetch permissions:', error);
+      }
       setPermissions(new Map());
     } finally {
       setLoading(false);

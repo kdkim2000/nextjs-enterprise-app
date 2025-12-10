@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 
 // ==========================================
 // TYPES
@@ -101,8 +101,8 @@ export function useAttachment(options: UseAttachmentOptions) {
   const fetchAttachmentType = useCallback(async () => {
     console.log('[useAttachment] Fetching attachment type:', attachmentTypeCode);
     try {
-      const response = await api.get<{ attachmentType: AttachmentType }>(
-        `/attachment-type/code/${attachmentTypeCode}`
+      const response = await commonApi.get<{ attachmentType: AttachmentType }>(
+        `/common/attachment-types/code/${attachmentTypeCode}`
       );
       console.log('[useAttachment] Attachment type fetched:', response.attachmentType);
       setAttachmentType(response.attachmentType);
@@ -124,8 +124,8 @@ export function useAttachment(options: UseAttachmentOptions) {
 
     try {
       setLoading(true);
-      const response = await api.get<{ attachments: Attachment[] }>(
-        `/attachment/reference/${referenceType}/${referenceId}`
+      const response = await commonApi.get<{ attachments: Attachment[] }>(
+        `/common/attachments/reference/${referenceType}/${referenceId}`
       );
 
       // Get the first attachment (usually one per reference)
@@ -204,8 +204,8 @@ export function useAttachment(options: UseAttachmentOptions) {
 
       // Upload with progress tracking
       // Note: Don't set Content-Type header for FormData - browser will set it with boundary
-      console.log('[useAttachment] Sending API request to /attachment/upload');
-      const response = await api.post<UploadResult>('/attachment/upload', formData, {
+      console.log('[useAttachment] Sending API request to /common/attachments/upload');
+      const response = await commonApi.post<UploadResult>('/common/attachments/upload', formData, {
         onUploadProgress: (progressEvent) => {
           const progress = progressEvent.total
             ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -284,7 +284,7 @@ export function useAttachment(options: UseAttachmentOptions) {
    */
   const deleteFile = useCallback(async (fileId: string) => {
     try {
-      await api.delete(`/attachment/file/${fileId}`);
+      await commonApi.delete(`/common/attachments/file/${fileId}`);
 
       // Update attachment state
       if (attachment) {
@@ -312,7 +312,7 @@ export function useAttachment(options: UseAttachmentOptions) {
     if (!attachment?.id) return false;
 
     try {
-      await api.delete(`/attachment/${attachment.id}`);
+      await commonApi.delete(`/common/attachments/${attachment.id}`);
       setAttachment(null);
       return true;
     } catch (err) {
@@ -331,8 +331,8 @@ export function useAttachment(options: UseAttachmentOptions) {
     try {
       // Use window.open for download
       const token = localStorage.getItem('accessToken');
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      window.open(`${baseUrl}/attachment/file/${fileId}/download?token=${token}`, '_blank');
+      const baseUrl = process.env.NEXT_PUBLIC_COMMON_API_URL || process.env.NEXT_PUBLIC_API_URL || '/api';
+      window.open(`${baseUrl}/common/attachments/file/${fileId}/download?token=${token}`, '_blank');
     } catch (err) {
       const error = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
       const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to download file';
@@ -348,8 +348,8 @@ export function useAttachment(options: UseAttachmentOptions) {
     if (!attachment?.id) return null;
 
     try {
-      const response = await api.put<{ attachment: Attachment }>(
-        `/attachment/${attachment.id}/reference`,
+      const response = await commonApi.put<{ attachment: Attachment }>(
+        `/common/attachments/${attachment.id}/reference`,
         { referenceType: newReferenceType, referenceId: newReferenceId }
       );
 

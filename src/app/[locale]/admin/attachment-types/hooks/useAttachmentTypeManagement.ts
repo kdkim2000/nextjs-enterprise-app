@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/axios';
+import { commonApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -79,7 +79,7 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       params.append('page', (page + 1).toString());
       params.append('limit', pageSize.toString());
 
-      const response = await api.get(`/attachment-type?${params.toString()}`);
+      const response = await commonApi.get(`/common/attachment-types??${params.toString()}`);
       setAttachmentTypes(response.attachmentTypes || []);
 
       if (response.pagination) {
@@ -165,11 +165,11 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       };
 
       if (!editingItem.id) {
-        const response = await api.post('/attachment-type', apiData);
+        const response = await commonApi.post('/common/attachment-types', apiData);
         setAttachmentTypes([...attachmentTypes, response.attachmentType]);
         await showSuccessMessage('CRUD_CREATE_SUCCESS');
       } else {
-        const response = await api.put(`/attachment-type/${editingItem.id}`, apiData);
+        const response = await commonApi.put(`/common/attachment-types/${editingItem.id}`, apiData);
         setAttachmentTypes(attachmentTypes.map((a) => (a.id === editingItem.id ? response.attachmentType : a)));
         await showSuccessMessage('CRUD_UPDATE_SUCCESS');
       }
@@ -194,7 +194,7 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       setDeleteLoading(true);
 
       for (const id of selectedForDelete) {
-        await api.delete(`/attachment-type/${id}`);
+        await commonApi.delete(`/common/attachment-types/${id}`);
       }
 
       setAttachmentTypes(attachmentTypes.filter((a) => !selectedForDelete.includes(a.id!)));

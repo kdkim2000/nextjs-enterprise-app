@@ -40,7 +40,7 @@ import {
 } from '@mui/icons-material';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { useHelp } from '@/hooks/useHelp';
-import api from '@/lib/axios';
+import { commApi } from '@/lib/axios';
 
 const PROGRAM_ID = 'PROG-MAIL-ADMIN';
 
@@ -123,8 +123,8 @@ export default function MailAdminPage() {
   // Fetch admin stats
   const fetchStats = useCallback(async () => {
     try {
-      const response = await api.get('/mail/admin/stats');
-      setStats(response.data.data);
+      const response = await commApi.get('/comm/mail/admin/stats');
+      setStats(response.data);
     } catch {
       // Set mock data for demo
       setStats({
@@ -141,8 +141,8 @@ export default function MailAdminPage() {
   // Fetch user quotas
   const fetchUserQuotas = useCallback(async () => {
     try {
-      const response = await api.get('/mail/admin/quotas', { params: { search: quotaSearch } });
-      setUserQuotas(response.data.data || []);
+      const response = await commApi.get('/comm/mail/admin/quotas', { params: { search: quotaSearch } });
+      setUserQuotas(response.data || []);
     } catch {
       // Set mock data for demo
       setUserQuotas([
@@ -156,9 +156,9 @@ export default function MailAdminPage() {
   // Fetch system settings
   const fetchSystemSettings = useCallback(async () => {
     try {
-      const response = await api.get('/mail/admin/settings');
-      if (response.data.data) {
-        setSystemSettings(response.data.data);
+      const response = await commApi.get('/comm/mail/admin/settings');
+      if (response.data) {
+        setSystemSettings(response.data);
       }
     } catch {
       // Use defaults
@@ -181,7 +181,7 @@ export default function MailAdminPage() {
     setSuccessMessage(null);
     setErrorMessage(null);
     try {
-      await api.put('/mail/admin/settings', systemSettings);
+      await commApi.put('/comm/mail/admin/settings', systemSettings);
       setSuccessMessage('Settings saved successfully');
     } catch {
       setErrorMessage('Failed to save settings');
