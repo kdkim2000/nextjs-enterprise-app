@@ -92,3 +92,5 @@ shared/dist/
 # Infrastructure
 infrastructure/*/data/
 infrastructure/*/logs/
+
+**/logs/
