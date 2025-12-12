@@ -53,8 +53,8 @@ RUN npm install --omit=dev && \
     mkdir -p node_modules/@enterprise && \
     ln -s /shared node_modules/@enterprise/shared
 
-# Create uploads directory
-RUN mkdir -p uploads && chown service:nodejs uploads
+# Create uploads and logs directories
+RUN mkdir -p uploads logs && chown -R service:nodejs uploads logs
 
 USER service
 
