@@ -26,15 +26,15 @@ interface ApiConfig {
 }
 
 const API_CONFIG: ApiConfig = {
-  // 로컬 개발 환경: 직접 호출
+  // 로컬 개발 환경: 직접 호출 (서비스 경로 포함)
   // core-service (3011): auth, admin, common
   // app-service (3012): content, comm
   development: {
-    auth: process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:3011',
-    admin: process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3011',
-    content: process.env.NEXT_PUBLIC_CONTENT_API_URL || 'http://localhost:3012',
-    comm: process.env.NEXT_PUBLIC_COMM_API_URL || 'http://localhost:3012',
-    common: process.env.NEXT_PUBLIC_COMMON_API_URL || 'http://localhost:3011',
+    auth: process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:3011/auth',
+    admin: process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3011/admin',
+    content: process.env.NEXT_PUBLIC_CONTENT_API_URL || 'http://localhost:3012/content',
+    comm: process.env.NEXT_PUBLIC_COMM_API_URL || 'http://localhost:3012/comm',
+    common: process.env.NEXT_PUBLIC_COMMON_API_URL || 'http://localhost:3011/common',
     legacy: process.env.NEXT_PUBLIC_LEGACY_API_URL || 'http://localhost:3001/api',
   },
 
