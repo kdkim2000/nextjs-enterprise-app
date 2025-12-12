@@ -28,7 +28,14 @@ router.get('/public', async (_req: Request, res: Response): Promise<void> => {
       'maintenance_message_zh', 'maintenance_message_vi', 'maintenance_end_time'
     ];
 
-    const allAppliedSettings = await appSettingsService.getAppliedSettingsMap();
+    let allAppliedSettings: Record<string, any> = {};
+    try {
+      allAppliedSettings = await appSettingsService.getAppliedSettingsMap();
+    } catch (dbError: any) {
+      // DB 오류 시 빈 설정 반환 (프론트엔드에서 기본값 사용)
+      logger.warn('Failed to fetch applied settings from DB, returning empty settings:', dbError.message);
+    }
+
     const publicSettings: Record<string, any> = {};
     for (const key of publicKeys) {
       if (allAppliedSettings[key] !== undefined) {
@@ -39,7 +46,8 @@ router.get('/public', async (_req: Request, res: Response): Promise<void> => {
     res.json({ settings: publicSettings });
   } catch (error: any) {
     logger.error('Get public settings error:', error);
-    res.status(500).json({ error: 'Failed to fetch public settings' });
+    // 에러 시에도 빈 설정 반환 (프론트엔드에서 기본값 사용)
+    res.json({ settings: {} });
   }
 });
 
