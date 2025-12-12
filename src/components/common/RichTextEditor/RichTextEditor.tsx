@@ -199,7 +199,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       if (response?.uploadedFiles && response.uploadedFiles.length > 0) {
         const uploadedFile = response.uploadedFiles[0];
-        const fileUrl = `/api/attachment/file/${uploadedFile.id}/view`;
+        const fileUrl = `/common/attachments/file/${uploadedFile.id}/view`;
         return fileUrl;
       }
       console.error('Image upload failed:', response?.errors || 'Unknown error');

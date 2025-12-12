@@ -1,10 +1,10 @@
 # Docker Compose - 서버 운영 환경
-# 기존 docker/docker-compose.yml 기반으로 MSA 구조 확장
+# MSA 구조: core-service + app-service (2개 서비스)
 #
 # 사용법:
-#   docker-compose up -d                    # 전체 서비스 시작
-#   docker-compose up -d backend frontend   # 특정 서비스만 시작
-#   docker-compose logs -f auth-service     # 로그 확인
+#   docker-compose up -d                         # 전체 서비스 시작
+#   docker-compose up -d core-service app-service # MSA 서비스만 시작
+#   docker-compose logs -f core-service          # 로그 확인
 #
 # 환경변수: .env 파일에서 로드
 #
@@ -51,7 +51,7 @@ services:
       - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      backend:
+      core-service:
         condition: service_healthy
       frontend:
         condition: service_started
@@ -194,49 +194,14 @@ services:
       - "3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_ENV=production
       - NEXT_PUBLIC_AUTH_API_URL=/auth
     depends_on:
-      backend:
+      core-service:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - corenext-network
-
-  # Legacy Backend (기존 모놀리식 - 점진적 마이그레이션 중)
-  backend:
-    build:
-      context: ../..
-      dockerfile: docker/backend.Dockerfile
-    container_name: corenext-backend
-    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
-    expose:
-      - "3001"
-    environment:
-      - NODE_ENV=production
-      - BACKEND_PORT=3001
-      - DB_HOST=corenext-postgres
-      - DB_PORT=5432
-      - DB_NAME=${DB_NAME:-corenextdb}
-      - DB_USER=${DB_USER:-corenext}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      # 첨부파일 저장소 - VM 스토리지 마운트
-      - /data/uploads:/app/backend/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - corenext-network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   # ===== MSA Services (통합) =====
   # 기존 5개 서비스 → 2개 서비스로 통합

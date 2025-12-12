@@ -198,6 +198,38 @@ router.get('/file/:fileId', authenticateToken, async (req: Request, res: Respons
   }
 });
 
+router.get('/file/:fileId/view', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const file = await attachmentService.getFileById(req.params.fileId);
+    if (!file) {
+      res.status(404).json({ error: 'File not found' });
+      return;
+    }
+
+    let fullPath: string;
+    if (file.full_path) {
+      fullPath = file.full_path;
+    } else {
+      fullPath = path.join(process.cwd(), 'uploads', file.storage_path, file.stored_filename);
+    }
+
+    if (!fs.existsSync(fullPath)) {
+      res.status(404).json({ error: 'File not found on server' });
+      return;
+    }
+
+    // Set content type for inline display
+    res.setHeader('Content-Type', file.mime_type || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.original_filename)}"`);
+
+    const fileStream = fs.createReadStream(fullPath);
+    fileStream.pipe(res);
+  } catch (error: any) {
+    logger.error('View file error:', error);
+    res.status(500).json({ error: 'Failed to view file' });
+  }
+});
+
 router.get('/file/:fileId/download', authenticateToken, async (req: Request, res: Response): Promise<void> => {
   try {
     const file = await attachmentService.getFileById(req.params.fileId);

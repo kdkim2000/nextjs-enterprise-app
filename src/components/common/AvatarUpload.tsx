@@ -105,7 +105,7 @@ export default function AvatarUpload({
         // Response: { attachment, uploadedFiles: [{ id, storagePath, storedFilename }] }
         if (response.uploadedFiles && response.uploadedFiles.length > 0) {
           const uploadedFile = response.uploadedFiles[0];
-          const fileUrl = `/api/attachment/file/${uploadedFile.id}/view`;
+          const fileUrl = `/common/attachments/file/${uploadedFile.id}/view`;
           if (onAvatarChange) {
             onAvatarChange(fileUrl, response.attachment?.id);
           }

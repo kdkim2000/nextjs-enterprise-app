@@ -271,7 +271,7 @@ export default function PostDetailDrawer({
 
   const handleDownload = async (attachment: Attachment) => {
     try {
-      window.open(`/api/attachment/${attachment.id}/download`, '_blank');
+      window.open(`/common/attachments/file/${attachment.id}/download`, '_blank');
     } catch (error) {
       console.error('Error downloading attachment:', error);
     }
