@@ -58,7 +58,7 @@ export function useQnA(postId?: string, authorId?: string) {
       try {
         setLoading(true);
         setError(null);
-        const response = await contentApiClient.get(`/content/qna/post/${postId}`);
+        const response = await contentApiClient.get(`/qna/post/${postId}`);
 
         if (response.success && response.data) {
           setQnaData(response.data);
@@ -84,7 +84,7 @@ export function useQnA(postId?: string, authorId?: string) {
     }
 
     try {
-      const response = await contentApiClient.post('/content/qna/accept-answer', {
+      const response = await contentApiClient.post('/qna/accept-answer', {
         postId,
         commentId
       });
@@ -115,7 +115,7 @@ export function useQnA(postId?: string, authorId?: string) {
     }
 
     try {
-      const response = await contentApiClient.post('/content/qna/unaccept-answer', {
+      const response = await contentApiClient.post('/qna/unaccept-answer', {
         postId,
         commentId
       });
@@ -183,8 +183,8 @@ export function useAnswerHelpful(commentId?: string) {
       setLoading(true);
 
       const response = isHelpful
-        ? await contentApiClient.delete(`/content/qna/helpful/${commentId}`)
-        : await contentApiClient.post(`/content/qna/helpful/${commentId}`);
+        ? await contentApiClient.delete(`/qna/helpful/${commentId}`)
+        : await contentApiClient.post(`/qna/helpful/${commentId}`);
 
       if (response.success) {
         setIsHelpful(!isHelpful);
@@ -238,7 +238,7 @@ export function useQnAStats(boardTypeId?: string) {
       try {
         setLoading(true);
         setError(null);
-        const response = await contentApiClient.get(`/content/qna/stats/${boardTypeId}`);
+        const response = await contentApiClient.get(`/qna/stats/${boardTypeId}`);
 
         if (response.success && (response as any).stats) {
           setStats((response as any).stats);

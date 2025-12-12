@@ -95,7 +95,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const url = `/admin/programs?${params.toString()}`;
+      const url = `/programs?${params.toString()}`;
       console.log('[useProgramManagement] API URL:', url);
 
       const response = await adminApi.get(url);

@@ -96,7 +96,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       params.append('limit', pageSize.toString());
 
       // Use boardType.id instead of boardTypeId (which is the code)
-      const url = `/content/posts/board/${boardType.id}?${params.toString()}`;
+      const url = `/posts/board/${boardType.id}?${params.toString()}`;
       console.log('Fetching posts from:', url);
       const response = await contentApiClient.get(url);
       console.log('API Response:', response);
@@ -220,7 +220,7 @@ export const useBoardManagement = (options: UseBoardManagementOptions) => {
       setDeleteLoading(true);
 
       // Delete posts one by one
-      const deletePromises = deleteTargetIds.map(id => contentApiClient.delete(`/content/posts/${id}`));
+      const deletePromises = deleteTargetIds.map(id => contentApiClient.delete(`/posts/${id}`));
       const results = await Promise.allSettled(deletePromises);
 
       // Count successes and failures

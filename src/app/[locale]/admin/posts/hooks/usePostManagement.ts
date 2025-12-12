@@ -24,7 +24,7 @@ export const usePostManagement = () => {
   // Fetch board types for filter
   const fetchBoardTypes = useCallback(async () => {
     try {
-      const response = await contentApiClient.get('/content/board-types/all');
+      const response = await contentApiClient.get('/board-types/all');
       if (response.success) {
         setBoardTypes(response.data || []);
       }
@@ -38,7 +38,7 @@ export const usePostManagement = () => {
     try {
       setSearching(true);
       const queryString = buildQueryParams(quickSearch, searchCriteria, paginationModel);
-      const response = await contentApiClient.get(`/content/posts?${queryString}`);
+      const response = await contentApiClient.get(`/posts?${queryString}`);
 
       if (response.success) {
         setPosts(response.data.items || []);
@@ -77,7 +77,7 @@ export const usePostManagement = () => {
   const handleApprove = useCallback(
     async (post: Post) => {
       try {
-        const response = await contentApiClient.post(`/content/posts/${post.id}/approve`);
+        const response = await contentApiClient.post(`/posts/${post.id}/approve`);
         if (response.success) {
           setSuccessMessage('Post approved successfully');
           fetchPosts();
@@ -96,8 +96,8 @@ export const usePostManagement = () => {
     async (post: Post) => {
       try {
         const response = post.is_pinned
-          ? await contentApiClient.post(`/content/posts/${post.id}/unpin`)
-          : await contentApiClient.post(`/content/posts/${post.id}/pin`);
+          ? await contentApiClient.post(`/posts/${post.id}/unpin`)
+          : await contentApiClient.post(`/posts/${post.id}/pin`);
 
         if (response.success) {
           setSuccessMessage(post.is_pinned ? 'Post unpinned successfully' : 'Post pinned successfully');
@@ -123,7 +123,7 @@ export const usePostManagement = () => {
       setDeleteLoading(true);
 
       for (const id of selectedForDelete) {
-        const response = await contentApiClient.delete(`/content/posts/${id}`);
+        const response = await contentApiClient.delete(`/posts/${id}`);
         if (!response.success) {
           throw new Error(response.error || `Failed to delete post ${id}`);
         }
