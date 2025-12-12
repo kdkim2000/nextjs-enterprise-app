@@ -112,7 +112,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await adminApi.get(`/admin/departments?${params.toString()}`);
+      const response = await adminApi.get(`/departments?${params.toString()}`);
       setDepartments(response.departments || []);
 
       // Update row count for DataGrid
@@ -189,7 +189,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
         await showSuccessMessage('CRUD_DEPARTMENT_CREATE_SUCCESS');
       } else {
         // Update existing department
-        const response = await adminApi.put(`/admin/departments/${editingDepartment.id}`, payload);
+        const response = await adminApi.put(`/departments/${editingDepartment.id}`, payload);
         setDepartments(departments.map((d) => (d.id === editingDepartment.id ? response.department : d)));
         await showSuccessMessage('CRUD_DEPARTMENT_UPDATE_SUCCESS');
       }
@@ -216,7 +216,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
 
       // Delete departments from API
       for (const id of selectedForDelete) {
-        await adminApi.delete(`/admin/departments/${id}`);
+        await adminApi.delete(`/departments/${id}`);
       }
 
       // Remove from local state

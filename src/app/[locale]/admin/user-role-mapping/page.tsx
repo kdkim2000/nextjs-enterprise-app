@@ -182,7 +182,7 @@ export default function UserRoleMappingPage() {
     try {
       setDeleting(true);
       for (const id of selectedMappingsForDelete) {
-        await adminApi.delete(`/admin/user-role-mappings/${id}`);
+        await adminApi.delete(`/user-role-mappings/${id}`);
       }
 
       const count = selectedMappingsForDelete.length;

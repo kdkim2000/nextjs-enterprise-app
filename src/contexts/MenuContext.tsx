@@ -154,7 +154,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   // Remove menu from favorites
   const removeFromFavorites = useCallback(async (menuId: string) => {
     try {
-      await adminApi.delete(`/admin/users/favorite-menus/${menuId}`);
+      await adminApi.delete(`/users/favorite-menus/${menuId}`);
       await fetchFavoriteMenus();
     } catch (err: unknown) {
       console.error('Error removing from favorites:', err);

@@ -173,7 +173,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       if (editingMenu.id) {
         // Update existing menu
-        await adminApi.put(`/admin/menus/${editingMenu.id}`, menuData);
+        await adminApi.put(`/menus/${editingMenu.id}`, menuData);
         await showSuccessMessage('CRUD_MENU_UPDATE_SUCCESS');
       } else {
         // Add new menu
@@ -206,7 +206,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       // Delete menus from API
       for (const id of selectedForDelete) {
-        await adminApi.delete(`/admin/menus/${id}`);
+        await adminApi.delete(`/menus/${id}`);
       }
 
       // Refresh menus

@@ -50,7 +50,7 @@ export default function HelpViewer({ open, onClose, programId, language = 'en', 
     try {
       setLoading(true);
       setError(null);
-      const response = await contentApi.get(`/content/help?programId=${programId}&language=${language}`);
+      const response = await contentApi.get(`/help?programId=${programId}&language=${language}`);
       setHelpContent(response.help || null);
 
       // If no help content found, fetch default template (help-001) for reference

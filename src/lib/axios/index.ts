@@ -217,6 +217,8 @@ const getAdminBaseUrl = (): string => {
 
 const getAuthServiceUrl = (): string => {
   const config = getApiConfig();
+  console.log('[getAuthServiceUrl] Environment config:', config);
+  console.log('[getAuthServiceUrl] Auth URL:', config.auth);
   return config.auth;
 };
 

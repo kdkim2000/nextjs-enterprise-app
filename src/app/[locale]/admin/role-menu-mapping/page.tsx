@@ -228,7 +228,7 @@ export default function RoleMenuMappingPage() {
     try {
       setSaveLoading(true);
 
-      await adminApi.put(`/admin/role-program-mappings/${editingPermission.id}`, {
+      await adminApi.put(`/role-program-mappings/${editingPermission.id}`, {
         canView: editingPermission.canView,
         canCreate: editingPermission.canCreate,
         canUpdate: editingPermission.canUpdate,
@@ -257,7 +257,7 @@ export default function RoleMenuMappingPage() {
     try {
       setDeleting(true);
       for (const id of selectedMappingsForDelete) {
-        await adminApi.delete(`/admin/role-program-mappings/${id}`);
+        await adminApi.delete(`/role-program-mappings/${id}`);
       }
 
       const count = selectedMappingsForDelete.length;

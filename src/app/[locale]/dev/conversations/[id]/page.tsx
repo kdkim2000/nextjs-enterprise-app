@@ -114,7 +114,7 @@ export default function ConversationDetailPage({ params }: { params: Promise<{ i
       setLoading(true);
       setError(null);
       try {
-        const response = await commApi.get(`/comm/conversations/${id}`);
+        const response = await commApi.get(`/conversations/${id}`);
         setData(response);
         // Filter out empty messages for initial expansion
         const nonEmptyIndices = response.messages

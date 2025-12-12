@@ -202,7 +202,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
         await showSuccessMessage('CRUD_PROGRAM_CREATE_SUCCESS');
       } else {
         // Update existing program
-        const response = await adminApi.put(`/admin/programs/${editingProgram.id}`, apiData);
+        const response = await adminApi.put(`/programs/${editingProgram.id}`, apiData);
 
         setPrograms(programs.map((p) => (p.id === editingProgram.id ? response.program : p)));
         await showSuccessMessage('CRUD_PROGRAM_UPDATE_SUCCESS');
@@ -230,7 +230,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       // Delete programs from API
       for (const id of selectedForDelete) {
-        await adminApi.delete(`/admin/programs/${id}`);
+        await adminApi.delete(`/programs/${id}`);
       }
 
       // Remove from local state

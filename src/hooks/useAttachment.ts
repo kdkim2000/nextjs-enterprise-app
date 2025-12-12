@@ -102,7 +102,7 @@ export function useAttachment(options: UseAttachmentOptions) {
     console.log('[useAttachment] Fetching attachment type:', attachmentTypeCode);
     try {
       const response = await commonApi.get<{ attachmentType: AttachmentType }>(
-        `/common/attachment-types/code/${attachmentTypeCode}`
+        `/attachment-types/code/${attachmentTypeCode}`
       );
       console.log('[useAttachment] Attachment type fetched:', response.attachmentType);
       setAttachmentType(response.attachmentType);
@@ -125,7 +125,7 @@ export function useAttachment(options: UseAttachmentOptions) {
     try {
       setLoading(true);
       const response = await commonApi.get<{ attachments: Attachment[] }>(
-        `/common/attachments/reference/${referenceType}/${referenceId}`
+        `/attachments/reference/${referenceType}/${referenceId}`
       );
 
       // Get the first attachment (usually one per reference)
@@ -204,7 +204,7 @@ export function useAttachment(options: UseAttachmentOptions) {
 
       // Upload with progress tracking
       // Note: Don't set Content-Type header for FormData - browser will set it with boundary
-      console.log('[useAttachment] Sending API request to /common/attachments/upload');
+      console.log('[useAttachment] Sending API request to /attachments/upload');
       const response = await commonApi.post<UploadResult>('/attachments/upload', formData, {
         onUploadProgress: (progressEvent) => {
           const progress = progressEvent.total
@@ -284,7 +284,7 @@ export function useAttachment(options: UseAttachmentOptions) {
    */
   const deleteFile = useCallback(async (fileId: string) => {
     try {
-      await commonApi.delete(`/common/attachments/file/${fileId}`);
+      await commonApi.delete(`/attachments/file/${fileId}`);
 
       // Update attachment state
       if (attachment) {
@@ -312,7 +312,7 @@ export function useAttachment(options: UseAttachmentOptions) {
     if (!attachment?.id) return false;
 
     try {
-      await commonApi.delete(`/common/attachments/${attachment.id}`);
+      await commonApi.delete(`/attachments/${attachment.id}`);
       setAttachment(null);
       return true;
     } catch (err) {
@@ -332,7 +332,7 @@ export function useAttachment(options: UseAttachmentOptions) {
       // Use window.open for download
       const token = localStorage.getItem('accessToken');
       const baseUrl = process.env.NEXT_PUBLIC_COMMON_API_URL || process.env.NEXT_PUBLIC_API_URL || '/api';
-      window.open(`${baseUrl}/common/attachments/file/${fileId}/download?token=${token}`, '_blank');
+      window.open(`${baseUrl}/attachments/file/${fileId}/download?token=${token}`, '_blank');
     } catch (err) {
       const error = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
       const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to download file';
@@ -349,7 +349,7 @@ export function useAttachment(options: UseAttachmentOptions) {
 
     try {
       const response = await commonApi.put<{ attachment: Attachment }>(
-        `/common/attachments/${attachment.id}/reference`,
+        `/attachments/${attachment.id}/reference`,
         { referenceType: newReferenceType, referenceId: newReferenceId }
       );
 

@@ -160,7 +160,7 @@ export default function LogsPage() {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await commonApi.get(`/common/logs?${params.toString()}`);
+      const response = await commonApi.get(`/logs?${params.toString()}`);
       setLogs(response.logs || []);
 
       // Update row count for DataGrid

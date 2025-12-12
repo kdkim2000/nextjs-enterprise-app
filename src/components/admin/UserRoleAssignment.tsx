@@ -154,7 +154,7 @@ export default function UserRoleAssignment({
       setRemovingRoleId(mappingId);
       setError(null);
 
-      await adminApi.delete(`/admin/user-role-mappings/${mappingId}`);
+      await adminApi.delete(`/user-role-mappings/${mappingId}`);
 
       // Update local state
       setUserRoles(prev => prev.filter(ur => ur.id !== mappingId));

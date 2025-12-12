@@ -118,7 +118,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await commonApi.get(`/common/codes??${params.toString()}`);
+      const response = await commonApi.get(`/codes?${params.toString()}`);
       setCodes(response.codes || []);
 
       // Update row count for DataGrid
@@ -207,7 +207,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
         await showSuccessMessage('CRUD_CODE_CREATE_SUCCESS');
       } else {
         // Update existing code
-        const response = await commonApi.put(`/common/codes/${editingCode.id}`, payload);
+        const response = await commonApi.put(`/codes/${editingCode.id}`, payload);
         setCodes(codes.map((c) => (c.id === editingCode.id ? response.code : c)));
         await showSuccessMessage('CRUD_CODE_UPDATE_SUCCESS');
       }
@@ -234,7 +234,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
       // Delete codes from API
       for (const id of selectedForDelete) {
-        await commonApi.delete(`/common/codes/${id}`);
+        await commonApi.delete(`/codes/${id}`);
       }
 
       // Remove from local state

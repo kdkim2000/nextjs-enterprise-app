@@ -46,7 +46,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
         params.append('isApplied', appliedFilter);
       }
 
-      const response = await commonApi.get(`/common/app-settings/grouped?${params.toString()}`);
+      const response = await commonApi.get(`/app-settings/grouped?${params.toString()}`);
       const grouped = response.settings || {};
 
       setGroupedSettings(grouped);
@@ -70,7 +70,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
   const fetchSettingsByCategory = useCallback(async (category: CategoryType) => {
     try {
       setLoading(true);
-      const response = await commonApi.get(`/common/app-settings/category/${category}`);
+      const response = await commonApi.get(`/app-settings/category/${category}`);
       return response.settings || [];
     } catch (error) {
       console.error('Failed to fetch category settings:', error);
@@ -85,7 +85,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
   const updateSetting = useCallback(async (key: string, updates: Partial<SettingUpdatePayload>) => {
     try {
       setSaveLoading(true);
-      const response = await commonApi.put(`/common/app-settings/${key}`, updates);
+      const response = await commonApi.put(`/app-settings/${key}`, updates);
 
       // Update local state
       const updatedSetting = response.setting;
@@ -120,7 +120,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
   const toggleReadyStatus = useCallback(async (key: string, isReady: boolean) => {
     try {
       setSaveLoading(true);
-      const response = await commonApi.patch(`/common/app-settings/${key}/ready`, { isReady });
+      const response = await commonApi.patch(`/app-settings/${key}/ready`, { isReady });
 
       const updatedSetting = response.setting;
 
@@ -154,7 +154,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
   const toggleAppliedStatus = useCallback(async (key: string, isApplied: boolean) => {
     try {
       setSaveLoading(true);
-      const response = await commonApi.patch(`/common/app-settings/${key}/applied`, { isApplied });
+      const response = await commonApi.patch(`/app-settings/${key}/applied`, { isApplied });
 
       const updatedSetting = response.setting;
 
@@ -218,7 +218,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
   const deleteSetting = useCallback(async (key: string) => {
     try {
       setSaveLoading(true);
-      await commonApi.delete(`/common/app-settings/${key}`);
+      await commonApi.delete(`/app-settings/${key}`);
 
       // Update local state
       setSettings(prev => prev.filter(s => s.key !== key));

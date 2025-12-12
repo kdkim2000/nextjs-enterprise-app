@@ -139,7 +139,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const response = await contentApi.get(`/content/help?${params.toString()}`);
+      const response = await contentApi.get(`/help?${params.toString()}`);
       setHelps(response.helps || []);
 
       // Update row count for DataGrid
@@ -196,7 +196,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
         await showSuccessMessage('CRUD_HELP_CREATE_SUCCESS');
       } else {
         // Update existing help
-        const response = await contentApi.put(`/content/help/${editingHelp.id}`, editingHelp);
+        const response = await contentApi.put(`/help/${editingHelp.id}`, editingHelp);
         setHelps(helps.map((h) => (h.id === editingHelp.id ? response.help : h)));
         await showSuccessMessage('CRUD_HELP_UPDATE_SUCCESS');
       }
@@ -223,7 +223,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
       // Delete helps from API
       for (const id of selectedForDelete) {
-        await contentApi.delete(`/content/help/${id}`);
+        await contentApi.delete(`/help/${id}`);
       }
 
       // Remove from local state
