@@ -238,12 +238,17 @@ services:
       retries: 3
       start_period: 10s
 
-  # Auth Service (MSA - 인증 담당)
-  auth-service:
+  # ===== MSA Services (통합) =====
+  # 기존 5개 서비스 → 2개 서비스로 통합
+  # - core-service: auth + admin + common (Port 3011)
+  # - app-service: content + communication (Port 3012)
+
+  # Core Service (MSA 통합 - Auth + Admin + Common)
+  core-service:
     build:
       context: ../..
-      dockerfile: services/auth-service/Dockerfile
-    container_name: corenext-auth-service
+      dockerfile: services/core-service/Dockerfile
+    container_name: corenext-core-service
     # 보안: Nginx를 통해서만 접근 (내부 네트워크)
     expose:
       - "3011"
@@ -261,6 +266,8 @@ services:
       # 보안: Redis 비밀번호 포함 URL
       - REDIS_URL=redis://:${REDIS_PASSWORD:-RedisSecure2025!}@corenext-redis:6379
       - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    volumes:
+      - /data/uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -276,12 +283,12 @@ services:
       retries: 3
       start_period: 10s
 
-  # Admin Service (MSA - 사용자/역할/메뉴 관리 담당)
-  admin-service:
+  # App Service (MSA 통합 - Content + Communication)
+  app-service:
     build:
       context: ../..
-      dockerfile: services/admin-service/Dockerfile
-    container_name: corenext-admin-service
+      dockerfile: services/app-service/Dockerfile
+    container_name: corenext-app-service
     # 보안: Nginx를 통해서만 접근 (내부 네트워크)
     expose:
       - "3012"
@@ -295,118 +302,19 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - AUTH_SERVICE_URL=http://corenext-auth-service:3011
       - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
+    volumes:
+      - /data/uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
-      auth-service:
+      core-service:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - corenext-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3012/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  # Content Service (MSA - 게시판/콘텐츠 관리 담당)
-  content-service:
-    build:
-      context: ../..
-      dockerfile: services/content-service/Dockerfile
-    container_name: corenext-content-service
-    expose:
-      - "3013"
-    environment:
-      - NODE_ENV=production
-      - PORT=3013
-      - DB_HOST=corenext-postgres
-      - DB_PORT=5432
-      - DB_NAME=${DB_NAME:-corenextdb}
-      - DB_USER=${DB_USER:-corenext}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
-    volumes:
-      - /data/uploads:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - corenext-network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3013/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  # Communication Service (MSA - 메일/메시지/대화 관리 담당)
-  communication-service:
-    build:
-      context: ../..
-      dockerfile: services/communication-service/Dockerfile
-    container_name: corenext-communication-service
-    expose:
-      - "3014"
-    environment:
-      - NODE_ENV=production
-      - PORT=3014
-      - DB_HOST=corenext-postgres
-      - DB_PORT=5432
-      - DB_NAME=${DB_NAME:-corenextdb}
-      - DB_USER=${DB_USER:-corenext}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - corenext-network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3014/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  # Common Service (MSA - 공통 기능 담당: 코드/설정/첨부파일 등)
-  common-service:
-    build:
-      context: ../..
-      dockerfile: services/common-service/Dockerfile
-    container_name: corenext-common-service
-    expose:
-      - "3015"
-    environment:
-      - NODE_ENV=production
-      - PORT=3015
-      - DB_HOST=corenext-postgres
-      - DB_PORT=5432
-      - DB_NAME=${DB_NAME:-corenextdb}
-      - DB_USER=${DB_USER:-corenext}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://your-domain.com}
-    volumes:
-      - /data/uploads:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - corenext-network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3015/health"]
       interval: 30s
       timeout: 10s
       retries: 3
