@@ -122,7 +122,7 @@ export function useDashboardData(): UseDashboardDataReturn {
         menuUsageData
       ] = await Promise.all([
         safeFetch(() => commonApi.get('/dashboard/summary'), null),
-        safeFetch(() => commonApi.get(`/common/dashboard/activity-trend?days=${days}`), []),
+        safeFetch(() => commonApi.get(`/dashboard/activity-trend?days=${days}`), []),
         safeFetch(() => commonApi.get('/dashboard/user-status'), []),
         safeFetch(() => commonApi.get('/dashboard/department-stats?limit=8'), []),
         safeFetch(() => commonApi.get('/dashboard/board-activity'), []),
@@ -131,7 +131,7 @@ export function useDashboardData(): UseDashboardDataReturn {
         safeFetch(() => commonApi.get('/dashboard/top-posts?limit=5'), []),
         safeFetch(() => commonApi.get('/dashboard/error-endpoints?limit=5'), []),
         safeFetch(() => commonApi.get('/dashboard/recent-activity?limit=10'), []),
-        safeFetch(() => commonApi.get(`/common/dashboard/login-stats?days=${days}`), []),
+        safeFetch(() => commonApi.get(`/dashboard/login-stats?days=${days}`), []),
         safeFetch(() => commonApi.get('/dashboard/menu-usage?limit=10'), [])
       ]);
 
