@@ -1,10 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AuthState } from '@/types/auth';
-import { authApi as authApiClient } from '@/lib/axios';
-import { getApiConfig, getEnvironment } from '@/lib/api/config';
+import { authApi } from '@/lib/axios';
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<any>;
@@ -18,19 +16,6 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Get Auth API base URL based on environment
- */
-const getAuthApiUrl = (): string => {
-  const config = getApiConfig();
-  const env = getEnvironment();
-
-  if (env === 'development') {
-    return config.auth; // Direct call to auth service
-  }
-  return ''; // Relative path via API Gateway
-};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -39,25 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
     isLoading: true
   });
-
-  // Create auth API client
-  const authApi = useMemo(() => {
-    const baseUrl = getAuthApiUrl();
-    return {
-      post: async (url: string, data?: any) => {
-        const fullUrl = baseUrl ? `${baseUrl}${url}` : url;
-        const response = await axios.post(fullUrl, data, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(typeof window !== 'undefined' && localStorage.getItem('accessToken')
-              ? { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-              : {})
-          }
-        });
-        return response.data;
-      }
-    };
-  }, []);
 
   // Initialize auth from localStorage
   useEffect(() => {
@@ -131,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = error.response?.data?.message || error.message || 'Login failed';
       throw new Error(message);
     }
-  }, [authApi]);
+  }, []);
 
   const verifyMFA = useCallback(async (mfaToken: string, code: string) => {
     try {
@@ -162,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = error.response?.data?.message || error.message || 'MFA verification failed';
       throw new Error(message);
     }
-  }, [authApi]);
+  }, []);
 
   const resendMFA = useCallback(async (mfaToken: string) => {
     try {
@@ -175,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = error.response?.data?.message || error.message || 'Failed to resend MFA code';
       throw new Error(message);
     }
-  }, [authApi]);
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -200,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: false
       });
     }
-  }, [authApi]);
+  }, []);
 
   const refreshAccessToken = useCallback(async () => {
     try {
