@@ -200,11 +200,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await logout();
       throw error;
     }
-  }, [authApi, logout]);
+  }, [logout]);
 
   const ssoLogin = useCallback(async () => {
     try {
-      const response = await authApiClient.post('/auth/sso');
+      const response = await authApi.post('/sso');
 
       const data = response.data || response;
       const accessToken = data.accessToken || data.token;
