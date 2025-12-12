@@ -70,8 +70,8 @@ export default function UserRoleMappingPage() {
   const fetchRoles = useCallback(async () => {
     try {
       const [rolesResponse, mappingsResponse] = await Promise.all([
-        adminApi.get('/admin/roles'),
-        adminApi.get('/admin/user-role-mappings', { params: { includeDetails: 'true' } })
+        adminApi.get('/roles'),
+        adminApi.get('/user-role-mappings', { params: { includeDetails: 'true' } })
       ]);
 
       const activeRoles = (rolesResponse.roles || []).filter((r: Role) => r.isActive);
@@ -94,7 +94,7 @@ export default function UserRoleMappingPage() {
     try {
       setLoading(true);
       // Fetch all mappings (active + inactive) for the role
-      const response = await adminApi.get('/admin/user-role-mappings', {
+      const response = await adminApi.get('/user-role-mappings', {
         params: { roleId: selectedRole.id, includeDetails: 'true' }
       });
       const allRoleMappings = response.mappings || [];
@@ -158,7 +158,7 @@ export default function UserRoleMappingPage() {
 
       // Create mappings for each selected user
       for (const user of users) {
-        await adminApi.post('/admin/user-role-mappings', {
+        await adminApi.post('/user-role-mappings', {
           userId: user.id,
           roleId: selectedRole.id,
           isActive: true

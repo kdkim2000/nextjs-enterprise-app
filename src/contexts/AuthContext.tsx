@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (username: string, password: string) => {
     try {
-      const response = await authApi.post('/auth/login', { username, password });
+      const response = await authApi.post('/login', { username, password });
 
       // Check for MFA required
       if (response.requireMFA || response.data?.requireMFA) {
@@ -135,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyMFA = useCallback(async (mfaToken: string, code: string) => {
     try {
-      const response = await authApi.post('/auth/verify-mfa', { mfaToken, code });
+      const response = await authApi.post('/verify-mfa', { mfaToken, code });
 
       const data = response.data || response;
       const accessToken = data.accessToken || data.token;
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resendMFA = useCallback(async (mfaToken: string) => {
     try {
-      const response = await authApi.post('/auth/resend-mfa', { mfaToken });
+      const response = await authApi.post('/resend-mfa', { mfaToken });
       return {
         devCode: response.devCode || response.data?.devCode
       };
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const refreshToken = localStorage.getItem('refreshToken');
 
       if (token) {
-        await authApi.post('/auth/logout', { refreshToken });
+        await authApi.post('/logout', { refreshToken });
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -209,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No refresh token available');
       }
 
-      const response = await authApi.post('/auth/refresh', {
+      const response = await authApi.post('/refresh', {
         refreshToken: currentRefreshToken
       });
 

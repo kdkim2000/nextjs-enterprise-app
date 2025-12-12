@@ -121,18 +121,18 @@ export function useDashboardData(): UseDashboardDataReturn {
         loginStatsData,
         menuUsageData
       ] = await Promise.all([
-        safeFetch(() => commonApi.get('/common/dashboard/summary'), null),
+        safeFetch(() => commonApi.get('/dashboard/summary'), null),
         safeFetch(() => commonApi.get(`/common/dashboard/activity-trend?days=${days}`), []),
-        safeFetch(() => commonApi.get('/common/dashboard/user-status'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/department-stats?limit=8'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/board-activity'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/system-performance?hours=24'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/http-status'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/top-posts?limit=5'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/error-endpoints?limit=5'), []),
-        safeFetch(() => commonApi.get('/common/dashboard/recent-activity?limit=10'), []),
+        safeFetch(() => commonApi.get('/dashboard/user-status'), []),
+        safeFetch(() => commonApi.get('/dashboard/department-stats?limit=8'), []),
+        safeFetch(() => commonApi.get('/dashboard/board-activity'), []),
+        safeFetch(() => commonApi.get('/dashboard/system-performance?hours=24'), []),
+        safeFetch(() => commonApi.get('/dashboard/http-status'), []),
+        safeFetch(() => commonApi.get('/dashboard/top-posts?limit=5'), []),
+        safeFetch(() => commonApi.get('/dashboard/error-endpoints?limit=5'), []),
+        safeFetch(() => commonApi.get('/dashboard/recent-activity?limit=10'), []),
         safeFetch(() => commonApi.get(`/common/dashboard/login-stats?days=${days}`), []),
-        safeFetch(() => commonApi.get('/common/dashboard/menu-usage?limit=10'), [])
+        safeFetch(() => commonApi.get('/dashboard/menu-usage?limit=10'), [])
       ]);
 
       // Single setState call with all data - prevents multiple re-renders

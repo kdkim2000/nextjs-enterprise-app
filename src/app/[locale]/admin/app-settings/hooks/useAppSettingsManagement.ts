@@ -193,7 +193,7 @@ export const useAppSettingsManagement = (options: UseAppSettingsManagementOption
   const createSetting = useCallback(async (settingData: Partial<AppSetting>) => {
     try {
       setSaveLoading(true);
-      const response = await commonApi.post('/common/app-settings', settingData);
+      const response = await commonApi.post('/app-settings', settingData);
       const newSetting = response.setting;
 
       // Refresh to get updated grouped settings

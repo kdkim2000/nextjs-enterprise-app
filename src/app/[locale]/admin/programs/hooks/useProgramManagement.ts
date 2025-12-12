@@ -196,7 +196,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       if (!editingProgram.id) {
         // Add new program
-        const response = await adminApi.post('/admin/programs', apiData);
+        const response = await adminApi.post('/programs', apiData);
 
         setPrograms([...programs, response.program]);
         await showSuccessMessage('CRUD_PROGRAM_CREATE_SUCCESS');

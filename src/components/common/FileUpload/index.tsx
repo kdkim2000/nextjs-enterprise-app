@@ -97,7 +97,7 @@ export default function FileUpload({
       formData.append('file', fileWithProgress.file);
 
       // Upload with progress tracking
-      const response = await commonApi.post<{ file: UploadedFile }>('/common/file/upload', formData, {
+      const response = await commonApi.post<{ file: UploadedFile }>('/file/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },

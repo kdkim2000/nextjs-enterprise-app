@@ -123,7 +123,7 @@ export default function MailAdminPage() {
   // Fetch admin stats
   const fetchStats = useCallback(async () => {
     try {
-      const response = await commApi.get('/comm/mail/admin/stats');
+      const response = await commApi.get('/mail/admin/stats');
       setStats(response.data);
     } catch {
       // Set mock data for demo
@@ -141,7 +141,7 @@ export default function MailAdminPage() {
   // Fetch user quotas
   const fetchUserQuotas = useCallback(async () => {
     try {
-      const response = await commApi.get('/comm/mail/admin/quotas', { params: { search: quotaSearch } });
+      const response = await commApi.get('/mail/admin/quotas', { params: { search: quotaSearch } });
       setUserQuotas(response.data || []);
     } catch {
       // Set mock data for demo
@@ -156,7 +156,7 @@ export default function MailAdminPage() {
   // Fetch system settings
   const fetchSystemSettings = useCallback(async () => {
     try {
-      const response = await commApi.get('/comm/mail/admin/settings');
+      const response = await commApi.get('/mail/admin/settings');
       if (response.data) {
         setSystemSettings(response.data);
       }
@@ -181,7 +181,7 @@ export default function MailAdminPage() {
     setSuccessMessage(null);
     setErrorMessage(null);
     try {
-      await commApi.put('/comm/mail/admin/settings', systemSettings);
+      await commApi.put('/mail/admin/settings', systemSettings);
       setSuccessMessage('Settings saved successfully');
     } catch {
       setErrorMessage('Failed to save settings');

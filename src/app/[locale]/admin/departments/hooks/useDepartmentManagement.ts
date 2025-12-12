@@ -70,7 +70,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
   const fetchUsers = useCallback(async () => {
     try {
       // Fetch all users using the simplified endpoint (no pagination)
-      const response = await adminApi.get('/admin/users/all');
+      const response = await adminApi.get('/users/all');
       setAllUsers(response.users || []);
     } catch (error: any) {
       // If user doesn't have permission to view users (403), silently set empty array
@@ -184,7 +184,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
 
       if (!editingDepartment.id) {
         // Add new department
-        const response = await adminApi.post('/admin/departments', payload);
+        const response = await adminApi.post('/departments', payload);
         setDepartments([...departments, response.department]);
         await showSuccessMessage('CRUD_DEPARTMENT_CREATE_SUCCESS');
       } else {

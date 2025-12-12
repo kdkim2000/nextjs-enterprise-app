@@ -73,7 +73,7 @@ export default function RoleSearchDialog({
   const fetchRoles = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.get('/admin/roles');
+      const response = await adminApi.get('/roles');
       const allRoles = response.roles || [];
       // 활성 역할만 필터링 및 이미 매핑된 역할 제외
       const activeRoles = allRoles.filter(

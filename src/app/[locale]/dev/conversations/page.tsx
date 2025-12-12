@@ -233,8 +233,8 @@ export default function ConversationsPage() {
     const fetchInitialData = async () => {
       try {
         const [statsRes, filtersRes] = await Promise.all([
-          commApi.get('/comm/conversations/stats'),
-          commApi.get('/comm/conversations/filters')
+          commApi.get('/conversations/stats'),
+          commApi.get('/conversations/filters')
         ]);
         setStats(statsRes);
         setFilterOptions(filtersRes);
@@ -366,7 +366,7 @@ export default function ConversationsPage() {
 
     setDeleting(true);
     try {
-      await commApi.delete('/comm/conversations/batch', { data: { ids: Array.from(selectedIds) } });
+      await commApi.delete('/conversations/batch', { data: { ids: Array.from(selectedIds) } });
       setSnackbar({
         open: true,
         message: `${selectedIds.size} conversation(s) deleted successfully`,

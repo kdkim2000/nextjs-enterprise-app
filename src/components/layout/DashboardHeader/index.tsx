@@ -85,7 +85,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
     // Save to backend asynchronously
     try {
-      await authApi.patch('/auth/user-settings/general', {
+      await authApi.patch('/user-settings/general', {
         language: newLocale
       });
       console.log(`[DashboardHeader] Language preference saved: ${newLocale}`);

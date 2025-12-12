@@ -83,7 +83,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
     try {
       setSearching(true);
 
-      const response = await adminApi.get('/admin/roles');
+      const response = await adminApi.get('/roles');
       const allRoles = response.roles || [];
 
       let filtered = [];
@@ -211,7 +211,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
         await showSuccessMessage('CRUD_ROLE_UPDATE_SUCCESS');
       } else {
         // Create new role
-        const response = await adminApi.post('/admin/roles', roleData);
+        const response = await adminApi.post('/roles', roleData);
         setRoles([...roles, response.role]);
         await showSuccessMessage('CRUD_ROLE_CREATE_SUCCESS');
       }

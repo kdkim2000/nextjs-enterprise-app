@@ -205,7 +205,7 @@ export function useAttachment(options: UseAttachmentOptions) {
       // Upload with progress tracking
       // Note: Don't set Content-Type header for FormData - browser will set it with boundary
       console.log('[useAttachment] Sending API request to /common/attachments/upload');
-      const response = await commonApi.post<UploadResult>('/common/attachments/upload', formData, {
+      const response = await commonApi.post<UploadResult>('/attachments/upload', formData, {
         onUploadProgress: (progressEvent) => {
           const progress = progressEvent.total
             ? Math.round((progressEvent.loaded * 100) / progressEvent.total)

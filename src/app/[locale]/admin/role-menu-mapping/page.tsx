@@ -74,8 +74,8 @@ export default function RoleMenuMappingPage() {
     try {
       console.log('[role-menu-mapping] Fetching programs and mappings...');
       const [programsResponse, mappingsResponse] = await Promise.all([
-        adminApi.get('/admin/programs/all'),
-        adminApi.get('/admin/role-program-mappings', { params: { includeDetails: 'true' } })
+        adminApi.get('/programs/all'),
+        adminApi.get('/role-program-mappings', { params: { includeDetails: 'true' } })
       ]);
 
       console.log('[role-menu-mapping] Programs response:', programsResponse);
@@ -106,7 +106,7 @@ export default function RoleMenuMappingPage() {
       console.log('[role-menu-mapping] Fetching mappings for program:', selectedProgram.id, selectedProgram.code);
 
       // Get mappings for this program
-      const response = await adminApi.get('/admin/role-program-mappings', {
+      const response = await adminApi.get('/role-program-mappings', {
         params: { programId: selectedProgram.id, includeDetails: 'true' }
       });
 
@@ -185,7 +185,7 @@ export default function RoleMenuMappingPage() {
 
       // For each role, create mapping to program
       for (const role of roles) {
-        await adminApi.post('/admin/role-program-mappings', {
+        await adminApi.post('/role-program-mappings', {
           roleId: role.id,
           programId: selectedProgram.id,
           ...permissions

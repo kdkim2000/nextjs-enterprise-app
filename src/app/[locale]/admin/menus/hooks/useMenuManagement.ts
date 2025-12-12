@@ -94,7 +94,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   const fetchMenus = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.get('/admin/menus/all');
+      const response = await adminApi.get('/menus/all');
       const menuList = response.menus || [];
       setAllMenus(menuList);
 
@@ -177,7 +177,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         await showSuccessMessage('CRUD_MENU_UPDATE_SUCCESS');
       } else {
         // Add new menu
-        await adminApi.post('/admin/menus', menuData);
+        await adminApi.post('/menus', menuData);
         await showSuccessMessage('CRUD_MENU_CREATE_SUCCESS');
       }
 

@@ -45,7 +45,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true);
-      const response = await adminApi.get('/admin/menus/user-menus');
+      const response = await adminApi.get('/menus/user-menus');
       setMenus(response.menus || []);
       setError(null);
     } catch (err: unknown) {
@@ -68,7 +68,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await adminApi.get('/admin/users/favorite-menus');
+      const response = await adminApi.get('/users/favorite-menus');
       setFavoriteMenus(response.menus || []);
     } catch (err: unknown) {
       // Only log non-401 errors (401 is expected when not authenticated)
@@ -88,7 +88,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await adminApi.get('/admin/users/recent-menus');
+      const response = await adminApi.get('/users/recent-menus');
       setRecentMenus(response.menus || []);
     } catch (err: unknown) {
       // Only log non-401 errors (401 is expected when not authenticated)
@@ -121,7 +121,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
       isFetchingByPathRef.current = true;
       lastFetchedPathRef.current = path;
 
-      const response = await adminApi.get('/admin/menus/by-path', {
+      const response = await adminApi.get('/menus/by-path', {
         params: { path }
       });
       const menu = response.menu || null;
@@ -143,7 +143,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   // Add menu to favorites
   const addToFavorites = useCallback(async (menuId: string) => {
     try {
-      await adminApi.post('/admin/users/favorite-menus', { menuId });
+      await adminApi.post('/users/favorite-menus', { menuId });
       await fetchFavoriteMenus();
     } catch (err: unknown) {
       console.error('Error adding to favorites:', err);

@@ -38,7 +38,7 @@ export default function LanguageLoader() {
       try {
         // Fetch user preferences from backend (auth-service)
         // Note: authApi.get() already returns response.data
-        const response = await authApi.get('/auth/user-settings');
+        const response = await authApi.get('/user-settings');
 
         // Extract settings from response - settings.general.language
         const { settings } = response;

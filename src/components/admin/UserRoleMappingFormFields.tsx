@@ -64,8 +64,8 @@ export default function UserRoleMappingFormFields({
       setLoading(true);
       try {
         const [usersResponse, rolesResponse] = await Promise.all([
-          adminApi.get('/admin/users'),
-          adminApi.get('/admin/roles')
+          adminApi.get('/users'),
+          adminApi.get('/roles')
         ]);
         setUsers(usersResponse.users || []);
         setRoles(rolesResponse.roles || []);

@@ -73,7 +73,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
   // Fetch all departments for dropdown
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await adminApi.get('/admin/departments/all');
+      const response = await adminApi.get('/departments/all');
       const departments = response.departments || [];
 
       // Transform department data to include name object for multi-language support
@@ -267,7 +267,7 @@ export const useUserManagement = (options: UseUserManagementOptions = {}) => {
 
       if (!editingUser.id) {
         // Add new user
-        const response = await adminApi.post('/admin/users', userData);
+        const response = await adminApi.post('/users', userData);
         setUsers([...users, response.user]);
         await showSuccessMessage('CRUD_USER_CREATE_SUCCESS');
       } else {

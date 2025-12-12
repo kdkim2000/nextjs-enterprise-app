@@ -75,7 +75,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
         // Check if help content exists for this page
         try {
-          const response = await contentApi.get('/content/help?programId=PROG-HELP-MGMT&language=en');
+          const response = await contentApi.get('/help?programId=PROG-HELP-MGMT&language=en');
           setHelpExists(!!response.help);
         } catch (error) {
           setHelpExists(false);
@@ -191,7 +191,7 @@ export const useHelpManagement = (options: UseHelpManagementOptions = {}) => {
 
       if (!editingHelp.id) {
         // Add new help
-        const response = await contentApi.post('/content/help', editingHelp);
+        const response = await contentApi.post('/help', editingHelp);
         setHelps([...helps, response.help]);
         await showSuccessMessage('CRUD_HELP_CREATE_SUCCESS');
       } else {

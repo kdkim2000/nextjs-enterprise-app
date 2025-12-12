@@ -165,7 +165,7 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       };
 
       if (!editingItem.id) {
-        const response = await commonApi.post('/common/attachment-types', apiData);
+        const response = await commonApi.post('/attachment-types', apiData);
         setAttachmentTypes([...attachmentTypes, response.attachmentType]);
         await showSuccessMessage('CRUD_CREATE_SUCCESS');
       } else {

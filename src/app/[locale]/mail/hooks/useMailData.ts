@@ -101,7 +101,7 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
   // Fetch folder counts
   const fetchCounts = useCallback(async () => {
     try {
-      const response = await commApi.get('/comm/mail/counts');
+      const response = await commApi.get('/mail/counts');
       setCounts(response.data);
     } catch (error) {
       console.error('Failed to fetch counts:', error);
@@ -131,7 +131,7 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
 
   // Create draft
   const createDraft = useCallback(async (data: DraftData): Promise<MailMessage> => {
-    const response = await commApi.post('/comm/mail/draft', data);
+    const response = await commApi.post('/mail/draft', data);
     return response.data;
   }, []);
 
@@ -150,7 +150,7 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
 
   // Send message
   const sendMessage = useCallback(async (data: SendMessageData) => {
-    const response = await commApi.post('/comm/mail/send', data);
+    const response = await commApi.post('/mail/send', data);
     await fetchCounts();
     return response.data;
   }, [fetchCounts]);
@@ -185,7 +185,7 @@ export function useMailData(initialFolder: FolderType = 'inbox') {
 
   // Bulk action
   const bulkAction = useCallback(async (messageIds: string[], action: string) => {
-    await commApi.post('/comm/mail/bulk', { messageIds, action });
+    await commApi.post('/mail/bulk', { messageIds, action });
     if (action === 'trash' || action === 'delete') {
       setMessages(prev => prev.filter(m => !messageIds.includes(m.id)));
     }

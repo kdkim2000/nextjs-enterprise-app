@@ -78,7 +78,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
         // Check if help content exists for this page
         try {
-          const response = await contentApi.get('/content/help?programId=PROG-CODE-MGMT&language=en');
+          const response = await contentApi.get('/help?programId=PROG-CODE-MGMT&language=en');
           setHelpExists(!!response.help);
         } catch (error) {
           setHelpExists(false);
@@ -202,7 +202,7 @@ export const useCodeManagement = (options: UseCodeManagementOptions = {}) => {
 
       if (!editingCode.id) {
         // Add new code
-        const response = await commonApi.post('/common/codes', payload);
+        const response = await commonApi.post('/codes', payload);
         setCodes([...codes, response.code]);
         await showSuccessMessage('CRUD_CODE_CREATE_SUCCESS');
       } else {

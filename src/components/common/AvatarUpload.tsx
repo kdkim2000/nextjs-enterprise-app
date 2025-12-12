@@ -96,7 +96,7 @@ export default function AvatarUpload({
           formData.append('referenceId', userId);
         }
 
-        const response = await commonApi.post('/common/attachments/upload', formData, {
+        const response = await commonApi.post('/attachments/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
