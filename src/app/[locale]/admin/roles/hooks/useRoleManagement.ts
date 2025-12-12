@@ -83,7 +83,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
     try {
       setSearching(true);
 
-      const response = await adminApi.get('/admin/roles');
+      const response = await adminApi.get('/roles');
       const allRoles = response.roles || [];
 
       let filtered = [];
@@ -178,7 +178,7 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
 
       // Delete roles from API
       for (const id of selectedForDelete) {
-        await adminApi.delete(`/admin/roles/${id}`);
+        await adminApi.delete(`/roles/${id}`);
       }
 
       // Remove from local state
@@ -206,12 +206,12 @@ export const useRoleManagement = (options: UseRoleManagementOptions = {}) => {
 
       if (roleData.id) {
         // Update existing role
-        const response = await adminApi.put(`/admin/roles/${roleData.id}`, roleData);
+        const response = await adminApi.put(`/roles/${roleData.id}`, roleData);
         setRoles(roles.map((r) => (r.id === roleData.id ? response.role : r)));
         await showSuccessMessage('CRUD_ROLE_UPDATE_SUCCESS');
       } else {
         // Create new role
-        const response = await adminApi.post('/admin/roles', roleData);
+        const response = await adminApi.post('/roles', roleData);
         setRoles([...roles, response.role]);
         await showSuccessMessage('CRUD_ROLE_CREATE_SUCCESS');
       }

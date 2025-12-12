@@ -28,7 +28,7 @@ export const useBoardTypeManagement = () => {
     try {
       setSearching(true);
       const queryString = buildQueryParams(quickSearch, searchCriteria, paginationModel);
-      const response = await contentApiClient.get(`/content/board-types?${queryString}`);
+      const response = await contentApiClient.get(`/board-types?${queryString}`);
 
       if (response.success) {
         setBoardTypes(response.data.items || []);
@@ -132,8 +132,8 @@ export const useBoardTypeManagement = () => {
       };
 
       const response = isNew
-        ? await contentApiClient.post('/content/board-types', payload)
-        : await contentApiClient.put(`/content/board-types/${editingBoardType.id}`, payload);
+        ? await contentApiClient.post('/board-types', payload)
+        : await contentApiClient.put(`/board-types/${editingBoardType.id}`, payload);
 
       if (response.success) {
         setSuccessMessage(isNew ? 'Board type created successfully' : 'Board type updated successfully');
@@ -164,7 +164,7 @@ export const useBoardTypeManagement = () => {
       let successCount = 0;
 
       for (const id of selectedForDelete) {
-        const response = await contentApiClient.delete(`/content/board-types/${id}`);
+        const response = await contentApiClient.delete(`/board-types/${id}`);
         if (!response.success) {
           // Collect errors but continue with other deletions
           const boardType = boardTypes.find(bt => bt.id === id);
@@ -212,7 +212,7 @@ export const useBoardTypeManagement = () => {
     if (!boardType) return;
 
     try {
-      const response = await contentApiClient.get(`/content/board-types/${id}/stats`);
+      const response = await contentApiClient.get(`/board-types/${id}/stats`);
       if (response.success) {
         setSelectedBoardTypeStats({ ...boardType, ...response.data });
         setStatsDialogOpen(true);

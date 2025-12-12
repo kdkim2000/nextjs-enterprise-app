@@ -64,7 +64,7 @@ export default function UserRoleAssignment({
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const data = await adminApi.get<{ roles: Role[] }>('/admin/roles');
+        const data = await adminApi.get<{ roles: Role[] }>('/roles');
         const activeRoles = (data.roles || []).filter(r => r.isActive);
         console.log('[UserRoleAssignment] Fetched roles:', activeRoles.length);
         setAllRoles(activeRoles);
@@ -83,7 +83,7 @@ export default function UserRoleAssignment({
       const fetchUserRoles = async () => {
         try {
           setLoading(true);
-          const data = await adminApi.get<{ mappings: UserRoleMapping[] }>('/admin/user-role-mappings', {
+          const data = await adminApi.get<{ mappings: UserRoleMapping[] }>('/user-role-mappings', {
             params: { userId, includeDetails: 'true' }
           });
           console.log('[UserRoleAssignment] Fetched mappings:', data);
@@ -123,14 +123,14 @@ export default function UserRoleAssignment({
       setAddingRoleId(roleId);
       setError(null);
 
-      await adminApi.post('/admin/user-role-mappings', {
+      await adminApi.post('/user-role-mappings', {
         userId,
         roleId,
         isActive: true
       });
 
       // Refresh user roles
-      const data = await adminApi.get<{ mappings: UserRoleMapping[] }>('/admin/user-role-mappings', {
+      const data = await adminApi.get<{ mappings: UserRoleMapping[] }>('/user-role-mappings', {
         params: { userId, includeDetails: 'true' }
       });
       const activeMappings = (data.mappings || []).filter(m => m.isActive);
@@ -154,7 +154,7 @@ export default function UserRoleAssignment({
       setRemovingRoleId(mappingId);
       setError(null);
 
-      await adminApi.delete(`/admin/user-role-mappings/${mappingId}`);
+      await adminApi.delete(`/user-role-mappings/${mappingId}`);
 
       // Update local state
       setUserRoles(prev => prev.filter(ur => ur.id !== mappingId));

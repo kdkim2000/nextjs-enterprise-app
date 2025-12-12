@@ -17,12 +17,12 @@ COPY . .
 # Copy .env.production if exists (optional)
 RUN touch .env.production
 
-# Build Next.js (ignoring middleware.js.nft.json error - build output is still usable)
+# Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 # IMPORTANT: NEXT_PUBLIC_* variables must be set at build time
-# /api will be proxied through Nginx to backend
-ENV NEXT_PUBLIC_API_URL=/api
-RUN npm run build || echo "Build completed with warnings"
+# Production uses relative paths through Nginx proxy
+ENV NEXT_PUBLIC_ENV=production
+RUN npm run build
 
 # Verify build output exists
 RUN test -d .next && ls -la .next/

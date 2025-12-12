@@ -70,7 +70,7 @@ export default function NoticePopup({ onClose }: NoticePopupProps) {
       try {
         console.log('[NoticePopup] Fetching popup notifications...');
         // Use content-service API: /content/posts/popup-notifications
-        const response = await contentApi.get<{ success: boolean; data: { notifications: Notice[] } }>('/content/posts/popup-notifications');
+        const response = await contentApi.get<{ success: boolean; data: { notifications: Notice[] } }>('/posts/popup-notifications');
         console.log('[NoticePopup] Response:', response);
 
         if (response.success && response.data?.notifications && response.data.notifications.length > 0) {

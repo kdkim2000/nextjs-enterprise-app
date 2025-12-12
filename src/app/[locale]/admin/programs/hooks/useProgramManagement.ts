@@ -95,7 +95,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
       params.append('limit', pageSize.toString());
 
-      const url = `/admin/programs?${params.toString()}`;
+      const url = `/programs?${params.toString()}`;
       console.log('[useProgramManagement] API URL:', url);
 
       const response = await adminApi.get(url);
@@ -196,13 +196,13 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       if (!editingProgram.id) {
         // Add new program
-        const response = await adminApi.post('/admin/programs', apiData);
+        const response = await adminApi.post('/programs', apiData);
 
         setPrograms([...programs, response.program]);
         await showSuccessMessage('CRUD_PROGRAM_CREATE_SUCCESS');
       } else {
         // Update existing program
-        const response = await adminApi.put(`/admin/programs/${editingProgram.id}`, apiData);
+        const response = await adminApi.put(`/programs/${editingProgram.id}`, apiData);
 
         setPrograms(programs.map((p) => (p.id === editingProgram.id ? response.program : p)));
         await showSuccessMessage('CRUD_PROGRAM_UPDATE_SUCCESS');
@@ -230,7 +230,7 @@ export const useProgramManagement = (options: UseProgramManagementOptions = {}) 
 
       // Delete programs from API
       for (const id of selectedForDelete) {
-        await adminApi.delete(`/admin/programs/${id}`);
+        await adminApi.delete(`/programs/${id}`);
       }
 
       // Remove from local state

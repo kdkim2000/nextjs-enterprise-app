@@ -9,6 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { useCurrentLocale } from "@/lib/i18n/client";
+import { getCommonApiUrl } from "@/lib/api/config";
 
 /**
  * Public App Settings type
@@ -131,18 +132,19 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
 
-      // MSA 환경: common-service (3015) 또는 API Gateway를 통해 접근
-      // NEXT_PUBLIC_COMMON_SERVICE_URL이 설정되어 있으면 사용, 아니면 기본 API URL 사용
-      const commonServiceUrl = process.env.NEXT_PUBLIC_COMMON_SERVICE_URL
-        || process.env.NEXT_PUBLIC_API_URL
-        || "/api";
+      // MSA 환경: core-service (3011)에서 common 모듈 제공
+      // getCommonApiUrl()은 개발환경에서는 http://localhost:3011, 운영에서는 /common 반환
+      const baseUrl = getCommonApiUrl();
 
       // MSA 경로: /common/app-settings/public
-      const apiPath = commonServiceUrl.includes('/common')
+      // 운영환경: baseUrl이 /common이므로 /app-settings/public만 추가
+      // 개발환경: baseUrl이 http://localhost:3011이므로 /common/app-settings/public 추가
+      const isProxyPath = baseUrl === '/common' || baseUrl.endsWith('/common');
+      const apiPath = isProxyPath
         ? '/app-settings/public'
         : '/common/app-settings/public';
 
-      const response = await fetch(`${commonServiceUrl}${apiPath}`, {
+      const response = await fetch(`${baseUrl}${apiPath}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

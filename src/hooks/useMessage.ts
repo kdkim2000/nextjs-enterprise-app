@@ -51,7 +51,7 @@ export function useMessage(options: UseMessageOptions = {}) {
       }
 
       // Fetch from API - using communication service
-      const message = await commApi.get<Message>(`/comm/messages/code/${code}`);
+      const message = await commApi.get<Message>(`/messages/code/${code}`);
 
       // Cache the message
       messageCache.current.set(code, message);

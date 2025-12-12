@@ -101,7 +101,7 @@ export default function MailViewPage() {
     const loadAttachments = async () => {
       if (message?.attachment_id) {
         try {
-          const response = await commonApi.get(`/common/attachments/${message.attachment_id}`);
+          const response = await commonApi.get(`/attachments/${message.attachment_id}`);
           if (response.attachment?.files) {
             setAttachmentFiles(response.attachment.files);
           }

@@ -9,10 +9,10 @@ import { SearchCriteria } from '../utils';
 
 // Use commApi with standardized response wrapper
 const api = {
-  get: async (url: string) => commApi.get(`/comm/messages${url}`),
-  post: async (url: string, data?: any) => commApi.post(`/comm/messages${url}`, data),
-  put: async (url: string, data?: any) => commApi.put(`/comm/messages${url}`, data),
-  delete: async (url: string) => commApi.delete(`/comm/messages${url}`)
+  get: async (url: string) => commApi.get(`/messages${url}`),
+  post: async (url: string, data?: any) => commApi.post(`/messages${url}`, data),
+  put: async (url: string, data?: any) => commApi.put(`/messages${url}`, data),
+  delete: async (url: string) => commApi.delete(`/messages${url}`)
 };
 
 export function useMessageManagement() {

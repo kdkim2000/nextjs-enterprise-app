@@ -2,7 +2,11 @@
  * 환경별 API 설정
  *
  * 로컬 개발: Frontend에서 Backend 서비스 직접 호출
- * 서버 운영: API Gateway (APISIX) 경유
+ * 서버 운영: API Gateway (Nginx) 경유
+ *
+ * MSA 구조 (통합):
+ *   - core-service (Port 3011): Auth + Admin + Common
+ *   - app-service (Port 3012): Content + Communication
  */
 
 type Environment = 'development' | 'production';
@@ -22,17 +26,19 @@ interface ApiConfig {
 }
 
 const API_CONFIG: ApiConfig = {
-  // 로컬 개발 환경: 직접 호출
+  // 로컬 개발 환경: 직접 호출 (서비스 경로 포함)
+  // core-service (3011): auth, admin, common
+  // app-service (3012): content, comm
   development: {
-    auth: process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:3011',
-    admin: process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3012',
-    content: process.env.NEXT_PUBLIC_CONTENT_API_URL || 'http://localhost:3013',
-    comm: process.env.NEXT_PUBLIC_COMM_API_URL || 'http://localhost:3014',
-    common: process.env.NEXT_PUBLIC_COMMON_API_URL || 'http://localhost:3015',
+    auth: process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:3011/auth',
+    admin: process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3011/admin',
+    content: process.env.NEXT_PUBLIC_CONTENT_API_URL || 'http://localhost:3012/content',
+    comm: process.env.NEXT_PUBLIC_COMM_API_URL || 'http://localhost:3012/comm',
+    common: process.env.NEXT_PUBLIC_COMMON_API_URL || 'http://localhost:3011/common',
     legacy: process.env.NEXT_PUBLIC_LEGACY_API_URL || 'http://localhost:3001/api',
   },
 
-  // 서버 운영 환경: API Gateway 경유 (상대 경로)
+  // 서버 운영 환경: Nginx Reverse Proxy 경유 (상대 경로)
   production: {
     auth: '/auth',
     admin: '/admin',

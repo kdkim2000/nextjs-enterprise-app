@@ -67,7 +67,7 @@ export default function MultiUserSelect({
       try {
         // Use 'search' parameter for full-text search across multiple fields:
         // loginid, email, name_ko, name_en, employee_number
-        const response = await adminApi.get(`/admin/users?search=${encodeURIComponent(searchTerm)}&page=1&limit=30`);
+        const response = await adminApi.get(`/users?search=${encodeURIComponent(searchTerm)}&page=1&limit=30`);
         const users: UserOption[] = (response.users || []).map((u: any) => ({
           id: u.id,
           username: u.loginid || u.username || u.id,

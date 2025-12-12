@@ -40,7 +40,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       // adminApi.get already returns response.data, not the full response object
-      const data = await adminApi.get<{ permissions: any[] }>('/admin/users/permissions');
+      const data = await adminApi.get<{ permissions: any[] }>('/users/permissions');
 
       // Add defensive check for response data
       if (!data) {

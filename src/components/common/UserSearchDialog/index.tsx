@@ -166,7 +166,7 @@ export default function UserSearchDialog({
       if (search.email && search.email.trim()) params.email = search.email.trim();
       if (search.department && search.department.trim()) params.department = [search.department.trim()];
 
-      const response = await adminApi.get('/admin/users', { params });
+      const response = await adminApi.get('/users', { params });
       const allUsers = response.users || [];
       setUsers(allUsers);
     } catch (err: any) {

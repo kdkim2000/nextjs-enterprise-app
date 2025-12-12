@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
   const loadDepartments = async () => {
     try {
-      const response = await adminApi.get('/admin/departments/all');
+      const response = await adminApi.get('/departments/all');
       setDepartments(response.departments || []);
     } catch (error) {
       console.error('Failed to load departments:', error);
@@ -150,7 +150,7 @@ export default function SettingsPage() {
   const loadPreferences = async () => {
     try {
       // Note: authApi.get() already returns response.data
-      const response = await authApi.get('/auth/user-settings');
+      const response = await authApi.get('/user-settings');
       const settings = response.settings;
 
       if (settings) {
@@ -184,7 +184,7 @@ export default function SettingsPage() {
   const handleProfileUpdate = async () => {
     setLoading(true);
     try {
-      const response = await adminApi.put('/admin/users/profile', profileData);
+      const response = await adminApi.put('/users/profile', profileData);
       // Update user in AuthContext
       if (response.user && updateUser) {
         updateUser(response.user);
@@ -211,7 +211,7 @@ export default function SettingsPage() {
 
     setLoading(true);
     try {
-      await authApi.post('/auth/change-password', {
+      await authApi.post('/change-password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
@@ -228,7 +228,7 @@ export default function SettingsPage() {
   const handleMfaToggle = async (enabled: boolean) => {
     setLoading(true);
     try {
-      await authApi.patch('/auth/user-settings/privacy', { mfaEnabled: enabled });
+      await authApi.patch('/user-settings/privacy', { mfaEnabled: enabled });
       setMfaEnabled(enabled);
       const status = enabled ? 'enabled' : 'disabled';
       await showSuccessMessage('SETTINGS_MFA_TOGGLE_SUCCESS', { status });
@@ -244,7 +244,7 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       // Update user settings using auth-service (sectional updates)
-      await authApi.put('/auth/user-settings', {
+      await authApi.put('/user-settings', {
         general: { language: preferences.language },
         appearance: { theme: preferences.theme },
         dataGrid: { rowsPerPage: preferences.rowsPerPage },

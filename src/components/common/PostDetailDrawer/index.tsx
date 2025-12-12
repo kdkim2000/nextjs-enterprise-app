@@ -138,14 +138,14 @@ export default function PostDetailDrawer({
         setLoading(true);
 
         // Fetch post data
-        const response = await contentApiClient.get(`/content/posts/${postId}`);
+        const response = await contentApiClient.get(`/posts/${postId}`);
         if (response.success && response.data) {
           const postData = response.data.post || response.data;
           setPost(postData);
 
           // Increment view count and update the view count in state
           try {
-            const viewResponse = await contentApiClient.get(`/content/posts/${postId}/view`);
+            const viewResponse = await contentApiClient.get(`/posts/${postId}/view`);
             console.log('[PostDetailDrawer] View response:', viewResponse);
 
             if (viewResponse.success && viewResponse.data) {
@@ -186,7 +186,7 @@ export default function PostDetailDrawer({
 
     const fetchComments = async () => {
       try {
-        const response = await contentApiClient.get(`/content/comments/post/${postId}`);
+        const response = await contentApiClient.get(`/comments/post/${postId}`);
         if (response.success && response.data) {
           setComments(response.data.comments || []);
         }
@@ -203,7 +203,7 @@ export default function PostDetailDrawer({
 
     const fetchAttachments = async () => {
       try {
-        const response = await commonApiClient.get(`/common/attachments/post/${postId}`);
+        const response = await commonApiClient.get(`/attachments/post/${postId}`);
         if (response.success && response.data) {
           setAttachments(response.data.attachments || []);
         }
@@ -219,8 +219,8 @@ export default function PostDetailDrawer({
 
     try {
       const response = liked
-        ? await contentApiClient.delete(`/content/posts/${postId}/like`)
-        : await contentApiClient.post(`/content/posts/${postId}/like`);
+        ? await contentApiClient.delete(`/posts/${postId}/like`)
+        : await contentApiClient.post(`/posts/${postId}/like`);
 
       if (response.success) {
         setLiked(!liked);
@@ -249,7 +249,7 @@ export default function PostDetailDrawer({
 
     try {
       setSubmittingComment(true);
-      const response = await contentApiClient.post('/content/comments', {
+      const response = await contentApiClient.post('/comments', {
         postId,
         content: newComment
       });
@@ -257,7 +257,7 @@ export default function PostDetailDrawer({
       if (response.success) {
         setNewComment('');
         // Refetch comments
-        const commentsResponse = await contentApiClient.get(`/content/comments/post/${postId}`);
+        const commentsResponse = await contentApiClient.get(`/comments/post/${postId}`);
         if (commentsResponse.success && commentsResponse.data) {
           setComments(commentsResponse.data.comments || []);
         }
@@ -271,7 +271,7 @@ export default function PostDetailDrawer({
 
   const handleDownload = async (attachment: Attachment) => {
     try {
-      window.open(`/api/attachment/${attachment.id}/download`, '_blank');
+      window.open(`/common/attachments/file/${attachment.id}/download`, '_blank');
     } catch (error) {
       console.error('Error downloading attachment:', error);
     }
@@ -293,7 +293,7 @@ export default function PostDetailDrawer({
   const handleConfirmDelete = async () => {
     try {
       setDeleteLoading(true);
-      const response = await contentApiClient.delete(`/content/posts/${postId}`);
+      const response = await contentApiClient.delete(`/posts/${postId}`);
 
       if (response.success) {
         // Show success message

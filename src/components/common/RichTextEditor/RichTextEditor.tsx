@@ -195,11 +195,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       formData.append('attachmentTypeCode', 'IMAGE_ONLY');
       formData.append('referenceType', 'editor');
 
-      const response = await contentApi.post('/content/attachment/upload', formData);
+      const response = await contentApi.post('/attachment/upload', formData);
 
       if (response?.uploadedFiles && response.uploadedFiles.length > 0) {
         const uploadedFile = response.uploadedFiles[0];
-        const fileUrl = `/api/attachment/file/${uploadedFile.id}/view`;
+        const fileUrl = `/common/attachments/file/${uploadedFile.id}/view`;
         return fileUrl;
       }
       console.error('Image upload failed:', response?.errors || 'Unknown error');

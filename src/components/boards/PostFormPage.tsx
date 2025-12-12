@@ -136,7 +136,7 @@ export default function PostFormPage({
 
         // Fetch post data in edit mode
         if (mode === 'edit' && postId) {
-          const postResponse = await contentApiClient.get(`/content/posts/${postId}`);
+          const postResponse = await contentApiClient.get(`/posts/${postId}`);
           if (postResponse.success && postResponse.data) {
             // API returns post data under data.post or directly under data
             const postData = postResponse.data.post || postResponse.data;
@@ -201,13 +201,13 @@ export default function PostFormPage({
       let finalPostId: string;
 
       if (mode === 'create') {
-        postResponse = await contentApiClient.post('/content/posts', postData);
+        postResponse = await contentApiClient.post('/posts', postData);
         if (!postResponse.success) {
           throw new Error(postResponse.error || 'Failed to create post');
         }
         finalPostId = postResponse.data.post.id;
       } else {
-        postResponse = await contentApiClient.put(`/content/posts/${postId}`, postData);
+        postResponse = await contentApiClient.put(`/posts/${postId}`, postData);
         if (!postResponse.success) {
           throw new Error(postResponse.error || 'Failed to update post');
         }

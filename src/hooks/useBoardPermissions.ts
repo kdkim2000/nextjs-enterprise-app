@@ -73,8 +73,8 @@ export function useBoardPermissions(boardTypeIdOrCode?: string): BoardPermission
         const isLegacyId = boardTypeIdOrCode.startsWith('BOARD-TYPE-');
 
         const endpoint = (isUUID || isLegacyId)
-          ? `/content/board-types/${boardTypeIdOrCode}`
-          : `/content/board-types/code/${boardTypeIdOrCode}`;
+          ? `/board-types/${boardTypeIdOrCode}`
+          : `/board-types/code/${boardTypeIdOrCode}`;
 
         const response = await contentApiClient.get(endpoint);
 

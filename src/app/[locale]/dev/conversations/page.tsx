@@ -233,8 +233,8 @@ export default function ConversationsPage() {
     const fetchInitialData = async () => {
       try {
         const [statsRes, filtersRes] = await Promise.all([
-          commApi.get('/comm/conversations/stats'),
-          commApi.get('/comm/conversations/filters')
+          commApi.get('/conversations/stats'),
+          commApi.get('/conversations/filters')
         ]);
         setStats(statsRes);
         setFilterOptions(filtersRes);
@@ -258,7 +258,7 @@ export default function ConversationsPage() {
       if (difficulty) params.append('difficulty', difficulty);
       if (branch) params.append('branch', branch);
 
-      const response = await commApi.get(`/comm/conversations?${params.toString()}`);
+      const response = await commApi.get(`/conversations?${params.toString()}`);
       setConversations(response.data || []);
       setTotalPages(response.pagination?.totalPages || 1);
       setTotal(response.pagination?.total || 0);
@@ -348,7 +348,7 @@ export default function ConversationsPage() {
 
     setDeleting(true);
     try {
-      await commApi.delete(`/comm/conversations/${deleteTargetId}`);
+      await commApi.delete(`/conversations/${deleteTargetId}`);
       setSnackbar({ open: true, message: 'Conversation deleted successfully', severity: 'success' });
       fetchConversations();
     } catch (err) {
@@ -366,7 +366,7 @@ export default function ConversationsPage() {
 
     setDeleting(true);
     try {
-      await commApi.delete('/comm/conversations/batch', { data: { ids: Array.from(selectedIds) } });
+      await commApi.delete('/conversations/batch', { data: { ids: Array.from(selectedIds) } });
       setSnackbar({
         open: true,
         message: `${selectedIds.size} conversation(s) deleted successfully`,

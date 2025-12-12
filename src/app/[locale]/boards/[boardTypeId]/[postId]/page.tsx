@@ -182,7 +182,7 @@ export default function PostDetailPage() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await contentApiClient.get(`/content/posts/${postId}`);
+        const response = await contentApiClient.get(`/posts/${postId}`);
         if (response.success && response.data) {
           const postData = response.data.post || response.data;
           const normalized = normalizePost(postData);
@@ -205,7 +205,7 @@ export default function PostDetailPage() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await contentApiClient.get(`/content/comments/post/${postId}`);
+        const response = await contentApiClient.get(`/comments/post/${postId}`);
         if (response.success) {
           const commentsData = response.data?.comments || response.data;
           if (Array.isArray(commentsData)) {
@@ -227,7 +227,7 @@ export default function PostDetailPage() {
   useEffect(() => {
     const fetchAttachments = async () => {
       try {
-        const response = await commonApiClient.get(`/common/attachments/reference/post/${postId}`);
+        const response = await commonApiClient.get(`/attachments/reference/post/${postId}`);
         if (response.success) {
           const attachmentsData = response.data?.attachments || response.data;
           // Extract files from all attachments
@@ -253,8 +253,8 @@ export default function PostDetailPage() {
   const handleLike = async () => {
     try {
       const response = liked
-        ? await contentApiClient.post(`/content/posts/${postId}/unlike`)
-        : await contentApiClient.post(`/content/posts/${postId}/like`);
+        ? await contentApiClient.post(`/posts/${postId}/unlike`)
+        : await contentApiClient.post(`/posts/${postId}/like`);
 
       if (response.success) {
         setLiked(!liked);
@@ -270,7 +270,7 @@ export default function PostDetailPage() {
 
     try {
       setSubmittingComment(true);
-      const response = await contentApiClient.post('/content/comments', {
+      const response = await contentApiClient.post('/comments', {
         postId,
         content: newComment
       });
@@ -278,7 +278,7 @@ export default function PostDetailPage() {
       if (response.success) {
         setNewComment('');
         // Refetch comments
-        const commentsResponse = await contentApiClient.get(`/content/comments/post/${postId}`);
+        const commentsResponse = await contentApiClient.get(`/comments/post/${postId}`);
         if (commentsResponse.success) {
           const commentsData = commentsResponse.data?.comments || commentsResponse.data;
           if (Array.isArray(commentsData)) {
@@ -313,7 +313,7 @@ export default function PostDetailPage() {
     if (!window.confirm(t('common.confirm'))) return;
 
     try {
-      const response = await contentApiClient.delete(`/content/posts/${postId}`);
+      const response = await contentApiClient.delete(`/posts/${postId}`);
       if (response.success) {
         router.push(`/boards/${boardTypeId}`);
       }

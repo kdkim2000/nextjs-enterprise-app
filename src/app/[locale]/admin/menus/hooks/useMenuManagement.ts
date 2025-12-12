@@ -94,7 +94,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   const fetchMenus = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.get('/admin/menus/all');
+      const response = await adminApi.get('/menus/all');
       const menuList = response.menus || [];
       setAllMenus(menuList);
 
@@ -173,11 +173,11 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       if (editingMenu.id) {
         // Update existing menu
-        await adminApi.put(`/admin/menus/${editingMenu.id}`, menuData);
+        await adminApi.put(`/menus/${editingMenu.id}`, menuData);
         await showSuccessMessage('CRUD_MENU_UPDATE_SUCCESS');
       } else {
         // Add new menu
-        await adminApi.post('/admin/menus', menuData);
+        await adminApi.post('/menus', menuData);
         await showSuccessMessage('CRUD_MENU_CREATE_SUCCESS');
       }
 
@@ -206,7 +206,7 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
 
       // Delete menus from API
       for (const id of selectedForDelete) {
-        await adminApi.delete(`/admin/menus/${id}`);
+        await adminApi.delete(`/menus/${id}`);
       }
 
       // Refresh menus

@@ -56,7 +56,7 @@ export function useCodeOptions(codeType: string, locale: string = 'en', autoFetc
       setLoading(true);
       setError(null);
 
-      const response = await commonApi.get(`/common/codes/type/${codeType}`);
+      const response = await commonApi.get(`/codes/type/${codeType}`);
       const fetchedCodes: Code[] = response.codes || [];
 
       // Transform codes to options format
@@ -139,7 +139,7 @@ export function useMultipleCodeOptions(codeTypes: string[], locale: string = 'en
 
       const promises = codeTypes.map(async (codeType) => {
         try {
-          const response = await commonApi.get(`/common/codes/type/${codeType}`);
+          const response = await commonApi.get(`/codes/type/${codeType}`);
           const fetchedCodes: Code[] = response.codes || [];
 
           const options: CodeOption[] = fetchedCodes

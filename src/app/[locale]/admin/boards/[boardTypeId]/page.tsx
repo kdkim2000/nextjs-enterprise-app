@@ -85,7 +85,7 @@ export default function AdminBoardListPage() {
           params.append('search', search);
         }
 
-        const response = await contentApiClient.get(`/content/posts/board/${boardType.id}?${params}`);
+        const response = await contentApiClient.get(`/posts/board/${boardType.id}?${params}`);
         if (response.success && response.data?.posts) {
           setPosts(response.data.posts.map((post: any) => ({
             id: post.id,

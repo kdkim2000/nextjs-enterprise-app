@@ -79,7 +79,7 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       params.append('page', (page + 1).toString());
       params.append('limit', pageSize.toString());
 
-      const response = await commonApi.get(`/common/attachment-types??${params.toString()}`);
+      const response = await commonApi.get(`/attachment-types?${params.toString()}`);
       setAttachmentTypes(response.attachmentTypes || []);
 
       if (response.pagination) {
@@ -165,11 +165,11 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       };
 
       if (!editingItem.id) {
-        const response = await commonApi.post('/common/attachment-types', apiData);
+        const response = await commonApi.post('/attachment-types', apiData);
         setAttachmentTypes([...attachmentTypes, response.attachmentType]);
         await showSuccessMessage('CRUD_CREATE_SUCCESS');
       } else {
-        const response = await commonApi.put(`/common/attachment-types/${editingItem.id}`, apiData);
+        const response = await commonApi.put(`/attachment-types/${editingItem.id}`, apiData);
         setAttachmentTypes(attachmentTypes.map((a) => (a.id === editingItem.id ? response.attachmentType : a)));
         await showSuccessMessage('CRUD_UPDATE_SUCCESS');
       }
@@ -194,7 +194,7 @@ export const useAttachmentTypeManagement = (options: UseAttachmentTypeManagement
       setDeleteLoading(true);
 
       for (const id of selectedForDelete) {
-        await commonApi.delete(`/common/attachment-types/${id}`);
+        await commonApi.delete(`/attachment-types/${id}`);
       }
 
       setAttachmentTypes(attachmentTypes.filter((a) => !selectedForDelete.includes(a.id!)));
