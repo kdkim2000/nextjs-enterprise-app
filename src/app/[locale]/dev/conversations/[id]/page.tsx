@@ -71,23 +71,22 @@ interface CodeChange {
   explanation: string;
 }
 
+// API returns conversation data directly with messages embedded
 interface ConversationDetail {
-  conversation: {
-    id: string;
-    title: string;
-    category: string;
-    difficulty_level: string;
-    branch_name: string;
-    total_messages: number;
-    duration_minutes: number;
-    started_at: string;
-    ended_at: string;
-    summary: string;
-    learning_points: string;
-    tags: Array<{ id: string; name: string; name_ko: string; color: string }> | null;
-  };
+  id: string;
+  title: string;
+  category: string;
+  difficulty_level: string;
+  branch_name: string;
+  total_messages: number;
+  duration_minutes: number;
+  started_at: string;
+  ended_at: string;
+  summary: string;
+  learning_points: string;
+  tags: Array<{ id: string; name: string; name_ko: string; color: string }> | null;
   messages: Message[];
-  codeChanges: CodeChange[];
+  codeChanges?: CodeChange[];
 }
 
 export default function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -227,7 +226,7 @@ export default function ConversationDetailPage({ params }: { params: Promise<{ i
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !data.id) {
     return (
       <PageContainer>
         <PageHeader useMenu showBreadcrumb />
@@ -244,7 +243,9 @@ export default function ConversationDetailPage({ params }: { params: Promise<{ i
     );
   }
 
-  const { conversation, codeChanges } = data;
+  // API returns conversation data directly (not wrapped in { conversation: {...} })
+  const conversation = data;
+  const codeChanges = data.codeChanges || [];
   const catConfig = categoryConfigs[conversation.category] || categoryConfigs.general;
 
   return (
