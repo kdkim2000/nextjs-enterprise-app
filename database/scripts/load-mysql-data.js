@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
@@ -264,7 +265,7 @@ async function main() {
       try {
         const [rows] = await conn.execute(`SELECT COUNT(*) as cnt FROM ${table}`);
         console.log(`${table}: ${rows[0].cnt}건`);
-      } catch (e) {
+      } catch {
         // Table may not exist or be empty
       }
     }

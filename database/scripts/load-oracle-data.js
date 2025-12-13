@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const oracledb = require('oracledb');
 const fs = require('fs');
 const path = require('path');
@@ -254,7 +255,7 @@ async function main() {
       try {
         const result = await conn.execute(`SELECT COUNT(*) FROM ${table}`);
         console.log(`${table}: ${result.rows[0][0]}건`);
-      } catch (e) {
+      } catch {
         // Table may not exist or be empty
       }
     }

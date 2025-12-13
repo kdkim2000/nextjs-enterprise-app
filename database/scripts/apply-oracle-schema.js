@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const oracledb = require('oracledb');
 const fs = require('fs');
 const path = require('path');
