@@ -123,8 +123,8 @@ export default function PostFormPage({
 
         // Fetch board type - determine if boardTypeId is UUID/legacy ID or code
         const endpoint = isUUIDOrLegacyId(boardTypeId)
-          ? `/content/board-types/${boardTypeId}`
-          : `/content/board-types/code/${boardTypeId}`;
+          ? `/board-types/${boardTypeId}`
+          : `/board-types/code/${boardTypeId}`;
 
         const boardTypeResponse = await contentApiClient.get(endpoint);
         if (boardTypeResponse.success && boardTypeResponse.data) {

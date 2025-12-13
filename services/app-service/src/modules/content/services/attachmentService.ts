@@ -26,7 +26,7 @@ export async function getAttachmentById(attachmentId: string): Promise<any | nul
   const filesQuery = `
     SELECT * FROM attachment_files
     WHERE attachment_id = $1 AND status = 'active'
-    ORDER BY sort_order ASC, created_at ASC
+    ORDER BY created_at ASC
   `;
   const filesResult = await query(filesQuery, [attachmentId]);
 
@@ -48,7 +48,7 @@ export async function getAttachmentsByPostId(postId: string): Promise<any[]> {
       AND a.reference_id = $1
       AND a.status = 'active'
       AND af.status = 'active'
-    ORDER BY af.sort_order ASC, af.created_at ASC
+    ORDER BY af.created_at ASC
   `;
 
   const result = await query(queryText, [postId]);
