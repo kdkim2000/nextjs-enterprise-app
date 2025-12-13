@@ -148,6 +148,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",  // nginx에서 API 요청으로 인식하도록 필수
         },
         credentials: "include",
         cache: "no-store",

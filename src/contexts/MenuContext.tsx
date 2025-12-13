@@ -180,19 +180,29 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   }, [fetchMenus, fetchFavoriteMenus, fetchRecentMenus]);
 
   // Initial data fetch - only when auth state changes
+  // Note: We call APIs directly here instead of using fetchMenus/fetchFavoriteMenus/fetchRecentMenus
+  // to avoid closure issues where the callback's captured isAuthenticated/user values might be stale
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Fetch all menu data in parallel
+      // Fetch all menu data in parallel - call APIs directly to avoid stale closure values
       const loadMenus = async () => {
         setIsLoading(true);
         try {
-          await Promise.all([
-            fetchMenus(),
-            fetchFavoriteMenus(),
-            fetchRecentMenus()
+          const [menusResponse, favoritesResponse, recentResponse] = await Promise.all([
+            adminApi.get('/menus/user-menus'),
+            adminApi.get('/users/favorite-menus'),
+            adminApi.get('/users/recent-menus')
           ]);
-        } catch (error) {
-          console.error('Error loading menus:', error);
+          setMenus(menusResponse.menus || []);
+          setFavoriteMenus(favoritesResponse.menus || []);
+          setRecentMenus(recentResponse.menus || []);
+          setError(null);
+        } catch (error: any) {
+          // Only log non-401 errors (401 is expected when not authenticated)
+          if (error?.response?.status !== 401) {
+            console.error('Error loading menus:', error);
+            setError(error.message || 'Failed to fetch menus');
+          }
         } finally {
           setIsLoading(false);
         }
@@ -205,8 +215,6 @@ export function MenuProvider({ children }: { children: ReactNode }) {
       setCurrentMenu(null);
       setIsLoading(false);
     }
-    // fetchMenus, fetchFavoriteMenus, fetchRecentMenus are stable (useCallback with stable deps)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user?.id]); // Only depend on auth state and user id
 
   const value: MenuContextType = useMemo(() => ({
