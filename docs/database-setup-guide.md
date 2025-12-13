@@ -5,6 +5,16 @@
 
 ---
 
+## 지원 데이터베이스
+
+| 데이터베이스 | 버전 | 스키마 파일 | 데이터 로드 |
+|-------------|------|------------|------------|
+| **PostgreSQL** | 14+ | `original-schema.sql` | `psql -f` 직접 실행 |
+| **MySQL/MariaDB** | 8.0+ / 10.5+ | `original-schema-mysql.sql` | `load-mysql-data.js` |
+| **Oracle** | 19c+ | `original-schema-oracle.sql` | `load-oracle-data.js` |
+
+---
+
 ## 목차
 
 1. [사전 준비물](#1-사전-준비물)
@@ -14,6 +24,9 @@
 5. [데이터 입력](#5-데이터-입력)
 6. [설치 확인](#6-설치-확인)
 7. [문제 해결](#7-문제-해결)
+8. [초기화 스크립트 사용](#초기화-스크립트-사용)
+9. [MySQL/MariaDB 설정](#mysqlmariadb-데이터베이스-설정)
+10. [Oracle 설정](#oracle-데이터베이스-설정)
 
 ---
 
@@ -329,6 +342,290 @@ DB_NAME=corenextdb
 DB_USER=corenext
 DB_PASSWORD=CoreNext2025#
 ```
+
+---
+
+## 초기화 스크립트 사용
+
+데이터베이스 초기화를 자동으로 수행하는 스크립트가 제공됩니다.
+스키마 생성과 데이터 로드를 한 번에 처리합니다.
+
+### 스크립트 위치
+
+- **Linux/Mac**: `database/scripts/init-db.sh`
+- **Windows**: `database/scripts/init-db.bat`
+
+### 사용법
+
+```bash
+# 기본 사용법
+./database/scripts/init-db.sh [OPTIONS]
+
+# 옵션
+  -t, --type TYPE   데이터베이스 타입: postgres (기본), mysql, oracle
+  -s, --sample      콘텐츠 샘플 데이터 포함
+  -c, --comm        커뮤니케이션 샘플 데이터 포함
+  -h, --help        도움말 표시
+```
+
+### 예제
+
+```bash
+# PostgreSQL (기본)
+DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh
+
+# PostgreSQL + 샘플 데이터 포함
+DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh -s -c
+
+# MySQL/MariaDB
+DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh -t mysql
+
+# Oracle
+DB_PASSWORD=CoreNext2025# DB_SERVICE=ORCL ./database/scripts/init-db.sh -t oracle
+```
+
+### Windows에서 사용
+
+```cmd
+REM 환경변수 설정
+set DB_PASSWORD=CoreNext2025#
+set DB_TYPE=postgres
+
+REM 스크립트 실행
+database\scripts\init-db.bat
+
+REM MySQL로 실행
+set DB_TYPE=mysql
+database\scripts\init-db.bat
+
+REM 샘플 데이터 포함
+set INCLUDE_SAMPLE=true
+set INCLUDE_COMM=true
+database\scripts\init-db.bat
+```
+
+### 환경변수 목록
+
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `DB_TYPE` | 데이터베이스 타입 | `postgres` |
+| `DB_HOST` | 호스트 주소 | `localhost` |
+| `DB_PORT` | 포트 번호 | DB별 기본값 |
+| `DB_NAME` | 데이터베이스 이름 | `corenextdb` |
+| `DB_USER` | 사용자 이름 | `corenext` |
+| `DB_PASSWORD` | 비밀번호 | (필수) |
+| `DB_SERVICE` | Oracle 서비스명 | `ORCL` |
+| `INCLUDE_SAMPLE` | 콘텐츠 데이터 포함 | `false` |
+| `INCLUDE_COMM` | 커뮤니케이션 데이터 포함 | `false` |
+
+---
+
+## MySQL/MariaDB 데이터베이스 설정
+
+PostgreSQL 대신 MySQL 또는 MariaDB를 사용하는 경우 아래 가이드를 따르세요.
+
+### MySQL 사전 준비
+
+1. **MySQL 설치** (8.0 이상 권장) 또는 **MariaDB 설치** (10.5 이상 권장)
+2. **mysql 클라이언트** 설치
+3. **Node.js** 설치 (데이터 로드 스크립트 실행용)
+
+### MySQL 사용자 및 데이터베이스 생성
+
+```sql
+-- root 계정으로 접속
+mysql -u root -p
+
+-- 사용자 생성
+CREATE USER 'corenext'@'localhost' IDENTIFIED BY 'CoreNext2025#';
+CREATE USER 'corenext'@'%' IDENTIFIED BY 'CoreNext2025#';
+
+-- 데이터베이스 생성
+CREATE DATABASE corenextdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 권한 부여
+GRANT ALL PRIVILEGES ON corenextdb.* TO 'corenext'@'localhost';
+GRANT ALL PRIVILEGES ON corenextdb.* TO 'corenext'@'%';
+FLUSH PRIVILEGES;
+```
+
+### MySQL 스키마 적용
+
+```bash
+# 스키마 적용
+mysql -h localhost -P 3306 -u corenext -pCoreNext2025# corenextdb < database/scripts/original-schema-mysql.sql
+```
+
+### MySQL 데이터 입력
+
+Node.js 스크립트를 사용하여 데이터를 로드합니다.
+
+```bash
+# mysql2 패키지 설치 (처음 한 번만)
+npm install mysql2
+
+# 마스터 데이터만 로드
+node database/scripts/load-mysql-data.js --master
+
+# 모든 데이터 로드
+node database/scripts/load-mysql-data.js --all
+```
+
+### MySQL 초기화 스크립트 사용
+
+```bash
+# Linux/Mac
+DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh -t mysql
+
+# Windows
+set DB_PASSWORD=CoreNext2025#
+set DB_TYPE=mysql
+database\scripts\init-db.bat
+```
+
+### MySQL 환경변수 설정
+
+`.env.local` 파일:
+
+```env
+# MySQL 데이터베이스 설정
+DB_TYPE=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=corenextdb
+DB_USER=corenext
+DB_PASSWORD=CoreNext2025#
+```
+
+---
+
+## Oracle 데이터베이스 설정
+
+PostgreSQL 대신 Oracle을 사용하는 경우 아래 가이드를 따르세요.
+
+### Oracle 사전 준비
+
+1. **Oracle Database 설치** (19c 이상 권장)
+2. **SQL*Plus 클라이언트** 설치
+3. **사용자 및 테이블스페이스 생성**
+
+```sql
+-- SYS 또는 SYSTEM 계정으로 접속
+CREATE USER corenext IDENTIFIED BY "CoreNext2025#"
+  DEFAULT TABLESPACE users
+  TEMPORARY TABLESPACE temp
+  QUOTA UNLIMITED ON users;
+
+GRANT CONNECT, RESOURCE TO corenext;
+GRANT CREATE VIEW TO corenext;
+GRANT CREATE SEQUENCE TO corenext;
+```
+
+### Oracle 스키마 적용
+
+```bash
+# 환경변수 설정
+export DB_TYPE=oracle
+export DB_HOST=localhost
+export DB_PORT=1521
+export DB_SERVICE=ORCL
+export DB_USER=corenext
+export DB_PASSWORD="CoreNext2025#"
+
+# 스키마 적용
+sqlplus $DB_USER/$DB_PASSWORD@//$DB_HOST:$DB_PORT/$DB_SERVICE @database/scripts/original-schema-oracle.sql
+```
+
+### Oracle 데이터 입력
+
+Oracle은 PostgreSQL의 COPY 형식을 직접 지원하지 않으므로, Node.js 스크립트를 사용하여 데이터를 로드합니다.
+
+```bash
+# oracledb 패키지 설치 (처음 한 번만)
+npm install oracledb
+
+# 환경변수 설정
+export DB_USER=corenext
+export DB_PASSWORD="CoreNext2025#"
+export DB_CONNECT_STRING=localhost:1521/ORCL
+
+# 마스터 데이터만 로드
+node database/scripts/load-oracle-data.js --master
+
+# 콘텐츠 데이터 포함
+node database/scripts/load-oracle-data.js --master --content
+
+# 모든 데이터 로드
+node database/scripts/load-oracle-data.js --all
+```
+
+#### 데이터 로드 스크립트 옵션
+
+| 옵션 | 설명 |
+|------|------|
+| `--master` | 마스터 데이터 (부서, 역할, 메뉴, 코드 등) - 기본값 |
+| `--content` | 콘텐츠 데이터 (게시글, 댓글, 첨부파일) |
+| `--comm` | 커뮤니케이션 데이터 (메일, 메시지) |
+| `--all` | 모든 데이터 |
+| `--help` | 도움말 |
+
+### Oracle 초기화 스크립트 사용
+
+```bash
+# 스키마만 적용 (데이터 로드는 Node.js 스크립트로 별도 실행)
+DB_PASSWORD=CoreNext2025# DB_SERVICE=ORCL ./database/scripts/init-db.sh -t oracle
+```
+
+### Oracle 환경변수 설정
+
+`.env.local` 파일:
+
+```env
+# Oracle 데이터베이스 설정
+DB_TYPE=oracle
+DB_HOST=localhost
+DB_PORT=1521
+DB_SERVICE=ORCL
+DB_USER=corenext
+DB_PASSWORD=CoreNext2025#
+```
+
+---
+
+## 스크립트 파일 목록
+
+`database/scripts/` 디렉토리에 있는 파일들입니다.
+
+### 스키마 파일
+
+| 파일 | 설명 |
+|------|------|
+| `original-schema.sql` | PostgreSQL 스키마 (35개 테이블) |
+| `original-schema-mysql.sql` | MySQL/MariaDB 스키마 |
+| `original-schema-oracle.sql` | Oracle 스키마 |
+
+### 데이터 파일 (PostgreSQL COPY 형식)
+
+| 파일 | 설명 |
+|------|------|
+| `master-data.sql` | 마스터 데이터 (부서, 역할, 메뉴, 코드, 관리자 계정) |
+| `content-data.sql` | 콘텐츠 데이터 (게시글, 댓글, 첨부파일) |
+| `comm-data.sql` | 커뮤니케이션 데이터 (메일, 메시지) |
+
+### 초기화 스크립트
+
+| 파일 | 설명 |
+|------|------|
+| `init-db.sh` | Linux/Mac용 초기화 스크립트 |
+| `init-db.bat` | Windows용 초기화 스크립트 |
+
+### 데이터 로드 스크립트 (Node.js)
+
+| 파일 | 설명 | 필요 패키지 |
+|------|------|------------|
+| `load-mysql-data.js` | MySQL/MariaDB 데이터 로드 | `mysql2` |
+| `load-oracle-data.js` | Oracle 데이터 로드 | `oracledb` |
+| `apply-oracle-schema.js` | Oracle 스키마 적용 | `oracledb` |
 
 ---
 
