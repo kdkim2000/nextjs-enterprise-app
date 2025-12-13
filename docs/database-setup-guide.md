@@ -94,7 +94,7 @@
 2. **아래 명령어 복사해서 붙여넣기**
 
    ```bash
-   psql -U postgres -c "CREATE USER corenext WITH PASSWORD 'CoreNext2025#';"
+   psql -U postgres -c "CREATE USER corenext WITH PASSWORD '<YOUR_PASSWORD>';"
    psql -U postgres -c "CREATE DATABASE corenextdb OWNER corenext ENCODING 'UTF8';"
    psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE corenextdb TO corenext;"
    ```
@@ -112,7 +112,7 @@
    - 비밀번호 입력
    - "Login/Group Roles" 우클릭 → "Create" → "Login/Group Role"
    - General 탭: Name에 `corenext` 입력
-   - Definition 탭: Password에 `CoreNext2025#` 입력
+   - Definition 탭: Password에 `<YOUR_PASSWORD>` 입력
    - Privileges 탭: "Can login?" 을 Yes로 변경
    - "Save" 클릭
 
@@ -143,7 +143,7 @@
 
 3. **비밀번호 입력**
    - `Password for user corenext:` 가 나오면
-   - `CoreNext2025#` 입력 후 엔터
+   - `<YOUR_PASSWORD>` 입력 후 엔터
 
 4. **성공 확인**
    - 여러 줄의 `CREATE TABLE`, `CREATE INDEX` 메시지가 나오면 성공!
@@ -179,7 +179,7 @@ psql -h localhost -p 5432 -U corenext -d corenextdb -f database/scripts/content-
 psql -h localhost -p 5432 -U corenext -d corenextdb -f database/scripts/comm-data.sql
 ```
 
-> **참고**: 각 명령어마다 비밀번호 `CoreNext2025#`를 입력해야 합니다.
+> **참고**: 각 명령어마다 비밀번호 `<YOUR_PASSWORD>`를 입력해야 합니다.
 
 ---
 
@@ -242,7 +242,7 @@ brew services start postgresql@16
 ### "authentication failed" 오류
 
 비밀번호가 틀렸습니다.
-- corenext 사용자의 비밀번호가 `CoreNext2025#`인지 확인
+- corenext 사용자의 비밀번호가 `<YOUR_PASSWORD>`인지 확인
 - 대소문자 구분에 주의하세요
 
 ### "database does not exist" 오류
@@ -284,12 +284,12 @@ cd E:\apps\nextjs-enterprise-app
 $env:PGPASSWORD = "PostgreSQL설치시설정한비밀번호"
 
 # 사용자 및 데이터베이스 생성
-psql -U postgres -c "CREATE USER corenext WITH PASSWORD 'CoreNext2025#';"
+psql -U postgres -c "CREATE USER corenext WITH PASSWORD '<YOUR_PASSWORD>';"
 psql -U postgres -c "CREATE DATABASE corenextdb OWNER corenext ENCODING 'UTF8';"
 psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE corenextdb TO corenext;"
 
 # 환경변수 변경 (corenext 사용자용)
-$env:PGPASSWORD = "CoreNext2025#"
+$env:PGPASSWORD = "<YOUR_PASSWORD>"
 
 # 스키마 및 데이터 적용
 psql -h localhost -U corenext -d corenextdb -f database/scripts/original-schema.sql
@@ -308,12 +308,12 @@ psql -h localhost -U corenext -d corenextdb -c "\dt"
 cd /path/to/nextjs-enterprise-app
 
 # 사용자 및 데이터베이스 생성
-sudo -u postgres psql -c "CREATE USER corenext WITH PASSWORD 'CoreNext2025#';"
+sudo -u postgres psql -c "CREATE USER corenext WITH PASSWORD '<YOUR_PASSWORD>';"
 sudo -u postgres psql -c "CREATE DATABASE corenextdb OWNER corenext ENCODING 'UTF8';"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE corenextdb TO corenext;"
 
 # 환경변수 설정
-export PGPASSWORD="CoreNext2025#"
+export PGPASSWORD="<YOUR_PASSWORD>"
 
 # 스키마 및 데이터 적용
 psql -h localhost -U corenext -d corenextdb -f database/scripts/original-schema.sql
@@ -340,7 +340,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=corenextdb
 DB_USER=corenext
-DB_PASSWORD=CoreNext2025#
+DB_PASSWORD=<YOUR_PASSWORD>
 ```
 
 ---
@@ -372,23 +372,23 @@ DB_PASSWORD=CoreNext2025#
 
 ```bash
 # PostgreSQL (기본)
-DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh
+DB_PASSWORD=<YOUR_PASSWORD> ./database/scripts/init-db.sh
 
 # PostgreSQL + 샘플 데이터 포함
-DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh -s -c
+DB_PASSWORD=<YOUR_PASSWORD> ./database/scripts/init-db.sh -s -c
 
 # MySQL/MariaDB
-DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh -t mysql
+DB_PASSWORD=<YOUR_PASSWORD> ./database/scripts/init-db.sh -t mysql
 
 # Oracle
-DB_PASSWORD=CoreNext2025# DB_SERVICE=ORCL ./database/scripts/init-db.sh -t oracle
+DB_PASSWORD=<YOUR_PASSWORD> DB_SERVICE=ORCL ./database/scripts/init-db.sh -t oracle
 ```
 
 ### Windows에서 사용
 
 ```cmd
 REM 환경변수 설정
-set DB_PASSWORD=CoreNext2025#
+set DB_PASSWORD=<YOUR_PASSWORD>
 set DB_TYPE=postgres
 
 REM 스크립트 실행
@@ -437,8 +437,8 @@ PostgreSQL 대신 MySQL 또는 MariaDB를 사용하는 경우 아래 가이드�
 mysql -u root -p
 
 -- 사용자 생성
-CREATE USER 'corenext'@'localhost' IDENTIFIED BY 'CoreNext2025#';
-CREATE USER 'corenext'@'%' IDENTIFIED BY 'CoreNext2025#';
+CREATE USER 'corenext'@'localhost' IDENTIFIED BY '<YOUR_PASSWORD>';
+CREATE USER 'corenext'@'%' IDENTIFIED BY '<YOUR_PASSWORD>';
 
 -- 데이터베이스 생성
 CREATE DATABASE corenextdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -453,7 +453,7 @@ FLUSH PRIVILEGES;
 
 ```bash
 # 스키마 적용
-mysql -h localhost -P 3306 -u corenext -pCoreNext2025# corenextdb < database/scripts/original-schema-mysql.sql
+mysql -h localhost -P 3306 -u corenext -p<YOUR_PASSWORD> corenextdb < database/scripts/original-schema-mysql.sql
 ```
 
 ### MySQL 데이터 입력
@@ -475,10 +475,10 @@ node database/scripts/load-mysql-data.js --all
 
 ```bash
 # Linux/Mac
-DB_PASSWORD=CoreNext2025# ./database/scripts/init-db.sh -t mysql
+DB_PASSWORD=<YOUR_PASSWORD> ./database/scripts/init-db.sh -t mysql
 
 # Windows
-set DB_PASSWORD=CoreNext2025#
+set DB_PASSWORD=<YOUR_PASSWORD>
 set DB_TYPE=mysql
 database\scripts\init-db.bat
 ```
@@ -494,7 +494,7 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=corenextdb
 DB_USER=corenext
-DB_PASSWORD=CoreNext2025#
+DB_PASSWORD=<YOUR_PASSWORD>
 ```
 
 ---
@@ -511,7 +511,7 @@ PostgreSQL 대신 Oracle을 사용하는 경우 아래 가이드를 따르세요
 
 ```sql
 -- SYS 또는 SYSTEM 계정으로 접속
-CREATE USER corenext IDENTIFIED BY "CoreNext2025#"
+CREATE USER corenext IDENTIFIED BY "<YOUR_PASSWORD>"
   DEFAULT TABLESPACE users
   TEMPORARY TABLESPACE temp
   QUOTA UNLIMITED ON users;
@@ -530,7 +530,7 @@ export DB_HOST=localhost
 export DB_PORT=1521
 export DB_SERVICE=ORCL
 export DB_USER=corenext
-export DB_PASSWORD="CoreNext2025#"
+export DB_PASSWORD="<YOUR_PASSWORD>"
 
 # 스키마 적용
 sqlplus $DB_USER/$DB_PASSWORD@//$DB_HOST:$DB_PORT/$DB_SERVICE @database/scripts/original-schema-oracle.sql
@@ -546,7 +546,7 @@ npm install oracledb
 
 # 환경변수 설정
 export DB_USER=corenext
-export DB_PASSWORD="CoreNext2025#"
+export DB_PASSWORD="<YOUR_PASSWORD>"
 export DB_CONNECT_STRING=localhost:1521/ORCL
 
 # 마스터 데이터만 로드
@@ -573,7 +573,7 @@ node database/scripts/load-oracle-data.js --all
 
 ```bash
 # 스키마만 적용 (데이터 로드는 Node.js 스크립트로 별도 실행)
-DB_PASSWORD=CoreNext2025# DB_SERVICE=ORCL ./database/scripts/init-db.sh -t oracle
+DB_PASSWORD=<YOUR_PASSWORD> DB_SERVICE=ORCL ./database/scripts/init-db.sh -t oracle
 ```
 
 ### Oracle 환경변수 설정
@@ -587,7 +587,7 @@ DB_HOST=localhost
 DB_PORT=1521
 DB_SERVICE=ORCL
 DB_USER=corenext
-DB_PASSWORD=CoreNext2025#
+DB_PASSWORD=<YOUR_PASSWORD>
 ```
 
 ---
