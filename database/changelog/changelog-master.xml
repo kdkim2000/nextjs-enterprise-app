@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Enterprise Application Database Schema
+         Version: 1.0.0
+         ========================================== -->
+
+    <!-- Property 정의 (DB별 타입 매핑) -->
+    <property name="clob.type" value="TEXT" dbms="postgresql"/>
+    <property name="clob.type" value="CLOB" dbms="oracle"/>
+
+    <property name="boolean.type" value="BOOLEAN" dbms="postgresql"/>
+    <property name="boolean.type" value="NUMBER(1)" dbms="oracle"/>
+
+    <property name="timestamp.type" value="TIMESTAMP WITH TIME ZONE" dbms="postgresql,oracle"/>
+
+    <property name="json.type" value="JSONB" dbms="postgresql"/>
+    <property name="json.type" value="CLOB" dbms="oracle"/>
+
+    <!-- v1.0 스키마 -->
+    <include file="v1.0/001-create-code-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/002-create-user-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/003-create-menu-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/004-create-content-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/005-create-communication-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/006-create-system-tables.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/007-create-indexes.xml" relativeToChangelogFile="true"/>
+
+    <!-- v1.0 Seed 데이터 -->
+    <include file="v1.0/008-load-required-seed.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/009-load-sample-seed.xml" relativeToChangelogFile="true"/>
+
+    <!-- 향후 버전 추가 -->
+    <!-- <include file="v1.1/xxx-new-feature.xml" relativeToChangelogFile="true"/> -->
+
+</databaseChangeLog>

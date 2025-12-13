@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Sample Seed Data (개발/테스트용 샘플 데이터)
+         Context: sample - 개발 환경에서만 로드
+         ========================================== -->
+
+    <changeSet id="009-01-load-sample-departments" author="system" context="sample">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="departments"/>
+        </preConditions>
+        <sqlFile path="../../seed/sample/001-sample-departments.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="009-02-load-sample-users" author="system" context="sample">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+        </preConditions>
+        <sqlFile path="../../seed/sample/002-sample-users.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="009-03-load-sample-board-types" author="system" context="sample">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="board_types"/>
+        </preConditions>
+        <sqlFile path="../../seed/sample/003-sample-board-types.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+</databaseChangeLog>
