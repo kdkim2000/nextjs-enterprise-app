@@ -10,8 +10,9 @@ import { Menu } from '../types';
 export async function getAllMenus(options: {
   search?: string;
   level?: number;
+  platform?: 'mobile' | 'desktop' | 'all';
 } = {}): Promise<Menu[]> {
-  const { search, level } = options;
+  const { search, level, platform = 'all' } = options;
 
   let queryText = 'SELECT * FROM menus WHERE 1=1';
   const params: any[] = [];
@@ -31,6 +32,13 @@ export async function getAllMenus(options: {
     queryText += ` AND level = $${paramIndex}`;
     params.push(level);
     paramIndex++;
+  }
+
+  // Filter by platform
+  if (platform === 'mobile') {
+    queryText += ' AND (mobile_enabled = true OR mobile_enabled IS NULL)';
+  } else if (platform === 'desktop') {
+    queryText += ' AND (desktop_enabled = true OR desktop_enabled IS NULL)';
   }
 
   queryText += ' ORDER BY level, "order", code';
@@ -75,6 +83,8 @@ export async function createMenu(menuData: {
   descriptionKo?: string;
   descriptionZh?: string;
   descriptionVi?: string;
+  mobileEnabled?: boolean;
+  desktopEnabled?: boolean;
   id?: string;
 }): Promise<Menu> {
   const id = menuData.id || uuidv4();
@@ -84,9 +94,10 @@ export async function createMenu(menuData: {
       id, code, name_en, name_ko, name_zh, name_vi, path, icon,
       parent_id, level, "order", program_id,
       description_en, description_ko, description_zh, description_vi,
+      mobile_enabled, desktop_enabled,
       created_at, updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
     RETURNING *`;
 
   const params = [
@@ -105,7 +116,9 @@ export async function createMenu(menuData: {
     menuData.descriptionEn,
     menuData.descriptionKo,
     menuData.descriptionZh,
-    menuData.descriptionVi
+    menuData.descriptionVi,
+    menuData.mobileEnabled ?? true,
+    menuData.desktopEnabled ?? true
   ];
 
   const result = await query(queryText, params);
@@ -116,7 +129,8 @@ export async function updateMenu(menuId: string, updates: any): Promise<Menu | n
   const allowedFields = [
     'code', 'name_en', 'name_ko', 'name_zh', 'name_vi', 'path', 'icon',
     'parent_id', 'level', 'order', 'program_id',
-    'description_en', 'description_ko', 'description_zh', 'description_vi'
+    'description_en', 'description_ko', 'description_zh', 'description_vi',
+    'mobile_enabled', 'desktop_enabled'
   ];
 
   const setClause: string[] = [];

@@ -19,7 +19,9 @@ function transformMenuToAPI(dbMenu: any): any {
   return {
     id: transformed.id, code: transformed.code, name: transformed.name, path: transformed.path,
     icon: transformed.icon, order: transformed.order || 0, parentId: transformed.parent_id,
-    level: transformed.level || 0, programId: transformed.program_id, description: transformed.description
+    level: transformed.level || 0, programId: transformed.program_id, description: transformed.description,
+    mobileEnabled: transformed.mobile_enabled ?? true,
+    desktopEnabled: transformed.desktop_enabled ?? true
   };
 }
 
@@ -96,7 +98,10 @@ router.get('/user-menus', authenticateToken, async (req: Request, res: Response)
     const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: 'User ID required' });
 
-    const dbMenus = await menuService.getAllMenus({});
+    // Get platform from query parameter (mobile, desktop, or all)
+    const platform = (req.query.platform as 'mobile' | 'desktop' | 'all') || 'all';
+
+    const dbMenus = await menuService.getAllMenus({ platform });
     const menus = dbMenus.map(transformMenuToAPI);
     const accessiblePrograms = await permissionService.getUserAccessiblePrograms(userId);
     const programPermissionsMap = new Map<string, any>();
@@ -189,7 +194,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
 
 router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { code, name, path, icon, order, parentId, level, programId, description } = req.body;
+    const { code, name, path, icon, order, parentId, level, programId, description, mobileEnabled, desktopEnabled } = req.body;
     if (!code || !name || !path || order === undefined || level === undefined) {
       return res.status(400).json({ error: 'Missing required fields: code, name, path, order, level' });
     }
@@ -207,7 +212,9 @@ router.post('/', authenticateToken, requireAdmin, async (req: Request, res: Resp
       descriptionEn: (typeof description === 'object' && description !== null) ? (description.en || '') : (typeof description === 'string' ? description : ''),
       descriptionKo: (typeof description === 'object' && description !== null) ? (description.ko || '') : '',
       descriptionZh: (typeof description === 'object' && description !== null) ? (description.zh || '') : '',
-      descriptionVi: (typeof description === 'object' && description !== null) ? (description.vi || '') : ''
+      descriptionVi: (typeof description === 'object' && description !== null) ? (description.vi || '') : '',
+      mobileEnabled: mobileEnabled ?? true,
+      desktopEnabled: desktopEnabled ?? true
     };
 
     const dbMenu = await menuService.createMenu(menuData);
@@ -224,7 +231,7 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Re
     const existingMenu = await menuService.getMenuById(req.params.id);
     if (!existingMenu) return res.status(404).json({ error: 'Menu not found' });
 
-    const { code, name, path, icon, order, parentId, level, programId, description } = req.body;
+    const { code, name, path, icon, order, parentId, level, programId, description, mobileEnabled, desktopEnabled } = req.body;
 
     if (code && code !== existingMenu.code) {
       const conflictMenu = await menuService.getMenuByCode(code);
@@ -258,6 +265,8 @@ router.put('/:id', authenticateToken, requireAdmin, async (req: Request, res: Re
       if (description.zh !== undefined) updates.descriptionZh = description.zh;
       if (description.vi !== undefined) updates.descriptionVi = description.vi;
     }
+    if (mobileEnabled !== undefined) updates.mobileEnabled = mobileEnabled;
+    if (desktopEnabled !== undefined) updates.desktopEnabled = desktopEnabled;
 
     const dbMenu = await menuService.updateMenu(req.params.id, updates);
     res.json({ menu: transformMenuToAPI(dbMenu) });

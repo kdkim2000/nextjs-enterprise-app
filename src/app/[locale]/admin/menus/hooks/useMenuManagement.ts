@@ -80,7 +80,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         parentId: item.parentId,
         level: item.level,
         programId: item.programId || '',
-        description: item.description
+        description: item.description,
+        mobileEnabled: item.mobileEnabled ?? true,
+        desktopEnabled: item.desktopEnabled ?? true
       };
       acc.push(flatItem);
       if (item.children && item.children.length > 0) {
@@ -126,7 +128,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       order: 0,
       parentId: null,
       level: 0,
-      programId: ''
+      programId: '',
+      mobileEnabled: true,
+      desktopEnabled: true
     } as MenuFormData);
     setDialogOpen(true);
   }, []);
@@ -145,7 +149,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         order: menu.order,
         parentId: menu.parentId,
         level: menu.level,
-        programId: menu.programId
+        programId: menu.programId,
+        mobileEnabled: menu.mobileEnabled ?? true,
+        desktopEnabled: menu.desktopEnabled ?? true
       } as MenuFormData);
       setDialogOpen(true);
     }
@@ -168,7 +174,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         parentId: editingMenu.parentId || null,
         level: editingMenu.level,
         programId: editingMenu.programId || null,
-        description
+        description,
+        mobileEnabled: editingMenu.mobileEnabled,
+        desktopEnabled: editingMenu.desktopEnabled
       };
 
       if (editingMenu.id) {

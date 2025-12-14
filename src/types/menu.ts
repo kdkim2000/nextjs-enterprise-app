@@ -20,6 +20,8 @@ export interface MenuItem {
     zh: string;
     vi: string;
   };
+  mobileEnabled?: boolean;   // Whether menu is visible on mobile
+  desktopEnabled?: boolean;  // Whether menu is visible on desktop
   children?: MenuItem[];
 }
 
