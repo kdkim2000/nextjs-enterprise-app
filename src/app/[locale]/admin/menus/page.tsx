@@ -1,11 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
-import ExcelDataGrid from '@/components/common/DataGrid';
+import { Paper } from '@mui/material';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
@@ -16,9 +13,8 @@ import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
 import { useMenuManagement } from './hooks/useMenuManagement';
-import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
-import { Menu } from './types';
+import MenuTreeView from './components/MenuTreeView';
 
 export default function MenuManagementPage() {
   const t = useI18n();
@@ -44,7 +40,6 @@ export default function MenuManagementPage() {
     // State
     filteredMenus,
     allMenus,
-    setMenus,
     searchCriteria,
     quickSearch,
     setQuickSearch,
@@ -60,6 +55,10 @@ export default function MenuManagementPage() {
     deleteLoading,
     successMessage,
     errorMessage,
+    // Tree-related state
+    treeMenus,
+    expandedIds,
+    selectedIds,
     // Handlers
     handleAdd,
     handleEdit,
@@ -74,15 +73,18 @@ export default function MenuManagementPage() {
     handleAdvancedSearchClear,
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
-    setDialogOpen
+    setDialogOpen,
+    // Tree-related handlers
+    handleToggleExpand,
+    handleExpandAll,
+    handleCollapseAll,
+    handleToggleSelect,
+    handleSelectAll,
+    handleDeselectAll,
+    handleTreeDelete
   } = useMenuManagement({ locale: currentLocale });
 
   // Memoized computed values
-  const columns = useMemo(
-    () => createColumns(t, currentLocale, allMenus, handleEdit, gridPermissions.editable),
-    [t, currentLocale, allMenus, handleEdit, gridPermissions.editable]
-  );
-
   const filterFields = useMemo(
     () => createFilterFields(t, allMenus, currentLocale),
     [t, allMenus, currentLocale]
@@ -149,30 +151,29 @@ export default function MenuManagementPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {filteredMenus.length === 0 && !loading ? (
-          <EmptyState
-            icon={Search}
-            title="No menus found"
-            description="Start by adding a new menu or loading existing ones"
-          />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={filteredMenus}
-              columns={columns}
-              onRowsChange={(rows) => setMenus(rows)}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="menus"
-              loading={loading}
-            />
-          </Box>
-        )}
+      {/* Menu Tree View Area */}
+      <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+        <MenuTreeView
+          menus={treeMenus}
+          expandedIds={expandedIds}
+          selectedIds={selectedIds}
+          locale={currentLocale}
+          loading={loading}
+          searchQuery={quickSearch}
+          onToggleExpand={handleToggleExpand}
+          onToggleSelect={handleToggleSelect}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          onExpandAll={handleExpandAll}
+          onCollapseAll={handleCollapseAll}
+          onEdit={handleEdit}
+          onAdd={handleAdd}
+          onDelete={handleTreeDelete}
+          onRefresh={handleRefresh}
+          canEdit={gridPermissions.editable}
+          canDelete={gridPermissions.showDeleteButton}
+          canAdd={gridPermissions.showAddButton}
+        />
       </Paper>
 
       {/* Edit Drawer */}

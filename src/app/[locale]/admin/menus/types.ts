@@ -15,6 +15,11 @@ export interface Menu {
   desktopEnabled?: boolean;
 }
 
+// Tree structure for MenuTreeView
+export interface MenuTreeNode extends Menu {
+  children?: MenuTreeNode[];
+}
+
 export interface MenuFormData {
   id?: string;
   code: string;
