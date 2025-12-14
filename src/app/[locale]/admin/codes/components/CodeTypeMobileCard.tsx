@@ -1,16 +1,13 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Typography, useTheme } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Category as CategoryIcon,
   Folder as FolderIcon,
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import MobileEntityCard, {
-  EntityAvatarConfig,
   EntityStatusIndicator,
   EntityRoleBadge,
   EntityFeatureBadge,
@@ -46,7 +43,6 @@ export default function CodeTypeMobileCard({
   showSwipeActions = true,
 }: CodeTypeMobileCardProps) {
   const t = useI18n();
-  const theme = useTheme();
   const isKorean = locale === 'ko';
   const isActive = codeType.status === 'active';
 
@@ -60,15 +56,7 @@ export default function CodeTypeMobileCard({
     return getLocalizedValue(codeType.description, locale) || '';
   };
 
-  // Avatar config - folder style for code types
-  const avatar: EntityAvatarConfig = useMemo(
-    () => ({
-      initials: codeType.code.substring(0, 2).toUpperCase(),
-      bgcolor: isActive ? theme.palette.primary.main : theme.palette.grey[400],
-      size: 48,
-    }),
-    [codeType.code, isActive, theme]
-  );
+  // No avatar for code types - code management doesn't need visual avatars
 
   // Status indicator
   const status: EntityStatusIndicator = useMemo(
@@ -143,7 +131,6 @@ export default function CodeTypeMobileCard({
   return (
     <MobileEntityCard
       item={codeType}
-      avatar={avatar}
       status={status}
       primaryText={getDisplayName()}
       roleBadge={roleBadge}

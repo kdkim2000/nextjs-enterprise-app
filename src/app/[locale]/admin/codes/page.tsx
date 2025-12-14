@@ -13,6 +13,7 @@ import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import MasterDetailLayout from '@/components/common/MasterDetailLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
+import MobileMasterDetail, { useMobileMasterDetail } from '@/components/mobile/MobileMasterDetail';
 import CodeFormFields, { CodeFormData } from '@/components/admin/CodeFormFields';
 import CodeTypeFormFields, { CodeTypeFormData } from '@/components/admin/CodeTypeFormFields';
 import CodeTypeList from './components/CodeTypeList';
@@ -37,9 +38,6 @@ import {
   SUPPORTED_LANGUAGES
 } from './utils';
 import { Code, CodeType, SearchCriteria } from './types';
-
-// Mobile view state type
-type MobileView = 'types' | 'codes';
 
 export default function CodesPage() {
   const t = useI18n();
@@ -66,8 +64,15 @@ export default function CodesPage() {
   // Fetch status options from code management system
   const { codes: statusOptions } = useCodeOptions('COMMON_STATUS', locale);
 
-  // Mobile view state (for drill-down navigation)
-  const [mobileView, setMobileView] = useState<MobileView>('types');
+  // Mobile Master-Detail navigation
+  const {
+    view: mobileView,
+    setView: setMobileView,
+    selectedMaster: mobileSelectedCodeType,
+    selectMaster: selectMobileCodeType,
+    goBack: handleMobileBack,
+    clearSelection: clearMobileSelection,
+  } = useMobileMasterDetail<CodeType>('master');
 
   // State
   const [codeTypes, setCodeTypes] = useState<CodeType[]>([]);
@@ -183,15 +188,15 @@ export default function CodesPage() {
   // Mobile: Handle code type selection (drill-down)
   const handleMobileCodeTypeClick = useCallback((codeType: CodeType) => {
     setSelectedCodeType(codeType);
-    setMobileView('codes');
-  }, []);
+    selectMobileCodeType(codeType);
+  }, [selectMobileCodeType]);
 
-  // Mobile: Go back to code types
-  const handleMobileBack = useCallback(() => {
-    setMobileView('types');
+  // Mobile: Handle back navigation
+  const handleMobileBackClick = useCallback(() => {
+    handleMobileBack();
     setMobileSelectionMode(false);
     setMobileSelectedIds(new Set());
-  }, []);
+  }, [handleMobileBack]);
 
   // Code Type handlers
   const handleAddCodeType = useCallback(() => {
@@ -287,9 +292,9 @@ export default function CodesPage() {
         setSelectedCodeType(null);
         setCodes([]);
         setFilteredCodes([]);
-        // Mobile: go back to types view
+        // Mobile: go back to master view
         if (isMobileLayout) {
-          setMobileView('types');
+          clearMobileSelection();
         }
       }
 
@@ -467,71 +472,58 @@ export default function CodesPage() {
     [selectedCodesForDelete, codes, locale]
   );
 
-  // Mobile title based on current view
-  const getMobileTitle = () => {
-    if (mobileView === 'codes' && selectedCodeType) {
-      return getLocalizedValue(selectedCodeType.name, locale);
-    }
-    return undefined; // Use menu title
-  };
-
-  // Render mobile content based on current view
-  const renderMobileContent = () => {
-    if (mobileView === 'types') {
-      // Code Types List
-      return (
-        <MobileCardList
-          data={codeTypes}
-          loading={false}
-          emptyMessage={locale === 'ko' ? '코드 타입이 없습니다' : 'No code types found'}
-          renderCard={(codeType) => (
-            <CodeTypeMobileCard
-              key={codeType.id}
-              codeType={codeType}
-              locale={locale}
-              onClick={handleMobileCodeTypeClick}
-              onEdit={gridPermissions.editable ? handleEditCodeType : undefined}
-              onDelete={gridPermissions.showDeleteButton ? handleDeleteCodeType : undefined}
-              showSwipeActions={gridPermissions.editable}
-            />
-          )}
-          keyExtractor={(codeType) => codeType.id}
+  // Mobile: Master Content (Code Types List)
+  const renderMasterContent = () => (
+    <MobileCardList
+      data={codeTypes}
+      loading={false}
+      emptyMessage={locale === 'ko' ? '코드 타입이 없습니다' : 'No code types found'}
+      renderCard={(codeType) => (
+        <CodeTypeMobileCard
+          key={codeType.id}
+          codeType={codeType}
+          locale={locale}
+          onClick={handleMobileCodeTypeClick}
+          onEdit={gridPermissions.editable ? handleEditCodeType : undefined}
+          onDelete={gridPermissions.showDeleteButton ? handleDeleteCodeType : undefined}
+          showSwipeActions={gridPermissions.editable}
         />
-      );
-    }
+      )}
+      keyExtractor={(codeType) => codeType.id}
+    />
+  );
 
-    // Codes List (mobileView === 'codes')
-    return (
-      <MobileCardList
-        data={filteredCodes}
-        loading={loading}
-        emptyMessage={locale === 'ko' ? '코드가 없습니다' : 'No codes found'}
-        renderCard={(code) => (
-          <CodeMobileCard
-            key={code.id}
-            code={code}
-            locale={locale}
-            onClick={gridPermissions.editable ? handleMobileEditCode : undefined}
-            onEdit={gridPermissions.editable ? handleMobileEditCode : undefined}
-            onDelete={gridPermissions.showDeleteButton ? handleMobileDeleteCode : undefined}
-            selected={mobileSelectedIds.has(code.id)}
-            selectable={mobileSelectionMode}
-            onSelectionChange={(selected) => {
-              const newIds = new Set(mobileSelectedIds);
-              if (selected) {
-                newIds.add(code.id);
-              } else {
-                newIds.delete(code.id);
-              }
-              setMobileSelectedIds(newIds);
-            }}
-            showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
-          />
-        )}
-        keyExtractor={(code) => code.id}
-      />
-    );
-  };
+  // Mobile: Detail Content (Codes List)
+  const renderDetailContent = () => (
+    <MobileCardList
+      data={filteredCodes}
+      loading={loading}
+      emptyMessage={locale === 'ko' ? '코드가 없습니다' : 'No codes found'}
+      renderCard={(code) => (
+        <CodeMobileCard
+          key={code.id}
+          code={code}
+          locale={locale}
+          onClick={gridPermissions.editable ? handleMobileEditCode : undefined}
+          onEdit={gridPermissions.editable ? handleMobileEditCode : undefined}
+          onDelete={gridPermissions.showDeleteButton ? handleMobileDeleteCode : undefined}
+          selected={mobileSelectedIds.has(code.id)}
+          selectable={mobileSelectionMode}
+          onSelectionChange={(selected) => {
+            const newIds = new Set(mobileSelectedIds);
+            if (selected) {
+              newIds.add(code.id);
+            } else {
+              newIds.delete(code.id);
+            }
+            setMobileSelectedIds(newIds);
+          }}
+          showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
+        />
+      )}
+      keyExtractor={(code) => code.id}
+    />
+  );
 
   return (
     <ResponsivePageLayout
@@ -541,9 +533,9 @@ export default function CodesPage() {
       // Messages
       successMessage={successMessage}
       errorMessage={errorMessage}
-      // Quick Search (only show in codes view on mobile)
-      quickSearch={isMobileLayout && mobileView === 'codes' ? quickSearch : undefined}
-      onQuickSearchChange={isMobileLayout && mobileView === 'codes' ? setQuickSearch : undefined}
+      // Quick Search (only show in detail view on mobile)
+      quickSearch={isMobileLayout && mobileView === 'detail' ? quickSearch : undefined}
+      onQuickSearchChange={isMobileLayout && mobileView === 'detail' ? setQuickSearch : undefined}
       onQuickSearch={() => {}}
       onQuickSearchClear={() => {
         setQuickSearch('');
@@ -551,11 +543,11 @@ export default function CodesPage() {
       }}
       quickSearchPlaceholder={locale === 'ko' ? '코드 검색...' : 'Search codes...'}
       searching={loading}
-      // Advanced Filter (only for codes view on mobile)
-      showAdvancedFilter={isMobileLayout && mobileView === 'codes'}
+      // Advanced Filter (only for detail view on mobile)
+      showAdvancedFilter={isMobileLayout && mobileView === 'detail'}
       advancedFilterOpen={advancedFilterOpen}
       onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={mobileView === 'codes' ? activeFilterCount : 0}
+      activeFilterCount={mobileView === 'detail' ? activeFilterCount : 0}
       filterTitle={`${t('common.search')} / ${t('common.filter')}`}
       filterContent={
         <SearchFilterFields
@@ -580,53 +572,76 @@ export default function CodesPage() {
       canManageHelp={canManageHelp}
       onHelpEdit={navigateToHelpEdit}
       language={language}
-      // Mobile specific props
-      mobileFab={
-        isMobileLayout
-          ? mobileView === 'types'
-            ? gridPermissions.showAddButton
-              ? { onClick: handleAddCodeType, label: t('common.create') }
-              : undefined
-            : gridPermissions.showAddButton
-              ? { onClick: handleAddCode, label: t('common.create') }
-              : undefined
-          : undefined
-      }
-      mobileSelectionMode={mobileView === 'codes' ? mobileSelectionMode : false}
+      // Mobile FAB - not needed when using MobileMasterDetail (it has its own FAB support)
+      mobileFab={undefined}
+      // Mobile selection mode - only active in detail view
+      mobileSelectionMode={mobileView === 'detail' ? mobileSelectionMode : false}
       mobileSelectedCount={mobileSelectedIds.size}
       mobileTotalCount={filteredCodes.length}
       onMobileSelectionModeToggle={
-        mobileView === 'codes' && gridPermissions.showDeleteButton
+        mobileView === 'detail' && gridPermissions.showDeleteButton
           ? handleMobileSelectionModeToggle
           : undefined
       }
       onMobileSelectAll={handleMobileSelectAll}
       onMobileDeselectAll={handleMobileDeselectAll}
       onMobileDeleteSelected={
-        mobileView === 'codes' && gridPermissions.showDeleteButton
+        mobileView === 'detail' && gridPermissions.showDeleteButton
           ? handleMobileDeleteSelected
           : undefined
       }
-      // Custom mobile header for back navigation
-      mobileCustomHeader={
-        isMobileLayout && mobileView === 'codes' ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title={locale === 'ko' ? '뒤로' : 'Back'}>
-              <IconButton onClick={handleMobileBack} size="small">
-                <ArrowBack />
-              </IconButton>
-            </Tooltip>
-            <Typography variant="subtitle1" fontWeight={600} noWrap>
-              {getMobileTitle()}
-            </Typography>
-          </Box>
-        ) : undefined
-      }
+      // Hide default mobile header when using MobileMasterDetail
+      mobileCustomHeader={isMobileLayout ? <Box /> : undefined}
     >
       {/* Conditional rendering based on device */}
       {isMobileLayout ? (
-        // Mobile: Drill-down navigation
-        renderMobileContent()
+        // Mobile: Master-Detail navigation with slide animation
+        <MobileMasterDetail
+          view={mobileView}
+          onViewChange={setMobileView}
+          masterContent={renderMasterContent()}
+          detailContent={renderDetailContent()}
+          detailHeader={{
+            title: selectedCodeType
+              ? getLocalizedValue(selectedCodeType.name, locale)
+              : '',
+            subtitle: selectedCodeType?.code,
+          }}
+          onBack={handleMobileBackClick}
+          masterFab={
+            gridPermissions.showAddButton
+              ? { onClick: handleAddCodeType, label: t('common.create') }
+              : undefined
+          }
+          detailFab={
+            gridPermissions.showAddButton
+              ? { onClick: handleAddCode, label: t('common.create') }
+              : undefined
+          }
+          detailSelection={
+            gridPermissions.showDeleteButton
+              ? {
+                  active: mobileSelectionMode,
+                  selectedCount: mobileSelectedIds.size,
+                  totalCount: filteredCodes.length,
+                  onToggle: handleMobileSelectionModeToggle,
+                  onSelectAll: handleMobileSelectAll,
+                  onDeselectAll: handleMobileDeselectAll,
+                  onDeleteSelected: handleMobileDeleteSelected,
+                }
+              : undefined
+          }
+          enableSwipeBack
+          detailLoading={loading}
+          hasDetailContent={filteredCodes.length > 0}
+          detailEmptyState={
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography color="text.secondary">
+                {locale === 'ko' ? '코드가 없습니다' : 'No codes found'}
+              </Typography>
+            </Box>
+          }
+        />
       ) : (
         // Desktop: Master-Detail Layout
         <MasterDetailLayout

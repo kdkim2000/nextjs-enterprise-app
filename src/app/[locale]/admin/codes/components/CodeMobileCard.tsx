@@ -1,16 +1,13 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Typography, useTheme } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Code as CodeIcon,
   Tag as TagIcon,
   SubdirectoryArrowRight as ChildIcon,
 } from '@mui/icons-material';
 import MobileEntityCard, {
-  EntityAvatarConfig,
   EntityStatusIndicator,
   EntityRoleBadge,
   EntityFeatureBadge,
@@ -44,10 +41,7 @@ export default function CodeMobileCard({
   showSwipeActions = true,
 }: CodeMobileCardProps) {
   const t = useI18n();
-  const theme = useTheme();
-  const isKorean = locale === 'ko';
   const isActive = code.status === 'active';
-  const hasParent = !!code.parentCode;
 
   // Get display name
   const getDisplayName = (): string => {
@@ -59,21 +53,7 @@ export default function CodeMobileCard({
     return getLocalizedValue(code.description, locale) || '';
   };
 
-  // Avatar config
-  const avatar: EntityAvatarConfig = useMemo(() => {
-    // Use code as initials (first 2 chars)
-    const initials = code.code.substring(0, 2).toUpperCase();
-
-    return {
-      initials,
-      bgcolor: isActive
-        ? hasParent
-          ? theme.palette.info.main
-          : theme.palette.primary.main
-        : theme.palette.grey[400],
-      size: 48,
-    };
-  }, [code.code, isActive, hasParent, theme]);
+  // No avatar for codes - code management doesn't need visual avatars
 
   // Status indicator
   const status: EntityStatusIndicator = useMemo(
@@ -151,7 +131,6 @@ export default function CodeMobileCard({
   return (
     <MobileEntityCard
       item={code}
-      avatar={avatar}
       status={status}
       primaryText={getDisplayName()}
       roleBadge={roleBadge}

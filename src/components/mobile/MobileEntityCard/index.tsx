@@ -136,61 +136,96 @@ export default function MobileEntityCard<T = unknown>({
         </Box>
       )}
 
-      {/* Avatar with status indicator */}
-      <Box sx={{ position: 'relative', flexShrink: 0 }}>
-        <Avatar
-          src={avatar.src || undefined}
-          sx={{
-            width: avatar.size || 48,
-            height: avatar.size || 48,
-            bgcolor: avatar.bgcolor || 'primary.main',
-            fontSize: '1rem',
-            fontWeight: 600,
-            opacity: isActive ? 1 : 0.6,
-          }}
-        >
-          {avatar.initials}
-        </Avatar>
-        {/* Status indicator */}
-        {status && (
-          <Box
+      {/* Avatar with status indicator (only shown when avatar is provided) */}
+      {avatar ? (
+        <Box sx={{ position: 'relative', flexShrink: 0 }}>
+          <Avatar
+            src={avatar.src || undefined}
             sx={{
-              position: 'absolute',
-              bottom: -2,
-              right: -2,
-              width: 18,
-              height: 18,
-              borderRadius: '50%',
-              bgcolor: 'background.paper',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '2px solid',
-              borderColor: 'background.paper',
+              width: avatar.size || 48,
+              height: avatar.size || 48,
+              bgcolor: avatar.bgcolor || 'primary.main',
+              fontSize: '1rem',
+              fontWeight: 600,
+              opacity: isActive ? 1 : 0.6,
             }}
           >
-            {status.active ? (
-              status.activeIcon || (
-                <ActiveIcon
-                  sx={{
-                    fontSize: 14,
-                    color: status.activeColor || 'success.main',
-                  }}
-                />
-              )
-            ) : (
-              status.inactiveIcon || (
-                <InactiveIcon
-                  sx={{
-                    fontSize: 14,
-                    color: status.inactiveColor || 'text.disabled',
-                  }}
-                />
-              )
-            )}
-          </Box>
-        )}
-      </Box>
+            {avatar.initials}
+          </Avatar>
+          {/* Status indicator */}
+          {status && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: -2,
+                right: -2,
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                bgcolor: 'background.paper',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid',
+                borderColor: 'background.paper',
+              }}
+            >
+              {status.active ? (
+                status.activeIcon || (
+                  <ActiveIcon
+                    sx={{
+                      fontSize: 14,
+                      color: status.activeColor || 'success.main',
+                    }}
+                  />
+                )
+              ) : (
+                status.inactiveIcon || (
+                  <InactiveIcon
+                    sx={{
+                      fontSize: 14,
+                      color: status.inactiveColor || 'text.disabled',
+                    }}
+                  />
+                )
+              )}
+            </Box>
+          )}
+        </Box>
+      ) : status ? (
+        /* Show only status indicator when no avatar but status is provided */
+        <Box
+          sx={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          {status.active ? (
+            status.activeIcon || (
+              <ActiveIcon
+                sx={{
+                  fontSize: 18,
+                  color: status.activeColor || 'success.main',
+                }}
+              />
+            )
+          ) : (
+            status.inactiveIcon || (
+              <InactiveIcon
+                sx={{
+                  fontSize: 18,
+                  color: status.inactiveColor || 'text.disabled',
+                }}
+              />
+            )
+          )}
+        </Box>
+      ) : null}
 
       {/* Content */}
       <Box sx={{ flex: 1, minWidth: 0 }}>

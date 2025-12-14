@@ -87,8 +87,8 @@ export interface MobileEntityCardProps<T = unknown> {
   /** The data item */
   item: T;
 
-  /** Avatar configuration */
-  avatar: EntityAvatarConfig;
+  /** Avatar configuration (optional - card can be displayed without avatar) */
+  avatar?: EntityAvatarConfig;
 
   /** Status indicator (shown on avatar) */
   status?: EntityStatusIndicator;
