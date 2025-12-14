@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Box, Typography, Avatar, Chip, alpha, useTheme } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Typography, useTheme } from '@mui/material';
 import {
   Security as SecurityIcon,
   VpnKey as VpnKeyIcon,
@@ -11,10 +11,14 @@ import {
   Person as PersonIcon,
   AdminPanelSettings as AdminIcon,
   SupervisorAccount as ManagerIcon,
-  CheckCircle as ActiveIcon,
-  Cancel as InactiveIcon,
 } from '@mui/icons-material';
-import MobileSwipeActions, { SwipeAction } from '@/components/mobile/MobileSwipeActions';
+import MobileEntityCard, {
+  EntityAvatarConfig,
+  EntityStatusIndicator,
+  EntityRoleBadge,
+  EntityFeatureBadge,
+  EntitySwipeAction,
+} from '@/components/mobile/MobileEntityCard';
 import { useI18n } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { User } from '../types';
@@ -114,307 +118,151 @@ export default function UserMobileCard({
     return roleLabels[user.role || 'user']?.[isKorean ? 'ko' : 'en'] || user.role || 'User';
   };
 
-  // Build swipe actions
-  const rightActions: SwipeAction[] = [];
-
-  if (onDelete) {
-    rightActions.push({
-      icon: <DeleteIcon />,
-      label: t('common.delete'),
-      color: '#fff',
-      backgroundColor: '#f44336',
-      onClick: () => onDelete(user),
-    });
-  }
-
-  if (onResetPassword) {
-    rightActions.push({
-      icon: <LockResetIcon />,
-      label: isKorean ? '비밀번호' : 'Reset PW',
-      color: '#fff',
-      backgroundColor: '#ff9800',
-      onClick: () => onResetPassword(user),
-    });
-  }
-
-  if (onEdit) {
-    rightActions.push({
-      icon: <EditIcon />,
-      label: t('common.edit'),
-      color: '#fff',
-      backgroundColor: '#2196f3',
-      onClick: () => onEdit(user),
-    });
-  }
-
-  const handleClick = () => {
-    if (selectable && onSelectionChange) {
-      onSelectionChange(!selected);
-    } else if (onClick) {
-      onClick(user);
-    }
-  };
-
-  const departmentName = getDepartmentName();
-  const positionInfo = [departmentName, user.position].filter(Boolean).join(' / ');
-
-  const cardContent = (
-    <Box
-      onClick={handleClick}
-      sx={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        p: 1.5,
-        gap: 1.5,
-        bgcolor: selected
-          ? alpha(theme.palette.primary.main, 0.08)
-          : isActive
-          ? 'background.paper'
-          : alpha(theme.palette.action.disabled, 0.04),
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        cursor: 'pointer',
-        transition: 'background-color 0.15s',
-        '&:active': {
-          bgcolor: alpha(theme.palette.primary.main, 0.12),
-        },
-      }}
-    >
-      {/* Selection checkbox area */}
-      {selectable && (
-        <Box
-          sx={{
-            width: 24,
-            height: 24,
-            borderRadius: '50%',
-            border: '2px solid',
-            borderColor: selected ? 'primary.main' : 'divider',
-            bgcolor: selected ? 'primary.main' : 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            mt: 1,
-          }}
-        >
-          {selected && (
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: 'white',
-              }}
-            />
-          )}
-        </Box>
-      )}
-
-      {/* Avatar */}
-      <Box sx={{ position: 'relative', flexShrink: 0 }}>
-        <Avatar
-          src={user.avatar_image || user.avatarUrl || undefined}
-          sx={{
-            width: 48,
-            height: 48,
-            bgcolor: getAvatarColor(),
-            fontSize: '1rem',
-            fontWeight: 600,
-            opacity: isActive ? 1 : 0.6,
-          }}
-        >
-          {getAvatarInitials()}
-        </Avatar>
-        {/* Status indicator */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: -2,
-            right: -2,
-            width: 18,
-            height: 18,
-            borderRadius: '50%',
-            bgcolor: 'background.paper',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '2px solid',
-            borderColor: 'background.paper',
-          }}
-        >
-          {isActive ? (
-            <ActiveIcon sx={{ fontSize: 14, color: 'success.main' }} />
-          ) : (
-            <InactiveIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-          )}
-        </Box>
-      </Box>
-
-      {/* Content */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        {/* Name + Role */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: 600,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              color: isActive ? 'text.primary' : 'text.secondary',
-            }}
-          >
-            {getDisplayName()}
-          </Typography>
-          <Chip
-            icon={getRoleIcon()}
-            label={getRoleLabel()}
-            size="small"
-            sx={{
-              height: 20,
-              fontSize: '0.65rem',
-              bgcolor:
-                user.role === 'admin'
-                  ? 'error.50'
-                  : user.role === 'manager'
-                  ? 'warning.50'
-                  : 'grey.100',
-              color:
-                user.role === 'admin'
-                  ? 'error.dark'
-                  : user.role === 'manager'
-                  ? 'warning.dark'
-                  : 'text.secondary',
-              '& .MuiChip-icon': {
-                ml: 0.5,
-                mr: -0.5,
-                color: 'inherit',
-              },
-            }}
-          />
-        </Box>
-
-        {/* Login ID + Employee Number */}
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            color: 'text.secondary',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            mb: 0.25,
-          }}
-        >
-          {user.loginid || user.email}
-          {user.employee_number && (
-            <Typography
-              component="span"
-              variant="caption"
-              sx={{ color: 'text.disabled', ml: 0.5 }}
-            >
-              ({user.employee_number})
-            </Typography>
-          )}
-        </Typography>
-
-        {/* Department / Position */}
-        {positionInfo && (
-          <Typography
-            variant="caption"
-            sx={{
-              display: 'block',
-              color: 'text.disabled',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              mb: 0.5,
-            }}
-          >
-            {positionInfo}
-          </Typography>
-        )}
-
-        {/* Security badges */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {user.mfaEnabled && (
-            <Chip
-              icon={<SecurityIcon sx={{ fontSize: '12px !important' }} />}
-              label="MFA"
-              size="small"
-              sx={{
-                height: 18,
-                fontSize: '0.6rem',
-                bgcolor: 'success.50',
-                color: 'success.dark',
-                '& .MuiChip-icon': { ml: 0.5, mr: -0.5, color: 'inherit' },
-              }}
-            />
-          )}
-          {user.ssoEnabled && (
-            <Chip
-              icon={<VpnKeyIcon sx={{ fontSize: '12px !important' }} />}
-              label="SSO"
-              size="small"
-              sx={{
-                height: 18,
-                fontSize: '0.6rem',
-                bgcolor: 'info.50',
-                color: 'info.dark',
-                '& .MuiChip-icon': { ml: 0.5, mr: -0.5, color: 'inherit' },
-              }}
-            />
-          )}
-          {user.user_category && user.user_category !== 'regular' && (
-            <Chip
-              label={user.user_category}
-              size="small"
-              variant="outlined"
-              sx={{ height: 18, fontSize: '0.6rem' }}
-            />
-          )}
-        </Box>
-      </Box>
-
-      {/* Right side - Email icon or chevron */}
-      {!selectable && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: 0.5,
-            pt: 0.5,
-          }}
-        >
-          {user.email && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.disabled',
-                fontSize: '0.65rem',
-                maxWidth: 100,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {user.email}
-            </Typography>
-          )}
-        </Box>
-      )}
-    </Box>
+  // Avatar config
+  const avatar: EntityAvatarConfig = useMemo(
+    () => ({
+      src: user.avatar_image || user.avatarUrl,
+      initials: getAvatarInitials(),
+      bgcolor: getAvatarColor(),
+      size: 48,
+    }),
+    [user.avatar_image, user.avatarUrl, user.name_ko, user.name_en, user.loginid, user.role]
   );
 
-  // Wrap with swipe actions if enabled
-  if (showSwipeActions && rightActions.length > 0) {
-    return (
-      <MobileSwipeActions rightActions={rightActions}>
-        {cardContent}
-      </MobileSwipeActions>
-    );
-  }
+  // Status indicator
+  const status: EntityStatusIndicator = useMemo(
+    () => ({
+      active: isActive,
+    }),
+    [isActive]
+  );
 
-  return cardContent;
+  // Role badge
+  const roleBadge: EntityRoleBadge = useMemo(
+    () => ({
+      label: getRoleLabel(),
+      icon: getRoleIcon(),
+      bgcolor:
+        user.role === 'admin'
+          ? 'error.50'
+          : user.role === 'manager'
+          ? 'warning.50'
+          : 'grey.100',
+      color:
+        user.role === 'admin'
+          ? 'error.dark'
+          : user.role === 'manager'
+          ? 'warning.dark'
+          : 'text.secondary',
+    }),
+    [user.role, isKorean]
+  );
+
+  // Feature badges
+  const featureBadges: EntityFeatureBadge[] = useMemo(
+    () => [
+      {
+        key: 'mfa',
+        label: 'MFA',
+        icon: <SecurityIcon sx={{ fontSize: '12px !important' }} />,
+        bgcolor: 'success.50',
+        color: 'success.dark',
+        show: user.mfaEnabled,
+      },
+      {
+        key: 'sso',
+        label: 'SSO',
+        icon: <VpnKeyIcon sx={{ fontSize: '12px !important' }} />,
+        bgcolor: 'info.50',
+        color: 'info.dark',
+        show: user.ssoEnabled,
+      },
+      {
+        key: 'category',
+        label: user.user_category || '',
+        show: !!user.user_category && user.user_category !== 'regular',
+      },
+    ],
+    [user.mfaEnabled, user.ssoEnabled, user.user_category]
+  );
+
+  // Swipe actions
+  const swipeActions: EntitySwipeAction<User>[] = useMemo(() => {
+    const actions: EntitySwipeAction<User>[] = [];
+
+    if (onDelete) {
+      actions.push({
+        icon: <DeleteIcon />,
+        label: t('common.delete'),
+        color: '#fff',
+        backgroundColor: '#f44336',
+        onClick: onDelete,
+      });
+    }
+
+    if (onResetPassword) {
+      actions.push({
+        icon: <LockResetIcon />,
+        label: isKorean ? '비밀번호' : 'Reset PW',
+        color: '#fff',
+        backgroundColor: '#ff9800',
+        onClick: onResetPassword,
+      });
+    }
+
+    if (onEdit) {
+      actions.push({
+        icon: <EditIcon />,
+        label: t('common.edit'),
+        color: '#fff',
+        backgroundColor: '#2196f3',
+        onClick: onEdit,
+      });
+    }
+
+    return actions;
+  }, [onDelete, onResetPassword, onEdit, t, isKorean]);
+
+  // Build tertiary text (department / position)
+  const departmentName = getDepartmentName();
+  const tertiaryText = [departmentName, user.position].filter(Boolean).join(' / ') || undefined;
+
+  // Right content (email)
+  const rightContent = user.email ? (
+    <Typography
+      variant="caption"
+      sx={{
+        color: 'text.disabled',
+        fontSize: '0.65rem',
+        maxWidth: 100,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {user.email}
+    </Typography>
+  ) : undefined;
+
+  return (
+    <MobileEntityCard
+      item={user}
+      avatar={avatar}
+      status={status}
+      primaryText={getDisplayName()}
+      roleBadge={roleBadge}
+      secondaryText={user.loginid || user.email || undefined}
+      secondarySubtext={user.employee_number || undefined}
+      tertiaryText={tertiaryText}
+      featureBadges={featureBadges}
+      rightContent={rightContent}
+      isActive={isActive}
+      onClick={onClick}
+      swipeActions={swipeActions}
+      showSwipeActions={showSwipeActions}
+      selected={selected}
+      selectable={selectable}
+      onSelectionChange={onSelectionChange}
+    />
+  );
 }
