@@ -1,14 +1,21 @@
 'use client';
 
-import React from 'react';
-import { Box, Typography, Chip, Avatar } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Typography, useTheme } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Code as CodeIcon,
+  Tag as TagIcon,
+  SubdirectoryArrowRight as ChildIcon,
 } from '@mui/icons-material';
-import MobileCard, { MobileCardChip } from '@/components/mobile/MobileCard';
-import MobileSwipeActions, { SwipeAction } from '@/components/mobile/MobileSwipeActions';
+import MobileEntityCard, {
+  EntityAvatarConfig,
+  EntityStatusIndicator,
+  EntityRoleBadge,
+  EntityFeatureBadge,
+  EntitySwipeAction,
+} from '@/components/mobile/MobileEntityCard';
 import { useI18n } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { Code } from '../types';
@@ -37,6 +44,10 @@ export default function CodeMobileCard({
   showSwipeActions = true,
 }: CodeMobileCardProps) {
   const t = useI18n();
+  const theme = useTheme();
+  const isKorean = locale === 'ko';
+  const isActive = code.status === 'active';
+  const hasParent = !!code.parentCode;
 
   // Get display name
   const getDisplayName = (): string => {
@@ -48,106 +59,112 @@ export default function CodeMobileCard({
     return getLocalizedValue(code.description, locale) || '';
   };
 
-  // Get avatar
-  const getAvatar = () => (
-    <Avatar
-      sx={{
-        width: 40,
-        height: 40,
-        bgcolor: code.status === 'active' ? 'primary.main' : 'grey.400',
-      }}
-    >
-      <CodeIcon />
-    </Avatar>
+  // Avatar config
+  const avatar: EntityAvatarConfig = useMemo(() => {
+    // Use code as initials (first 2 chars)
+    const initials = code.code.substring(0, 2).toUpperCase();
+
+    return {
+      initials,
+      bgcolor: isActive
+        ? hasParent
+          ? theme.palette.info.main
+          : theme.palette.primary.main
+        : theme.palette.grey[400],
+      size: 48,
+    };
+  }, [code.code, isActive, hasParent, theme]);
+
+  // Status indicator
+  const status: EntityStatusIndicator = useMemo(
+    () => ({
+      active: isActive,
+    }),
+    [isActive]
   );
 
-  // Build badge (status)
-  const getBadge = () => (
-    <Chip
-      label={
-        code.status === 'active'
-          ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
-          : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
-      }
-      size="small"
-      color={code.status === 'active' ? 'success' : 'default'}
-      sx={{ height: 20, '& .MuiChip-label': { px: 1, fontSize: '0.7rem' } }}
-    />
-  );
-
-  // Build chips
-  const getChips = (): MobileCardChip[] => {
-    const chips: MobileCardChip[] = [];
-
-    // Order chip
+  // Role badge - shows order number
+  const roleBadge: EntityRoleBadge | undefined = useMemo(() => {
     if (code.order !== undefined) {
-      chips.push({
+      return {
         label: `#${code.order}`,
-        color: 'default',
-        variant: 'outlined',
-      });
+        icon: <TagIcon sx={{ fontSize: 12 }} />,
+        bgcolor: 'grey.100',
+        color: 'text.secondary',
+      };
     }
+    return undefined;
+  }, [code.order]);
 
-    // Parent code chip
+  // Feature badges
+  const featureBadges: EntityFeatureBadge[] = useMemo(() => {
+    const badges: EntityFeatureBadge[] = [];
+
+    // Parent code badge
     if (code.parentCode) {
-      chips.push({
-        label: `↑ ${code.parentCode}`,
-        color: 'secondary',
-        variant: 'outlined',
+      badges.push({
+        key: 'parent',
+        label: code.parentCode,
+        icon: <ChildIcon sx={{ fontSize: '12px !important' }} />,
+        bgcolor: 'info.50',
+        color: 'info.dark',
+        show: true,
       });
     }
 
-    return chips;
-  };
+    return badges;
+  }, [code.parentCode]);
 
-  // Build swipe actions
-  const rightActions: SwipeAction[] = [];
+  // Swipe actions
+  const swipeActions: EntitySwipeAction<Code>[] = useMemo(() => {
+    const actions: EntitySwipeAction<Code>[] = [];
 
-  if (onDelete) {
-    rightActions.push({
-      icon: <DeleteIcon />,
-      label: t('common.delete'),
-      color: '#fff',
-      backgroundColor: '#f44336',
-      onClick: () => onDelete(code),
-    });
-  }
+    if (onDelete) {
+      actions.push({
+        icon: <DeleteIcon />,
+        label: t('common.delete'),
+        color: '#fff',
+        backgroundColor: '#f44336',
+        onClick: onDelete,
+      });
+    }
 
-  if (onEdit) {
-    rightActions.push({
-      icon: <EditIcon />,
-      label: t('common.edit'),
-      color: '#fff',
-      backgroundColor: '#2196f3',
-      onClick: () => onEdit(code),
-    });
-  }
+    if (onEdit) {
+      actions.push({
+        icon: <EditIcon />,
+        label: t('common.edit'),
+        color: '#fff',
+        backgroundColor: '#2196f3',
+        onClick: onEdit,
+      });
+    }
 
-  const cardContent = (
-    <MobileCard
+    return actions;
+  }, [onDelete, onEdit, t]);
+
+  // Build secondary text
+  const secondaryText = code.code;
+
+  // Build tertiary text (description)
+  const tertiaryText = getDescription() || undefined;
+
+  return (
+    <MobileEntityCard
       item={code}
+      avatar={avatar}
+      status={status}
       primaryText={getDisplayName()}
-      secondaryText={code.code}
-      tertiaryText={getDescription()}
-      avatar={getAvatar()}
-      badge={getBadge()}
-      chips={getChips()}
-      onClick={onClick ? () => onClick(code) : undefined}
+      roleBadge={roleBadge}
+      secondaryText={secondaryText}
+      tertiaryText={tertiaryText}
+      featureBadges={featureBadges}
+      isActive={isActive}
+      onClick={onClick}
+      swipeActions={swipeActions}
+      showSwipeActions={showSwipeActions}
       selected={selected}
       selectable={selectable}
       onSelectionChange={onSelectionChange}
-      divider
     />
   );
-
-  // Wrap with swipe actions if enabled
-  if (showSwipeActions && rightActions.length > 0) {
-    return (
-      <MobileSwipeActions rightActions={rightActions}>
-        {cardContent}
-      </MobileSwipeActions>
-    );
-  }
-
-  return cardContent;
 }

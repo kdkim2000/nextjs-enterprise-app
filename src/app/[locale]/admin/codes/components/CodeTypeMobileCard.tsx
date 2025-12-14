@@ -1,15 +1,21 @@
 'use client';
 
-import React from 'react';
-import { Box, Typography, Chip, Avatar } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Typography, useTheme } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Category as CategoryIcon,
+  Folder as FolderIcon,
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
-import MobileCard from '@/components/mobile/MobileCard';
-import MobileSwipeActions, { SwipeAction } from '@/components/mobile/MobileSwipeActions';
+import MobileEntityCard, {
+  EntityAvatarConfig,
+  EntityStatusIndicator,
+  EntityRoleBadge,
+  EntityFeatureBadge,
+  EntitySwipeAction,
+} from '@/components/mobile/MobileEntityCard';
 import { useI18n } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { CodeType } from '../types';
@@ -17,23 +23,32 @@ import { CodeType } from '../types';
 export interface CodeTypeMobileCardProps {
   codeType: CodeType;
   locale?: string;
+  codeCount?: number; // Number of codes in this type
   onClick?: (codeType: CodeType) => void;
   onEdit?: (codeType: CodeType) => void;
   onDelete?: (codeType: CodeType) => void;
   selected?: boolean;
+  selectable?: boolean;
+  onSelectionChange?: (selected: boolean) => void;
   showSwipeActions?: boolean;
 }
 
 export default function CodeTypeMobileCard({
   codeType,
   locale = 'ko',
+  codeCount,
   onClick,
   onEdit,
   onDelete,
   selected = false,
+  selectable = false,
+  onSelectionChange,
   showSwipeActions = true,
 }: CodeTypeMobileCardProps) {
   const t = useI18n();
+  const theme = useTheme();
+  const isKorean = locale === 'ko';
+  const isActive = codeType.status === 'active';
 
   // Get display name
   const getDisplayName = (): string => {
@@ -45,97 +60,104 @@ export default function CodeTypeMobileCard({
     return getLocalizedValue(codeType.description, locale) || '';
   };
 
-  // Get avatar
-  const getAvatar = () => (
-    <Avatar
-      sx={{
-        width: 40,
-        height: 40,
-        bgcolor: codeType.status === 'active' ? 'primary.main' : 'grey.400',
-      }}
-    >
-      <CategoryIcon />
-    </Avatar>
+  // Avatar config - folder style for code types
+  const avatar: EntityAvatarConfig = useMemo(
+    () => ({
+      initials: codeType.code.substring(0, 2).toUpperCase(),
+      bgcolor: isActive ? theme.palette.primary.main : theme.palette.grey[400],
+      size: 48,
+    }),
+    [codeType.code, isActive, theme]
   );
 
-  // Build badge (status)
-  const getBadge = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      <Chip
-        label={
-          codeType.status === 'active'
-            ? getLocalizedValue({ en: 'Active', ko: '활성', zh: '激活', vi: 'Kích hoạt' }, locale)
-            : getLocalizedValue({ en: 'Inactive', ko: '비활성', zh: '未激活', vi: 'Không hoạt động' }, locale)
-        }
-        size="small"
-        color={codeType.status === 'active' ? 'success' : 'default'}
-        sx={{ height: 20, '& .MuiChip-label': { px: 1, fontSize: '0.7rem' } }}
-      />
-      <ChevronRightIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
-    </Box>
+  // Status indicator
+  const status: EntityStatusIndicator = useMemo(
+    () => ({
+      active: isActive,
+    }),
+    [isActive]
   );
 
-  // Build chips
-  const getChips = () => {
-    const chips = [];
+  // Role badge - shows code count if available
+  const roleBadge: EntityRoleBadge | undefined = useMemo(() => {
+    if (codeCount !== undefined) {
+      return {
+        label: isKorean ? `${codeCount}개` : `${codeCount}`,
+        icon: <FolderIcon sx={{ fontSize: 12 }} />,
+        bgcolor: 'primary.50',
+        color: 'primary.dark',
+      };
+    }
+    return undefined;
+  }, [codeCount, isKorean]);
+
+  // Feature badges
+  const featureBadges: EntityFeatureBadge[] = useMemo(() => {
+    const badges: EntityFeatureBadge[] = [];
 
     if (codeType.category) {
-      chips.push({
+      badges.push({
+        key: 'category',
         label: codeType.category,
-        color: 'default' as const,
-        variant: 'outlined' as const,
+        bgcolor: 'grey.100',
+        color: 'text.secondary',
+        show: true,
       });
     }
 
-    return chips;
-  };
+    return badges;
+  }, [codeType.category]);
 
-  // Build swipe actions
-  const rightActions: SwipeAction[] = [];
+  // Swipe actions
+  const swipeActions: EntitySwipeAction<CodeType>[] = useMemo(() => {
+    const actions: EntitySwipeAction<CodeType>[] = [];
 
-  if (onDelete) {
-    rightActions.push({
-      icon: <DeleteIcon />,
-      label: t('common.delete'),
-      color: '#fff',
-      backgroundColor: '#f44336',
-      onClick: () => onDelete(codeType),
-    });
-  }
+    if (onDelete) {
+      actions.push({
+        icon: <DeleteIcon />,
+        label: t('common.delete'),
+        color: '#fff',
+        backgroundColor: '#f44336',
+        onClick: onDelete,
+      });
+    }
 
-  if (onEdit) {
-    rightActions.push({
-      icon: <EditIcon />,
-      label: t('common.edit'),
-      color: '#fff',
-      backgroundColor: '#2196f3',
-      onClick: () => onEdit(codeType),
-    });
-  }
+    if (onEdit) {
+      actions.push({
+        icon: <EditIcon />,
+        label: t('common.edit'),
+        color: '#fff',
+        backgroundColor: '#2196f3',
+        onClick: onEdit,
+      });
+    }
 
-  const cardContent = (
-    <MobileCard
+    return actions;
+  }, [onDelete, onEdit, t]);
+
+  // Right content - chevron to indicate drill-down
+  const rightContent = onClick ? (
+    <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 24 }} />
+  ) : undefined;
+
+  return (
+    <MobileEntityCard
       item={codeType}
+      avatar={avatar}
+      status={status}
       primaryText={getDisplayName()}
-      secondaryText={`${codeType.code}`}
-      tertiaryText={getDescription()}
-      avatar={getAvatar()}
-      badge={getBadge()}
-      chips={getChips()}
-      onClick={onClick ? () => onClick(codeType) : undefined}
+      roleBadge={roleBadge}
+      secondaryText={codeType.code}
+      tertiaryText={getDescription() || undefined}
+      featureBadges={featureBadges}
+      rightContent={rightContent}
+      isActive={isActive}
+      onClick={onClick}
+      swipeActions={swipeActions}
+      showSwipeActions={showSwipeActions}
       selected={selected}
-      divider
+      selectable={selectable}
+      onSelectionChange={onSelectionChange}
     />
   );
-
-  // Wrap with swipe actions if enabled
-  if (showSwipeActions && rightActions.length > 0) {
-    return (
-      <MobileSwipeActions rightActions={rightActions}>
-        {cardContent}
-      </MobileSwipeActions>
-    );
-  }
-
-  return cardContent;
 }
