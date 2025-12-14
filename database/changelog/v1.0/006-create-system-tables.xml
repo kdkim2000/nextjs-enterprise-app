@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         System Tables (app_settings, logs, preferences, tokens, conversations)
+         ========================================== -->
+
+    <changeSet id="006-01-create-app-settings" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="app_settings"/></not>
+        </preConditions>
+
+        <createTable tableName="app_settings" remarks="Application settings">
+            <column name="key" type="varchar(100)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="value" type="${clob.type}"/>
+            <column name="value_type" type="varchar(20)" defaultValue="string"/>
+            <column name="category" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_ready" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="is_applied" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="display_order" type="int" defaultValueNumeric="0"/>
+            <column name="is_sensitive" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="updated_by" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-02-create-user-preferences" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="user_preferences"/></not>
+        </preConditions>
+
+        <createTable tableName="user_preferences" remarks="User preferences and settings">
+            <column name="user_id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="favorite_menus" type="${json.type}"/>
+            <column name="recent_menus" type="${json.type}"/>
+            <column name="language" type="varchar(10)"/>
+            <column name="theme" type="varchar(20)"/>
+            <column name="rows_per_page" type="int"/>
+            <column name="email_notifications" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="system_notifications" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="session_timeout" type="int"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-03-create-logs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="logs"/></not>
+        </preConditions>
+
+        <createTable tableName="logs" remarks="System access and operation logs">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="timestamp" type="${timestamp.type}"/>
+            <column name="method" type="varchar(10)"/>
+            <column name="path" type="${clob.type}"/>
+            <column name="url" type="${clob.type}"/>
+            <column name="original_url" type="${clob.type}"/>
+            <column name="status_code" type="int"/>
+            <column name="duration" type="varchar(20)"/>
+            <column name="user_id" type="varchar(50)"/>
+            <column name="program_id" type="varchar(50)"/>
+            <column name="ip" type="varchar(50)"/>
+            <column name="user_agent" type="${clob.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-04-create-token-blacklist" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="token_blacklist"/></not>
+        </preConditions>
+
+        <createTable tableName="token_blacklist" remarks="Blacklisted JWT tokens">
+            <column name="token" type="varchar(500)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(50)"/>
+            <column name="expires_at" type="${timestamp.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-05-create-mfa-codes" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="mfa_codes"/></not>
+        </preConditions>
+
+        <createTable tableName="mfa_codes" remarks="Multi-factor authentication codes">
+            <column name="user_id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="secret" type="varchar(255)"/>
+            <column name="backup_codes" type="${json.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-06-create-conversations" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="conversations"/></not>
+        </preConditions>
+
+        <createTable tableName="conversations" remarks="AI conversation sessions">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="${clob.type}"/>
+            <column name="project_path" type="varchar(1000)"/>
+            <column name="project_name" type="varchar(200)"/>
+            <column name="branch_name" type="varchar(200)"/>
+            <column name="summary" type="${clob.type}"/>
+            <column name="learning_points" type="${clob.type}"/>
+            <column name="difficulty_level" type="varchar(20)"/>
+            <column name="category" type="varchar(50)"/>
+            <column name="total_messages" type="int" defaultValueNumeric="0"/>
+            <column name="total_tokens" type="int" defaultValueNumeric="0"/>
+            <column name="duration_minutes" type="int"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="source" type="varchar(50)"/>
+            <column name="original_session_id" type="varchar(100)"/>
+            <column name="started_at" type="${timestamp.type}"/>
+            <column name="ended_at" type="${timestamp.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="tags" type="${json.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-07-create-conversation-messages" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="conversation_messages"/></not>
+        </preConditions>
+
+        <createTable tableName="conversation_messages" remarks="AI conversation messages">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="conversation_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(20)"/>
+            <column name="content" type="${clob.type}"/>
+            <column name="content_type" type="varchar(20)"/>
+            <column name="has_code" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="has_error" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="tool_calls" type="${json.type}"/>
+            <column name="display_order" type="int" defaultValueNumeric="0"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-08-create-conversation-code-changes" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="conversation_code_changes"/></not>
+        </preConditions>
+
+        <createTable tableName="conversation_code_changes" remarks="Code changes in conversations">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="conversation_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_path" type="varchar(1000)"/>
+            <column name="change_type" type="varchar(20)"/>
+            <column name="lines_added" type="int" defaultValueNumeric="0"/>
+            <column name="lines_removed" type="int" defaultValueNumeric="0"/>
+            <column name="explanation" type="${clob.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

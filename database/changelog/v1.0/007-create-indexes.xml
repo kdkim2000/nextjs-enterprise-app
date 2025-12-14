@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Indexes for all tables
+         ========================================== -->
+
+    <!-- Code Tables Indexes -->
+    <changeSet id="007-01-code-tables-indexes" author="system">
+        <createIndex tableName="codes" indexName="idx_codes_code_type_id">
+            <column name="code_type_id"/>
+        </createIndex>
+        <createIndex tableName="codes" indexName="idx_codes_code_type">
+            <column name="code_type"/>
+        </createIndex>
+        <createIndex tableName="codes" indexName="idx_codes_parent_code">
+            <column name="parent_code"/>
+        </createIndex>
+        <createIndex tableName="codes" indexName="idx_codes_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- User Tables Indexes -->
+    <changeSet id="007-02-user-tables-indexes" author="system">
+        <createIndex tableName="departments" indexName="idx_departments_parent_id">
+            <column name="parent_id"/>
+        </createIndex>
+        <createIndex tableName="departments" indexName="idx_departments_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="departments" indexName="idx_departments_manager_id">
+            <column name="manager_id"/>
+        </createIndex>
+
+        <createIndex tableName="roles" indexName="idx_roles_role_type">
+            <column name="role_type"/>
+        </createIndex>
+        <createIndex tableName="roles" indexName="idx_roles_is_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_role">
+            <column name="role"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="idx_users_department">
+            <column name="department"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="idx_users_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="users" indexName="idx_users_email">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex tableName="user_role_mappings" indexName="idx_user_role_mappings_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="user_role_mappings" indexName="idx_user_role_mappings_role_id">
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex tableName="user_role_mappings" indexName="idx_user_role_mappings_is_active">
+            <column name="is_active"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Menu Tables Indexes -->
+    <changeSet id="007-03-menu-tables-indexes" author="system">
+        <createIndex tableName="menus" indexName="idx_menus_parent_id">
+            <column name="parent_id"/>
+        </createIndex>
+        <createIndex tableName="menus" indexName="idx_menus_program_id">
+            <column name="program_id"/>
+        </createIndex>
+
+        <createIndex tableName="programs" indexName="idx_programs_category">
+            <column name="category"/>
+        </createIndex>
+        <createIndex tableName="programs" indexName="idx_programs_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="help" indexName="idx_help_program_id">
+            <column name="program_id"/>
+        </createIndex>
+
+        <createIndex tableName="role_menu_mappings" indexName="idx_role_menu_mappings_role_id">
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex tableName="role_menu_mappings" indexName="idx_role_menu_mappings_menu_id">
+            <column name="menu_id"/>
+        </createIndex>
+
+        <createIndex tableName="role_program_mappings" indexName="idx_role_program_mappings_role_id">
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex tableName="role_program_mappings" indexName="idx_role_program_mappings_program_id">
+            <column name="program_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Content Tables Indexes -->
+    <changeSet id="007-04-content-tables-indexes" author="system">
+        <createIndex tableName="attachments" indexName="idx_attachments_attachment_type_id">
+            <column name="attachment_type_id"/>
+        </createIndex>
+        <createIndex tableName="attachments" indexName="idx_attachments_uploaded_by">
+            <column name="uploaded_by"/>
+        </createIndex>
+
+        <createIndex tableName="board_types" indexName="idx_board_types_category">
+            <column name="category"/>
+        </createIndex>
+        <createIndex tableName="board_types" indexName="idx_board_types_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="posts" indexName="idx_posts_board_type_id">
+            <column name="board_type_id"/>
+        </createIndex>
+        <createIndex tableName="posts" indexName="idx_posts_author_id">
+            <column name="author_id"/>
+        </createIndex>
+        <createIndex tableName="posts" indexName="idx_posts_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="posts" indexName="idx_posts_created_at">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex tableName="posts" indexName="idx_posts_is_pinned">
+            <column name="is_pinned"/>
+        </createIndex>
+
+        <createIndex tableName="comments" indexName="idx_comments_post_id">
+            <column name="post_id"/>
+        </createIndex>
+        <createIndex tableName="comments" indexName="idx_comments_parent_id">
+            <column name="parent_id"/>
+        </createIndex>
+        <createIndex tableName="comments" indexName="idx_comments_author_id">
+            <column name="author_id"/>
+        </createIndex>
+        <createIndex tableName="comments" indexName="idx_comments_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Communication Tables Indexes -->
+    <changeSet id="007-05-communication-tables-indexes" author="system">
+        <createIndex tableName="mail_messages" indexName="idx_mail_messages_sender_id">
+            <column name="sender_id"/>
+        </createIndex>
+        <createIndex tableName="mail_messages" indexName="idx_mail_messages_is_draft">
+            <column name="is_draft"/>
+        </createIndex>
+        <createIndex tableName="mail_messages" indexName="idx_mail_messages_sent_at">
+            <column name="sent_at"/>
+        </createIndex>
+
+        <createIndex tableName="mail_recipients" indexName="idx_mail_recipients_message_id">
+            <column name="message_id"/>
+        </createIndex>
+        <createIndex tableName="mail_recipients" indexName="idx_mail_recipients_recipient_id">
+            <column name="recipient_id"/>
+        </createIndex>
+
+        <createIndex tableName="mail_user_messages" indexName="idx_mail_user_messages_message_id">
+            <column name="message_id"/>
+        </createIndex>
+        <createIndex tableName="mail_user_messages" indexName="idx_mail_user_messages_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="mail_user_messages" indexName="idx_mail_user_messages_folder">
+            <column name="folder"/>
+        </createIndex>
+        <createIndex tableName="mail_user_messages" indexName="idx_mail_user_messages_is_read">
+            <column name="is_read"/>
+        </createIndex>
+
+        <createIndex tableName="messages" indexName="idx_messages_category">
+            <column name="category"/>
+        </createIndex>
+        <createIndex tableName="messages" indexName="idx_messages_type">
+            <column name="type"/>
+        </createIndex>
+        <createIndex tableName="messages" indexName="idx_messages_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- System Tables Indexes -->
+    <changeSet id="007-06-system-tables-indexes" author="system">
+        <createIndex tableName="app_settings" indexName="idx_app_settings_category">
+            <column name="category"/>
+        </createIndex>
+        <createIndex tableName="app_settings" indexName="idx_app_settings_is_ready">
+            <column name="is_ready"/>
+        </createIndex>
+
+        <createIndex tableName="logs" indexName="idx_logs_timestamp">
+            <column name="timestamp"/>
+        </createIndex>
+        <createIndex tableName="logs" indexName="idx_logs_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="logs" indexName="idx_logs_program_id">
+            <column name="program_id"/>
+        </createIndex>
+        <createIndex tableName="logs" indexName="idx_logs_status_code">
+            <column name="status_code"/>
+        </createIndex>
+
+        <createIndex tableName="token_blacklist" indexName="idx_token_blacklist_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="token_blacklist" indexName="idx_token_blacklist_expires_at">
+            <column name="expires_at"/>
+        </createIndex>
+
+        <createIndex tableName="conversations" indexName="idx_conversations_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="conversations" indexName="idx_conversations_category">
+            <column name="category"/>
+        </createIndex>
+        <createIndex tableName="conversations" indexName="idx_conversations_created_at">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex tableName="conversations" indexName="idx_conversations_source">
+            <column name="source"/>
+        </createIndex>
+
+        <createIndex tableName="conversation_messages" indexName="idx_conversation_messages_conversation_id">
+            <column name="conversation_id"/>
+        </createIndex>
+        <createIndex tableName="conversation_messages" indexName="idx_conversation_messages_role">
+            <column name="role"/>
+        </createIndex>
+
+        <createIndex tableName="conversation_code_changes" indexName="idx_conversation_code_changes_conversation_id">
+            <column name="conversation_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

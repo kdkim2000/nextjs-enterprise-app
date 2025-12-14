@@ -201,6 +201,21 @@ export default function PostDetailPage() {
     fetchPost();
   }, [postId]);
 
+  // Increment view count when post is loaded
+  useEffect(() => {
+    const incrementViewCount = async () => {
+      try {
+        await contentApiClient.get(`/posts/${postId}/view`);
+      } catch (error) {
+        // Silently fail - view count increment is not critical
+        console.error('Error incrementing view count:', error);
+      }
+    };
+    if (post) {
+      incrementViewCount();
+    }
+  }, [postId, post?.id]);
+
   // Fetch comments
   useEffect(() => {
     const fetchComments = async () => {

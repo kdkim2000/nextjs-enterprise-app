@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Content Tables (board_types, posts, comments, attachments)
+         ========================================== -->
+
+    <changeSet id="004-01-create-attachment-types" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="attachment_types"/></not>
+        </preConditions>
+
+        <createTable tableName="attachment_types" remarks="Attachment type definitions">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_en" type="varchar(200)"/>
+            <column name="name_ko" type="varchar(200)"/>
+            <column name="name_zh" type="varchar(200)"/>
+            <column name="name_vi" type="varchar(200)"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="allowed_extensions" type="${json.type}"/>
+            <column name="max_file_size" type="bigint"/>
+            <column name="max_files" type="int"/>
+            <column name="storage_path" type="varchar(500)"/>
+            <column name="is_active" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-02-create-attachments" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="attachments"/></not>
+        </preConditions>
+
+        <createTable tableName="attachments" remarks="File attachments">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="attachment_type_id" type="varchar(50)"/>
+            <column name="original_name" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stored_name" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mime_type" type="varchar(100)"/>
+            <column name="file_size" type="bigint"/>
+            <column name="file_path" type="varchar(1000)"/>
+            <column name="download_count" type="int" defaultValueNumeric="0"/>
+            <column name="uploaded_by" type="varchar(50)"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-03-create-board-types" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="board_types"/></not>
+        </preConditions>
+
+        <createTable tableName="board_types" remarks="Board type definitions">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_en" type="varchar(200)"/>
+            <column name="name_ko" type="varchar(200)"/>
+            <column name="name_zh" type="varchar(200)"/>
+            <column name="name_vi" type="varchar(200)"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="type" type="varchar(20)" defaultValue="normal"/>
+            <column name="settings" type="${json.type}"/>
+            <column name="write_roles" type="${json.type}"/>
+            <column name="read_roles" type="${json.type}"/>
+            <column name="category" type="varchar(50)"/>
+            <column name="display_order" type="int" defaultValueNumeric="0"/>
+            <column name="status" type="varchar(20)" defaultValue="active"/>
+            <column name="total_posts" type="int" defaultValueNumeric="0"/>
+            <column name="total_views" type="int" defaultValueNumeric="0"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="updated_by" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-04-create-posts" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="posts"/></not>
+        </preConditions>
+
+        <createTable tableName="posts" remarks="Board posts">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="board_type_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="${clob.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_name" type="varchar(200)"/>
+            <column name="author_department" type="varchar(50)"/>
+            <column name="is_anonymous" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="post_type" type="varchar(20)" defaultValue="normal"/>
+            <column name="status" type="varchar(20)" defaultValue="published"/>
+            <column name="is_pinned" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="pinned_until" type="${timestamp.type}"/>
+            <column name="is_secret" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="is_approved" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="approved_by" type="varchar(50)"/>
+            <column name="approved_at" type="${timestamp.type}"/>
+            <column name="view_count" type="int" defaultValueNumeric="0"/>
+            <column name="comment_count" type="int" defaultValueNumeric="0"/>
+            <column name="like_count" type="int" defaultValueNumeric="0"/>
+            <column name="attachment_count" type="int" defaultValueNumeric="0"/>
+            <column name="attachment_id" type="varchar(50)"/>
+            <column name="tags" type="${json.type}"/>
+            <column name="metadata" type="${json.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="published_at" type="${timestamp.type}"/>
+            <column name="deleted_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-05-create-comments" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="comments"/></not>
+        </preConditions>
+
+        <createTable tableName="comments" remarks="Post comments">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="post_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="varchar(50)"/>
+            <column name="content" type="${clob.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_name" type="varchar(200)"/>
+            <column name="is_anonymous" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="status" type="varchar(20)" defaultValue="active"/>
+            <column name="like_count" type="int" defaultValueNumeric="0"/>
+            <column name="reply_count" type="int" defaultValueNumeric="0"/>
+            <column name="depth" type="int" defaultValueNumeric="0"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="deleted_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

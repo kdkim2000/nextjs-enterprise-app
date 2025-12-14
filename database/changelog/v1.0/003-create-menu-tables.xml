@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Menu Tables (menus, programs, help, permissions, role mappings)
+         ========================================== -->
+
+    <changeSet id="003-01-create-menus" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="menus"/></not>
+        </preConditions>
+
+        <createTable tableName="menus" remarks="Menu structure with multi-language support">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_en" type="varchar(200)"/>
+            <column name="name_ko" type="varchar(200)"/>
+            <column name="name_zh" type="varchar(200)"/>
+            <column name="name_vi" type="varchar(200)"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="path" type="varchar(500)"/>
+            <column name="icon" type="varchar(100)"/>
+            <column name="display_order" type="int"/>
+            <column name="parent_id" type="varchar(50)"/>
+            <column name="level" type="int"/>
+            <column name="program_id" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-02-create-programs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="programs"/></not>
+        </preConditions>
+
+        <createTable tableName="programs" remarks="Program definitions with multi-language support">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_en" type="varchar(200)"/>
+            <column name="name_ko" type="varchar(200)"/>
+            <column name="name_zh" type="varchar(200)"/>
+            <column name="name_vi" type="varchar(200)"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="category" type="varchar(50)"/>
+            <column name="type" type="varchar(50)"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="permissions" type="${json.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-03-create-help" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="help"/></not>
+        </preConditions>
+
+        <createTable tableName="help" remarks="Help documentation for programs">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="program_id" type="varchar(50)"/>
+            <column name="title" type="${clob.type}"/>
+            <column name="content" type="${clob.type}"/>
+            <column name="sections" type="${json.type}"/>
+            <column name="faq" type="${json.type}"/>
+            <column name="tips" type="${json.type}"/>
+            <column name="troubleshooting" type="${json.type}"/>
+            <column name="video_url" type="varchar(500)"/>
+            <column name="related_topics" type="${json.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="updated_by" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-04-create-permissions" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="permissions"/></not>
+        </preConditions>
+
+        <createTable tableName="permissions" remarks="User permissions and menu access">
+            <column name="user_id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role" type="varchar(50)"/>
+            <column name="permissions" type="${json.type}"/>
+            <column name="menu_access" type="${json.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-05-create-role-menu-mappings" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="role_menu_mappings"/></not>
+        </preConditions>
+
+        <createTable tableName="role_menu_mappings" remarks="Role to menu access mappings">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="menu_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="can_view" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="can_create" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="can_update" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="can_delete" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-06-create-role-program-mappings" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="role_program_mappings"/></not>
+        </preConditions>
+
+        <createTable tableName="role_program_mappings" remarks="Role to program access mappings">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="program_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="can_view" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="can_create" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="can_update" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="can_delete" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
