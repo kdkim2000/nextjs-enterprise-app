@@ -1,18 +1,21 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import ProgramFormFields from '@/components/admin/ProgramFormFields';
+import ProgramMobileCard from './components/ProgramMobileCard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
 import { useProgramManagement } from './hooks/useProgramManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -21,6 +24,8 @@ import { Program } from './types';
 export default function ProgramManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
+
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
 
@@ -106,8 +111,29 @@ export default function ProgramManagementPage() {
     vi: 'Tìm theo mã hoặc tên...'
   }, currentLocale);
 
+  // Mobile handlers
+  const handleMobileEdit = useCallback((program: Program) => {
+    handleEdit(program.id!);
+  }, [handleEdit]);
+
+  const handleMobileDelete = useCallback((program: Program) => {
+    handleDeleteClick([program.id!]);
+  }, [handleDeleteClick]);
+
+  // Mobile card renderer
+  const renderMobileCard = useCallback((program: Program) => (
+    <ProgramMobileCard
+      program={program}
+      locale={currentLocale}
+      onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+      onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+      canEdit={gridPermissions.editable}
+      canDelete={gridPermissions.showDeleteButton}
+    />
+  ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete]);
+
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -149,27 +175,38 @@ export default function ProgramManagementPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        <Box sx={{ flex: 1, minHeight: 0 }}>
-          <ExcelDataGrid
-            rows={programs}
-            columns={columns}
-            onRowsChange={(rows) => setPrograms(rows as Program[])}
-            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-            onRefresh={handleRefresh}
-            checkboxSelection={gridPermissions.checkboxSelection}
-            editable={gridPermissions.editable}
-            exportFileName="programs"
-            loading={searching}
-            paginationMode="server"
-            rowCount={rowCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={handlePaginationModelChange}
-          />
-        </Box>
-      </Paper>
+      {isMobileLayout ? (
+        // Mobile: Card List
+        <MobileCardList
+          data={programs}
+          loading={searching}
+          renderCard={renderMobileCard}
+          keyExtractor={(program) => program.id!}
+          emptyMessage={currentLocale === 'ko' ? '프로그램이 없습니다' : 'No programs found'}
+        />
+      ) : (
+        // Desktop: DataGrid
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <ExcelDataGrid
+              rows={programs}
+              columns={columns}
+              onRowsChange={(rows) => setPrograms(rows as Program[])}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+              onRefresh={handleRefresh}
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
+              exportFileName="programs"
+              loading={searching}
+              paginationMode="server"
+              rowCount={rowCount}
+              paginationModel={paginationModel}
+              onPaginationModelChange={handlePaginationModelChange}
+            />
+          </Box>
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -205,6 +242,6 @@ export default function ProgramManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

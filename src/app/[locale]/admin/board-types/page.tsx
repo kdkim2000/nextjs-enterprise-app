@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import BoardTypeFormFields, { BoardTypeFormData } from '@/components/admin/BoardTypeFormFields';
 import BoardTypeStatsDialog from '@/components/admin/BoardTypeStatsDialog';
+import BoardTypeMobileCard from './components/BoardTypeMobileCard';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useBoardTypeManagement } from './hooks/useBoardTypeManagement';
 import { createColumns } from './constants';
@@ -17,10 +19,12 @@ import { BoardType } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
 
 export default function BoardTypeManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
 
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
@@ -115,8 +119,34 @@ export default function BoardTypeManagementPage() {
     [selectedForDelete, boardTypes, currentLocale]
   );
 
+  // Mobile handlers
+  const handleMobileEdit = useCallback((boardType: BoardType) => {
+    handleEdit(boardType.id);
+  }, [handleEdit]);
+
+  const handleMobileDelete = useCallback((boardType: BoardType) => {
+    handleDeleteClick([boardType.id]);
+  }, [handleDeleteClick]);
+
+  const handleMobileViewStats = useCallback((boardType: BoardType) => {
+    handleViewStats(boardType.id);
+  }, [handleViewStats]);
+
+  // Mobile card renderer
+  const renderMobileCard = useCallback((boardType: BoardType) => (
+    <BoardTypeMobileCard
+      boardType={boardType}
+      locale={currentLocale}
+      onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+      onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+      onViewStats={handleMobileViewStats}
+      canEdit={gridPermissions.editable}
+      canDelete={gridPermissions.showDeleteButton}
+    />
+  ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete, handleMobileViewStats]);
+
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -158,27 +188,38 @@ export default function BoardTypeManagementPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        <Box sx={{ flex: 1, minHeight: 0 }}>
-          <ExcelDataGrid
-            rows={boardTypes}
-            columns={columns}
-            onRowsChange={(rows) => setBoardTypes(rows as BoardType[])}
-            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-            onRefresh={handleRefresh}
-            checkboxSelection={gridPermissions.checkboxSelection}
-            editable={gridPermissions.editable}
-            exportFileName="board-types"
-            loading={searching}
-            paginationMode="server"
-            rowCount={rowCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={handlePaginationModelChange}
-          />
-        </Box>
-      </Paper>
+      {isMobileLayout ? (
+        // Mobile: Card List
+        <MobileCardList
+          data={boardTypes}
+          loading={searching}
+          renderCard={renderMobileCard}
+          keyExtractor={(bt) => bt.id}
+          emptyMessage={currentLocale === 'ko' ? '게시판 유형이 없습니다' : 'No board types found'}
+        />
+      ) : (
+        // Desktop: DataGrid
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <ExcelDataGrid
+              rows={boardTypes}
+              columns={columns}
+              onRowsChange={(rows) => setBoardTypes(rows as BoardType[])}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+              onRefresh={handleRefresh}
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
+              exportFileName="board-types"
+              loading={searching}
+              paginationMode="server"
+              rowCount={rowCount}
+              paginationModel={paginationModel}
+              onPaginationModelChange={handlePaginationModelChange}
+            />
+          </Box>
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -218,6 +259,6 @@ export default function BoardTypeManagementPage() {
         boardType={selectedBoardTypeStats}
         onClose={() => setStatsDialogOpen(false)}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }
