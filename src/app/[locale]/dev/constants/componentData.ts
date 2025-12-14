@@ -65,6 +65,12 @@ export const componentCategories = [
         tags: ['Table', 'List', 'Pagination', 'Lightweight']
       },
       {
+        title: 'TreeView',
+        description: 'Generic tree view for hierarchical data with expand/collapse, multi-select, custom columns, and row actions',
+        path: '/dev/components/tree-view',
+        tags: ['Tree', 'Hierarchy', 'Generic', 'Selection']
+      },
+      {
         title: 'Search & Filter Panel',
         description: 'Advanced search with multiple filter criteria, date ranges, and dynamic field generation',
         path: '/dev/components/search-filter',
