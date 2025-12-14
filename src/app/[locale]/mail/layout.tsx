@@ -1,6 +1,6 @@
 'use client';
 
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 /**
  * Mail Layout - Uses fullBleed mode for minimal padding
@@ -12,8 +12,8 @@ export default function MailLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthenticatedLayout fullBleed>
+    <ResponsiveLayout fullBleed>
       {children}
-    </AuthenticatedLayout>
+    </ResponsiveLayout>
   );
 }

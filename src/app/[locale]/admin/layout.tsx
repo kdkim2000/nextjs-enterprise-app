@@ -1,6 +1,6 @@
 'use client';
 
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 export default function AdminLayout({
   children
@@ -9,8 +9,8 @@ export default function AdminLayout({
 }) {
   // Remove requireRole - use program-based permissions via RouteGuard in each page
   return (
-    <AuthenticatedLayout>
+    <ResponsiveLayout>
       {children}
-    </AuthenticatedLayout>
+    </ResponsiveLayout>
   );
 }

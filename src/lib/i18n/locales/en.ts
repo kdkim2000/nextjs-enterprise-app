@@ -82,7 +82,8 @@ export default {
     removeFromFavorites: 'Remove from Favorites',
     allMenus: 'All Menus',
     refresh: 'Refresh',
-    myWork: 'My Work'
+    myWork: 'My Work',
+    menu: 'Menu'
   },
   menuManagement: {
     title: 'Menu Management',

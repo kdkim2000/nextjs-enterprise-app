@@ -82,7 +82,8 @@ export default {
     removeFromFavorites: '즐겨찾기에서 제거',
     allMenus: '전체 메뉴',
     refresh: '새로고침',
-    myWork: '나의 업무'
+    myWork: '나의 업무',
+    menu: '메뉴'
   },
   menuManagement: {
     title: '메뉴 관리',
