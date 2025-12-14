@@ -1,22 +1,26 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Paper, Typography } from '@mui/material';
-import { Search } from '@mui/icons-material';
+import { Box, Paper, Typography, IconButton, Tooltip } from '@mui/material';
+import { Search, ArrowBack } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import MasterDetailLayout from '@/components/common/MasterDetailLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import CodeFormFields, { CodeFormData } from '@/components/admin/CodeFormFields';
 import CodeTypeFormFields, { CodeTypeFormData } from '@/components/admin/CodeTypeFormFields';
 import CodeTypeList from './components/CodeTypeList';
+import CodeTypeMobileCard from './components/CodeTypeMobileCard';
+import CodeMobileCard from './components/CodeMobileCard';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { commonApi } from '@/lib/axios';
+import { useMobile } from '@/hooks/useMobile';
 import { useAutoHideMessage } from '@/hooks/useAutoHideMessage';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useCodeOptions } from '@/hooks/useCodeOptions';
@@ -34,10 +38,15 @@ import {
 } from './utils';
 import { Code, CodeType, SearchCriteria } from './types';
 
+// Mobile view state type
+type MobileView = 'types' | 'codes';
+
 export default function CodesPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
   const { successMessage, errorMessage, showSuccess, showError } = useAutoHideMessage();
+
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
 
@@ -56,6 +65,9 @@ export default function CodesPage() {
 
   // Fetch status options from code management system
   const { codes: statusOptions } = useCodeOptions('COMMON_STATUS', locale);
+
+  // Mobile view state (for drill-down navigation)
+  const [mobileView, setMobileView] = useState<MobileView>('types');
 
   // State
   const [codeTypes, setCodeTypes] = useState<CodeType[]>([]);
@@ -84,6 +96,10 @@ export default function CodesPage() {
   const [codeSaveLoading, setCodeSaveLoading] = useState(false);
   const [codeDeleteConfirmOpen, setCodeDeleteConfirmOpen] = useState(false);
   const [selectedCodesForDelete, setSelectedCodesForDelete] = useState<(string | number)[]>([]);
+
+  // Mobile selection state
+  const [mobileSelectedIds, setMobileSelectedIds] = useState<Set<string | number>>(new Set());
+  const [mobileSelectionMode, setMobileSelectionMode] = useState(false);
 
   // Fetch code types
   const fetchCodeTypes = useCallback(async () => {
@@ -124,12 +140,12 @@ export default function CodesPage() {
     void fetchCodeTypes();
   }, [fetchCodeTypes]);
 
-  // Auto-select first code type on initial load
+  // Auto-select first code type on initial load (desktop only)
   useEffect(() => {
-    if (codeTypes.length > 0 && !selectedCodeType) {
+    if (!isMobileLayout && codeTypes.length > 0 && !selectedCodeType) {
       setSelectedCodeType(codeTypes[0]);
     }
-  }, [codeTypes, selectedCodeType]);
+  }, [codeTypes, selectedCodeType, isMobileLayout]);
 
   // Load codes when code type changes
   useEffect(() => {
@@ -163,6 +179,19 @@ export default function CodesPage() {
 
     setFilteredCodes(filtered);
   }, [codes, quickSearch, searchCriteria]);
+
+  // Mobile: Handle code type selection (drill-down)
+  const handleMobileCodeTypeClick = useCallback((codeType: CodeType) => {
+    setSelectedCodeType(codeType);
+    setMobileView('codes');
+  }, []);
+
+  // Mobile: Go back to code types
+  const handleMobileBack = useCallback(() => {
+    setMobileView('types');
+    setMobileSelectionMode(false);
+    setMobileSelectedIds(new Set());
+  }, []);
 
   // Code Type handlers
   const handleAddCodeType = useCallback(() => {
@@ -258,13 +287,17 @@ export default function CodesPage() {
         setSelectedCodeType(null);
         setCodes([]);
         setFilteredCodes([]);
+        // Mobile: go back to types view
+        if (isMobileLayout) {
+          setMobileView('types');
+        }
       }
 
       await fetchCodeTypes();
     } catch (err: any) {
       showError(err.response?.data?.error || 'Failed to delete code type');
     }
-  }, [codeTypeToDelete, selectedCodeType, fetchCodeTypes, showSuccess, showError, locale]);
+  }, [codeTypeToDelete, selectedCodeType, fetchCodeTypes, showSuccess, showError, locale, isMobileLayout]);
 
   // Code handlers
   const handleAddCode = useCallback(() => {
@@ -304,6 +337,17 @@ export default function CodesPage() {
       setCodeDialogOpen(true);
     }
   }, [codes]);
+
+  // Mobile: Edit code from card
+  const handleMobileEditCode = useCallback((code: Code) => {
+    handleEditCode(code.id);
+  }, [handleEditCode]);
+
+  // Mobile: Delete single code from card
+  const handleMobileDeleteCode = useCallback((code: Code) => {
+    setSelectedCodesForDelete([code.id]);
+    setCodeDeleteConfirmOpen(true);
+  }, []);
 
   const handleSaveCode = useCallback(async () => {
     if (!editingCode) return;
@@ -365,11 +409,33 @@ export default function CodesPage() {
       showSuccess(`Successfully deleted ${count} code${count > 1 ? 's' : ''}`);
       setCodeDeleteConfirmOpen(false);
       setSelectedCodesForDelete([]);
+      setMobileSelectedIds(new Set());
+      setMobileSelectionMode(false);
       await fetchCodes();
     } catch (err: any) {
       showError(err.response?.data?.error || 'Failed to delete codes');
     }
   }, [selectedCodesForDelete, fetchCodes, showSuccess, showError]);
+
+  // Mobile selection handlers
+  const handleMobileSelectionModeToggle = useCallback(() => {
+    setMobileSelectionMode((prev) => !prev);
+    if (mobileSelectionMode) {
+      setMobileSelectedIds(new Set());
+    }
+  }, [mobileSelectionMode]);
+
+  const handleMobileSelectAll = useCallback(() => {
+    setMobileSelectedIds(new Set(filteredCodes.map((c) => c.id)));
+  }, [filteredCodes]);
+
+  const handleMobileDeselectAll = useCallback(() => {
+    setMobileSelectedIds(new Set());
+  }, []);
+
+  const handleMobileDeleteSelected = useCallback(() => {
+    handleDeleteCodes(Array.from(mobileSelectedIds));
+  }, [mobileSelectedIds, handleDeleteCodes]);
 
   // Memoized values
   const columns = useMemo(
@@ -401,14 +467,111 @@ export default function CodesPage() {
     [selectedCodesForDelete, codes, locale]
   );
 
+  // Mobile title based on current view
+  const getMobileTitle = () => {
+    if (mobileView === 'codes' && selectedCodeType) {
+      return getLocalizedValue(selectedCodeType.name, locale);
+    }
+    return undefined; // Use menu title
+  };
+
+  // Render mobile content based on current view
+  const renderMobileContent = () => {
+    if (mobileView === 'types') {
+      // Code Types List
+      return (
+        <MobileCardList
+          data={codeTypes}
+          loading={false}
+          emptyMessage={locale === 'ko' ? '코드 타입이 없습니다' : 'No code types found'}
+          renderCard={(codeType) => (
+            <CodeTypeMobileCard
+              key={codeType.id}
+              codeType={codeType}
+              locale={locale}
+              onClick={handleMobileCodeTypeClick}
+              onEdit={gridPermissions.editable ? handleEditCodeType : undefined}
+              onDelete={gridPermissions.showDeleteButton ? handleDeleteCodeType : undefined}
+              showSwipeActions={gridPermissions.editable}
+            />
+          )}
+          keyExtractor={(codeType) => codeType.id}
+        />
+      );
+    }
+
+    // Codes List (mobileView === 'codes')
+    return (
+      <MobileCardList
+        data={filteredCodes}
+        loading={loading}
+        emptyMessage={locale === 'ko' ? '코드가 없습니다' : 'No codes found'}
+        renderCard={(code) => (
+          <CodeMobileCard
+            key={code.id}
+            code={code}
+            locale={locale}
+            onClick={gridPermissions.editable ? handleMobileEditCode : undefined}
+            onEdit={gridPermissions.editable ? handleMobileEditCode : undefined}
+            onDelete={gridPermissions.showDeleteButton ? handleMobileDeleteCode : undefined}
+            selected={mobileSelectedIds.has(code.id)}
+            selectable={mobileSelectionMode}
+            onSelectionChange={(selected) => {
+              const newIds = new Set(mobileSelectedIds);
+              if (selected) {
+                newIds.add(code.id);
+              } else {
+                newIds.delete(code.id);
+              }
+              setMobileSelectedIds(newIds);
+            }}
+            showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
+          />
+        )}
+        keyExtractor={(code) => code.id}
+      />
+    );
+  };
+
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
+      // Page Header
       useMenu
       showBreadcrumb
+      // Messages
       successMessage={successMessage}
       errorMessage={errorMessage}
-      showQuickSearch={false}
-      showAdvancedFilter={false}
+      // Quick Search (only show in codes view on mobile)
+      quickSearch={isMobileLayout && mobileView === 'codes' ? quickSearch : undefined}
+      onQuickSearchChange={isMobileLayout && mobileView === 'codes' ? setQuickSearch : undefined}
+      onQuickSearch={() => {}}
+      onQuickSearchClear={() => {
+        setQuickSearch('');
+        setSearchCriteria({ codeType: '', code: '', status: '' });
+      }}
+      quickSearchPlaceholder={locale === 'ko' ? '코드 검색...' : 'Search codes...'}
+      searching={loading}
+      // Advanced Filter (only for codes view on mobile)
+      showAdvancedFilter={isMobileLayout && mobileView === 'codes'}
+      advancedFilterOpen={advancedFilterOpen}
+      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
+      activeFilterCount={mobileView === 'codes' ? activeFilterCount : 0}
+      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
+      filterContent={
+        <SearchFilterFields
+          fields={filterFields}
+          values={searchCriteria}
+          onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
+          onEnter={() => setAdvancedFilterOpen(false)}
+        />
+      }
+      onFilterApply={() => setAdvancedFilterOpen(false)}
+      onFilterClear={() => {
+        setQuickSearch('');
+        setSearchCriteria({ codeType: '', code: '', status: '' });
+      }}
+      onFilterClose={() => setAdvancedFilterOpen(false)}
+      // Help
       programId={programId || ''}
       helpOpen={helpOpen}
       onHelpOpenChange={setHelpOpen}
@@ -417,23 +580,71 @@ export default function CodesPage() {
       canManageHelp={canManageHelp}
       onHelpEdit={navigateToHelpEdit}
       language={language}
+      // Mobile specific props
+      mobileFab={
+        isMobileLayout
+          ? mobileView === 'types'
+            ? gridPermissions.showAddButton
+              ? { onClick: handleAddCodeType, label: t('common.create') }
+              : undefined
+            : gridPermissions.showAddButton
+              ? { onClick: handleAddCode, label: t('common.create') }
+              : undefined
+          : undefined
+      }
+      mobileSelectionMode={mobileView === 'codes' ? mobileSelectionMode : false}
+      mobileSelectedCount={mobileSelectedIds.size}
+      mobileTotalCount={filteredCodes.length}
+      onMobileSelectionModeToggle={
+        mobileView === 'codes' && gridPermissions.showDeleteButton
+          ? handleMobileSelectionModeToggle
+          : undefined
+      }
+      onMobileSelectAll={handleMobileSelectAll}
+      onMobileDeselectAll={handleMobileDeselectAll}
+      onMobileDeleteSelected={
+        mobileView === 'codes' && gridPermissions.showDeleteButton
+          ? handleMobileDeleteSelected
+          : undefined
+      }
+      // Custom mobile header for back navigation
+      mobileCustomHeader={
+        isMobileLayout && mobileView === 'codes' ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip title={locale === 'ko' ? '뒤로' : 'Back'}>
+              <IconButton onClick={handleMobileBack} size="small">
+                <ArrowBack />
+              </IconButton>
+            </Tooltip>
+            <Typography variant="subtitle1" fontWeight={600} noWrap>
+              {getMobileTitle()}
+            </Typography>
+          </Box>
+        ) : undefined
+      }
     >
-      <MasterDetailLayout
-        masterSize={30}
-        detailSize={70}
-        master={
-          <CodeTypeList
-            codeTypes={codeTypes}
-            selectedCodeType={selectedCodeType}
-            onSelectCodeType={setSelectedCodeType}
-            onAddCodeType={handleAddCodeType}
-            onEditCodeType={handleEditCodeType}
-            onDeleteCodeType={handleDeleteCodeType}
-            locale={locale}
-          />
-        }
-        detail={
-          <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Conditional rendering based on device */}
+      {isMobileLayout ? (
+        // Mobile: Drill-down navigation
+        renderMobileContent()
+      ) : (
+        // Desktop: Master-Detail Layout
+        <MasterDetailLayout
+          masterSize={30}
+          detailSize={70}
+          master={
+            <CodeTypeList
+              codeTypes={codeTypes}
+              selectedCodeType={selectedCodeType}
+              onSelectCodeType={setSelectedCodeType}
+              onAddCodeType={handleAddCodeType}
+              onEditCodeType={handleEditCodeType}
+              onDeleteCodeType={handleDeleteCodeType}
+              locale={locale}
+            />
+          }
+          detail={
+            <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {!selectedCodeType ? (
                 <EmptyState
                   icon={Search}
@@ -513,8 +724,9 @@ export default function CodesPage() {
                 </Box>
               )}
             </Paper>
-        }
-      />
+          }
+        />
+      )}
 
       {/* Code Type Edit Drawer */}
       <EditDrawer
@@ -630,6 +842,6 @@ export default function CodesPage() {
         onConfirm={handleConfirmDeleteCodes}
         loading={false}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

@@ -73,6 +73,8 @@ export interface ResponsivePageLayoutProps {
   onMobileSelectAll?: () => void;
   onMobileDeselectAll?: () => void;
   onMobileDeleteSelected?: () => void;
+  mobileCustomHeader?: ReactNode;
+  hideMobileSearchHeader?: boolean;
 
   // Container Props
   containerSx?: any;
@@ -132,6 +134,8 @@ export default function ResponsivePageLayout({
   onMobileSelectAll,
   onMobileDeselectAll,
   onMobileDeleteSelected,
+  mobileCustomHeader,
+  hideMobileSearchHeader = false,
 
   // Container Props
   containerSx,
@@ -150,8 +154,11 @@ export default function ResponsivePageLayout({
           ...containerSx,
         }}
       >
+        {/* Mobile Custom Header (for drill-down navigation) */}
+        {mobileCustomHeader}
+
         {/* Mobile Search Header */}
-        {showQuickSearch && (
+        {showQuickSearch && !hideMobileSearchHeader && (
           <MobileSearchHeader
             searchValue={quickSearch}
             onSearchChange={onQuickSearchChange || (() => {})}
