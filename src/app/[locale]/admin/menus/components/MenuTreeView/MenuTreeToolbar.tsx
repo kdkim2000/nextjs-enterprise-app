@@ -3,12 +3,11 @@
 import React from 'react';
 import {
   Box,
-  Button,
+  Stack,
   IconButton,
   Tooltip,
-  Typography,
-  Divider,
-  CircularProgress
+  CircularProgress,
+  Divider
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -19,6 +18,7 @@ import {
   SelectAll as SelectAllIcon,
   Deselect as DeselectIcon
 } from '@mui/icons-material';
+import { useI18n } from '@/lib/i18n/client';
 
 export interface MenuTreeToolbarProps {
   selectedCount: number;
@@ -51,54 +51,91 @@ export default function MenuTreeToolbar({
   canDelete = true,
   loading = false
 }: MenuTreeToolbarProps) {
+  const t = useI18n();
   const isKorean = locale === 'ko';
 
   return (
-    <Box
+    <Stack
+      direction="row"
+      spacing={0.5}
       sx={{
-        display: 'flex',
+        py: 0.75,
+        px: 1.5,
         alignItems: 'center',
-        gap: 1,
-        px: 1,
-        py: 1,
         borderBottom: '1px solid',
-        borderBottomColor: 'divider',
-        flexWrap: 'wrap'
+        borderColor: 'divider'
       }}
     >
+      {/* Total Count Badge */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          px: 1,
+          py: 0.5,
+          bgcolor: 'primary.50',
+          borderRadius: 1,
+          color: 'primary.main',
+          fontWeight: 600,
+          fontSize: '0.8125rem'
+        }}
+      >
+        {selectedCount > 0
+          ? isKorean
+            ? `${selectedCount}개 선택 / 전체 ${totalCount}개`
+            : `${selectedCount} selected / ${totalCount} total`
+          : t('grid.totalCount', { count: totalCount.toLocaleString() })
+        }
+      </Box>
+
+      <Box sx={{ flex: 1 }} />
+
       {/* Add Button */}
       {canAdd && (
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={onAdd}
-          disabled={loading}
-        >
-          {isKorean ? '추가' : 'Add'}
-        </Button>
+        <Tooltip title={t('common.create')} arrow>
+          <IconButton
+            size="small"
+            onClick={onAdd}
+            disabled={loading}
+            sx={{
+              color: 'primary.main',
+              '&:hover': { bgcolor: 'primary.50' }
+            }}
+          >
+            <AddIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )}
 
-      {/* Delete Button */}
-      {canDelete && (
-        <Button
-          variant="outlined"
-          size="small"
-          color="error"
-          startIcon={<DeleteIcon />}
-          onClick={onDelete}
-          disabled={selectedCount === 0 || loading}
-        >
-          {isKorean ? '삭제' : 'Delete'}
-          {selectedCount > 0 && ` (${selectedCount})`}
-        </Button>
+      {/* Delete Button - only visible when items are selected */}
+      {canDelete && selectedCount > 0 && (
+        <Tooltip title={t('common.delete')} arrow>
+          <IconButton
+            size="small"
+            onClick={onDelete}
+            disabled={loading}
+            sx={{
+              color: 'error.main',
+              '&:hover': { bgcolor: 'error.50' }
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )}
-
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Refresh Button */}
-      <Tooltip title={isKorean ? '새로고침' : 'Refresh'}>
-        <IconButton size="small" onClick={onRefresh} disabled={loading}>
+      <Tooltip title={t('common.refresh')} arrow>
+        <IconButton
+          size="small"
+          onClick={onRefresh}
+          disabled={loading}
+          sx={{
+            color: 'action.active',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
           {loading ? <CircularProgress size={18} /> : <RefreshIcon fontSize="small" />}
         </IconButton>
       </Tooltip>
@@ -106,13 +143,29 @@ export default function MenuTreeToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Expand/Collapse All */}
-      <Tooltip title={isKorean ? '모두 펼치기' : 'Expand All'}>
-        <IconButton size="small" onClick={onExpandAll} disabled={loading}>
+      <Tooltip title={isKorean ? '모두 펼치기' : 'Expand All'} arrow>
+        <IconButton
+          size="small"
+          onClick={onExpandAll}
+          disabled={loading}
+          sx={{
+            color: 'action.active',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
           <ExpandAllIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title={isKorean ? '모두 접기' : 'Collapse All'}>
-        <IconButton size="small" onClick={onCollapseAll} disabled={loading}>
+      <Tooltip title={isKorean ? '모두 접기' : 'Collapse All'} arrow>
+        <IconButton
+          size="small"
+          onClick={onCollapseAll}
+          disabled={loading}
+          sx={{
+            color: 'action.active',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
           <CollapseAllIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -120,31 +173,34 @@ export default function MenuTreeToolbar({
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
       {/* Select/Deselect All */}
-      <Tooltip title={isKorean ? '모두 선택' : 'Select All'}>
-        <IconButton size="small" onClick={onSelectAll} disabled={loading}>
+      <Tooltip title={isKorean ? '모두 선택' : 'Select All'} arrow>
+        <IconButton
+          size="small"
+          onClick={onSelectAll}
+          disabled={loading}
+          sx={{
+            color: 'action.active',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
           <SelectAllIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title={isKorean ? '선택 해제' : 'Deselect All'}>
-        <IconButton size="small" onClick={onDeselectAll} disabled={loading || selectedCount === 0}>
-          <DeselectIcon fontSize="small" />
-        </IconButton>
+      <Tooltip title={isKorean ? '선택 해제' : 'Deselect All'} arrow>
+        <span>
+          <IconButton
+            size="small"
+            onClick={onDeselectAll}
+            disabled={loading || selectedCount === 0}
+            sx={{
+              color: 'action.active',
+              '&:hover': { bgcolor: 'action.hover' }
+            }}
+          >
+            <DeselectIcon fontSize="small" />
+          </IconButton>
+        </span>
       </Tooltip>
-
-      {/* Spacer */}
-      <Box sx={{ flex: 1 }} />
-
-      {/* Selection Info */}
-      <Typography variant="caption" color="text.secondary">
-        {selectedCount > 0
-          ? isKorean
-            ? `${selectedCount}개 선택됨 / 전체 ${totalCount}개`
-            : `${selectedCount} selected / ${totalCount} total`
-          : isKorean
-            ? `전체 ${totalCount}개`
-            : `${totalCount} items`
-        }
-      </Typography>
-    </Box>
+    </Stack>
   );
 }
