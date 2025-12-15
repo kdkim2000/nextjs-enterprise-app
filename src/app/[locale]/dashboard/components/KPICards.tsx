@@ -4,6 +4,7 @@ import React, { memo, useMemo } from 'react';
 import { Grid } from '@mui/material';
 import { People, PersonOutline, Article, Comment, Visibility, ErrorOutline } from '@mui/icons-material';
 import StatCard, { StatCardGradients } from '@/components/common/StatCard';
+import { useMobile } from '@/hooks/useMobile';
 import { DashboardSummary } from '../types';
 
 interface KPICardsProps {
@@ -12,6 +13,7 @@ interface KPICardsProps {
 }
 
 function KPICards({ summary, loading }: KPICardsProps) {
+  const { isMobileLayout } = useMobile();
   const cards = useMemo(() => {
     if (!summary) return [];
     return [
@@ -62,15 +64,15 @@ function KPICards({ summary, loading }: KPICardsProps) {
   }, [summary]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={isMobileLayout ? 1 : 2}>
       {loading
         ? [1, 2, 3, 4, 5, 6].map((i) => (
-            <Grid item xs={12} sm={6} md={4} lg={2} key={i}>
-              <StatCard title="" value="" loading />
+            <Grid item xs={6} sm={6} md={4} lg={2} key={i}>
+              <StatCard title="" value="" loading compact={isMobileLayout} />
             </Grid>
           ))
         : cards.map((card, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+            <Grid item xs={6} sm={6} md={4} lg={2} key={index}>
               <StatCard
                 title={card.title}
                 value={card.value}
@@ -78,6 +80,7 @@ function KPICards({ summary, loading }: KPICardsProps) {
                 icon={card.icon}
                 gradient={card.gradient}
                 trend={card.trend}
+                compact={isMobileLayout}
               />
             </Grid>
           ))}

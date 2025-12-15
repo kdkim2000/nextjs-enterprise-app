@@ -45,6 +45,8 @@ export interface StatCardProps {
   loading?: boolean;
   /** Click handler */
   onClick?: () => void;
+  /** Compact mode for mobile */
+  compact?: boolean;
 }
 
 function StatCard({
@@ -56,7 +58,8 @@ function StatCard({
   color,
   trend,
   loading = false,
-  onClick
+  onClick,
+  compact = false
 }: StatCardProps) {
   const accentGradient = gradient || (color ? `linear-gradient(135deg, ${color} 0%, ${color}99 100%)` : COLORS.gradients.primary);
 
@@ -64,16 +67,16 @@ function StatCard({
     return (
       <Box
         sx={{
-          p: 2.5,
-          borderRadius: 3,
+          p: compact ? 1.5 : 2.5,
+          borderRadius: compact ? 2 : 3,
           bgcolor: 'background.paper',
           border: '1px solid',
           borderColor: 'divider'
         }}
       >
-        <Skeleton variant="text" width={80} height={20} />
-        <Skeleton variant="text" width={100} height={40} sx={{ my: 1 }} />
-        <Skeleton variant="text" width={60} height={16} />
+        <Skeleton variant="text" width={compact ? 60 : 80} height={compact ? 16 : 20} />
+        <Skeleton variant="text" width={compact ? 70 : 100} height={compact ? 28 : 40} sx={{ my: compact ? 0.5 : 1 }} />
+        <Skeleton variant="text" width={compact ? 50 : 60} height={compact ? 14 : 16} />
       </Box>
     );
   }
@@ -83,8 +86,8 @@ function StatCard({
       onClick={onClick}
       sx={{
         position: 'relative',
-        p: 2.5,
-        borderRadius: 3,
+        p: compact ? 1.5 : 2.5,
+        borderRadius: compact ? 2 : 3,
         bgcolor: 'background.paper',
         border: '1px solid',
         borderColor: 'divider',
@@ -93,8 +96,8 @@ function StatCard({
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+          transform: compact ? 'none' : 'translateY(-4px)',
+          boxShadow: compact ? '0 1px 3px 0 rgb(0 0 0 / 0.1)' : '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
         },
         '&::before': {
           content: '""',
@@ -102,7 +105,7 @@ function StatCard({
           top: 0,
           left: 0,
           right: 0,
-          height: 4,
+          height: compact ? 3 : 4,
           background: accentGradient
         }
       }}
@@ -111,29 +114,32 @@ function StatCard({
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             sx={{
-              fontSize: '0.7rem',
+              fontSize: compact ? '0.6rem' : '0.7rem',
               fontWeight: 600,
               color: 'text.secondary',
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
-              mb: 0.5
+              mb: compact ? 0.25 : 0.5,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }}
           >
             {title}
           </Typography>
           <Typography
             sx={{
-              fontSize: '1.5rem',
+              fontSize: compact ? '1.1rem' : '1.5rem',
               fontWeight: 700,
               letterSpacing: '-0.025em',
               lineHeight: 1.2,
-              mb: 0.5
+              mb: compact ? 0.25 : 0.5
             }}
           >
             {value}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-            {trend !== undefined && (
+            {trend !== undefined && !compact && (
               <Box
                 sx={{
                   display: 'inline-flex',
@@ -163,11 +169,21 @@ function StatCard({
               </Box>
             )}
             {subValue && (
-              <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>{subValue}</Typography>
+              <Typography
+                sx={{
+                  fontSize: compact ? '0.6rem' : '0.7rem',
+                  color: 'text.secondary',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {subValue}
+              </Typography>
             )}
           </Box>
         </Box>
-        {Icon && (
+        {Icon && !compact && (
           <Box
             sx={{
               width: 40,
