@@ -40,6 +40,7 @@ import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
 import { MetaInfo } from '@/components/common/Badge';
 import DateTimeRangePicker from '@/components/common/DateTimeRangePicker';
+import { useMobile } from '@/hooks/useMobile';
 
 interface BoardType {
   id: string;
@@ -88,6 +89,7 @@ export default function PostFormPage({
   const router = useRouter();
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -245,7 +247,14 @@ export default function PostFormPage({
   // Loading state
   if (initialLoading) {
     return (
-      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{
+        flex: 1,
+        minHeight: isMobileLayout ? 200 : 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        p: isMobileLayout ? 2 : 0
+      }}>
         <CircularProgress />
       </Box>
     );
@@ -254,15 +263,233 @@ export default function PostFormPage({
   // Error state (no board type found)
   if (error && !boardType) {
     return (
-      <Box sx={{ flex: 1, minHeight: 0, p: 4 }}>
+      <Box sx={{ flex: 1, minHeight: 0, p: isMobileLayout ? 2 : 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-        <Button startIcon={<ArrowBack />} onClick={handleCancel}>
+        <Button startIcon={<ArrowBack />} onClick={handleCancel} size={isMobileLayout ? 'small' : 'medium'}>
           {t('board.backToList')}
         </Button>
       </Box>
     );
   }
 
+  // 모바일 레이아웃: MobileLayout의 스크롤 사용
+  if (isMobileLayout) {
+    return (
+      <Box sx={{ px: 1.5, py: 1 }}>
+        {/* Mobile Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 1.5,
+            pb: 1.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <IconButton onClick={handleCancel} size="small" sx={{ bgcolor: 'grey.100' }}>
+            <ArrowBack fontSize="small" />
+          </IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {mode === 'create' ? (
+                <AddIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+              ) : (
+                <EditIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+              )}
+              <Typography variant="subtitle2" fontWeight={600}>
+                {pageTitle || defaultPageTitle}
+              </Typography>
+            </Box>
+            <Chip
+              size="small"
+              label={boardName}
+              sx={{ height: 18, fontSize: '0.6rem', mt: 0.5 }}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton
+              onClick={handleCancel}
+              size="small"
+              disabled={loading}
+              sx={{ bgcolor: 'grey.100', color: 'error.main' }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              onClick={handleSubmit}
+              size="small"
+              disabled={loading}
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': { bgcolor: 'primary.dark' },
+                '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
+              }}
+            >
+              {loading ? <CircularProgress size={16} sx={{ color: 'inherit' }} /> : <SaveIcon fontSize="small" />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Messages */}
+        {success && <Alert severity="success" sx={{ mb: 2, fontSize: '0.8rem' }}>{success}</Alert>}
+        {error && <Alert severity="error" sx={{ mb: 2, fontSize: '0.8rem' }}>{error}</Alert>}
+
+        {/* Mobile Form */}
+        <Paper sx={{ p: 2 }}>
+          <Stack spacing={2}>
+            {/* Title Field */}
+            <TextField
+              fullWidth
+              required
+              label={t('board.titleRequired')}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={t('board.titlePlaceholder')}
+              size="small"
+              disabled={loading}
+            />
+
+            {/* Tags Field */}
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                <LabelIcon sx={{ fontSize: 14 }} color="action" />
+                <Typography variant="caption" fontWeight={600}>{t('board.tags')}</Typography>
+              </Box>
+              <TagInput
+                value={tags}
+                onChange={setTags}
+                placeholder={t('board.tagsPlaceholder')}
+                maxTags={10}
+                disabled={loading}
+              />
+            </Box>
+
+            {/* Content Field */}
+            <Box>
+              <Typography variant="caption" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
+                {t('board.contentRequired')}
+              </Typography>
+              <RichTextEditor
+                value={content}
+                onChange={setContent}
+                placeholder={t('board.contentPlaceholder')}
+                minHeight={200}
+                disabled={loading}
+              />
+            </Box>
+
+            {/* Attachments */}
+            {boardType?.settings?.allowAttachments && (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                  <AttachFileIcon sx={{ fontSize: 14 }} color="action" />
+                  <Typography variant="caption" fontWeight={600}>{t('board.attachmentsTitle')}</Typography>
+                </Box>
+                <AttachmentUpload
+                  attachmentTypeCode="BOARD_GENERAL"
+                  referenceType={mode === 'edit' ? 'post' : undefined}
+                  referenceId={mode === 'edit' ? postId : undefined}
+                  locale={currentLocale}
+                  autoFetch={mode === 'edit'}
+                  onUploadComplete={(id) => setAttachmentId(id)}
+                  compact
+                />
+              </Box>
+            )}
+
+            {/* Options */}
+            <Box>
+              <Typography variant="caption" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
+                {t('board.visibility')}
+              </Typography>
+              <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'grey.50' }}>
+                <Stack spacing={0.5}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isSecret}
+                        onChange={(e) => setIsSecret(e.target.checked)}
+                        disabled={loading}
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Typography variant="caption">{t('board.secretPost')}</Typography>
+                    }
+                  />
+                  {isAdmin && (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isPinned}
+                          onChange={(e) => setIsPinned(e.target.checked)}
+                          disabled={loading}
+                          size="small"
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <PushPinIcon sx={{ fontSize: 14, color: 'warning.main' }} />
+                          <Typography variant="caption">{t('board.pinnedPost')}</Typography>
+                        </Box>
+                      }
+                    />
+                  )}
+                </Stack>
+              </Paper>
+            </Box>
+
+            {/* Popup Notification Options - Admin Only */}
+            {isAdmin && (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                  <NotificationsIcon sx={{ fontSize: 14 }} color="action" />
+                  <Typography variant="caption" fontWeight={600}>{t('board.popupNotification')}</Typography>
+                </Box>
+                <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'grey.50' }}>
+                  <Stack spacing={1}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={showPopup}
+                          onChange={(e) => setShowPopup(e.target.checked)}
+                          disabled={loading}
+                          size="small"
+                        />
+                      }
+                      label={<Typography variant="caption">{t('board.showAsPopup')}</Typography>}
+                    />
+                    {showPopup && (
+                      <Box sx={{ pl: 2 }}>
+                        <DateTimeRangePicker
+                          label={t('board.displayPeriod')}
+                          startDateTime={displayStartDate}
+                          endDateTime={displayEndDate}
+                          onChange={(start, end) => {
+                            setDisplayStartDate(start);
+                            setDisplayEndDate(end);
+                          }}
+                          startLabel={t('board.startDate')}
+                          endLabel={t('board.endDate')}
+                          disabled={loading}
+                          lang={currentLocale}
+                        />
+                      </Box>
+                    )}
+                  </Stack>
+                </Paper>
+              </Box>
+            )}
+          </Stack>
+        </Paper>
+      </Box>
+    );
+  }
+
+  // 데스크톱 레이아웃: 고정 헤더 + 내부 스크롤
   return (
     <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Fixed Header Area */}

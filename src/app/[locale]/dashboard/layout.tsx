@@ -1,11 +1,11 @@
 'use client';
 
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthenticatedLayout showAutoLogoutWarning>
+    <ResponsiveLayout showAutoLogoutWarning>
       {children}
-    </AuthenticatedLayout>
+    </ResponsiveLayout>
   );
 }

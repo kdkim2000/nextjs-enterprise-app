@@ -4,7 +4,7 @@ import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { useMenu } from '@/hooks/useMenu';
-import { Menu, MenuFormData, SearchCriteria } from '../types';
+import { Menu, MenuFormData, SearchCriteria, MenuTreeNode } from '../types';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import {
   multiLangFieldsToFormData,
@@ -67,6 +67,30 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // Tree-related states
+  const [treeMenus, setTreeMenus] = useState<MenuTreeNode[]>([]);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Convert API menu items to tree nodes
+  const convertToTreeNodes = (items: MenuItemType[]): MenuTreeNode[] => {
+    return items.map(item => ({
+      id: item.id,
+      code: item.code,
+      name: item.name,
+      path: item.path,
+      icon: item.icon,
+      order: item.order,
+      parentId: item.parentId,
+      level: item.level,
+      programId: item.programId || '',
+      description: item.description,
+      mobileEnabled: item.mobileEnabled ?? true,
+      desktopEnabled: item.desktopEnabled ?? true,
+      children: item.children ? convertToTreeNodes(item.children) : undefined
+    }));
+  };
+
   // Flatten menu structure for DataGrid (not using useCallback to avoid dependency issues)
   const flattenMenus = (items: MenuItemType[]): Menu[] => {
     return items.reduce((acc: Menu[], item) => {
@@ -80,11 +104,24 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         parentId: item.parentId,
         level: item.level,
         programId: item.programId || '',
-        description: item.description
+        description: item.description,
+        mobileEnabled: item.mobileEnabled ?? true,
+        desktopEnabled: item.desktopEnabled ?? true
       };
       acc.push(flatItem);
       if (item.children && item.children.length > 0) {
         acc.push(...flattenMenus(item.children));
+      }
+      return acc;
+    }, []);
+  };
+
+  // Collect all IDs from tree for expand all
+  const collectAllIds = (items: MenuTreeNode[]): string[] => {
+    return items.reduce((acc: string[], item) => {
+      acc.push(item.id);
+      if (item.children && item.children.length > 0) {
+        acc.push(...collectAllIds(item.children));
       }
       return acc;
     }, []);
@@ -98,8 +135,19 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       const menuList = response.menus || [];
       setAllMenus(menuList);
 
+      // Set flat menus for backward compatibility
       const flatMenus = flattenMenus(menuList);
       setMenus(flatMenus);
+
+      // Set tree menus for TreeView
+      const tree = convertToTreeNodes(menuList);
+      setTreeMenus(tree);
+
+      // Expand root menus by default on first load
+      if (expandedIds.size === 0 && tree.length > 0) {
+        const rootIds = tree.map(m => m.id);
+        setExpandedIds(new Set(rootIds));
+      }
     } catch (error) {
       const err = error as { response?: { data?: { error?: string } } };
       await showErrorMessage(err.response?.data?.error ? 'COMMON_LOAD_FAIL' : 'CRUD_MENU_LOAD_FAIL');
@@ -116,7 +164,16 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
   }, []);
 
   // Menu CRUD operations
-  const handleAdd = useCallback(() => {
+  const handleAdd = useCallback((parentId?: string | null) => {
+    // Find parent menu to get level
+    let parentLevel = -1;
+    if (parentId) {
+      const parent = menus.find(m => m.id === parentId);
+      if (parent) {
+        parentLevel = parent.level;
+      }
+    }
+
     setEditingMenu({
       id: '',
       code: '',
@@ -124,12 +181,14 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
       path: '',
       icon: 'Dashboard',
       order: 0,
-      parentId: null,
-      level: 0,
-      programId: ''
+      parentId: parentId || null,
+      level: parentLevel + 1,
+      programId: '',
+      mobileEnabled: true,
+      desktopEnabled: true
     } as MenuFormData);
     setDialogOpen(true);
-  }, []);
+  }, [menus]);
 
   const handleEdit = useCallback((id: string | number) => {
     const menu = menus.find((m) => m.id === id);
@@ -145,7 +204,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         order: menu.order,
         parentId: menu.parentId,
         level: menu.level,
-        programId: menu.programId
+        programId: menu.programId,
+        mobileEnabled: menu.mobileEnabled ?? true,
+        desktopEnabled: menu.desktopEnabled ?? true
       } as MenuFormData);
       setDialogOpen(true);
     }
@@ -168,7 +229,9 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
         parentId: editingMenu.parentId || null,
         level: editingMenu.level,
         programId: editingMenu.programId || null,
-        description
+        description,
+        mobileEnabled: editingMenu.mobileEnabled,
+        desktopEnabled: editingMenu.desktopEnabled
       };
 
       if (editingMenu.id) {
@@ -274,6 +337,54 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     sessionStorage.removeItem(storageKey);
   }, [setSearchCriteria, storageKey]);
 
+  // Tree-related handlers
+  const handleToggleExpand = useCallback((id: string) => {
+    setExpandedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleExpandAll = useCallback(() => {
+    const allIds = collectAllIds(treeMenus);
+    setExpandedIds(new Set(allIds));
+  }, [treeMenus]);
+
+  const handleCollapseAll = useCallback(() => {
+    setExpandedIds(new Set());
+  }, []);
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    const allIds = collectAllIds(treeMenus);
+    setSelectedIds(new Set(allIds));
+  }, [treeMenus]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleTreeDelete = useCallback((ids: string[]) => {
+    setSelectedForDelete(ids);
+    setDeleteConfirmOpen(true);
+  }, []);
+
   // Client-side filtering
   const filteredMenus = useMemo(() => {
     // If quick search is active
@@ -370,6 +481,11 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     successMessage,
     errorMessage,
 
+    // Tree-related state
+    treeMenus,
+    expandedIds,
+    selectedIds,
+
     // Handlers
     handleAdd,
     handleEdit,
@@ -384,6 +500,15 @@ export const useMenuManagement = (options: UseMenuManagementOptions) => {
     handleAdvancedSearchClear,
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
-    setDialogOpen
+    setDialogOpen,
+
+    // Tree-related handlers
+    handleToggleExpand,
+    handleExpandAll,
+    handleCollapseAll,
+    handleToggleSelect,
+    handleSelectAll,
+    handleDeselectAll,
+    handleTreeDelete
   };
 };

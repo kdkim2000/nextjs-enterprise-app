@@ -1,6 +1,6 @@
 'use client';
 
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 export default function DevLayout({
   children
@@ -8,8 +8,8 @@ export default function DevLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthenticatedLayout>
+    <ResponsiveLayout>
       {children}
-    </AuthenticatedLayout>
+    </ResponsiveLayout>
   );
 }

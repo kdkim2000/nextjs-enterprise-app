@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { Box } from '@mui/material';
+import { Box, Paper } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import PageStateWrapper from '@/components/common/PageStateWrapper';
 import BoardListView from '@/components/boards/BoardListView';
+import MobileCardList from '@/components/mobile/MobileCardList';
+import BoardMobileCard from './components/BoardMobileCard';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
 import { useBoardManagement } from './hooks/useBoardManagement';
+import { useMobile } from '@/hooks/useMobile';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { buildSimpleDeleteItemsList } from '@/lib/utils/deleteItemsListBuilder';
 
@@ -19,6 +23,7 @@ export default function BoardListPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
   const boardTypeId = params.boardTypeId as string;
+  const { isMobileLayout } = useMobile();
 
   // Board permissions
   const { canWrite, canRead, boardType, loading: permLoading } = useBoardPermissions(boardTypeId);
@@ -57,8 +62,52 @@ export default function BoardListPage() {
     boardType
   });
 
-  // Selection state for BoardListView
-  const [selectedIds, setSelectedIds] = React.useState<(string | number)[]>([]);
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+  const [mobileSelectedIds, setMobileSelectedIds] = useState<Set<string | number>>(new Set());
+  const [mobileSelectionMode, setMobileSelectionMode] = useState(false);
+
+  // Mobile infinite scroll state
+  const [mobileHasMore, setMobileHasMore] = useState(true);
+
+  // Mobile handlers
+  const handleMobileLoadMore = useCallback(() => {
+    if (posts.length < rowCount) {
+      handlePaginationModelChange({
+        page: paginationModel.page + 1,
+        pageSize: paginationModel.pageSize,
+      });
+    } else {
+      setMobileHasMore(false);
+    }
+  }, [posts.length, rowCount, paginationModel, handlePaginationModelChange]);
+
+  const handleMobileRefresh = useCallback(async () => {
+    handleRefresh();
+  }, [handleRefresh]);
+
+  const handleMobileSelectionModeToggle = useCallback(() => {
+    setMobileSelectionMode((prev) => !prev);
+    if (mobileSelectionMode) {
+      setMobileSelectedIds(new Set());
+    }
+  }, [mobileSelectionMode]);
+
+  const handleMobileSelectAll = useCallback(() => {
+    setMobileSelectedIds(new Set(posts.map((p) => p.id)));
+  }, [posts]);
+
+  const handleMobileDeselectAll = useCallback(() => {
+    setMobileSelectedIds(new Set());
+  }, []);
+
+  const handleMobileDeleteSelected = useCallback(() => {
+    handleDelete(Array.from(mobileSelectedIds));
+  }, [mobileSelectedIds, handleDelete]);
+
+  const handleMobilePostDelete = useCallback((post: { id: string }) => {
+    handleDelete([post.id]);
+  }, [handleDelete]);
 
   // Memoized computed values
   const filterFields = useMemo(() => createFilterFields(currentLocale), [currentLocale]);
@@ -88,7 +137,7 @@ export default function BoardListPage() {
       noPermission={!canRead && !permLoading && !!boardType}
       noPermissionMessage={t('common.error')}
     >
-      <StandardCrudPageLayout
+      <ResponsivePageLayout
         // Page Header (consistent with users page)
         useMenu
         showBreadcrumb
@@ -120,30 +169,76 @@ export default function BoardListPage() {
         onFilterApply={handleAdvancedFilterApply}
         onFilterClear={handleQuickSearchClear}
         onFilterClose={handleAdvancedFilterClose}
-        // Note: programId is NOT passed to avoid RouteGuard permission check
-        // Boards use their own permission system via useBoardPermissions
+        // Mobile specific props
+        mobileFab={canWrite ? {
+          onClick: handleAdd,
+          label: t('common.create'),
+        } : undefined}
+        mobileSelectionMode={mobileSelectionMode}
+        mobileSelectedCount={mobileSelectedIds.size}
+        mobileTotalCount={posts.length}
+        onMobileSelectionModeToggle={canWrite ? handleMobileSelectionModeToggle : undefined}
+        onMobileSelectAll={handleMobileSelectAll}
+        onMobileDeselectAll={handleMobileDeselectAll}
+        onMobileDeleteSelected={canWrite ? handleMobileDeleteSelected : undefined}
       >
-        {/* Board List View - Optimized for boards */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <BoardListView
-            posts={posts}
+        {/* Conditional rendering based on device */}
+        {isMobileLayout ? (
+          // Mobile: Card List with infinite scroll
+          <MobileCardList
+            data={posts}
             loading={searching}
-            totalCount={rowCount}
-            page={paginationModel.page}
-            pageSize={paginationModel.pageSize}
-            onPageChange={(newPage) => handlePaginationModelChange({ ...paginationModel, page: newPage })}
-            onPageSizeChange={(newPageSize) => handlePaginationModelChange({ page: 0, pageSize: newPageSize })}
-            checkboxSelection={canWrite}
-            selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
-            onRowClick={handlePostClick}
-            onAdd={canWrite ? handleAdd : undefined}
-            onDelete={canWrite ? handleDeleteSelected : undefined}
-            onRefresh={handleRefresh}
-            showRowNumber
-            locale={currentLocale}
+            emptyMessage={t('board.noPosts')}
+            renderCard={(post, index) => (
+              <BoardMobileCard
+                key={post.id}
+                post={post}
+                rowNumber={paginationModel.page * paginationModel.pageSize + index + 1}
+                onClick={(post) => handlePostClick(post.id)}
+                onDelete={canWrite ? handleMobilePostDelete : undefined}
+                selected={mobileSelectedIds.has(post.id)}
+                selectable={mobileSelectionMode}
+                onSelectionChange={(selected) => {
+                  const newIds = new Set(mobileSelectedIds);
+                  if (selected) {
+                    newIds.add(post.id);
+                  } else {
+                    newIds.delete(post.id);
+                  }
+                  setMobileSelectedIds(newIds);
+                }}
+                locale={currentLocale}
+                showSwipeActions={!mobileSelectionMode && canWrite}
+              />
+            )}
+            keyExtractor={(post) => post.id}
+            hasMore={mobileHasMore}
+            onLoadMore={handleMobileLoadMore}
+            onRefresh={handleMobileRefresh}
           />
-        </Box>
+        ) : (
+          // Desktop: Board List View with DataGrid
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <BoardListView
+              posts={posts}
+              loading={searching}
+              totalCount={rowCount}
+              page={paginationModel.page}
+              pageSize={paginationModel.pageSize}
+              onPageChange={(newPage) => handlePaginationModelChange({ ...paginationModel, page: newPage })}
+              onPageSizeChange={(newPageSize) => handlePaginationModelChange({ page: 0, pageSize: newPageSize })}
+              checkboxSelection={canWrite}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+              onRowClick={handlePostClick}
+              onAdd={canWrite ? handleAdd : undefined}
+              onDelete={canWrite ? handleDeleteSelected : undefined}
+              onRefresh={handleRefresh}
+              showRowNumber
+              locale={currentLocale}
+            />
+          </Box>
+        )}
 
         {/* Delete Confirmation Dialog */}
         <DeleteConfirmDialog
@@ -158,7 +253,7 @@ export default function BoardListPage() {
           cancelText={t('common.cancel')}
           confirmText={t('common.delete')}
         />
-      </StandardCrudPageLayout>
+      </ResponsivePageLayout>
     </PageStateWrapper>
   );
 }

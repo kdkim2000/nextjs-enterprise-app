@@ -2,8 +2,14 @@
 
 import React from 'react';
 import { GridColDef } from '@mui/x-data-grid';
-import { IconButton, Box, Tooltip } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { IconButton, Box, Tooltip, Chip } from '@mui/material';
+import {
+  Edit,
+  Smartphone as SmartphoneIcon,
+  DesktopWindows as DesktopIcon,
+  Check as CheckIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { getMenuIcon, getAvailableIconNames } from '@/lib/icons/menuIcons';
@@ -56,7 +62,33 @@ export const createColumns = (
         return parent ? getLocalizedValue(parent.name, locale) : '-';
       }
     },
-    { field: 'programId', headerName: t('menuManagement.programId'), width: 140 }
+    { field: 'programId', headerName: t('menuManagement.programId'), width: 140 },
+    {
+      field: 'visibility',
+      headerName: locale === 'ko' ? '표시' : 'Visibility',
+      width: 120,
+      sortable: false,
+      renderCell: (params) => {
+        const desktop = params.row.desktopEnabled ?? true;
+        const mobile = params.row.mobileEnabled ?? true;
+        return (
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+            <Tooltip title={locale === 'ko' ? '데스크톱' : 'Desktop'}>
+              <DesktopIcon
+                fontSize="small"
+                sx={{ color: desktop ? 'success.main' : 'action.disabled' }}
+              />
+            </Tooltip>
+            <Tooltip title={locale === 'ko' ? '모바일' : 'Mobile'}>
+              <SmartphoneIcon
+                fontSize="small"
+                sx={{ color: mobile ? 'success.main' : 'action.disabled' }}
+              />
+            </Tooltip>
+          </Box>
+        );
+      }
+    }
   ];
 
   if (canUpdate) {

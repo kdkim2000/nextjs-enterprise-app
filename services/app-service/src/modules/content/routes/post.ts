@@ -15,19 +15,28 @@ const router = Router();
 const logger = getLogger('app-service:content:post-routes');
 
 /**
+ * Safely parse JSON string
+ */
+function safeJsonParse(value: any, defaultValue: any = []): any {
+  if (value === null || value === undefined) return defaultValue;
+  if (typeof value !== 'string') return value;
+  if (value === '' || value === 'null') return defaultValue;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return defaultValue;
+  }
+}
+
+/**
  * Transform database row to API format
  */
 function transformPostToAPI(dbPost: Post): PostApiResponse | null {
   if (!dbPost) return null;
 
-  // Parse JSON fields
-  const tags = typeof dbPost.tags === 'string'
-    ? JSON.parse(dbPost.tags)
-    : dbPost.tags;
-
-  const metadata = typeof dbPost.metadata === 'string'
-    ? JSON.parse(dbPost.metadata)
-    : dbPost.metadata;
+  // Parse JSON fields safely
+  const tags = safeJsonParse(dbPost.tags, []);
+  const metadata = safeJsonParse(dbPost.metadata, {});
 
   return {
     id: dbPost.id,
@@ -234,7 +243,9 @@ router.get('/popup-notifications', authenticateToken, async (req: Request, res: 
 router.get('/:id', authenticateToken, checkSecretPostAccess(), async (req: Request, res: Response) => {
   try {
     const dbPost = req.post!; // Injected by checkSecretPostAccess middleware
+    logger.info('Fetching post:', { postId: req.params.id, hasPost: !!dbPost });
     const post = transformPostToAPI(dbPost) as any;
+    logger.info('Transformed post:', { postId: post?.id });
 
     // Get attachments
     if (dbPost.attachment_id) {
@@ -269,9 +280,13 @@ router.get('/:id', authenticateToken, checkSecretPostAccess(), async (req: Reque
     }
 
     res.json({ post });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching post:', error);
-    res.status(500).json({ error: 'Failed to fetch post' });
+    res.status(500).json({
+      error: 'Failed to fetch post',
+      details: process.env.NODE_ENV !== 'production' ? error.message : undefined,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+    });
   }
 });
 

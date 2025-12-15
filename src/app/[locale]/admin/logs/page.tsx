@@ -1,26 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Paper,
-  Alert,
-  Chip,
-  Tooltip
-} from '@mui/material';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Box, Paper, Chip, Tooltip } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import PageHeader from '@/components/common/PageHeader';
-import QuickSearchBar from '@/components/common/QuickSearchBar';
-import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
-import PageContainer from '@/components/common/PageContainer';
 import RouteGuard from '@/components/auth/RouteGuard';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
+import LogMobileCard from './components/LogMobileCard';
 import { GridColDef } from '@mui/x-data-grid';
 import { commonApi } from '@/lib/axios';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import type { LogEntry } from '@/types/log';
 
@@ -36,7 +30,7 @@ interface SearchCriteria {
 }
 
 // Session storage key for state persistence
-const STORAGE_KEY = 'admin-logs-page-state-v2'; // Changed key to clear old invalid data
+const STORAGE_KEY = 'admin-logs-page-state-v2';
 
 // Helper functions for state persistence
 const savePageState = (state: {
@@ -66,6 +60,7 @@ const loadPageState = () => {
 export default function LogsPage() {
   const t = useI18n();
   const locale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
 
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
@@ -75,7 +70,7 @@ export default function LogsPage() {
 
   const [logs, setLogs] = useState<LogEntry[]>(savedState?.logs || []);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [quickSearch, setQuickSearch] = useState(savedState?.quickSearch || '');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(
@@ -97,15 +92,18 @@ export default function LogsPage() {
   );
   const [rowCount, setRowCount] = useState(savedState?.rowCount || 0);
 
+  // Mobile: hasMore state for infinite scroll
+  const hasMore = useMemo(() => logs.length < rowCount, [logs.length, rowCount]);
+
   // Auto-hide error message after 10 seconds
   useEffect(() => {
-    if (error) {
+    if (errorMessage) {
       const timer = setTimeout(() => {
-        setError(null);
+        setErrorMessage(null);
       }, 10000);
       return () => clearTimeout(timer);
     }
-  }, [error]);
+  }, [errorMessage]);
 
   // Save page state whenever it changes
   useEffect(() => {
@@ -122,30 +120,30 @@ export default function LogsPage() {
   useEffect(() => {
     if (savedState && (savedState.logs?.length > 0 || savedState.quickSearch ||
         Object.values(savedState.searchCriteria || {}).some(v => v !== ''))) {
-      // Data already loaded from savedState, no need to fetch again
-      // User can click refresh if they want fresh data
+      // Data already loaded from savedState
     } else {
-      // No saved state, fetch initial data (recent logs)
       fetchLogs(0, 50, false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchLogs = async (page: number = 0, pageSize: number = 50, useQuickSearch: boolean = false) => {
+  const fetchLogs = useCallback(async (
+    page: number = 0,
+    pageSize: number = 50,
+    useQuickSearch: boolean = false,
+    append: boolean = false
+  ) => {
     try {
       setLoading(true);
-      setError(null);
+      setErrorMessage(null);
 
       const params = new URLSearchParams();
 
       if (useQuickSearch && quickSearch) {
-        // Quick search: search in path, userId, and programId
         params.append('path', quickSearch);
         params.append('userId', quickSearch);
         params.append('programId', quickSearch);
       } else {
-        // Advanced search: use specific criteria
-        // Handle method as array
         if (Array.isArray(searchCriteria.method) && searchCriteria.method.length > 0) {
           searchCriteria.method.forEach(method => params.append('method', method));
         }
@@ -157,60 +155,59 @@ export default function LogsPage() {
         if (searchCriteria.endDate) params.append('endDate', searchCriteria.endDate);
       }
 
-      params.append('page', (page + 1).toString()); // Backend uses 1-indexed
+      params.append('page', (page + 1).toString());
       params.append('limit', pageSize.toString());
 
       const response = await commonApi.get(`/logs?${params.toString()}`);
-      setLogs(response.logs || []);
+      const newLogs = response.logs || [];
 
-      // Update row count for DataGrid
+      if (append) {
+        setLogs(prev => [...prev, ...newLogs]);
+      } else {
+        setLogs(newLogs);
+      }
+
       if (response.pagination) {
         setRowCount(response.pagination.total || 0);
       } else {
-        setRowCount(response.logs?.length || 0);
+        setRowCount(newLogs.length);
       }
     } catch (err) {
       const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Failed to load logs');
+      setErrorMessage(error.response?.data?.error || 'Failed to load logs');
       console.error('Failed to fetch logs:', err);
-      setLogs([]);
-      setRowCount(0);
+      if (!append) {
+        setLogs([]);
+        setRowCount(0);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [quickSearch, searchCriteria]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     const useQuickSearch = quickSearch.trim() !== '';
     fetchLogs(paginationModel.page, paginationModel.pageSize, useQuickSearch);
-  };
+  }, [fetchLogs, paginationModel, quickSearch]);
 
-  const handleSearchChange = (field: keyof SearchCriteria, value: string | string[]) => {
+  const handleSearchChange = useCallback((field: keyof SearchCriteria, value: string | string[]) => {
     setSearchCriteria(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  // Quick search handlers
-  const handleQuickSearch = () => {
-    setPaginationModel({ ...paginationModel, page: 0 });
+  const handleQuickSearch = useCallback(() => {
+    setPaginationModel((prev: { page: number; pageSize: number }) => ({ ...prev, page: 0 }));
     fetchLogs(0, paginationModel.pageSize, true);
-  };
+  }, [fetchLogs, paginationModel.pageSize]);
 
-  const handleQuickSearchClear = () => {
+  const handleQuickSearchClear = useCallback(() => {
     setQuickSearch('');
     setLogs([]);
     setRowCount(0);
     setPaginationModel({ page: 0, pageSize: 50 });
-    // Clear saved state
     sessionStorage.removeItem(STORAGE_KEY);
-  };
+  }, []);
 
-  // Advanced search handlers
-  const handleAdvancedSearch = () => {
-    setPaginationModel({ ...paginationModel, page: 0 });
-    fetchLogs(0, paginationModel.pageSize, false);
-  };
-
-  const handleAdvancedSearchClear = () => {
+  const handleAdvancedSearchClear = useCallback(() => {
     setSearchCriteria({
       method: [],
       path: '',
@@ -220,30 +217,37 @@ export default function LogsPage() {
       startDate: '',
       endDate: ''
     });
-    // Clear saved state
     sessionStorage.removeItem(STORAGE_KEY);
-  };
+  }, []);
 
-  const handleAdvancedFilterApply = () => {
+  const handleAdvancedFilterApply = useCallback(() => {
     setAdvancedFilterOpen(false);
-    handleAdvancedSearch();
-  };
+    setPaginationModel((prev: { page: number; pageSize: number }) => ({ ...prev, page: 0 }));
+    fetchLogs(0, paginationModel.pageSize, false);
+  }, [fetchLogs, paginationModel.pageSize]);
 
-  const handleAdvancedFilterClose = () => {
+  const handleAdvancedFilterClose = useCallback(() => {
     setAdvancedFilterOpen(false);
-  };
+  }, []);
 
-  const handlePaginationModelChange = (newModel: { page: number; pageSize: number }) => {
+  const handlePaginationModelChange = useCallback((newModel: { page: number; pageSize: number }) => {
     setPaginationModel(newModel);
     const useQuickSearch = quickSearch.trim() !== '';
     fetchLogs(newModel.page, newModel.pageSize, useQuickSearch);
-  };
+  }, [fetchLogs, quickSearch]);
+
+  // Mobile: Load more handler for infinite scroll
+  const handleLoadMore = useCallback(() => {
+    if (loading || !hasMore) return;
+    const nextPage = paginationModel.page + 1;
+    setPaginationModel((prev: { page: number; pageSize: number }) => ({ ...prev, page: nextPage }));
+    const useQuickSearch = quickSearch.trim() !== '';
+    fetchLogs(nextPage, paginationModel.pageSize, useQuickSearch, true);
+  }, [loading, hasMore, paginationModel, quickSearch, fetchLogs]);
 
   const activeFilterCount = useMemo(() => {
     return Object.entries(searchCriteria).filter(([_key, value]) => {
-      if (Array.isArray(value)) {
-        return value.length > 0;
-      }
+      if (Array.isArray(value)) return value.length > 0;
       return value !== '';
     }).length;
   }, [searchCriteria]);
@@ -268,18 +272,14 @@ export default function LogsPage() {
     }
   };
 
-  // Extract unique program IDs from logs for filter dropdown
   const programIds = useMemo(() => {
     const ids = new Set<string>();
     logs.forEach(log => {
-      if (log.programId) {
-        ids.add(log.programId);
-      }
+      if (log.programId) ids.add(log.programId);
     });
     return Array.from(ids).sort();
   }, [logs]);
 
-  // Filter field configuration
   const filterFields: FilterFieldConfig[] = useMemo(() => [
     {
       name: 'method',
@@ -331,7 +331,7 @@ export default function LogsPage() {
       startLabel: getLocalizedValue({ en: 'Start Date', ko: '시작일', zh: '开始日期', vi: 'Ngày bắt đầu' }, locale),
       endLabel: getLocalizedValue({ en: 'End Date', ko: '종료일', zh: '结束日期', vi: 'Ngày kết thúc' }, locale),
       gridSize: { xs: 12, sm: 6, md: 6 },
-      dateOnly: true // Date only, time auto-filled (00:00:00 ~ 23:59:59)
+      dateOnly: true
     }
   ], [programIds, locale]);
 
@@ -347,11 +347,7 @@ export default function LogsPage() {
       headerName: getLocalizedValue({ en: 'Method', ko: '메서드', zh: '方法', vi: 'Phương thức' }, locale),
       width: 90,
       renderCell: (params) => (
-        <Chip
-          label={params.value}
-          size="small"
-          color={getMethodColor(params.value)}
-        />
+        <Chip label={params.value} size="small" color={getMethodColor(params.value)} />
       )
     },
     {
@@ -366,11 +362,7 @@ export default function LogsPage() {
       width: 150,
       renderCell: (params) => (
         <Tooltip title={params.value || 'N/A'}>
-          <Chip
-            label={params.value || 'N/A'}
-            size="small"
-            variant="outlined"
-          />
+          <Chip label={params.value || 'N/A'} size="small" variant="outlined" />
         </Tooltip>
       )
     },
@@ -379,11 +371,7 @@ export default function LogsPage() {
       headerName: getLocalizedValue({ en: 'Status', ko: '상태', zh: '状态', vi: 'Trạng thái' }, locale),
       width: 100,
       renderCell: (params) => (
-        <Chip
-          label={params.value}
-          size="small"
-          color={getStatusColor(params.value)}
-        />
+        <Chip label={params.value} size="small" color={getStatusColor(params.value)} />
       )
     },
     {
@@ -409,76 +397,99 @@ export default function LogsPage() {
     }
   ], [locale]);
 
+  // Mobile card renderer
+  const renderMobileCard = useCallback((log: LogEntry) => (
+    <LogMobileCard log={log} locale={locale} />
+  ), [locale]);
+
+  // Localized placeholder
+  const quickSearchPlaceholder = getLocalizedValue({
+    en: 'Search by path, user, or program...',
+    ko: '경로, 사용자 또는 프로그램으로 검색...',
+    zh: '按路径、用户或程序搜索...',
+    vi: 'Tìm theo đường dẫn, người dùng hoặc chương trình...'
+  }, locale);
+
   return (
     <RouteGuard programCode={programId || ''} requiredPermission="view" fallbackUrl="/dashboard">
-      <PageContainer>
-        <PageHeader useMenu showBreadcrumb />
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Quick Search Bar */}
-      <QuickSearchBar
-        searchValue={quickSearch}
-        onSearchChange={setQuickSearch}
-        onSearch={handleQuickSearch}
-        onClear={handleQuickSearchClear}
-        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        placeholder={getLocalizedValue({ en: 'Search by path, user, or program...', ko: '경로, 사용자 또는 프로그램으로 검색...', zh: '按路径、用户或程序搜索...', vi: 'Tìm theo đường dẫn, người dùng hoặc chương trình...' }, locale)}
+      <ResponsivePageLayout
+        // Page Header
+        useMenu
+        showBreadcrumb
+        // Messages
+        errorMessage={errorMessage}
+        // Quick Search
+        quickSearch={quickSearch}
+        onQuickSearchChange={setQuickSearch}
+        onQuickSearch={handleQuickSearch}
+        onQuickSearchClear={handleQuickSearchClear}
+        quickSearchPlaceholder={quickSearchPlaceholder}
         searching={loading}
+        // Advanced Filter
+        showAdvancedFilter
+        advancedFilterOpen={advancedFilterOpen}
+        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
         activeFilterCount={activeFilterCount}
-        showAdvancedButton={true}
-      />
-
-      {/* Advanced Filter Panel - Only show when open */}
-      {advancedFilterOpen && (
-        <SearchFilterPanel
-          title={`${t('common.search')} / ${t('common.filter')}`}
-          activeFilterCount={activeFilterCount}
-          onApply={handleAdvancedFilterApply}
-          onClear={handleAdvancedSearchClear}
-          onClose={handleAdvancedFilterClose}
-          mode="advanced"
-          expanded={true}
-          showHeader={false}
-        >
+        filterTitle={`${t('common.search')} / ${t('common.filter')}`}
+        filterContent={
           <SearchFilterFields
             fields={filterFields}
             values={searchCriteria}
             onChange={handleSearchChange}
             onEnter={handleAdvancedFilterApply}
+            locale={locale}
           />
-        </SearchFilterPanel>
-      )}
-
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {logs.length === 0 && !loading ? (
-          <EmptyState
-            icon={Search}
-            title={getLocalizedValue({ en: 'No logs loaded', ko: '로그가 없습니다', zh: '未加载日志', vi: 'Không có nhật ký' }, locale)}
-            description={getLocalizedValue({ en: 'Use the search filters above to load log data', ko: '검색 필터를 사용하여 로그 데이터를 불러오세요', zh: '使用上面的搜索过滤器加载日志数据', vi: 'Sử dụng bộ lọc tìm kiếm ở trên để tải dữ liệu nhật ký' }, locale)}
+        }
+        onFilterApply={handleAdvancedFilterApply}
+        onFilterClear={handleAdvancedSearchClear}
+        onFilterClose={handleAdvancedFilterClose}
+        // Help
+        programId={programId || ''}
+      >
+        {isMobileLayout ? (
+          // Mobile: Card List with infinite scroll
+          <MobileCardList
+            data={logs}
+            loading={loading}
+            renderCard={renderMobileCard}
+            keyExtractor={(log) => log.id}
+            emptyIcon={<Search sx={{ fontSize: 64, opacity: 0.5 }} />}
+            emptyMessage={getLocalizedValue({
+              en: 'No logs loaded',
+              ko: '로그가 없습니다',
+              zh: '未加载日志',
+              vi: 'Không có nhật ký'
+            }, locale)}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
           />
         ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={logs}
-              columns={columns}
-              onRefresh={handleRefresh}
-              exportFileName="system-logs"
-              loading={loading}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
-            />
-          </Box>
+          // Desktop: DataGrid with server-side pagination
+          <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+            {logs.length === 0 && !loading ? (
+              <EmptyState
+                icon={Search}
+                title={getLocalizedValue({ en: 'No logs loaded', ko: '로그가 없습니다', zh: '未加载日志', vi: 'Không có nhật ký' }, locale)}
+                description={getLocalizedValue({ en: 'Use the search filters above to load log data', ko: '검색 필터를 사용하여 로그 데이터를 불러오세요', zh: '使用上面的搜索过滤器加载日志数据', vi: 'Sử dụng bộ lọc tìm kiếm ở trên để tải dữ liệu nhật ký' }, locale)}
+              />
+            ) : (
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <ExcelDataGrid
+                  rows={logs}
+                  columns={columns}
+                  onRefresh={handleRefresh}
+                  exportFileName="system-logs"
+                  loading={loading}
+                  paginationMode="server"
+                  rowCount={rowCount}
+                  paginationModel={paginationModel}
+                  onPaginationModelChange={handlePaginationModelChange}
+                />
+              </Box>
+            )}
+          </Paper>
         )}
-      </Paper>
-    </PageContainer>
+      </ResponsivePageLayout>
     </RouteGuard>
   );
 }

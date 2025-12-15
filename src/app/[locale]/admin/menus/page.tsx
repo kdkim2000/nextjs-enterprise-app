@@ -1,28 +1,29 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
-import ExcelDataGrid from '@/components/common/DataGrid';
+import React, { useMemo, useState, useCallback } from 'react';
+import { Paper, Box } from '@mui/material';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MenuFormFields from '@/components/admin/MenuFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { useMobile } from '@/hooks/useMobile';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
 import { useMenuManagement } from './hooks/useMenuManagement';
-import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
+import MenuTreeView from './components/MenuTreeView';
+import MenuMobileTreeView from './components/MenuMobileTreeView';
 import { Menu } from './types';
 
 export default function MenuManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
+
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
 
@@ -44,7 +45,6 @@ export default function MenuManagementPage() {
     // State
     filteredMenus,
     allMenus,
-    setMenus,
     searchCriteria,
     quickSearch,
     setQuickSearch,
@@ -60,6 +60,10 @@ export default function MenuManagementPage() {
     deleteLoading,
     successMessage,
     errorMessage,
+    // Tree-related state
+    treeMenus,
+    expandedIds,
+    selectedIds,
     // Handlers
     handleAdd,
     handleEdit,
@@ -74,15 +78,27 @@ export default function MenuManagementPage() {
     handleAdvancedSearchClear,
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
-    setDialogOpen
+    setDialogOpen,
+    // Tree-related handlers
+    handleToggleExpand,
+    handleExpandAll,
+    handleCollapseAll,
+    handleToggleSelect,
+    handleSelectAll,
+    handleDeselectAll,
+    handleTreeDelete
   } = useMenuManagement({ locale: currentLocale });
 
-  // Memoized computed values
-  const columns = useMemo(
-    () => createColumns(t, currentLocale, allMenus, handleEdit, gridPermissions.editable),
-    [t, currentLocale, allMenus, handleEdit, gridPermissions.editable]
-  );
+  // Mobile handlers
+  const handleMobileMenuDelete = useCallback((menu: Menu) => {
+    handleDeleteClick([menu.id]);
+  }, [handleDeleteClick]);
 
+  const handleMobileMenuEdit = useCallback((menu: Menu) => {
+    handleEdit(menu.id);
+  }, [handleEdit]);
+
+  // Memoized computed values
   const filterFields = useMemo(
     () => createFilterFields(t, allMenus, currentLocale),
     [t, allMenus, currentLocale]
@@ -108,7 +124,7 @@ export default function MenuManagementPage() {
   );
 
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -149,31 +165,48 @@ export default function MenuManagementPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {filteredMenus.length === 0 && !loading ? (
-          <EmptyState
-            icon={Search}
-            title="No menus found"
-            description="Start by adding a new menu or loading existing ones"
+      {/* Conditional rendering based on device */}
+      {isMobileLayout ? (
+        // Mobile: Drill-down Tree View
+        <MenuMobileTreeView
+          menus={filteredMenus}
+          allMenus={allMenus}
+          locale={currentLocale}
+          loading={loading}
+          onEdit={gridPermissions.editable ? handleMobileMenuEdit : undefined}
+          onDelete={gridPermissions.showDeleteButton ? handleMobileMenuDelete : undefined}
+          onAdd={gridPermissions.showAddButton ? handleAdd : undefined}
+          onRefresh={handleRefresh}
+          canEdit={gridPermissions.editable}
+          canDelete={gridPermissions.showDeleteButton}
+          canAdd={gridPermissions.showAddButton}
+        />
+      ) : (
+        // Desktop: TreeView
+        <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <MenuTreeView
+            menus={treeMenus}
+            expandedIds={expandedIds}
+            selectedIds={selectedIds}
+            locale={currentLocale}
+            loading={loading}
+            searchQuery={quickSearch}
+            onToggleExpand={handleToggleExpand}
+            onToggleSelect={handleToggleSelect}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
+            onExpandAll={handleExpandAll}
+            onCollapseAll={handleCollapseAll}
+            onEdit={handleEdit}
+            onAdd={handleAdd}
+            onDelete={handleTreeDelete}
+            onRefresh={handleRefresh}
+            canEdit={gridPermissions.editable}
+            canDelete={gridPermissions.showDeleteButton}
+            canAdd={gridPermissions.showAddButton}
           />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={filteredMenus}
-              columns={columns}
-              onRowsChange={(rows) => setMenus(rows)}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={gridPermissions.editable}
-              exportFileName="menus"
-              loading={loading}
-            />
-          </Box>
-        )}
-      </Paper>
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -208,6 +241,6 @@ export default function MenuManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

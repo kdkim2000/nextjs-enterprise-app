@@ -1,6 +1,5 @@
 'use client';
 
- 
 import React, { useState } from 'react';
 import {
   Container,
@@ -23,12 +22,14 @@ import { Visibility, VisibilityOff, Login as LoginIcon, ArrowForward } from '@mu
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
+import { useMobile } from '@/hooks/useMobile';
 
 export default function LoginPage() {
   const router = useRouter();
   const locale = useCurrentLocale();
   const t = useI18n();
   const theme = useTheme();
+  const { isMobile, isMobileLayout } = useMobile();
   const { login, verifyMFA, ssoLogin } = useAuth();
 
   const [username, setUsername] = useState('');
@@ -106,46 +107,60 @@ export default function LoginPage() {
           background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
           position: 'relative',
           overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: '-50%',
-            right: '-20%',
-            width: '800px',
-            height: '800px',
-            background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 70%)`,
-            borderRadius: '50%',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: '-50%',
-            left: '-20%',
-            width: '800px',
-            height: '800px',
-            background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 70%)`,
-            borderRadius: '50%',
-          }
+          // 모바일에서 배경 효과 간소화
+          ...(!isMobile && {
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: '-50%',
+              right: '-20%',
+              width: '800px',
+              height: '800px',
+              background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 70%)`,
+              borderRadius: '50%',
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: '-50%',
+              left: '-20%',
+              width: '800px',
+              height: '800px',
+              background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 70%)`,
+              borderRadius: '50%',
+            }
+          })
         }}
       >
-        <Container maxWidth="sm" sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
+        <Container
+          maxWidth="sm"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            zIndex: 1,
+            px: isMobile ? 2 : 3,
+            py: isMobile ? 2 : 0
+          }}
+        >
           <Card
             elevation={0}
             sx={{
               width: '100%',
-              backdropFilter: 'blur(20px)',
-              backgroundColor: alpha(theme.palette.background.paper, 0.8),
+              backdropFilter: isMobile ? 'none' : 'blur(20px)',
+              backgroundColor: isMobile
+                ? theme.palette.background.paper
+                : alpha(theme.palette.background.paper, 0.8),
               border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              borderRadius: 3,
+              borderRadius: isMobile ? 2 : 3,
               overflow: 'hidden'
             }}
           >
-            <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-              <Stack spacing={3} alignItems="center">
+            <CardContent sx={{ p: { xs: 2.5, sm: 5 } }}>
+              <Stack spacing={isMobile ? 2 : 3} alignItems="center">
                 <Box
                   sx={{
-                    width: 64,
-                    height: 64,
+                    width: isMobile ? 56 : 64,
+                    height: isMobile ? 56 : 64,
                     borderRadius: 2,
                     display: 'flex',
                     alignItems: 'center',
@@ -154,16 +169,25 @@ export default function LoginPage() {
                     boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.3)}`
                   }}
                 >
-                  <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                  <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ color: 'white', fontWeight: 700 }}>
                     2FA
                   </Typography>
                 </Box>
 
-                <Stack spacing={1} alignItems="center">
-                  <Typography variant="h4" component="h1" fontWeight={600}>
+                <Stack spacing={0.5} alignItems="center">
+                  <Typography
+                    variant={isMobile ? 'h5' : 'h4'}
+                    component="h1"
+                    fontWeight={600}
+                    textAlign="center"
+                  >
                     {t('auth.verificationRequired')}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" textAlign="center">
+                  <Typography
+                    variant={isMobile ? 'caption' : 'body2'}
+                    color="text.secondary"
+                    textAlign="center"
+                  >
                     {t('auth.enterCodeSentTo', { email: mfaEmail })}
                   </Typography>
                 </Stack>
@@ -173,9 +197,10 @@ export default function LoginPage() {
                 <Alert
                   severity="info"
                   sx={{
-                    mt: 3,
+                    mt: isMobile ? 2 : 3,
                     borderRadius: 2,
-                    border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+                    fontSize: isMobile ? '0.75rem' : '0.875rem'
                   }}
                 >
                   <strong>{t('auth.devMode')}:</strong> {t('auth.codeIs')} {devCode}
@@ -186,16 +211,17 @@ export default function LoginPage() {
                 <Alert
                   severity="error"
                   sx={{
-                    mt: 3,
+                    mt: isMobile ? 2 : 3,
                     borderRadius: 2,
-                    border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`
+                    border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+                    fontSize: isMobile ? '0.75rem' : '0.875rem'
                   }}
                 >
                   {error}
                 </Alert>
               )}
 
-              <Box component="form" onSubmit={handleMFAVerify} sx={{ mt: 4 }}>
+              <Box component="form" onSubmit={handleMFAVerify} sx={{ mt: isMobile ? 3 : 4 }}>
                 <TextField
                   id="mfa-code"
                   fullWidth
@@ -209,13 +235,13 @@ export default function LoginPage() {
                     maxLength: 6,
                     style: {
                       textAlign: 'center',
-                      fontSize: '1.5rem',
-                      letterSpacing: '0.5rem',
+                      fontSize: isMobile ? '1.25rem' : '1.5rem',
+                      letterSpacing: isMobile ? '0.3rem' : '0.5rem',
                       fontWeight: 600
                     }
                   }}
                   sx={{
-                    mb: 3,
+                    mb: isMobile ? 2 : 3,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       backgroundColor: alpha(theme.palette.background.default, 0.5),
@@ -227,15 +253,15 @@ export default function LoginPage() {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  size="large"
+                  size={isMobile ? 'medium' : 'large'}
                   disabled={loading}
                   endIcon={loading ? null : <ArrowForward />}
                   sx={{
                     mb: 2,
-                    height: 56,
+                    height: isMobile ? 48 : 56,
                     borderRadius: 2,
                     textTransform: 'none',
-                    fontSize: '1rem',
+                    fontSize: isMobile ? '0.875rem' : '1rem',
                     fontWeight: 600,
                     boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
                     '&:hover': {
@@ -243,17 +269,19 @@ export default function LoginPage() {
                     }
                   }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.verifyCode')}
+                  {loading ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : t('auth.verifyCode')}
                 </Button>
 
                 <Button
                   fullWidth
                   variant="text"
+                  size={isMobile ? 'small' : 'medium'}
                   onClick={() => setMfaRequired(false)}
                   disabled={loading}
                   sx={{
                     textTransform: 'none',
                     color: 'text.secondary',
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
                     '&:hover': {
                       backgroundColor: alpha(theme.palette.text.primary, 0.05)
                     }
@@ -277,46 +305,60 @@ export default function LoginPage() {
         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
         position: 'relative',
         overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: '-50%',
-          right: '-20%',
-          width: '800px',
-          height: '800px',
-          background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 70%)`,
-          borderRadius: '50%',
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: '-50%',
-          left: '-20%',
-          width: '800px',
-          height: '800px',
-          background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 70%)`,
-          borderRadius: '50%',
-        }
+        // 모바일에서 배경 효과 간소화
+        ...(!isMobile && {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: '-50%',
+            right: '-20%',
+            width: '800px',
+            height: '800px',
+            background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 70%)`,
+            borderRadius: '50%',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: '-50%',
+            left: '-20%',
+            width: '800px',
+            height: '800px',
+            background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 70%)`,
+            borderRadius: '50%',
+          }
+        })
       }}
     >
-      <Container maxWidth="sm" sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
+      <Container
+        maxWidth="sm"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          zIndex: 1,
+          px: isMobile ? 2 : 3,
+          py: isMobile ? 2 : 0
+        }}
+      >
         <Card
           elevation={0}
           sx={{
             width: '100%',
-            backdropFilter: 'blur(20px)',
-            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+            backdropFilter: isMobile ? 'none' : 'blur(20px)',
+            backgroundColor: isMobile
+              ? theme.palette.background.paper
+              : alpha(theme.palette.background.paper, 0.8),
             border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-            borderRadius: 3,
+            borderRadius: isMobile ? 2 : 3,
             overflow: 'hidden'
           }}
         >
-          <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-            <Stack spacing={3} alignItems="center">
+          <CardContent sx={{ p: { xs: 2.5, sm: 5 } }}>
+            <Stack spacing={isMobile ? 2 : 3} alignItems="center">
               <Box
                 sx={{
-                  width: 64,
-                  height: 64,
+                  width: isMobile ? 56 : 64,
+                  height: isMobile ? 56 : 64,
                   borderRadius: 2,
                   display: 'flex',
                   alignItems: 'center',
@@ -325,14 +367,21 @@ export default function LoginPage() {
                   boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.3)}`
                 }}
               >
-                <LoginIcon sx={{ fontSize: 32, color: 'white' }} />
+                <LoginIcon sx={{ fontSize: isMobile ? 28 : 32, color: 'white' }} />
               </Box>
 
-              <Stack spacing={1} alignItems="center">
-                <Typography variant="h4" component="h1" fontWeight={600}>
+              <Stack spacing={0.5} alignItems="center">
+                <Typography
+                  variant={isMobile ? 'h5' : 'h4'}
+                  component="h1"
+                  fontWeight={600}
+                >
                   {t('auth.welcomeBack')}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant={isMobile ? 'caption' : 'body2'}
+                  color="text.secondary"
+                >
                   {t('auth.signInToContinue')}
                 </Typography>
               </Stack>
@@ -342,17 +391,18 @@ export default function LoginPage() {
               <Alert
                 severity="error"
                 sx={{
-                  mt: 3,
+                  mt: isMobile ? 2 : 3,
                   borderRadius: 2,
-                  border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`
+                  border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+                  fontSize: isMobile ? '0.75rem' : '0.875rem'
                 }}
               >
                 {error}
               </Alert>
             )}
 
-            <Box component="form" onSubmit={handleLogin} sx={{ mt: 4 }}>
-              <Stack spacing={2.5}>
+            <Box component="form" onSubmit={handleLogin} sx={{ mt: isMobile ? 3 : 4 }}>
+              <Stack spacing={isMobile ? 2 : 2.5}>
                 <TextField
                   id="login-username"
                   fullWidth
@@ -361,6 +411,7 @@ export default function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   disabled={loading}
+                  size={isMobile ? 'small' : 'medium'}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
@@ -378,6 +429,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
+                  size={isMobile ? 'small' : 'medium'}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
@@ -390,6 +442,7 @@ export default function LoginPage() {
                         <IconButton
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
+                          size={isMobile ? 'small' : 'medium'}
                           sx={{ color: 'text.secondary' }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -403,15 +456,15 @@ export default function LoginPage() {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  size="large"
+                  size={isMobile ? 'medium' : 'large'}
                   disabled={loading}
                   endIcon={loading ? null : <ArrowForward />}
                   sx={{
                     mt: 1,
-                    height: 56,
+                    height: isMobile ? 48 : 56,
                     borderRadius: 2,
                     textTransform: 'none',
-                    fontSize: '1rem',
+                    fontSize: isMobile ? '0.875rem' : '1rem',
                     fontWeight: 600,
                     boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
                     '&:hover': {
@@ -419,10 +472,10 @@ export default function LoginPage() {
                     }
                   }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.signIn')}
+                  {loading ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : t('auth.signIn')}
                 </Button>
 
-                <Divider sx={{ my: 1 }}>
+                <Divider sx={{ my: isMobile ? 0.5 : 1 }}>
                   <Typography variant="caption" color="text.secondary">
                     {t('auth.or')}
                   </Typography>
@@ -431,14 +484,14 @@ export default function LoginPage() {
                 <Button
                   fullWidth
                   variant="outlined"
-                  size="large"
+                  size={isMobile ? 'medium' : 'large'}
                   onClick={handleSSO}
                   disabled={loading}
                   sx={{
-                    height: 56,
+                    height: isMobile ? 48 : 56,
                     borderRadius: 2,
                     textTransform: 'none',
-                    fontSize: '1rem',
+                    fontSize: isMobile ? '0.875rem' : '1rem',
                     fontWeight: 600,
                     borderWidth: 2,
                     '&:hover': {

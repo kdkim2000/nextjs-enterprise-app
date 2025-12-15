@@ -1,25 +1,28 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
-import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import DepartmentFormFields, { DepartmentFormData } from '@/components/admin/DepartmentFormFields';
+import DepartmentTreeView from './components/DepartmentTreeView';
+import DepartmentMobileTreeView from './components/DepartmentMobileTreeView';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { useDepartmentManagement } from './hooks/useDepartmentManagement';
-import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
 import { Department } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export default function DepartmentsPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
 
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
@@ -47,8 +50,6 @@ export default function DepartmentsPage() {
     searchCriteria,
     quickSearch,
     setQuickSearch,
-    paginationModel,
-    rowCount,
     searching,
     saveLoading,
     dialogOpen,
@@ -74,11 +75,13 @@ export default function DepartmentsPage() {
     handleQuickSearchClear,
     handleAdvancedFilterApply,
     handleAdvancedFilterClose,
-    handlePaginationModelChange,
     setDialogOpen,
-    fetchUsers,
-    fetchDepartments
+    fetchUsers
   } = useDepartmentManagement();
+
+  // Tree state for desktop view
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Fetch users on mount for manager dropdown
   useEffect(() => {
@@ -86,12 +89,103 @@ export default function DepartmentsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Memoized computed values
-  const columns = useMemo(
-    () => createColumns(t, currentLocale, departments, allUsers, handleEdit, gridPermissions.editable),
-    [t, currentLocale, departments, allUsers, handleEdit, gridPermissions.editable]
-  );
+  // Tree state handlers
+  const handleToggleExpand = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  // Collect all IDs for expand/select all
+  const getAllIds = useCallback((): string[] => {
+    return departments.map((d) => d.id);
+  }, [departments]);
+
+  const handleExpandAll = useCallback(() => {
+    setExpandedIds(new Set(getAllIds()));
+  }, [getAllIds]);
+
+  const handleCollapseAll = useCallback(() => {
+    setExpandedIds(new Set());
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(getAllIds()));
+  }, [getAllIds]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  // Handle add with parent ID
+  const handleAddWithParent = useCallback((parentId?: string | null) => {
+    // Calculate level based on parent
+    let level = 1;
+    if (parentId) {
+      const parent = departments.find((d) => d.id === parentId);
+      if (parent) {
+        level = parent.level + 1;
+      }
+    }
+
+    setEditingDepartment({
+      id: '',
+      code: '',
+      nameEn: '',
+      nameKo: '',
+      nameZh: '',
+      nameVi: '',
+      descriptionEn: '',
+      descriptionKo: '',
+      descriptionZh: '',
+      descriptionVi: '',
+      parentId: parentId || '',
+      managerId: '',
+      status: 'active',
+      order: 1
+    } as any);
+    setDialogOpen(true);
+  }, [departments, setEditingDepartment, setDialogOpen]);
+
+  // Handle edit for tree view (receives id)
+  const handleTreeEdit = useCallback((id: string) => {
+    handleEdit(id);
+  }, [handleEdit]);
+
+  // Handle edit for mobile view (receives department object)
+  const handleMobileEdit = useCallback((department: Department) => {
+    handleEdit(department.id);
+  }, [handleEdit]);
+
+  // Handle delete for mobile view (receives department object)
+  const handleMobileDelete = useCallback((department: Department) => {
+    handleDeleteClick([department.id]);
+  }, [handleDeleteClick]);
+
+  // Handle delete for tree view (receives ids array)
+  const handleTreeDelete = useCallback((ids: string[]) => {
+    handleDeleteClick(ids);
+  }, [handleDeleteClick]);
+
+  // Memoized computed values
   const filterFields = useMemo(
     () => createFilterFields(t, departments, allUsers, currentLocale),
     [t, departments, allUsers, currentLocale]
@@ -117,7 +211,7 @@ export default function DepartmentsPage() {
   );
 
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -129,7 +223,7 @@ export default function DepartmentsPage() {
       onQuickSearchChange={setQuickSearch}
       onQuickSearch={handleQuickSearch}
       onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by code or name..."
+      quickSearchPlaceholder={currentLocale === 'ko' ? '코드 또는 이름으로 검색...' : 'Search by code or name...'}
       searching={searching}
       // Advanced Filter
       showAdvancedFilter
@@ -157,28 +251,53 @@ export default function DepartmentsPage() {
       canManageHelp={canManageHelp}
       onHelpEdit={navigateToHelpEdit}
       language={language}
+      // Hide mobile search header when using mobile tree view (it has its own header)
+      hideMobileSearchHeader={isMobileLayout}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        <Box sx={{ flex: 1, minHeight: 0 }}>
-          <ExcelDataGrid
-            rows={departments}
-            columns={columns}
-            onRowsChange={(rows) => setDepartments(rows as Department[])}
-            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-            onRefresh={handleRefresh}
-            checkboxSelection={gridPermissions.checkboxSelection}
-            editable={gridPermissions.editable}
-            exportFileName="departments"
-            loading={searching}
-            paginationMode="server"
-            rowCount={rowCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={handlePaginationModelChange}
-          />
-        </Box>
-      </Paper>
+      {isMobileLayout ? (
+        // Mobile: Drill-down tree navigation
+        <DepartmentMobileTreeView
+          departments={departments}
+          allUsers={allUsers}
+          locale={currentLocale}
+          loading={searching}
+          onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+          onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+          onAdd={gridPermissions.showAddButton ? handleAddWithParent : undefined}
+          onRefresh={handleRefresh}
+          canEdit={gridPermissions.editable}
+          canDelete={gridPermissions.showDeleteButton}
+          canAdd={gridPermissions.showAddButton}
+        />
+      ) : (
+        // Desktop: TreeView
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <DepartmentTreeView
+              departments={departments}
+              allUsers={allUsers}
+              expandedIds={expandedIds}
+              selectedIds={selectedIds}
+              locale={currentLocale}
+              loading={searching}
+              searchQuery={quickSearch}
+              onToggleExpand={handleToggleExpand}
+              onToggleSelect={handleToggleSelect}
+              onSelectAll={handleSelectAll}
+              onDeselectAll={handleDeselectAll}
+              onExpandAll={handleExpandAll}
+              onCollapseAll={handleCollapseAll}
+              onEdit={handleTreeEdit}
+              onAdd={handleAddWithParent}
+              onDelete={handleTreeDelete}
+              onRefresh={handleRefresh}
+              canEdit={gridPermissions.editable}
+              canDelete={gridPermissions.showDeleteButton}
+              canAdd={gridPermissions.showAddButton}
+            />
+          </Box>
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -224,6 +343,6 @@ export default function DepartmentsPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

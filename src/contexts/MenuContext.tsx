@@ -5,6 +5,7 @@ import { MenuItem } from '@/types/menu';
 import { adminApi } from '@/lib/axios';
 import { useAuth } from './AuthContext';
 import { usePathname } from 'next/navigation';
+import { useMobile } from '@/hooks/useMobile';
 
 interface MenuContextType {
   menus: MenuItem[];
@@ -26,6 +27,7 @@ const MenuContext = createContext<MenuContextType | undefined>(undefined);
 export function MenuProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
+  const { isMobileLayout } = useMobile();
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [currentMenu, setCurrentMenu] = useState<MenuItem | null>(null);
   const [favoriteMenus, setFavoriteMenus] = useState<MenuItem[]>([]);
@@ -34,6 +36,10 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const lastFetchedPathRef = useRef<string>('');
   const isFetchingByPathRef = useRef<boolean>(false);
+  const lastPlatformRef = useRef<string>('');
+
+  // Get current platform based on screen size
+  const platform = isMobileLayout ? 'mobile' : 'desktop';
 
   // Fetch user's accessible menus
   const fetchMenus = useCallback(async () => {
@@ -45,9 +51,12 @@ export function MenuProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true);
-      const response = await adminApi.get('/menus/user-menus');
+      const response = await adminApi.get('/menus/user-menus', {
+        params: { platform }
+      });
       setMenus(response.menus || []);
       setError(null);
+      lastPlatformRef.current = platform;
     } catch (err: unknown) {
       const error = err as { message?: string; response?: { status?: number } };
       // Only log non-401 errors (401 is expected when not authenticated)
@@ -58,7 +67,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, platform]);
 
   // Fetch favorite menus
   const fetchFavoriteMenus = useCallback(async () => {
@@ -189,7 +198,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         try {
           const [menusResponse, favoritesResponse, recentResponse] = await Promise.all([
-            adminApi.get('/menus/user-menus'),
+            adminApi.get('/menus/user-menus', { params: { platform } }),
             adminApi.get('/users/favorite-menus'),
             adminApi.get('/users/recent-menus')
           ]);
@@ -197,6 +206,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
           setFavoriteMenus(favoritesResponse.menus || []);
           setRecentMenus(recentResponse.menus || []);
           setError(null);
+          lastPlatformRef.current = platform;
         } catch (error: any) {
           // Only log non-401 errors (401 is expected when not authenticated)
           if (error?.response?.status !== 401) {
@@ -215,7 +225,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
       setCurrentMenu(null);
       setIsLoading(false);
     }
-  }, [isAuthenticated, user?.id]); // Only depend on auth state and user id
+  }, [isAuthenticated, user?.id, platform]); // Include platform to refetch when screen size changes
 
   const value: MenuContextType = useMemo(() => ({
     menus,

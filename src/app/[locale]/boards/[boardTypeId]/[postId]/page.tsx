@@ -39,6 +39,7 @@ import {
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { contentApiClient, commonApiClient } from '@/lib/api/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
+import { useMobile } from '@/hooks/useMobile';
 import { useQnA } from '@/hooks/useQnA';
 import { useAuth } from '@/contexts/AuthContext';
 import { QnAStatusBadge } from '@/components/boards/QnAStatusBadge';
@@ -152,6 +153,7 @@ export default function PostDetailPage() {
   const router = useRouter();
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
   const boardTypeId = params.boardTypeId as string;
   const postId = params.postId as string;
   const { user } = useAuth();
@@ -362,7 +364,14 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{
+        flex: 1,
+        minHeight: isMobileLayout ? 200 : 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        p: isMobileLayout ? 2 : 0
+      }}>
         <CircularProgress />
       </Box>
     );
@@ -370,15 +379,272 @@ export default function PostDetailPage() {
 
   if (error || !post) {
     return (
-      <Box sx={{ flex: 1, minHeight: 0, p: 4 }}>
+      <Box sx={{ flex: 1, minHeight: 0, p: isMobileLayout ? 2 : 4 }}>
         <Alert severity="error">{error || t('common.error')}</Alert>
-        <Button onClick={() => router.push(`/boards/${boardTypeId}`)} sx={{ mt: 2 }}>
+        <Button onClick={() => router.push(`/${currentLocale}/boards/${boardTypeId}`)} sx={{ mt: 2 }}>
           {t('board.backToList')}
         </Button>
       </Box>
     );
   }
 
+  // 모바일 레이아웃: MobileLayout의 스크롤 사용
+  if (isMobileLayout) {
+    return (
+      <Box sx={{ px: 1.5, py: 1 }}>
+        {/* Mobile Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 1.5,
+            pb: 1.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <IconButton
+            onClick={() => router.push(`/${currentLocale}/boards/${boardTypeId}`)}
+            size="small"
+            sx={{ bgcolor: 'grey.100' }}
+          >
+            <ArrowBack fontSize="small" />
+          </IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="subtitle2"
+              fontWeight={600}
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {post.title}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              {post.is_pinned && (
+                <Chip
+                  size="small"
+                  icon={<PushPin sx={{ fontSize: 10 }} />}
+                  label={t('board.pinned')}
+                  sx={{ height: 18, fontSize: '0.6rem' }}
+                />
+              )}
+              {post.is_secret && (
+                <Chip
+                  size="small"
+                  icon={<Lock sx={{ fontSize: 10 }} />}
+                  label={t('board.secret')}
+                  sx={{ height: 18, fontSize: '0.6rem', bgcolor: '#f59e0b15', color: '#f59e0b' }}
+                />
+              )}
+              {isQnABoard && qnaData && (
+                <QnAStatusBadge status={qnaData.question_status} />
+              )}
+            </Box>
+          </Box>
+          {canEdit && (
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              <IconButton onClick={handleEdit} size="small" sx={{ bgcolor: 'grey.100' }}>
+                <Edit fontSize="small" />
+              </IconButton>
+              <IconButton onClick={handleDelete} size="small" sx={{ bgcolor: 'grey.100', color: 'error.main' }}>
+                <Delete fontSize="small" />
+              </IconButton>
+            </Box>
+          )}
+        </Box>
+
+        {/* Mobile Meta Info */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
+          <Typography variant="caption" color="text.secondary">
+            {post.author_name || post.author_username || 'Unknown'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {formatDate(post.created_at)}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Visibility sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">{post.view_count || 0}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <ThumbUp sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">{likeCount}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <CommentIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">{comments.length}</Typography>
+          </Box>
+        </Box>
+
+        {/* Mobile Content */}
+        <Paper sx={{ p: 2, mb: 2 }}>
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                {post.tags.map((tag, index) => (
+                  <Chip key={index} label={tag} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
+                ))}
+              </Stack>
+            </Box>
+          )}
+
+          {/* Content */}
+          <Box sx={{ py: 1, minHeight: 100 }}>
+            <SafeHtmlRenderer
+              html={post.content}
+              sx={{
+                fontSize: '0.875rem',
+                '& p:first-of-type': { marginTop: 0 },
+                '& p:last-of-type': { marginBottom: 0 }
+              }}
+            />
+          </Box>
+
+          {/* Attachments */}
+          {attachments.length > 0 && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Box>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                  <AttachFile sx={{ fontSize: 16 }} color="action" />
+                  <Typography variant="caption" fontWeight={600}>
+                    {t('board.attachmentsTitle')} ({attachments.length})
+                  </Typography>
+                </Stack>
+                <List dense disablePadding>
+                  {attachments.map((file) => (
+                    <ListItem
+                      key={file.id}
+                      secondaryAction={
+                        <IconButton edge="end" onClick={() => handleDownload(file)} size="small">
+                          <Download fontSize="small" />
+                        </IconButton>
+                      }
+                      sx={{ py: 0.5, px: 0 }}
+                    >
+                      <ListItemText
+                        primary={file.originalFilename}
+                        secondary={formatFileSize(file.fileSize)}
+                        primaryTypographyProps={{ variant: 'caption', fontWeight: 500 }}
+                        secondaryTypographyProps={{ variant: 'caption' }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            </>
+          )}
+
+          {/* Like Button */}
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <IconButton
+              onClick={handleLike}
+              color={liked ? 'primary' : 'default'}
+              sx={{
+                border: 1,
+                borderColor: liked ? 'primary.main' : 'divider',
+                borderRadius: 2,
+                px: 2,
+                py: 0.75,
+                gap: 0.5
+              }}
+            >
+              {liked ? <ThumbUp fontSize="small" /> : <ThumbUpOutlined fontSize="small" />}
+              <Typography variant="body2" fontWeight={500}>{likeCount}</Typography>
+            </IconButton>
+          </Box>
+        </Paper>
+
+        {/* Mobile Comments Section */}
+        <Paper sx={{ p: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+            <CommentIcon sx={{ fontSize: 18 }} color="action" />
+            <Typography variant="subtitle2" fontWeight={600}>
+              {t('board.commentsTitle')} ({comments.length})
+            </Typography>
+          </Stack>
+          <Divider sx={{ mb: 2 }} />
+
+          {/* New Comment */}
+          <Box sx={{ mb: 2 }}>
+            <RichTextEditor
+              value={newComment}
+              onChange={setNewComment}
+              placeholder={t('board.writeComment')}
+              minHeight={80}
+            />
+            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton
+                onClick={handleSubmitComment}
+                disabled={submittingComment || !newComment.trim() || newComment === '<p></p>'}
+                size="small"
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'primary.dark' },
+                  '&:disabled': { bgcolor: 'action.disabledBackground' }
+                }}
+              >
+                {submittingComment ? <CircularProgress size={16} color="inherit" /> : <Send fontSize="small" />}
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Comment List */}
+          {comments.length === 0 ? (
+            <Typography variant="caption" color="text.secondary" align="center" sx={{ display: 'block', py: 3 }}>
+              {t('board.noComments')}
+            </Typography>
+          ) : (
+            <List disablePadding>
+              {comments.map((comment, index) => (
+                <React.Fragment key={comment.id}>
+                  {index > 0 && <Divider sx={{ my: 1 }} />}
+                  <ListItem alignItems="flex-start" sx={{ px: 0, py: 1 }}>
+                    <ListItemAvatar sx={{ minWidth: 40 }}>
+                      <Avatar sx={{ width: 28, height: 28, fontSize: '0.75rem' }}>
+                        {(comment.author_name || comment.author_username || 'U')[0].toUpperCase()}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+                          <Typography variant="caption" fontWeight={600}>
+                            {comment.author_name || comment.author_username || 'Unknown'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                            {formatDate(comment.created_at)}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <SafeHtmlRenderer
+                          html={comment.content}
+                          sx={{
+                            fontSize: '0.8rem',
+                            '& p': { marginTop: 0, marginBottom: '0.25em' },
+                            '& p:last-child': { marginBottom: 0 }
+                          }}
+                        />
+                      }
+                      secondaryTypographyProps={{ component: 'div' }}
+                    />
+                  </ListItem>
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+        </Paper>
+      </Box>
+    );
+  }
+
+  // 데스크톱 레이아웃: 고정 헤더 + 내부 스크롤
   return (
     <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Fixed Header Area */}

@@ -1,6 +1,6 @@
 'use client';
 
-import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 export default function BoardsLayout({
   children
@@ -8,8 +8,8 @@ export default function BoardsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthenticatedLayout fullBleed>
+    <ResponsiveLayout fullBleed>
       {children}
-    </AuthenticatedLayout>
+    </ResponsiveLayout>
   );
 }

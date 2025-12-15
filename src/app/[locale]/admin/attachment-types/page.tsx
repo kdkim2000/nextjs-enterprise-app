@@ -1,18 +1,21 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import AttachmentTypeFormFields from '@/components/admin/AttachmentTypeFormFields';
+import AttachmentTypeMobileCard from './components/AttachmentTypeMobileCard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
 import { useAttachmentTypeManagement } from './hooks/useAttachmentTypeManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -21,6 +24,7 @@ import { AttachmentType } from './types';
 export default function AttachmentTypeManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
 
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
@@ -106,8 +110,29 @@ export default function AttachmentTypeManagementPage() {
     [selectedForDelete, attachmentTypes, currentLocale]
   );
 
+  // Mobile handlers
+  const handleMobileEdit = useCallback((item: AttachmentType) => {
+    handleEdit(item.id!);
+  }, [handleEdit]);
+
+  const handleMobileDelete = useCallback((item: AttachmentType) => {
+    handleDeleteClick([item.id!]);
+  }, [handleDeleteClick]);
+
+  // Mobile card renderer
+  const renderMobileCard = useCallback((item: AttachmentType) => (
+    <AttachmentTypeMobileCard
+      attachmentType={item}
+      locale={currentLocale}
+      onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+      onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+      canEdit={gridPermissions.editable}
+      canDelete={gridPermissions.showDeleteButton}
+    />
+  ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete]);
+
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -154,27 +179,38 @@ export default function AttachmentTypeManagementPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        <Box sx={{ flex: 1, minHeight: 0 }}>
-          <ExcelDataGrid
-            rows={attachmentTypes}
-            columns={columns}
-            onRowsChange={(rows) => setAttachmentTypes(rows as AttachmentType[])}
-            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-            onRefresh={handleRefresh}
-            checkboxSelection={gridPermissions.checkboxSelection}
-            editable={gridPermissions.editable}
-            exportFileName="attachment-types"
-            loading={searching}
-            paginationMode="server"
-            rowCount={rowCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={handlePaginationModelChange}
-          />
-        </Box>
-      </Paper>
+      {isMobileLayout ? (
+        // Mobile: Card List
+        <MobileCardList
+          data={attachmentTypes}
+          loading={searching}
+          renderCard={renderMobileCard}
+          keyExtractor={(item) => item.id!}
+          emptyMessage={currentLocale === 'ko' ? '첨부파일 종류가 없습니다' : 'No attachment types found'}
+        />
+      ) : (
+        // Desktop: DataGrid
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <ExcelDataGrid
+              rows={attachmentTypes}
+              columns={columns}
+              onRowsChange={(rows) => setAttachmentTypes(rows as AttachmentType[])}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+              onRefresh={handleRefresh}
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
+              exportFileName="attachment-types"
+              loading={searching}
+              paginationMode="server"
+              rowCount={rowCount}
+              paginationModel={paginationModel}
+              onPaginationModelChange={handlePaginationModelChange}
+            />
+          </Box>
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -210,6 +246,6 @@ export default function AttachmentTypeManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

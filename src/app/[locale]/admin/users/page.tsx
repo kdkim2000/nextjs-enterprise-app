@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
-import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
+import UserMobileCard from './components/UserMobileCard';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
 import ResetPasswordDialog from '@/components/admin/ResetPasswordDialog';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
+import { useMobile } from '@/hooks/useMobile';
 import { useUserManagement } from './hooks/useUserManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -23,6 +24,7 @@ import { useProgramId } from '@/hooks/useProgramId';
 export default function UserManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
 
   // Get programId from DB (menus table)
   const { programId, isLoading: programIdLoading } = useProgramId();
@@ -91,12 +93,71 @@ export default function UserManagementPage() {
     setDialogOpen
   } = useUserManagement();
 
+  // Mobile selection state
+  const [mobileSelectedIds, setMobileSelectedIds] = useState<Set<string | number>>(new Set());
+  const [mobileSelectionMode, setMobileSelectionMode] = useState(false);
+  const [mobileHasMore, setMobileHasMore] = useState(true);
+
+  // Mobile handlers
+  const handleMobileLoadMore = useCallback(() => {
+    if (users.length < rowCount) {
+      handlePaginationModelChange({
+        page: paginationModel.page + 1,
+        pageSize: paginationModel.pageSize,
+      });
+    } else {
+      setMobileHasMore(false);
+    }
+  }, [users.length, rowCount, paginationModel, handlePaginationModelChange]);
+
+  const handleMobileRefresh = useCallback(async () => {
+    handleRefresh();
+  }, [handleRefresh]);
+
+  const handleMobileSelectionModeToggle = useCallback(() => {
+    setMobileSelectionMode((prev) => !prev);
+    if (mobileSelectionMode) {
+      setMobileSelectedIds(new Set());
+    }
+  }, [mobileSelectionMode]);
+
+  const handleMobileSelectAll = useCallback(() => {
+    setMobileSelectedIds(new Set(users.map((u) => u.id)));
+  }, [users]);
+
+  const handleMobileDeselectAll = useCallback(() => {
+    setMobileSelectedIds(new Set());
+  }, []);
+
+  const handleMobileDeleteSelected = useCallback(() => {
+    handleDeleteClick(Array.from(mobileSelectedIds));
+  }, [mobileSelectedIds, handleDeleteClick]);
+
+  const handleMobileUserClick = useCallback((user: User) => {
+    if (gridPermissions.editable) {
+      handleEdit(user.id);
+    }
+  }, [gridPermissions.editable, handleEdit]);
+
+  const handleMobileUserDelete = useCallback((user: User) => {
+    handleDeleteClick([user.id]);
+  }, [handleDeleteClick]);
+
+  const handleMobileUserEdit = useCallback((user: User) => {
+    handleEdit(user.id);
+  }, [handleEdit]);
+
+  const handleMobileResetPassword = useCallback((user: User) => {
+    handleResetPasswordClick(user.id);
+  }, [handleResetPasswordClick]);
+
   // Memoized computed values
   const columns = useMemo(() => {
-    console.log('[UserManagementPage] Creating columns with handleResetPasswordClick:', !!handleResetPasswordClick);
     return createColumns(t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable, handleToggleField);
   }, [t, currentLocale, allDepartments, handleEdit, handleResetPasswordClick, gridPermissions.editable, handleToggleField]);
+
   const filterFields = useMemo(() => createFilterFields(t, currentLocale, allDepartments), [t, currentLocale, allDepartments]);
+
   const activeFilterCount = useMemo(
     () => calculateActiveFilterCount(searchCriteria),
     [searchCriteria]
@@ -109,7 +170,7 @@ export default function UserManagementPage() {
         return user
           ? {
               id: user.id,
-              displayName: `${user.username} (${user.name || user.email})`
+              displayName: `${user.loginid || user.username} (${user.name_ko || user.name || user.email})`
             }
           : { id, displayName: String(id) };
       }),
@@ -117,7 +178,7 @@ export default function UserManagementPage() {
   );
 
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -158,30 +219,80 @@ export default function UserManagementPage() {
       canManageHelp={canManageHelp}
       onHelpEdit={navigateToHelpEdit}
       language={language}
+      // Mobile specific props
+      mobileFab={gridPermissions.showAddButton ? {
+        onClick: handleAdd,
+        label: t('common.create'),
+      } : undefined}
+      mobileSelectionMode={mobileSelectionMode}
+      mobileSelectedCount={mobileSelectedIds.size}
+      mobileTotalCount={users.length}
+      onMobileSelectionModeToggle={gridPermissions.showDeleteButton ? handleMobileSelectionModeToggle : undefined}
+      onMobileSelectAll={handleMobileSelectAll}
+      onMobileDeselectAll={handleMobileDeselectAll}
+      onMobileDeleteSelected={gridPermissions.showDeleteButton ? handleMobileDeleteSelected : undefined}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        <Box sx={{ flex: 1, minHeight: 0 }}>
-          <ExcelDataGrid
-            rows={users}
-            columns={columns}
-            onRowsChange={(rows) => setUsers(rows as User[])}
-            {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-            {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-            {...(gridPermissions.editable && { onEdit: handleEdit })}
-            {...(gridPermissions.editable && { onRowUpdate: handleRowUpdate })}
-            onRefresh={handleRefresh}
-            checkboxSelection={gridPermissions.checkboxSelection}
-            editable={gridPermissions.editable}
-            exportFileName="users"
-            loading={searching}
-            paginationMode="server"
-            rowCount={rowCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={handlePaginationModelChange}
-          />
-        </Box>
-      </Paper>
+      {/* Conditional rendering based on device */}
+      {isMobileLayout ? (
+        // Mobile: Card List with infinite scroll
+        <MobileCardList
+          data={users}
+          loading={searching}
+          emptyMessage={t('grid.noRows')}
+          renderCard={(user, index) => (
+            <UserMobileCard
+              key={user.id}
+              user={user}
+              locale={currentLocale}
+              departments={allDepartments}
+              onClick={handleMobileUserClick}
+              onEdit={gridPermissions.editable ? handleMobileUserEdit : undefined}
+              onDelete={gridPermissions.showDeleteButton ? handleMobileUserDelete : undefined}
+              onResetPassword={gridPermissions.editable ? handleMobileResetPassword : undefined}
+              selected={mobileSelectedIds.has(user.id)}
+              selectable={mobileSelectionMode}
+              onSelectionChange={(selected) => {
+                const newIds = new Set(mobileSelectedIds);
+                if (selected) {
+                  newIds.add(user.id);
+                } else {
+                  newIds.delete(user.id);
+                }
+                setMobileSelectedIds(newIds);
+              }}
+              showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
+            />
+          )}
+          keyExtractor={(user) => user.id}
+          hasMore={mobileHasMore}
+          onLoadMore={handleMobileLoadMore}
+          onRefresh={handleMobileRefresh}
+        />
+      ) : (
+        // Desktop: DataGrid Area
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <ExcelDataGrid
+              rows={users}
+              columns={columns}
+              onRowsChange={(rows) => setUsers(rows as User[])}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+              {...(gridPermissions.editable && { onEdit: handleEdit })}
+              {...(gridPermissions.editable && { onRowUpdate: handleRowUpdate })}
+              onRefresh={handleRefresh}
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={gridPermissions.editable}
+              exportFileName="users"
+              loading={searching}
+              paginationMode="server"
+              rowCount={rowCount}
+              paginationModel={paginationModel}
+              onPaginationModelChange={handlePaginationModelChange}
+            />
+          </Box>
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -228,6 +339,6 @@ export default function UserManagementPage() {
         onConfirm={handleResetPasswordConfirm}
         onCancel={handleResetPasswordCancel}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

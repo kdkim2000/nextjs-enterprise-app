@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import PostViewDialog from '@/components/admin/PostViewDialog';
+import PostMobileCard from './components/PostMobileCard';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { usePostManagement } from './hooks/usePostManagement';
 import { createColumns } from './constants';
@@ -17,10 +19,12 @@ import { Post } from './types';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
 
 export default function PostManagementPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
 
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
@@ -115,8 +119,44 @@ export default function PostManagementPage() {
     [selectedForDelete, posts]
   );
 
+  // Mobile handlers
+  const handleMobileView = useCallback((post: Post) => {
+    handleView(post);
+  }, [handleView]);
+
+  const handleMobileEdit = useCallback((post: Post) => {
+    handleEdit(post);
+  }, [handleEdit]);
+
+  const handleMobileDelete = useCallback((post: Post) => {
+    handleDeleteClick([post.id]);
+  }, [handleDeleteClick]);
+
+  const handleMobileApprove = useCallback((post: Post) => {
+    handleApprove(post);
+  }, [handleApprove]);
+
+  const handleMobilePin = useCallback((post: Post) => {
+    handlePin(post);
+  }, [handlePin]);
+
+  // Mobile card renderer
+  const renderMobileCard = useCallback((post: Post) => (
+    <PostMobileCard
+      post={post}
+      locale={currentLocale}
+      onView={handleMobileView}
+      onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+      onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+      onApprove={gridPermissions.editable ? handleMobileApprove : undefined}
+      onPin={gridPermissions.editable ? handleMobilePin : undefined}
+      canEdit={gridPermissions.editable}
+      canDelete={gridPermissions.showDeleteButton}
+    />
+  ), [currentLocale, gridPermissions, handleMobileView, handleMobileEdit, handleMobileDelete, handleMobileApprove, handleMobilePin]);
+
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -158,34 +198,45 @@ export default function PostManagementPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area - Flexible */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {posts.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No posts found"
-            description="Use the search filters above to find posts"
-          />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={posts}
-              columns={columns}
-              onRowsChange={(rows) => setPosts(rows as Post[])}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              editable={false}
-              exportFileName="posts"
-              loading={searching}
-              paginationMode="server"
-              rowCount={rowCount}
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
+      {isMobileLayout ? (
+        // Mobile: Card List
+        <MobileCardList
+          data={posts}
+          loading={searching}
+          renderCard={renderMobileCard}
+          keyExtractor={(post) => post.id}
+          emptyMessage={currentLocale === 'ko' ? '게시물이 없습니다' : 'No posts found'}
+        />
+      ) : (
+        // Desktop: DataGrid
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          {posts.length === 0 && !searching ? (
+            <EmptyState
+              icon={Search}
+              title="No posts found"
+              description="Use the search filters above to find posts"
             />
-          </Box>
-        )}
-      </Paper>
+          ) : (
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+              <ExcelDataGrid
+                rows={posts}
+                columns={columns}
+                onRowsChange={(rows) => setPosts(rows as Post[])}
+                {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+                onRefresh={handleRefresh}
+                checkboxSelection={gridPermissions.checkboxSelection}
+                editable={false}
+                exportFileName="posts"
+                loading={searching}
+                paginationMode="server"
+                rowCount={rowCount}
+                paginationModel={paginationModel}
+                onPaginationModelChange={handlePaginationModelChange}
+              />
+            </Box>
+          )}
+        </Paper>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
@@ -205,6 +256,6 @@ export default function PostManagementPage() {
         onClose={() => setViewDialogOpen(false)}
         onEdit={handleEdit}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

@@ -8,8 +8,16 @@ import {
   Select,
   MenuItem,
   Divider,
-  Stack
+  Stack,
+  FormControlLabel,
+  Checkbox,
+  Box,
+  Typography
 } from '@mui/material';
+import {
+  Smartphone as SmartphoneIcon,
+  DesktopWindows as DesktopIcon
+} from '@mui/icons-material';
 import { MenuItem as MenuItemType } from '@/types/menu';
 import { MenuFormData } from '@/app/[locale]/admin/menus/types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
@@ -33,7 +41,7 @@ export default function MenuFormFields({
 }: MenuFormFieldsProps) {
   if (!menu) return null;
 
-  const handleChange = (field: keyof MenuFormData, value: string | number | null) => {
+  const handleChange = (field: keyof MenuFormData, value: string | number | boolean | null) => {
     onChange({ ...menu, [field]: value });
   };
 
@@ -149,6 +157,45 @@ export default function MenuFormFields({
         onChange={(e) => handleChange('programId', e.target.value)}
         helperText="Program identifier (optional)"
       />
+
+      <Divider />
+
+      {/* Visibility Settings */}
+      <Box>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+          {locale === 'ko' ? '표시 설정' : 'Visibility Settings'}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 3 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={menu.desktopEnabled ?? true}
+                onChange={(e) => handleChange('desktopEnabled', e.target.checked)}
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <DesktopIcon fontSize="small" />
+                <span>{locale === 'ko' ? '데스크톱' : 'Desktop'}</span>
+              </Box>
+            }
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={menu.mobileEnabled ?? true}
+                onChange={(e) => handleChange('mobileEnabled', e.target.checked)}
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <SmartphoneIcon fontSize="small" />
+                <span>{locale === 'ko' ? '모바일' : 'Mobile'}</span>
+              </Box>
+            }
+          />
+        </Box>
+      </Box>
 
       <Divider />
 

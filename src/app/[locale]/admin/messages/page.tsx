@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import ExcelDataGrid from '@/components/common/DataGrid';
@@ -8,13 +8,16 @@ import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import MessageFormFields from '@/components/admin/MessageFormFields';
+import MessageMobileCard from './components/MessageMobileCard';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
+import { useMobile } from '@/hooks/useMobile';
 import { useMessageManagement } from './hooks/useMessageManagement';
 import { createColumns } from './constants';
 import { createFilterFields, calculateActiveFilterCount } from './utils';
@@ -23,6 +26,8 @@ import { Message } from './types';
 export default function MessagesPage() {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
+  const { isMobileLayout } = useMobile();
+
   // Get programId from DB (menus table)
   const { programId } = useProgramId();
 
@@ -100,8 +105,29 @@ export default function MessagesPage() {
     [selectedForDelete, messages, currentLocale]
   );
 
+  // Mobile handlers
+  const handleMobileEdit = useCallback((message: Message) => {
+    handleEdit(message.id);
+  }, [handleEdit]);
+
+  const handleMobileDelete = useCallback((message: Message) => {
+    handleDeleteClick([message.id]);
+  }, [handleDeleteClick]);
+
+  // Mobile card renderer
+  const renderMobileCard = useCallback((message: Message) => (
+    <MessageMobileCard
+      message={message}
+      locale={currentLocale}
+      onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+      onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+      canEdit={gridPermissions.editable}
+      canDelete={gridPermissions.showDeleteButton}
+    />
+  ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete]);
+
   return (
-    <StandardCrudPageLayout
+    <ResponsivePageLayout
       // Page Header
       useMenu
       showBreadcrumb
@@ -142,33 +168,44 @@ export default function MessagesPage() {
       onHelpEdit={navigateToHelpEdit}
       language={language}
     >
-      {/* DataGrid Area */}
-      <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-        {messages.length === 0 && !searching ? (
-          <EmptyState
-            icon={Search}
-            title="No messages found"
-            description="Use the search above to find messages"
-          />
-        ) : (
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <ExcelDataGrid
-              rows={messages}
-              columns={columns}
-              onRowsChange={(rows) => setMessages(rows as Message[])}
-              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-              onRefresh={handleRefresh}
-              checkboxSelection={gridPermissions.checkboxSelection}
-              exportFileName="messages"
-              loading={searching}
-              paginationMode="client"
-              paginationModel={paginationModel}
-              onPaginationModelChange={handlePaginationModelChange}
+      {isMobileLayout ? (
+        // Mobile: Card List
+        <MobileCardList
+          data={messages}
+          loading={searching}
+          renderCard={renderMobileCard}
+          keyExtractor={(message) => message.id}
+          emptyMessage={currentLocale === 'ko' ? '메시지가 없습니다' : 'No messages found'}
+        />
+      ) : (
+        // Desktop: DataGrid
+        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          {messages.length === 0 && !searching ? (
+            <EmptyState
+              icon={Search}
+              title="No messages found"
+              description="Use the search above to find messages"
             />
-          </Box>
-        )}
-      </Paper>
+          ) : (
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+              <ExcelDataGrid
+                rows={messages}
+                columns={columns}
+                onRowsChange={(rows) => setMessages(rows as Message[])}
+                {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+                {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+                onRefresh={handleRefresh}
+                checkboxSelection={gridPermissions.checkboxSelection}
+                exportFileName="messages"
+                loading={searching}
+                paginationMode="client"
+                paginationModel={paginationModel}
+                onPaginationModelChange={handlePaginationModelChange}
+              />
+            </Box>
+          )}
+        </Paper>
+      )}
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -204,6 +241,6 @@ export default function MessagesPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </StandardCrudPageLayout>
+    </ResponsivePageLayout>
   );
 }

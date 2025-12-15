@@ -73,8 +73,8 @@ pgdata/
 .claude/
 migration/.claude/
 
-# claude sessions (local only - may contain sensitive info)
-docs/claude-sessions/
+# Note: docs/claude-sessions/ is now shared (sanitized)
+# Run docs/claude-sessions/sanitize.py before committing new sessions
 
 # Uploaded files
 uploads/
@@ -92,4 +92,5 @@ shared/dist/
 # Infrastructure
 infrastructure/*/data/
 infrastructure/*/logs/
+docker/ssl/
 infrastructure/*/ssl/

@@ -19,7 +19,9 @@
       "ko": "메인 대시보드 개요",
       "zh": "主仪表板概述",
       "vi": "Tổng quan bảng điều khiển chính"
-    }
+    },
+    "mobileEnabled": true,
+    "desktopEnabled": true
   },
   {
     "id": "menu-002",
@@ -41,7 +43,9 @@
       "ko": "관리자 및 시스템 관리",
       "zh": "管理和系统管理",
       "vi": "Quản trị và quản lý hệ thống"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-003",
@@ -63,7 +67,9 @@
       "ko": "사용자 조회 및 관리",
       "zh": "查看和管理用户",
       "vi": "Xem và quản lý người dùng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-019",
@@ -85,7 +91,9 @@
       "ko": "조직 부서 및 구조 관리",
       "zh": "管理组织部门和结构",
       "vi": "Quản lý phòng ban và cấu trúc tổ chức"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-004",
@@ -107,7 +115,9 @@
       "ko": "애플리케이션 메뉴 구조 및 권한 관리",
       "zh": "管理应用程序菜单结构和权限",
       "vi": "Quản lý cấu trúc menu và quyền ứng dụng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-009",
@@ -129,7 +139,9 @@
       "ko": "사용자 역할 및 권한 관리",
       "zh": "管理用户角色和权限",
       "vi": "Quản lý vai trò và quyền người dùng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-020",
@@ -151,7 +163,9 @@
       "ko": "시스템 코드 및 코드 타입 관리",
       "zh": "管理系统代码和代码类型",
       "vi": "Quản lý mã hệ thống và loại mã"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-021",
@@ -173,7 +187,9 @@
       "ko": "어플리케이션 메시지 관리",
       "zh": "管理应用程序消息",
       "vi": "Quản lý tin nhắn ứng dụng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-010",
@@ -195,7 +211,9 @@
       "ko": "모든 페이지의 도움말 컨텐츠 관리",
       "zh": "管理所有页面的帮助内容",
       "vi": "Quản lý nội dung trợ giúp cho tất cả các trang"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-011",
@@ -217,7 +235,9 @@
       "ko": "사용자-역할 할당 관리",
       "zh": "管理用户角色分配",
       "vi": "Quản lý phân công vai trò người dùng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-012",
@@ -239,7 +259,9 @@
       "ko": "역할-메뉴 권한 관리",
       "zh": "管理角色菜单权限",
       "vi": "Quản lý quyền vai trò-menu"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-013",
@@ -261,7 +283,9 @@
       "ko": "애플리케이션 프로그램 및 권한 관리",
       "zh": "管理应用程序和权限",
       "vi": "Quản lý chương trình và quyền ứng dụng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-014",
@@ -283,7 +307,9 @@
       "ko": "시스템 로그 조회 및 분석",
       "zh": "查看和分析系统日志",
       "vi": "Xem và phân tích nhật ký hệ thống"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-005",
@@ -305,7 +331,9 @@
       "ko": "보고서 모듈",
       "zh": "报告模块",
       "vi": "Mô-đun báo cáo"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-006",
@@ -327,7 +355,9 @@
       "ko": "판매 분석 및 보고서",
       "zh": "销售分析和报告",
       "vi": "Phân tích và báo cáo bán hàng"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-007",
@@ -349,7 +379,9 @@
       "ko": "애플리케이션 설정",
       "zh": "应用程序设置",
       "vi": "Cài đặt ứng dụng"
-    }
+    },
+    "mobileEnabled": true,
+    "desktopEnabled": true
   },
   {
     "id": "menu-016",
@@ -371,7 +403,9 @@
       "ko": "개발 지원 및 도구",
       "zh": "开发支持和工具",
       "vi": "Hỗ trợ và công cụ phát triển"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-008",
@@ -393,7 +427,9 @@
       "ko": "예제 및 문서가 포함된 재사용 가능한 모든 UI 컴포넌트 탐색",
       "zh": "浏览所有可重用的UI组件及示例和文档",
       "vi": "Duyệt qua tất cả các thành phần UI có thể tái sử dụng với ví dụ và tài liệu"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-017",
@@ -415,7 +451,9 @@
       "ko": "커스텀 색상 및 스타일이 적용된 MUI 테마 시스템의 종합 데모",
       "zh": "MUI主题系统的全面演示，包含自定义颜色和样式",
       "vi": "Trình diễn toàn diện hệ thống chủ đề MUI với màu sắc và kiểu tùy chỉnh"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   },
   {
     "id": "menu-018",
@@ -437,6 +475,8 @@
       "ko": "React 학습 교재 및 연구 자료",
       "zh": "React学习资料和研究资源",
       "vi": "Tài liệu học tập và tài nguyên nghiên cứu React"
-    }
+    },
+    "mobileEnabled": false,
+    "desktopEnabled": true
   }
 ]

@@ -1,0 +1,150 @@
+'use client';
+
+import React, { useMemo } from 'react';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Folder as FolderIcon,
+  ChevronRight as ChevronRightIcon,
+} from '@mui/icons-material';
+import MobileEntityCard, {
+  EntityStatusIndicator,
+  EntityRoleBadge,
+  EntityFeatureBadge,
+  EntitySwipeAction,
+} from '@/components/mobile/MobileEntityCard';
+import { useI18n } from '@/lib/i18n/client';
+import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { CodeType } from '../types';
+
+export interface CodeTypeMobileCardProps {
+  codeType: CodeType;
+  locale?: string;
+  codeCount?: number; // Number of codes in this type
+  onClick?: (codeType: CodeType) => void;
+  onEdit?: (codeType: CodeType) => void;
+  onDelete?: (codeType: CodeType) => void;
+  selected?: boolean;
+  selectable?: boolean;
+  onSelectionChange?: (selected: boolean) => void;
+  showSwipeActions?: boolean;
+}
+
+export default function CodeTypeMobileCard({
+  codeType,
+  locale = 'ko',
+  codeCount,
+  onClick,
+  onEdit,
+  onDelete,
+  selected = false,
+  selectable = false,
+  onSelectionChange,
+  showSwipeActions = true,
+}: CodeTypeMobileCardProps) {
+  const t = useI18n();
+  const isKorean = locale === 'ko';
+  const isActive = codeType.status === 'active';
+
+  // Get display name
+  const getDisplayName = (): string => {
+    return getLocalizedValue(codeType.name, locale) || codeType.code;
+  };
+
+  // Get description
+  const getDescription = (): string => {
+    return getLocalizedValue(codeType.description, locale) || '';
+  };
+
+  // No avatar for code types - code management doesn't need visual avatars
+
+  // Status indicator
+  const status: EntityStatusIndicator = useMemo(
+    () => ({
+      active: isActive,
+    }),
+    [isActive]
+  );
+
+  // Role badge - shows code count if available
+  const roleBadge: EntityRoleBadge | undefined = useMemo(() => {
+    if (codeCount !== undefined) {
+      return {
+        label: isKorean ? `${codeCount}개` : `${codeCount}`,
+        icon: <FolderIcon sx={{ fontSize: 12 }} />,
+        bgcolor: 'primary.50',
+        color: 'primary.dark',
+      };
+    }
+    return undefined;
+  }, [codeCount, isKorean]);
+
+  // Feature badges
+  const featureBadges: EntityFeatureBadge[] = useMemo(() => {
+    const badges: EntityFeatureBadge[] = [];
+
+    if (codeType.category) {
+      badges.push({
+        key: 'category',
+        label: codeType.category,
+        bgcolor: 'grey.100',
+        color: 'text.secondary',
+        show: true,
+      });
+    }
+
+    return badges;
+  }, [codeType.category]);
+
+  // Swipe actions
+  const swipeActions: EntitySwipeAction<CodeType>[] = useMemo(() => {
+    const actions: EntitySwipeAction<CodeType>[] = [];
+
+    if (onDelete) {
+      actions.push({
+        icon: <DeleteIcon />,
+        label: t('common.delete'),
+        color: '#fff',
+        backgroundColor: '#f44336',
+        onClick: onDelete,
+      });
+    }
+
+    if (onEdit) {
+      actions.push({
+        icon: <EditIcon />,
+        label: t('common.edit'),
+        color: '#fff',
+        backgroundColor: '#2196f3',
+        onClick: onEdit,
+      });
+    }
+
+    return actions;
+  }, [onDelete, onEdit, t]);
+
+  // Right content - chevron to indicate drill-down
+  const rightContent = onClick ? (
+    <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 24 }} />
+  ) : undefined;
+
+  return (
+    <MobileEntityCard
+      item={codeType}
+      status={status}
+      primaryText={getDisplayName()}
+      roleBadge={roleBadge}
+      secondaryText={codeType.code}
+      tertiaryText={getDescription() || undefined}
+      featureBadges={featureBadges}
+      rightContent={rightContent}
+      isActive={isActive}
+      onClick={onClick}
+      swipeActions={swipeActions}
+      showSwipeActions={showSwipeActions}
+      selected={selected}
+      selectable={selectable}
+      onSelectionChange={onSelectionChange}
+    />
+  );
+}

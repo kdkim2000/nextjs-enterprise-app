@@ -11,6 +11,13 @@ export interface Menu {
   level: number;
   programId: string;
   description: MultiLangField;
+  mobileEnabled?: boolean;
+  desktopEnabled?: boolean;
+}
+
+// Tree structure for MenuTreeView
+export interface MenuTreeNode extends Menu {
+  children?: MenuTreeNode[];
 }
 
 export interface MenuFormData {
@@ -30,6 +37,8 @@ export interface MenuFormData {
   descriptionKo: string;
   descriptionZh: string;
   descriptionVi: string;
+  mobileEnabled: boolean;
+  desktopEnabled: boolean;
 }
 
 export interface SearchCriteria {
