@@ -481,8 +481,9 @@ async function migrateMenus(client) {
         INSERT INTO menus (
           id, code, name_en, name_ko, name_zh, name_vi,
           description_en, description_ko, description_zh, description_vi,
-          path, icon, "order", parent_id, level, program_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+          path, icon, "order", parent_id, level, program_id,
+          mobile_enabled, desktop_enabled
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       `;
 
       const nameFields = formatMultiLang(item.name, 'name');
@@ -504,7 +505,9 @@ async function migrateMenus(client) {
         item.order || null,
         item.parentId || null,
         item.level || 0,
-        item.programId || null
+        item.programId || null,
+        item.mobileEnabled !== undefined ? item.mobileEnabled : true,
+        item.desktopEnabled !== undefined ? item.desktopEnabled : true
       ];
 
       if (!isDryRun) {

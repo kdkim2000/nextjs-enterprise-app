@@ -202,13 +202,17 @@ CREATE TABLE menus (
     "order" INTEGER,
     parent_id VARCHAR(50),
     level INTEGER,
-    program_id VARCHAR(50)
+    program_id VARCHAR(50),
+    mobile_enabled BOOLEAN DEFAULT true,
+    desktop_enabled BOOLEAN DEFAULT true
 );
 
 CREATE INDEX idx_menus_code ON menus(code);
 CREATE INDEX idx_menus_parent_id ON menus(parent_id);
 CREATE INDEX idx_menus_program_id ON menus(program_id);
 CREATE INDEX idx_menus_order ON menus("order");
+CREATE INDEX idx_menus_mobile_enabled ON menus(mobile_enabled);
+CREATE INDEX idx_menus_desktop_enabled ON menus(desktop_enabled);
 
 -- ==========================================
 -- PROGRAMS TABLE
