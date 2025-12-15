@@ -31,8 +31,6 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      # Attachments storage - mount VM storage for persistence
-      # VM: /data/uploads -> Container: /app/backend/uploads
       - /data/uploads:/app/backend/uploads
     depends_on:
       - postgres16
@@ -63,7 +61,7 @@ services:
     networks:
       - corenext-network
 
-  # Nginx Reverse Proxy (optional)
+  # Nginx Reverse Proxy with SSL
   nginx:
     image: nginx:alpine
     container_name: corenext-nginx
@@ -72,13 +70,18 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-ssl.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - frontend
       - backend
     networks:
       - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   pg16_pgdata_16_11:

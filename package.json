@@ -40,7 +40,13 @@
     "migrate:conversations:force": "node scripts/migrate-conversations.js --force",
     "migrate:conversations:status": "node scripts/migrate-conversations.js --status",
     "migrate:conversations:md": "node scripts/migrate-conversations.js --md-only",
-    "migrate:conversations:db": "node scripts/migrate-conversations.js --db-only"
+    "migrate:conversations:db": "node scripts/migrate-conversations.js --db-only",
+    "db:init": "bash database/scripts/init-db.sh",
+    "db:init:sample": "bash database/scripts/init-db.sh --sample",
+    "db:init:oracle": "bash database/scripts/init-db.sh --type oracle",
+    "db:status": "bash database/scripts/db-status.sh",
+    "db:validate": "bash database/scripts/db-validate.sh",
+    "db:rollback": "bash database/scripts/db-rollback.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -96,6 +102,7 @@
     "next": "16.0.1",
     "next-international": "^1.3.0",
     "nodemailer": "^7.0.10",
+    "oracledb": "^6.10.0",
     "pg": "^8.16.3",
     "pg-promise": "^12.3.0",
     "react": "19.2.0",

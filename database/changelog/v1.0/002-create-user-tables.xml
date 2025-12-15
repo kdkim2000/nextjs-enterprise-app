@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         User Tables (departments, roles, users, user_role_mappings)
+         ========================================== -->
+
+    <changeSet id="002-01-create-departments" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="departments"/></not>
+        </preConditions>
+
+        <createTable tableName="departments" remarks="Department hierarchy with multi-language support">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name_en" type="varchar(200)"/>
+            <column name="name_ko" type="varchar(200)"/>
+            <column name="name_zh" type="varchar(200)"/>
+            <column name="name_vi" type="varchar(200)"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="parent_id" type="varchar(50)"/>
+            <column name="manager_id" type="varchar(50)"/>
+            <column name="level" type="int"/>
+            <column name="display_order" type="int"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="phone" type="varchar(50)"/>
+            <column name="location" type="varchar(200)"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-02-create-roles" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="roles"/></not>
+        </preConditions>
+
+        <createTable tableName="roles" remarks="User roles and permissions">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="display_name" type="varchar(200)"/>
+            <column name="description" type="${clob.type}"/>
+            <column name="role_type" type="varchar(50)"/>
+            <column name="manager" type="varchar(50)"/>
+            <column name="representative" type="varchar(50)"/>
+            <column name="is_system" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="is_active" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="created_by" type="varchar(50)"/>
+            <column name="updated_by" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-03-create-users" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="users"/></not>
+        </preConditions>
+
+        <createTable tableName="users" remarks="System users">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)"/>
+            <column name="email" type="varchar(200)">
+                <constraints unique="true"/>
+            </column>
+            <column name="name" type="varchar(200)"/>
+            <column name="role" type="varchar(50)"/>
+            <column name="department" type="varchar(50)"/>
+            <column name="position" type="varchar(100)"/>
+            <column name="phone" type="varchar(50)"/>
+            <column name="mobile" type="varchar(50)"/>
+            <column name="mfa_enabled" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="sso_enabled" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+            <column name="last_login" type="${timestamp.type}"/>
+            <column name="avatar_url" type="${clob.type}"/>
+            <column name="avatar_image" type="${clob.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-04-create-user-role-mappings" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="user_role_mappings"/></not>
+        </preConditions>
+
+        <createTable tableName="user_role_mappings" remarks="User to role mappings">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assigned_by" type="varchar(50)"/>
+            <column name="assigned_at" type="${timestamp.type}"/>
+            <column name="expires_at" type="${timestamp.type}"/>
+            <column name="is_active" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="is_primary" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="notes" type="${clob.type}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

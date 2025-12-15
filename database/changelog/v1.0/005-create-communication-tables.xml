@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Communication Tables (mail, messages)
+         ========================================== -->
+
+    <changeSet id="005-01-create-mail-messages" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="mail_messages"/></not>
+        </preConditions>
+
+        <createTable tableName="mail_messages" remarks="Mail messages">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sender_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject" type="varchar(500)"/>
+            <column name="body" type="${clob.type}"/>
+            <column name="body_html" type="${clob.type}"/>
+            <column name="attachment_id" type="varchar(50)"/>
+            <column name="send_external" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="external_status" type="varchar(20)"/>
+            <column name="external_sent_at" type="${timestamp.type}"/>
+            <column name="external_error" type="${clob.type}"/>
+            <column name="is_draft" type="${boolean.type}" defaultValueBoolean="true"/>
+            <column name="sent_at" type="${timestamp.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="005-02-create-mail-recipients" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="mail_recipients"/></not>
+        </preConditions>
+
+        <createTable tableName="mail_recipients" remarks="Mail recipients">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recipient_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recipient_type" type="varchar(10)" defaultValue="to"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="mail_recipients"
+                             columnNames="message_id,recipient_id"
+                             constraintName="uq_mail_recipients"/>
+    </changeSet>
+
+    <changeSet id="005-03-create-mail-user-messages" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="mail_user_messages"/></not>
+        </preConditions>
+
+        <createTable tableName="mail_user_messages" remarks="User mail view">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="folder" type="varchar(20)" defaultValue="inbox"/>
+            <column name="is_read" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="read_at" type="${timestamp.type}"/>
+            <column name="is_starred" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="is_important" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="is_deleted" type="${boolean.type}" defaultValueBoolean="false"/>
+            <column name="deleted_at" type="${timestamp.type}"/>
+            <column name="created_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="005-04-create-messages" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="messages"/></not>
+        </preConditions>
+
+        <createTable tableName="messages" remarks="System messages with multi-language support">
+            <column name="id" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="category" type="varchar(50)"/>
+            <column name="type" type="varchar(50)"/>
+            <column name="message_en" type="${clob.type}"/>
+            <column name="message_ko" type="${clob.type}"/>
+            <column name="message_zh" type="${clob.type}"/>
+            <column name="message_vi" type="${clob.type}"/>
+            <column name="description_en" type="${clob.type}"/>
+            <column name="description_ko" type="${clob.type}"/>
+            <column name="description_zh" type="${clob.type}"/>
+            <column name="description_vi" type="${clob.type}"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="created_at" type="${timestamp.type}"/>
+            <column name="updated_at" type="${timestamp.type}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- ==========================================
+         Required Seed Data (시스템 필수 데이터)
+         ========================================== -->
+
+    <changeSet id="008-01-load-roles" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/001-roles.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="008-02-load-root-department" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="departments"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/002-root-department.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="008-03-load-admin-user" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/003-admin-user.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="008-04-load-code-types" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="code_types"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/004-code-types.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="008-05-load-codes" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="codes"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/005-codes.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="008-06-load-attachment-types" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="attachment_types"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/006-attachment-types.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+    <changeSet id="008-07-load-app-settings" author="system" context="seed">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="app_settings"/>
+        </preConditions>
+        <sqlFile path="../../seed/required/007-app-settings.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="true"
+                 stripComments="true"/>
+    </changeSet>
+
+</databaseChangeLog>
