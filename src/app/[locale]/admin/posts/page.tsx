@@ -125,7 +125,7 @@ export default function PostManagementPage() {
   }, [handleView]);
 
   const handleMobileEdit = useCallback((post: Post) => {
-    handleEdit(post.id);
+    handleEdit(post);
   }, [handleEdit]);
 
   const handleMobileDelete = useCallback((post: Post) => {
@@ -137,7 +137,7 @@ export default function PostManagementPage() {
   }, [handleApprove]);
 
   const handleMobilePin = useCallback((post: Post) => {
-    handlePin(post.id);
+    handlePin(post);
   }, [handlePin]);
 
   // Mobile card renderer

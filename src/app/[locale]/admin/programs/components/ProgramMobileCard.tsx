@@ -62,11 +62,11 @@ export default function ProgramMobileCard({
       secondaryText={program.code}
       tertiaryText={description}
       status={{
-        active: program.isActive !== false,
+        active: program.status === 'active',
         activeColor: 'success.main',
         inactiveColor: 'text.disabled',
       }}
-      isActive={program.isActive !== false}
+      isActive={program.status === 'active'}
       onClick={canEdit && onEdit ? () => onEdit(program) : undefined}
       swipeActions={swipeActions}
       rightContent={
