@@ -1,20 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
   IconButton,
   Typography,
   Avatar,
-  Box
+  Box,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider
 } from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
+import {
+  Menu as MenuIcon,
+  Logout,
+  Settings,
+  Person,
+  Check,
+  Policy
+} from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
+import { useCurrentLocale, useChangeLocale, useI18n } from '@/lib/i18n/client';
 import { getAvatarUrl } from '@/lib/config';
 import { useAppSettings } from '@/hooks/useAppSettings';
+import { SUPPORTED_LANGUAGES } from '@/lib/i18n/languages';
+import { authApi } from '@/lib/axios';
 
 const MOBILE_HEADER_HEIGHT = 56;
 
@@ -25,9 +39,12 @@ interface MobileHeaderProps {
 export default function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
   const router = useRouter();
   const locale = useCurrentLocale();
+  const changeLocale = useChangeLocale();
   const t = useI18n();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { getSetting, getLocalizedSetting } = useAppSettings();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
   // Get app name and logo from settings
   const appName = getLocalizedSetting('app_name', t('common.appName'));
@@ -60,9 +77,49 @@ export default function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
   };
 
   const avatarSrc = getAvatarSrc();
+  const displayName = user?.name_ko || user?.name_en || user?.name || '';
 
-  const handleAvatarClick = () => {
+  // Menu handlers
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfile = () => {
+    handleUserMenuClose();
     router.push(`/${locale}/dashboard/settings`);
+  };
+
+  const handleSettings = () => {
+    handleUserMenuClose();
+    router.push(`/${locale}/dashboard/settings`);
+  };
+
+  const handlePrivacyPolicy = () => {
+    handleUserMenuClose();
+    router.push(`/${locale}/privacy-policy`);
+  };
+
+  const handleLogout = async () => {
+    handleUserMenuClose();
+    await logout();
+    router.push(`/${locale}/login`);
+  };
+
+  const handleLanguageChange = async (newLocale: string) => {
+    handleUserMenuClose();
+    changeLocale(newLocale as 'en' | 'ko' | 'zh' | 'vi');
+
+    try {
+      await authApi.patch('/user-settings/general', {
+        language: newLocale
+      });
+    } catch (error) {
+      console.error('[MobileHeader] Failed to save language preference:', error);
+    }
   };
 
   return (
@@ -122,13 +179,13 @@ export default function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
 
         {/* User Avatar */}
         <IconButton
-          onClick={handleAvatarClick}
+          onClick={handleUserMenuClick}
           sx={{ p: 0.5 }}
           aria-label={t('header.profile')}
         >
           <Avatar
             src={avatarSrc}
-            alt={user?.name_ko || user?.name_en || ''}
+            alt={displayName}
             sx={{
               width: 32,
               height: 32,
@@ -140,6 +197,114 @@ export default function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
             {!avatarSrc && getUserInitials()}
           </Avatar>
         </IconButton>
+
+        {/* User Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleUserMenuClose}
+          onClick={handleUserMenuClose}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          PaperProps={{
+            elevation: 3,
+            sx: {
+              minWidth: 220,
+              mt: 1,
+              '& .MuiMenuItem-root': {
+                px: 2,
+                py: 1.25,
+                fontSize: '0.875rem'
+              }
+            }
+          }}
+        >
+          {/* User Info */}
+          <Box sx={{ px: 2, py: 1.5, bgcolor: 'action.hover' }}>
+            <Typography variant="subtitle2" fontWeight={600} noWrap>
+              {displayName}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+              {user?.email}
+            </Typography>
+          </Box>
+
+          <Divider />
+
+          <MenuItem onClick={handleProfile}>
+            <ListItemIcon>
+              <Person fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('header.profile')}</ListItemText>
+          </MenuItem>
+
+          <MenuItem onClick={handleSettings}>
+            <ListItemIcon>
+              <Settings fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('header.settings')}</ListItemText>
+          </MenuItem>
+
+          <MenuItem onClick={handlePrivacyPolicy}>
+            <ListItemIcon>
+              <Policy fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('header.privacyPolicy')}</ListItemText>
+          </MenuItem>
+
+          <Divider />
+
+          {/* Language Selection */}
+          <Box sx={{ px: 2, py: 1 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              {t('header.language')}
+            </Typography>
+          </Box>
+
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <MenuItem
+              key={lang.code}
+              onClick={() => handleLanguageChange(lang.code)}
+              selected={locale === lang.code}
+              sx={{
+                pl: 3,
+                py: 1,
+                '&.Mui-selected': {
+                  backgroundColor: 'action.selected',
+                  '&:hover': {
+                    backgroundColor: 'action.hover'
+                  }
+                }
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 32 }}>
+                {locale === lang.code ? (
+                  <Check fontSize="small" color="primary" />
+                ) : (
+                  <Box component="span" sx={{ fontSize: '1rem', width: 20, textAlign: 'center' }}>
+                    {lang.flag}
+                  </Box>
+                )}
+              </ListItemIcon>
+              <ListItemText
+                primary={lang.nativeName}
+                primaryTypographyProps={{
+                  fontSize: '0.85rem',
+                  fontWeight: locale === lang.code ? 600 : 400
+                }}
+              />
+            </MenuItem>
+          ))}
+
+          <Divider />
+
+          <MenuItem onClick={handleLogout}>
+            <ListItemIcon>
+              <Logout fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText sx={{ color: 'error.main' }}>{t('header.logout')}</ListItemText>
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
