@@ -512,6 +512,7 @@ router.post('/:id/approve', authenticateToken, checkPostApprovalPermission(), as
 
 /**
  * GET /api/post/:id/view - Increment view count
+ * 조회할 때마다 조회수 증가 (1일 1회 제한 없음)
  */
 router.get('/:id/view', authenticateToken, async (req, res) => {
   try {
@@ -520,43 +521,23 @@ router.get('/:id/view', authenticateToken, async (req, res) => {
 
     console.log('[POST VIEW] Recording view for post:', req.params.id, 'by user:', req.user.userId);
 
-    // Check if already viewed today
-    const checkResult = await db.query(`
-      SELECT id FROM post_views
-      WHERE post_id = $1
-        AND user_id = $2
-        AND DATE(viewed_at) = CURRENT_DATE
-      LIMIT 1
-    `, [req.params.id, req.user.userId]);
+    // Record view history (for tracking purposes)
+    await db.query(`
+      INSERT INTO post_views (id, post_id, user_id, ip_address, user_agent, viewed_at)
+      VALUES ($1, $2, $3, $4, $5, NOW())
+    `, [viewId, req.params.id, req.user.userId, req.ip, req.get('user-agent')]);
 
-    if (checkResult.rows.length === 0) {
-      // Not viewed today - record new view
-      await db.query(`
-        INSERT INTO post_views (id, post_id, user_id, ip_address, user_agent, viewed_at)
-        VALUES ($1, $2, $3, $4, $5, NOW())
-      `, [viewId, req.params.id, req.user.userId, req.ip, req.get('user-agent')]);
+    // Increment view count
+    console.log('[POST VIEW] View recorded, incrementing count');
+    await postService.incrementViewCount(req.params.id);
 
-      // Increment view count
-      console.log('[POST VIEW] New view recorded, incrementing count');
-      await postService.incrementViewCount(req.params.id);
-
-      // Get updated post to return new view count
-      const updatedPost = await postService.getPostById(req.params.id);
-      res.json({
-        success: true,
-        viewCount: updatedPost.view_count,
-        message: 'View count incremented'
-      });
-    } else {
-      console.log('[POST VIEW] Already viewed today, not incrementing');
-      // Already viewed today, return current count without incrementing
-      const currentPost = await postService.getPostById(req.params.id);
-      res.json({
-        success: true,
-        viewCount: currentPost.view_count,
-        message: 'Already viewed today'
-      });
-    }
+    // Get updated post to return new view count
+    const updatedPost = await postService.getPostById(req.params.id);
+    res.json({
+      success: true,
+      viewCount: updatedPost.view_count,
+      message: 'View count incremented'
+    });
   } catch (error) {
     console.error('[POST VIEW] Error recording view:', error);
     res.status(500).json({ error: 'Failed to record view' });

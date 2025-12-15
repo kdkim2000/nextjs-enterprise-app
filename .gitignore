@@ -93,3 +93,4 @@ shared/dist/
 infrastructure/*/data/
 infrastructure/*/logs/
 docker/ssl/
+infrastructure/*/ssl/

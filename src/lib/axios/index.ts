@@ -154,6 +154,16 @@ export const api = {
 };
 
 /**
+ * Get the auth service URL for token refresh
+ */
+const getAuthServiceUrl = (): string => {
+  const config = getApiConfig();
+  console.log('[getAuthServiceUrl] Environment config:', config);
+  console.log('[getAuthServiceUrl] Auth URL:', config.auth);
+  return config.auth;
+};
+
+/**
  * Create API client for specific service
  */
 export const createServiceApi = (baseUrl: string) => {
@@ -186,7 +196,53 @@ export const createServiceApi = (baseUrl: string) => {
 
   instance.interceptors.response.use(
     (response) => response,
-    (error) => Promise.reject(error)
+    async (error: AxiosError) => {
+      const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+      // Handle 401 Unauthorized - token expired
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          // Try to refresh token
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const authServiceUrl = getAuthServiceUrl();
+            const refreshUrl = `${authServiceUrl}/refresh`;
+
+            const response = await axios.post(refreshUrl, { refreshToken });
+
+            const { data } = response.data;
+            const newAccessToken = data?.accessToken || response.data.accessToken || response.data.token;
+            const newRefreshToken = data?.refreshToken || response.data.refreshToken;
+
+            if (newAccessToken) {
+              localStorage.setItem('accessToken', newAccessToken);
+            }
+            if (newRefreshToken) {
+              localStorage.setItem('refreshToken', newRefreshToken);
+            }
+
+            // Retry original request with new token
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            }
+            return instance(originalRequest);
+          }
+        } catch (refreshError) {
+          // Refresh token failed - logout user
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            window.location.href = '/en/login';
+          }
+          return Promise.reject(refreshError);
+        }
+      }
+
+      return Promise.reject(error);
+    }
   );
 
   return {
@@ -213,13 +269,6 @@ let _commApiInstance: ReturnType<typeof createServiceApi> | null = null;
 const getAdminBaseUrl = (): string => {
   const config = getApiConfig();
   return config.admin;
-};
-
-const getAuthServiceUrl = (): string => {
-  const config = getApiConfig();
-  console.log('[getAuthServiceUrl] Environment config:', config);
-  console.log('[getAuthServiceUrl] Auth URL:', config.auth);
-  return config.auth;
 };
 
 const getContentBaseUrl = (): string => {

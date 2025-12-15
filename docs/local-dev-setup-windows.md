@@ -105,7 +105,7 @@
 │      └──► Common Service (localhost:3015)                       │
 │                     │                                            │
 │                     ▼                                            │
-│              PostgreSQL (원격: 123.37.36.45:9090)               │
+│              PostgreSQL (원격: <DB_SERVER_IP>:9090)               │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -150,11 +150,11 @@ NODE_ENV=development
 NEXT_PUBLIC_ENV=development
 
 # Database (원격)
-DB_HOST=123.37.36.45
+DB_HOST=<DB_SERVER_IP>
 DB_PORT=9090
 DB_NAME=corenextdb
 DB_USER=corenext
-DB_PASSWORD=CoreNext2025#
+DB_PASSWORD=<YOUR_PASSWORD>
 
 # JWT
 JWT_SECRET=your-jwt-secret-key
@@ -383,10 +383,10 @@ ls .env*
 
 ```powershell
 # PostgreSQL 연결 테스트
-psql -h 123.37.36.45 -p 9090 -U corenext -d corenextdb
+psql -h <DB_SERVER_IP> -p 9090 -U corenext -d corenextdb
 
 # 방화벽 확인 (PowerShell 관리자)
-Test-NetConnection -ComputerName 123.37.36.45 -Port 9090
+Test-NetConnection -ComputerName <DB_SERVER_IP> -Port 9090
 ```
 
 ### 6.4 CORS 오류
