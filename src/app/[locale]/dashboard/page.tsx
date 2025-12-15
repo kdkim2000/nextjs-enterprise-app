@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import { Box, Grid, ToggleButtonGroup, ToggleButton, IconButton, Tooltip, Alert, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Grid, ToggleButtonGroup, ToggleButton, IconButton, Tooltip, Alert } from '@mui/material';
 import { Refresh, Today, DateRange as DateRangeIcon, CalendarMonth } from '@mui/icons-material';
 import PageHeader from '@/components/common/PageHeader';
 import PageContainer from '@/components/common/PageContainer';
@@ -51,6 +51,110 @@ export default function DashboardPage() {
     }
   }, [setDateRange]);
 
+  // 모바일: 단순 레이아웃 (MobileLayout의 스크롤 사용)
+  // 데스크톱: 고정 헤더 + 내부 스크롤
+  if (isMobileLayout) {
+    return (
+      <RouteGuard>
+        <Box sx={{ px: 1.5, py: 1 }}>
+          {/* Toolbar */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 1.5,
+              flexWrap: 'wrap',
+              gap: 1
+            }}
+          >
+            <ToggleButtonGroup
+              value={dateRange}
+              exclusive
+              onChange={handleDateRangeChange}
+              size="small"
+              sx={{
+                '& .MuiToggleButton-root': {
+                  px: 1,
+                  py: 0.5,
+                  fontSize: '0.75rem'
+                }
+              }}
+            >
+              <ToggleButton value="today">
+                <Today sx={{ fontSize: 16, mr: 0.5 }} />
+                오늘
+              </ToggleButton>
+              <ToggleButton value="7days">
+                <DateRangeIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                7일
+              </ToggleButton>
+              <ToggleButton value="30days">
+                <CalendarMonth sx={{ fontSize: 16, mr: 0.5 }} />
+                30일
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            <Tooltip title="새로고침">
+              <IconButton onClick={refresh} disabled={loading} size="small">
+                <Refresh />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          {/* KPI Cards */}
+          <Box sx={{ mb: 2 }}>
+            <KPICards summary={summary} loading={loading} />
+          </Box>
+
+          {/* Charts & Tables */}
+          <Grid container spacing={1.5}>
+            <Grid item xs={12}>
+              <ActivityTrendChart data={activityTrend} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <UserStatusChart data={userStatus} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <LoginStatsChart data={loginStats} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <MenuUsageChart data={menuUsage} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <BoardActivityChart data={boardActivity} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <SystemPerformanceChart data={systemPerformance} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <HttpStatusChart data={httpStatus} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <TopPostsTable data={topPosts} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <ErrorEndpointsTable data={errorEndpoints} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <RecentActivityFeed data={recentActivity} loading={loading} />
+            </Grid>
+            <Grid item xs={12}>
+              <QuickActions />
+            </Grid>
+          </Grid>
+        </Box>
+      </RouteGuard>
+    );
+  }
+
+  // 데스크톱 레이아웃
   return (
     <RouteGuard>
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -64,8 +168,8 @@ export default function DashboardPage() {
             zIndex: 10
           }}
         >
-          <PageContainer sx={{ pb: 0, pt: 1, px: isMobileLayout ? 1.5 : 3 }}>
-            {!isMobileLayout && <PageHeader useMenu showBreadcrumb />}
+          <PageContainer sx={{ pb: 0, pt: 1, px: 3 }}>
+            <PageHeader useMenu showBreadcrumb />
 
             {/* Toolbar */}
             <Box
@@ -73,8 +177,7 @@ export default function DashboardPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                pb: isMobileLayout ? 1.5 : 2,
-                pt: isMobileLayout ? 1 : 0,
+                pb: 2,
                 flexWrap: 'wrap',
                 gap: 1
               }}
@@ -86,28 +189,28 @@ export default function DashboardPage() {
                 size="small"
                 sx={{
                   '& .MuiToggleButton-root': {
-                    px: isMobile ? 1 : 1.5,
-                    py: isMobile ? 0.5 : 0.75,
-                    fontSize: isMobile ? '0.75rem' : '0.875rem'
+                    px: 1.5,
+                    py: 0.75,
+                    fontSize: '0.875rem'
                   }
                 }}
               >
                 <ToggleButton value="today">
-                  <Today sx={{ fontSize: isMobile ? 16 : 18, mr: 0.5 }} />
-                  {isMobile ? '오늘' : '오늘'}
+                  <Today sx={{ fontSize: 18, mr: 0.5 }} />
+                  오늘
                 </ToggleButton>
                 <ToggleButton value="7days">
-                  <DateRangeIcon sx={{ fontSize: isMobile ? 16 : 18, mr: 0.5 }} />
-                  {isMobile ? '7일' : '7일'}
+                  <DateRangeIcon sx={{ fontSize: 18, mr: 0.5 }} />
+                  7일
                 </ToggleButton>
                 <ToggleButton value="30days">
-                  <CalendarMonth sx={{ fontSize: isMobile ? 16 : 18, mr: 0.5 }} />
-                  {isMobile ? '30일' : '30일'}
+                  <CalendarMonth sx={{ fontSize: 18, mr: 0.5 }} />
+                  30일
                 </ToggleButton>
               </ToggleButtonGroup>
 
               <Tooltip title="새로고침">
-                <IconButton onClick={refresh} disabled={loading} size={isMobile ? 'small' : 'medium'}>
+                <IconButton onClick={refresh} disabled={loading}>
                   <Refresh />
                 </IconButton>
               </Tooltip>
@@ -117,7 +220,7 @@ export default function DashboardPage() {
 
         {/* Scrollable Content */}
         <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-          <PageContainer sx={{ py: isMobileLayout ? 1.5 : 2, px: isMobileLayout ? 1.5 : 3 }}>
+          <PageContainer sx={{ py: 2, px: 3 }}>
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
