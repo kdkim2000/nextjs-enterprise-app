@@ -26,7 +26,8 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
+        height: '100vh', // Fixed height for scroll to work
+        overflow: 'hidden', // Prevent outer scroll
         backgroundColor: 'background.default',
       }}
     >
@@ -40,7 +41,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
         onClose={handleDrawerClose}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Scrollable */}
       <Box
         component="main"
         sx={{
@@ -49,7 +50,8 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
           flexDirection: 'column',
           mt: `${MOBILE_HEADER_HEIGHT}px`,
           mb: `${BOTTOM_NAV_HEIGHT}px`,
-          overflow: 'auto',
+          overflowY: 'auto',
+          overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
         }}
       >

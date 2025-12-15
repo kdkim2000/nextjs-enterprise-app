@@ -72,16 +72,15 @@ export default function ResponsiveLayout({
     return (
       <>
         <MobileLayout>
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              ...(fullBleed ? {} : { px: 2, py: 2 }),
-            }}
-          >
-            {children}
-          </Box>
+          {fullBleed ? (
+            // fullBleed: children manage their own layout
+            children
+          ) : (
+            // Default: add padding
+            <Box sx={{ px: 2, py: 2 }}>
+              {children}
+            </Box>
+          )}
         </MobileLayout>
         {showAutoLogoutWarning && <AutoLogoutWarning />}
       </>
