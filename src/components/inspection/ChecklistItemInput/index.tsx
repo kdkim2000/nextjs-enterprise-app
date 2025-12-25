@@ -204,7 +204,7 @@ export default function ChecklistItemInput({
       );
 
     case 'select':
-      const selectOptions = options?.split(',').map((o) => o.trim()) || [];
+      const selectOptions = Array.isArray(options) ? options : typeof options === 'string' ? options.split(',').map((o) => o.trim()) : [];
       return (
         <TouchSelect
           value={value}
