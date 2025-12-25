@@ -21,8 +21,30 @@ import {
   Refresh as RetakeIcon,
   Videocam as VideocamIcon,
   VideocamOff as VideocamOffIcon,
+  FileUpload as FileUploadIcon,
 } from '@mui/icons-material';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+
+// Check if we're in a secure context (HTTPS or localhost)
+const isSecureContext = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
+  // window.isSecureContext is the standard way to check
+  if (typeof window.isSecureContext === 'boolean') {
+    return window.isSecureContext;
+  }
+
+  // Fallback: check URL
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+
+  return (
+    protocol === 'https:' ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '[::1]'
+  );
+};
 
 export interface PhotoCaptureProps {
   open: boolean;
@@ -40,14 +62,59 @@ export default function PhotoCapture({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [errorType, setErrorType] = useState<'permission' | 'notfound' | 'inuse' | 'notsupported' | 'unknown'>('unknown');
+  const [errorType, setErrorType] = useState<'permission' | 'notfound' | 'inuse' | 'notsupported' | 'insecure' | 'unknown'>('unknown');
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [permissionState, setPermissionState] = useState<PermissionState | null>(null);
+  const [useFileInput, setUseFileInput] = useState(false);
+
+  // Check secure context on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const secure = isSecureContext();
+      if (!secure) {
+        setUseFileInput(true);
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  // Handle file input change (fallback method)
+  const handleFileInputChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setCapturedImage(reader.result);
+        }
+      };
+      reader.onerror = () => {
+        setError(getLocalizedValue({
+          en: 'Failed to read the image file.',
+          ko: '이미지 파일을 읽는데 실패했습니다.',
+          zh: '读取图片文件失败。',
+          vi: 'Không thể đọc tệp hình ảnh.',
+        }, locale));
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('File read error:', err);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, [locale]);
 
   // Check camera permission status
   const checkPermission = useCallback(async () => {
@@ -146,8 +213,21 @@ export default function PhotoCapture({
 
   // Start camera
   const startCamera = useCallback(async () => {
+    // If using file input mode, don't try to start camera
+    if (useFileInput) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
+    // Check secure context first
+    if (!isSecureContext()) {
+      setUseFileInput(true);
+      setLoading(false);
+      return;
+    }
 
     // Check browser support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -415,6 +495,75 @@ export default function PhotoCapture({
                 objectFit: 'contain',
               }}
             />
+          ) : useFileInput ? (
+            /* File input fallback for non-secure contexts (HTTP) */
+            <Box sx={{ px: 3, textAlign: 'center', maxWidth: 400 }}>
+              <CameraIcon sx={{ fontSize: 80, color: 'grey.500', mb: 3 }} />
+              <Typography variant="body1" color="grey.300" sx={{ mb: 2 }}>
+                {getLocalizedValue({
+                  en: 'Tap the button below to take a photo or select from gallery',
+                  ko: '아래 버튼을 눌러 사진을 촬영하거나 갤러리에서 선택하세요',
+                  zh: '点击下方按钮拍照或从相册选择',
+                  vi: 'Nhấn nút bên dưới để chụp ảnh hoặc chọn từ thư viện',
+                }, locale)}
+              </Typography>
+              <Alert severity="info" sx={{ mb: 3, textAlign: 'left' }}>
+                {getLocalizedValue({
+                  en: 'For direct camera access, please use HTTPS.',
+                  ko: '카메라 직접 접근을 위해서는 HTTPS를 사용해주세요.',
+                  zh: '要直接访问相机，请使用 HTTPS。',
+                  vi: 'Để truy cập camera trực tiếp, vui lòng sử dụng HTTPS.',
+                }, locale)}
+              </Alert>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileInputChange}
+                style={{ display: 'none' }}
+              />
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<CameraIcon />}
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{ py: 2, px: 4 }}
+                >
+                  {getLocalizedValue({
+                    en: 'Take Photo',
+                    ko: '사진 촬영',
+                    zh: '拍照',
+                    vi: 'Chụp ảnh',
+                  }, locale)}
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  startIcon={<FileUploadIcon />}
+                  onClick={() => {
+                    // Remove capture attribute to allow gallery selection
+                    if (fileInputRef.current) {
+                      fileInputRef.current.removeAttribute('capture');
+                      fileInputRef.current.click();
+                      // Restore capture attribute after a short delay
+                      setTimeout(() => {
+                        fileInputRef.current?.setAttribute('capture', 'environment');
+                      }, 100);
+                    }
+                  }}
+                  sx={{ py: 2, px: 4, color: 'white', borderColor: 'grey.500' }}
+                >
+                  {getLocalizedValue({
+                    en: 'From Gallery',
+                    ko: '갤러리에서',
+                    zh: '从相册',
+                    vi: 'Từ thư viện',
+                  }, locale)}
+                </Button>
+              </Box>
+            </Box>
           ) : (
             <video
               ref={videoRef}
@@ -442,7 +591,7 @@ export default function PhotoCapture({
             left: 0,
             right: 0,
             zIndex: 10,
-            display: 'flex',
+            display: capturedImage || !useFileInput ? 'flex' : 'none',
             justifyContent: 'center',
             alignItems: 'center',
             gap: 4,
@@ -481,7 +630,7 @@ export default function PhotoCapture({
                 {getLocalizedValue({ en: 'Use Photo', ko: '사용', zh: '使用', vi: 'Sử dụng' }, locale)}
               </Button>
             </>
-          ) : (
+          ) : !useFileInput ? (
             <>
               <IconButton
                 onClick={toggleFlash}
@@ -513,7 +662,7 @@ export default function PhotoCapture({
                 <SwitchCameraIcon />
               </IconButton>
             </>
-          )}
+          ) : null}
         </Box>
       </DialogContent>
     </Dialog>
