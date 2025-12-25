@@ -90,10 +90,18 @@ export default function MobileInspectionExecutePage() {
 
       const resultsState: Record<string, ResultState> = {};
       existingResults.forEach((r) => {
+        // Extract photo/signature data from photo_urls
+        const photoUrls = r.photo_urls || [];
+        const photoData = photoUrls.find((url: string) => url && !url.startsWith('signature:'));
+        const signatureEntry = photoUrls.find((url: string) => url && url.startsWith('signature:'));
+        // Remove 'signature:' prefix from signature data
+        const signatureData = signatureEntry ? signatureEntry.replace('signature:', '') : undefined;
+
         resultsState[r.item_id] = {
           value: r.value || '',
-          notes: r.notes || '',
-          photoData: r.photo_url,
+          notes: r.remarks || r.notes || '',
+          photoData: photoData || undefined,
+          signatureData: signatureData,
         };
       });
 
@@ -208,12 +216,24 @@ export default function MobileInspectionExecutePage() {
     try {
       setSaving(true);
 
-      const resultsToSave = Object.entries(results).map(([itemId, result]) => ({
-        item_id: itemId,
-        value: result.value,
-        notes: result.notes,
-        photo_url: result.photoData,
-      }));
+      const resultsToSave = Object.entries(results).map(([itemId, result]) => {
+        // Build photo_urls array from photoData and signatureData
+        const photoUrls: string[] = [];
+        if (result.photoData) {
+          photoUrls.push(result.photoData);
+        }
+        if (result.signatureData) {
+          // Mark signature data for identification
+          photoUrls.push(`signature:${result.signatureData}`);
+        }
+
+        return {
+          item_id: itemId,
+          value: result.value,
+          remarks: result.notes,
+          photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
+        };
+      });
 
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
       await showSuccessMessage('COMMON_SAVE_SUCCESS');
@@ -230,12 +250,24 @@ export default function MobileInspectionExecutePage() {
     try {
       setSaving(true);
 
-      const resultsToSave = Object.entries(results).map(([itemId, result]) => ({
-        item_id: itemId,
-        value: result.value,
-        notes: result.notes,
-        photo_url: result.photoData,
-      }));
+      const resultsToSave = Object.entries(results).map(([itemId, result]) => {
+        // Build photo_urls array from photoData and signatureData
+        const photoUrls: string[] = [];
+        if (result.photoData) {
+          photoUrls.push(result.photoData);
+        }
+        if (result.signatureData) {
+          // Mark signature data for identification
+          photoUrls.push(`signature:${result.signatureData}`);
+        }
+
+        return {
+          item_id: itemId,
+          value: result.value,
+          remarks: result.notes,
+          photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
+        };
+      });
 
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
       await inspectionApi.post(`/executions/${inspectionId}/submit`);

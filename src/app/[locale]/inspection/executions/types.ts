@@ -31,6 +31,7 @@ export interface InspectionResult {
   notes?: string;
   remarks?: string; // Backend uses 'remarks', frontend uses 'notes'
   photo_url?: string;
+  photo_urls?: string[]; // Array of photo data URLs or URLs
   created_at: string;
   updated_at: string;
 }

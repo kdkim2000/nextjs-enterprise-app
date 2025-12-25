@@ -28,6 +28,7 @@ import { templateRoutes } from './modules/templates/routes';
 import { itemRoutes } from './modules/items/routes';
 import { inspectionRoutes } from './modules/inspections/routes';
 import { syncRoutes } from './modules/sync/routes';
+import { dashboardRoutes } from './modules/dashboard/routes';
 
 // Swagger
 import swaggerSpec from './swagger';
@@ -112,6 +113,7 @@ app.use('/inspection/templates', templateRoutes);
 app.use('/inspection/items', itemRoutes);
 app.use('/inspection/executions', inspectionRoutes);
 app.use('/inspection/sync', syncRoutes);
+app.use('/inspection/dashboard', dashboardRoutes);
 
 // Error Handling
 app.use(notFoundHandler as unknown as RequestHandler);
@@ -137,6 +139,8 @@ app.listen(PORT, () => {
   logger.info('    - /inspection/executions (CRUD, execute, submit)');
   logger.info('  [Sync Module]');
   logger.info('    - /inspection/sync (download, upload, status)');
+  logger.info('  [Dashboard Module]');
+  logger.info('    - /inspection/dashboard (stats, analytics)');
   logger.info('='.repeat(60));
 });
 

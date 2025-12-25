@@ -181,11 +181,23 @@ export default function InspectionExecutePage() {
 
       // Convert results to lookup map
       const resultsMap: Record<string, InspectionResult> = {};
-      const resultsState: Record<string, { value: string; notes: string }> = {};
+      const resultsState: Record<string, ResultState> = {};
 
       existingResults.forEach((r) => {
         resultsMap[r.item_id] = r;
-        resultsState[r.item_id] = { value: r.value || '', notes: r.remarks || '' };
+        // Extract photo/signature data from photo_urls
+        const photoUrls = r.photo_urls || [];
+        const photoData = photoUrls.find((url: string) => url && !url.startsWith('signature:'));
+        const signatureEntry = photoUrls.find((url: string) => url && url.startsWith('signature:'));
+        // Remove 'signature:' prefix from signature data
+        const signatureData = signatureEntry ? signatureEntry.replace('signature:', '') : undefined;
+
+        resultsState[r.item_id] = {
+          value: r.value || '',
+          notes: r.remarks || '',
+          photoData: photoData || undefined,
+          signatureData: signatureData,
+        };
       });
 
       // Initialize empty results for items without existing results
@@ -222,11 +234,24 @@ export default function InspectionExecutePage() {
     try {
       setSaving(true);
 
-      const resultsToSave = Object.entries(results).map(([itemId, result]) => ({
-        item_id: itemId,
-        value: result.value,
-        remarks: result.notes,
-      }));
+      const resultsToSave = Object.entries(results).map(([itemId, result]) => {
+        // Build photo_urls array from photoData and signatureData
+        const photoUrls: string[] = [];
+        if (result.photoData) {
+          photoUrls.push(result.photoData);
+        }
+        if (result.signatureData) {
+          // Mark signature data for identification
+          photoUrls.push(`signature:${result.signatureData}`);
+        }
+
+        return {
+          item_id: itemId,
+          value: result.value,
+          remarks: result.notes,
+          photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
+        };
+      });
 
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
       await showSuccessMessage('COMMON_SAVE_SUCCESS');
@@ -243,12 +268,25 @@ export default function InspectionExecutePage() {
     try {
       setSaving(true);
 
-      // Save results first
-      const resultsToSave = Object.entries(results).map(([itemId, result]) => ({
-        item_id: itemId,
-        value: result.value,
-        remarks: result.notes,
-      }));
+      // Save results first (with photo/signature data)
+      const resultsToSave = Object.entries(results).map(([itemId, result]) => {
+        // Build photo_urls array from photoData and signatureData
+        const photoUrls: string[] = [];
+        if (result.photoData) {
+          photoUrls.push(result.photoData);
+        }
+        if (result.signatureData) {
+          // Mark signature data for identification
+          photoUrls.push(`signature:${result.signatureData}`);
+        }
+
+        return {
+          item_id: itemId,
+          value: result.value,
+          remarks: result.notes,
+          photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
+        };
+      });
 
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
 

@@ -17,6 +17,11 @@ import {
   IconButton,
   Tooltip,
   useTheme,
+  Alert,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import {
   Assessment as DashboardIcon,
@@ -24,6 +29,8 @@ import {
   Schedule as PendingIcon,
   Warning as OverdueIcon,
   Refresh as RefreshIcon,
+  Description as TemplateIcon,
+  PlayArrow as InProgressIcon,
 } from '@mui/icons-material';
 import {
   BarChart,
@@ -45,117 +52,123 @@ import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { StatCard } from '@/components/inspection/common';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import axios from '@/lib/axios';
 
 interface DashboardStats {
   total: number;
   completed: number;
   inProgress: number;
-  overdue: number;
+  draft: number;
+  submitted: number;
   completionRate: number;
-  trend: number;
+  totalTemplates: number;
 }
 
-interface MonthlyData {
+interface CategoryStats {
+  category: string;
+  count: number;
+  color: string;
+}
+
+interface TemplateStats {
+  id: string;
+  name: string;
+  code: string;
+  inspectionCount: number;
+  completedCount: number;
+  completionRate: number;
+}
+
+interface MonthlyStats {
   month: string;
-  completed: number;
+  monthLabel: string;
   total: number;
+  completed: number;
   rate: number;
 }
 
-interface CategoryData {
-  name: string;
-  value: number;
-  color: string;
-  [key: string]: string | number;
+interface InspectorStats {
+  inspectorId: string;
+  inspectorName: string;
+  completedCount: number;
+  inProgressCount: number;
+  totalCount: number;
 }
 
-interface TemplatePerformance {
-  name: string;
-  inspections: number;
-  avgCompletionTime: number;
-  completionRate: number;
+interface RecentInspection {
+  id: string;
+  inspectionCode: string;
+  targetName: string;
+  status: string;
+  createdAt: string;
+  templateName: string;
+  inspectorName: string;
 }
 
-interface InspectorPerformance {
-  name: string;
-  completed: number;
-  avgTime: number;
-  rating: number;
+interface DashboardData {
+  stats: DashboardStats;
+  categoryStats: CategoryStats[];
+  templateStats: TemplateStats[];
+  monthlyStats: MonthlyStats[];
+  inspectorStats: InspectorStats[];
+  recentInspections: RecentInspection[];
 }
 
-const COLORS = ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
+const COLORS = ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0', '#00bcd4', '#8bc34a', '#e91e63', '#795548', '#607d8b'];
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed':
+    case 'submitted':
+      return 'success';
+    case 'in_progress':
+      return 'info';
+    case 'draft':
+      return 'warning';
+    default:
+      return 'default';
+  }
+};
+
+const getStatusLabel = (status: string, locale: string) => {
+  const labels: Record<string, Record<string, string>> = {
+    draft: { ko: '초안', en: 'Draft' },
+    in_progress: { ko: '진행중', en: 'In Progress' },
+    completed: { ko: '완료', en: 'Completed' },
+    submitted: { ko: '제출됨', en: 'Submitted' },
+  };
+  return labels[status]?.[locale] || labels[status]?.en || status;
+};
 
 export default function InspectionDashboardPage() {
   const currentLocale = useCurrentLocale();
   const theme = useTheme();
 
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
-  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
-  const [templatePerformance, setTemplatePerformance] = useState<TemplatePerformance[]>([]);
-  const [inspectorPerformance, setInspectorPerformance] = useState<InspectorPerformance[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
 
-  // Fetch dashboard data
+  // Fetch dashboard data from API
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      // In production, these would be real API calls
-      // For now, generate mock data
-      const mockStats: DashboardStats = {
-        total: 156,
-        completed: 128,
-        inProgress: 18,
-        overdue: 10,
-        completionRate: 82.1,
-        trend: 5.3,
-      };
-
-      const mockMonthlyData: MonthlyData[] = [
-        { month: 'Jan', completed: 45, total: 52, rate: 86.5 },
-        { month: 'Feb', completed: 38, total: 48, rate: 79.2 },
-        { month: 'Mar', completed: 52, total: 58, rate: 89.7 },
-        { month: 'Apr', completed: 48, total: 55, rate: 87.3 },
-        { month: 'May', completed: 61, total: 68, rate: 89.7 },
-        { month: 'Jun', completed: 55, total: 62, rate: 88.7 },
-      ];
-
-      const mockCategoryData: CategoryData[] = [
-        { name: getLocalizedValue({ en: 'Safety', ko: '안전 점검' }, currentLocale), value: 45, color: '#4caf50' },
-        { name: getLocalizedValue({ en: 'Quality', ko: '품질 검사' }, currentLocale), value: 32, color: '#2196f3' },
-        { name: getLocalizedValue({ en: 'Equipment', ko: '설비 점검' }, currentLocale), value: 28, color: '#ff9800' },
-        { name: getLocalizedValue({ en: 'Environment', ko: '환경 점검' }, currentLocale), value: 18, color: '#9c27b0' },
-        { name: getLocalizedValue({ en: 'Other', ko: '기타' }, currentLocale), value: 12, color: '#607d8b' },
-      ];
-
-      const mockTemplatePerformance: TemplatePerformance[] = [
-        { name: getLocalizedValue({ en: 'Daily Safety Check', ko: '일일 안전 점검' }, currentLocale), inspections: 120, avgCompletionTime: 15, completionRate: 95 },
-        { name: getLocalizedValue({ en: 'Equipment Maintenance', ko: '설비 유지보수' }, currentLocale), inspections: 45, avgCompletionTime: 45, completionRate: 88 },
-        { name: getLocalizedValue({ en: 'Quality Audit', ko: '품질 감사' }, currentLocale), inspections: 32, avgCompletionTime: 60, completionRate: 92 },
-        { name: getLocalizedValue({ en: 'Fire Safety', ko: '소방 점검' }, currentLocale), inspections: 24, avgCompletionTime: 30, completionRate: 100 },
-        { name: getLocalizedValue({ en: 'Cleanliness Check', ko: '청결 점검' }, currentLocale), inspections: 85, avgCompletionTime: 10, completionRate: 78 },
-      ];
-
-      const mockInspectorPerformance: InspectorPerformance[] = [
-        { name: getLocalizedValue({ en: 'John Kim', ko: '김철수' }, currentLocale), completed: 45, avgTime: 18, rating: 4.8 },
-        { name: getLocalizedValue({ en: 'Sarah Lee', ko: '이영희' }, currentLocale), completed: 38, avgTime: 22, rating: 4.6 },
-        { name: getLocalizedValue({ en: 'Mike Park', ko: '박민수' }, currentLocale), completed: 42, avgTime: 20, rating: 4.7 },
-        { name: getLocalizedValue({ en: 'Jane Choi', ko: '최지은' }, currentLocale), completed: 35, avgTime: 25, rating: 4.5 },
-      ];
-
-      setStats(mockStats);
-      setMonthlyData(mockMonthlyData);
-      setCategoryData(mockCategoryData);
-      setTemplatePerformance(mockTemplatePerformance);
-      setInspectorPerformance(mockInspectorPerformance);
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      const response = await axios.get('/inspection/dashboard');
+      setData(response.data);
+    } catch (err: any) {
+      console.error('Failed to fetch dashboard data:', err);
+      setError(
+        err.response?.data?.error ||
+          getLocalizedValue(
+            { en: 'Failed to load dashboard data', ko: '대시보드 데이터를 불러오는데 실패했습니다' },
+            currentLocale
+          )
+      );
     } finally {
       setLoading(false);
     }
-  }, [currentLocale, period]);
+  }, [currentLocale]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -171,6 +184,46 @@ export default function InspectionDashboardPage() {
     );
   }
 
+  if (error) {
+    return (
+      <StandardCrudPageLayout useMenu showBreadcrumb>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <IconButton onClick={fetchDashboardData} color="primary">
+            <RefreshIcon />
+          </IconButton>
+        </Box>
+      </StandardCrudPageLayout>
+    );
+  }
+
+  const stats = data?.stats;
+  const categoryStats = data?.categoryStats || [];
+  const templateStats = data?.templateStats || [];
+  const monthlyStats = data?.monthlyStats || [];
+  const inspectorStats = data?.inspectorStats || [];
+  const recentInspections = data?.recentInspections || [];
+
+  // Prepare chart data
+  const categoryChartData = categoryStats
+    .filter((cat) => cat.count > 0)
+    .map((cat, index) => ({
+      name: cat.category,
+      value: cat.count,
+      color: cat.color || COLORS[index % COLORS.length],
+    }));
+
+  const monthlyChartData = monthlyStats.map((m) => ({
+    month: m.monthLabel,
+    total: m.total,
+    completed: m.completed,
+    rate: m.rate,
+  }));
+
+  const templateChartData = templateStats.filter((t) => t.inspectionCount > 0).slice(0, 5);
+
   return (
     <StandardCrudPageLayout useMenu showBreadcrumb>
       {/* Header */}
@@ -178,23 +231,10 @@ export default function InspectionDashboardPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <DashboardIcon color="primary" />
           <Typography variant="h5" fontWeight="bold">
-            {getLocalizedValue({ en: 'Inspection Dashboard', ko: '검사 대시보드' }, currentLocale)}
+            {getLocalizedValue({ en: 'Inspection Dashboard', ko: '점검 대시보드' }, currentLocale)}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>{getLocalizedValue({ en: 'Period', ko: '기간' }, currentLocale)}</InputLabel>
-            <Select
-              value={period}
-              label={getLocalizedValue({ en: 'Period', ko: '기간' }, currentLocale)}
-              onChange={(e) => setPeriod(e.target.value as typeof period)}
-            >
-              <MenuItem value="week">{getLocalizedValue({ en: 'This Week', ko: '이번 주' }, currentLocale)}</MenuItem>
-              <MenuItem value="month">{getLocalizedValue({ en: 'This Month', ko: '이번 달' }, currentLocale)}</MenuItem>
-              <MenuItem value="quarter">{getLocalizedValue({ en: 'This Quarter', ko: '이번 분기' }, currentLocale)}</MenuItem>
-              <MenuItem value="year">{getLocalizedValue({ en: 'This Year', ko: '올해' }, currentLocale)}</MenuItem>
-            </Select>
-          </FormControl>
           <Tooltip title={getLocalizedValue({ en: 'Refresh', ko: '새로고침' }, currentLocale)}>
             <IconButton onClick={fetchDashboardData}>
               <RefreshIcon />
@@ -207,11 +247,19 @@ export default function InspectionDashboardPage() {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
-            title={getLocalizedValue({ en: 'Total Inspections', ko: '전체 검사' }, currentLocale)}
+            title={getLocalizedValue({ en: 'Total Inspections', ko: '전체 점검' }, currentLocale)}
             value={stats?.total || 0}
             icon={<DashboardIcon />}
             color={theme.palette.primary.main}
-            trend={stats?.trend}
+            locale={currentLocale}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <StatCard
+            title={getLocalizedValue({ en: 'In Progress', ko: '진행중' }, currentLocale)}
+            value={stats?.inProgress || 0}
+            icon={<InProgressIcon />}
+            color={theme.palette.info.main}
             locale={currentLocale}
           />
         </Grid>
@@ -221,25 +269,16 @@ export default function InspectionDashboardPage() {
             value={stats?.completed || 0}
             icon={<CompletedIcon />}
             color={theme.palette.success.main}
-            subtitle={`${stats?.completionRate}% ${getLocalizedValue({ en: 'completion rate', ko: '완료율' }, currentLocale)}`}
+            subtitle={`${stats?.completionRate || 0}% ${getLocalizedValue({ en: 'completion rate', ko: '완료율' }, currentLocale)}`}
             locale={currentLocale}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
-            title={getLocalizedValue({ en: 'In Progress', ko: '진행 중' }, currentLocale)}
-            value={stats?.inProgress || 0}
-            icon={<PendingIcon />}
-            color={theme.palette.info.main}
-            locale={currentLocale}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={getLocalizedValue({ en: 'Overdue', ko: '지연' }, currentLocale)}
-            value={stats?.overdue || 0}
-            icon={<OverdueIcon />}
-            color={theme.palette.error.main}
+            title={getLocalizedValue({ en: 'Templates', ko: '템플릿' }, currentLocale)}
+            value={stats?.totalTemplates || 0}
+            icon={<TemplateIcon />}
+            color={theme.palette.secondary.main}
             locale={currentLocale}
           />
         </Grid>
@@ -251,33 +290,41 @@ export default function InspectionDashboardPage() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3, height: 400 }}>
             <Typography variant="h6" gutterBottom>
-              {getLocalizedValue({ en: 'Monthly Inspection Trend', ko: '월별 검사 추이' }, currentLocale)}
+              {getLocalizedValue({ en: 'Monthly Inspection Trend', ko: '월별 점검 추이' }, currentLocale)}
             </Typography>
-            <ResponsiveContainer width="100%" height="85%">
-              <AreaChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <RechartsTooltip />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="total"
-                  name={getLocalizedValue({ en: 'Total', ko: '전체' }, currentLocale)}
-                  stroke={theme.palette.primary.main}
-                  fill={theme.palette.primary.light}
-                  fillOpacity={0.3}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="completed"
-                  name={getLocalizedValue({ en: 'Completed', ko: '완료' }, currentLocale)}
-                  stroke={theme.palette.success.main}
-                  fill={theme.palette.success.light}
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {monthlyChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="85%">
+                <AreaChart data={monthlyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <RechartsTooltip />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    name={getLocalizedValue({ en: 'Total', ko: '전체' }, currentLocale)}
+                    stroke={theme.palette.primary.main}
+                    fill={theme.palette.primary.light}
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="completed"
+                    name={getLocalizedValue({ en: 'Completed', ko: '완료' }, currentLocale)}
+                    stroke={theme.palette.success.main}
+                    fill={theme.palette.success.light}
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '85%' }}>
+                <Typography color="text.secondary">
+                  {getLocalizedValue({ en: 'No data available', ko: '데이터가 없습니다' }, currentLocale)}
+                </Typography>
+              </Box>
+            )}
           </Paper>
         </Grid>
 
@@ -287,129 +334,188 @@ export default function InspectionDashboardPage() {
             <Typography variant="h6" gutterBottom>
               {getLocalizedValue({ en: 'By Category', ko: '카테고리별 분포' }, currentLocale)}
             </Typography>
-            <ResponsiveContainer width="100%" height="85%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={(props: PieLabelRenderProps) => `${props.name} ${(Number(props.percent || 0) * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <RechartsTooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {categoryChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="85%">
+                <PieChart>
+                  <Pie
+                    data={categoryChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={(props: PieLabelRenderProps) =>
+                      `${props.name} ${(Number(props.percent || 0) * 100).toFixed(0)}%`
+                    }
+                    labelLine={false}
+                  >
+                    {categoryChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '85%' }}>
+                <Typography color="text.secondary">
+                  {getLocalizedValue({ en: 'No data available', ko: '데이터가 없습니다' }, currentLocale)}
+                </Typography>
+              </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>
 
       {/* Charts Row 2 */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Template Performance */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 3, height: 400 }}>
             <Typography variant="h6" gutterBottom>
-              {getLocalizedValue({ en: 'Template Performance', ko: '템플릿별 성과' }, currentLocale)}
+              {getLocalizedValue({ en: 'Top Templates', ko: '주요 템플릿' }, currentLocale)}
             </Typography>
-            <ResponsiveContainer width="100%" height="85%">
-              <BarChart data={templatePerformance} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12 }} />
-                <RechartsTooltip />
-                <Legend />
-                <Bar
-                  dataKey="inspections"
-                  name={getLocalizedValue({ en: 'Inspections', ko: '검사 수' }, currentLocale)}
-                  fill={theme.palette.primary.main}
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {templateChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="85%">
+                <BarChart data={templateChartData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} />
+                  <RechartsTooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="inspectionCount"
+                    name={getLocalizedValue({ en: 'Inspections', ko: '점검 수' }, currentLocale)}
+                    fill={theme.palette.primary.main}
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '85%' }}>
+                <Typography color="text.secondary">
+                  {getLocalizedValue({ en: 'No data available', ko: '데이터가 없습니다' }, currentLocale)}
+                </Typography>
+              </Box>
+            )}
           </Paper>
         </Grid>
 
-        {/* Completion Rate by Template */}
+        {/* Recent Inspections */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 3, height: 400 }}>
             <Typography variant="h6" gutterBottom>
-              {getLocalizedValue({ en: 'Completion Rate by Template', ko: '템플릿별 완료율' }, currentLocale)}
+              {getLocalizedValue({ en: 'Recent Inspections', ko: '최근 점검' }, currentLocale)}
             </Typography>
-            <ResponsiveContainer width="100%" height="85%">
-              <BarChart data={templatePerformance}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
-                <YAxis domain={[0, 100]} />
-                <RechartsTooltip formatter={(value) => `${value}%`} />
-                <Bar
-                  dataKey="completionRate"
-                  name={getLocalizedValue({ en: 'Completion Rate', ko: '완료율' }, currentLocale)}
-                  fill={theme.palette.success.main}
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-
-        {/* Inspector Performance */}
-        <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              {getLocalizedValue({ en: 'Inspector Performance', ko: '검사자별 성과' }, currentLocale)}
-            </Typography>
-            <Box sx={{ overflowX: 'auto' }}>
-              <Box sx={{ display: 'flex', gap: 2, py: 2, minWidth: 'fit-content' }}>
-                {inspectorPerformance.map((inspector, index) => (
-                  <Card key={index} sx={{ minWidth: 200, flex: '0 0 auto' }}>
-                    <CardContent>
-                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                        {inspector.name}
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {getLocalizedValue({ en: 'Completed', ko: '완료' }, currentLocale)}
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold">
-                            {inspector.completed}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {getLocalizedValue({ en: 'Avg. Time', ko: '평균 시간' }, currentLocale)}
-                          </Typography>
-                          <Typography variant="body2" fontWeight="bold">
-                            {inspector.avgTime} {getLocalizedValue({ en: 'min', ko: '분' }, currentLocale)}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {getLocalizedValue({ en: 'Rating', ko: '평점' }, currentLocale)}
-                          </Typography>
-                          <Chip
-                            label={inspector.rating.toFixed(1)}
-                            size="small"
-                            color={inspector.rating >= 4.5 ? 'success' : inspector.rating >= 4 ? 'primary' : 'warning'}
-                          />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
+            {recentInspections.length > 0 ? (
+              <List sx={{ overflow: 'auto', maxHeight: 320 }}>
+                {recentInspections.map((inspection, index) => (
+                  <React.Fragment key={inspection.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" fontWeight="bold">
+                              {inspection.inspectionCode}
+                            </Typography>
+                            <Chip
+                              label={getStatusLabel(inspection.status, currentLocale)}
+                              size="small"
+                              color={getStatusColor(inspection.status) as any}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <>
+                            <Typography variant="body2" component="span">
+                              {inspection.templateName}
+                            </Typography>
+                            {inspection.targetName && (
+                              <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+                                - {inspection.targetName}
+                              </Typography>
+                            )}
+                            <br />
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(inspection.createdAt).toLocaleString(currentLocale)}
+                            </Typography>
+                          </>
+                        }
+                      />
+                    </ListItem>
+                    {index < recentInspections.length - 1 && <Divider />}
+                  </React.Fragment>
                 ))}
+              </List>
+            ) : (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '85%' }}>
+                <Typography color="text.secondary">
+                  {getLocalizedValue({ en: 'No recent inspections', ko: '최근 점검이 없습니다' }, currentLocale)}
+                </Typography>
               </Box>
-            </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Inspector Performance */}
+      {inspectorStats.length > 0 && (
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12 }}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                {getLocalizedValue({ en: 'Inspector Performance', ko: '점검자별 현황' }, currentLocale)}
+              </Typography>
+              <Box sx={{ overflowX: 'auto' }}>
+                <Box sx={{ display: 'flex', gap: 2, py: 2, minWidth: 'fit-content' }}>
+                  {inspectorStats.map((inspector, index) => (
+                    <Card key={index} sx={{ minWidth: 200, flex: '0 0 auto' }}>
+                      <CardContent>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                          {inspector.inspectorName}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {getLocalizedValue({ en: 'Total', ko: '전체' }, currentLocale)}
+                            </Typography>
+                            <Typography variant="body2" fontWeight="bold">
+                              {inspector.totalCount}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {getLocalizedValue({ en: 'Completed', ko: '완료' }, currentLocale)}
+                            </Typography>
+                            <Chip
+                              label={inspector.completedCount}
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                            />
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {getLocalizedValue({ en: 'In Progress', ko: '진행중' }, currentLocale)}
+                            </Typography>
+                            <Chip
+                              label={inspector.inProgressCount}
+                              size="small"
+                              color="info"
+                              variant="outlined"
+                            />
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      )}
     </StandardCrudPageLayout>
   );
 }
