@@ -9,12 +9,10 @@ import {
   IconButton,
   CircularProgress,
   Alert,
-  Fab,
   Zoom,
   Slide,
   SwipeableDrawer,
   List,
-  ListItem,
   ListItemIcon,
   ListItemText,
   ListItemButton,
@@ -519,89 +517,183 @@ export default function MobileInspectionExecutePage() {
         </Zoom>
       </Box>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Action Bar */}
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          p: 2,
-          pb: 'calc(env(safe-area-inset-bottom) + 16px)',
           bgcolor: 'background.paper',
           borderTop: 1,
           borderColor: 'divider',
-          boxShadow: '0 -4px 12px rgba(0,0,0,0.05)',
+          boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
+          pb: 'env(safe-area-inset-bottom)',
         }}
       >
-        <Button
-          variant="outlined"
-          onClick={goPrev}
-          disabled={currentIndex === 0}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderRadius: 2,
-            fontWeight: 'bold',
-          }}
-          startIcon={<PrevIcon />}
-        >
-          {getLocalizedValue({ en: 'Prev', ko: '이전' }, currentLocale)}
-        </Button>
+        {/* Progress Summary Bar */}
+        {!isCompleted && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 2,
+              py: 1,
+              bgcolor: canSubmit
+                ? alpha(theme.palette.success.main, 0.08)
+                : alpha(theme.palette.warning.main, 0.08),
+              borderBottom: 1,
+              borderColor: 'divider',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {canSubmit ? (
+                <CheckIcon sx={{ fontSize: 18, color: 'success.main' }} />
+              ) : (
+                <RequiredIcon sx={{ fontSize: 18, color: 'warning.main' }} />
+              )}
+              <Typography variant="caption" fontWeight="medium" color={canSubmit ? 'success.main' : 'warning.main'}>
+                {canSubmit
+                  ? getLocalizedValue({ en: 'All required items completed', ko: '필수 항목 모두 완료' }, currentLocale)
+                  : getLocalizedValue(
+                      { en: `Required: ${completedRequiredItems}/${requiredItems.length}`, ko: `필수: ${completedRequiredItems}/${requiredItems.length}` },
+                      currentLocale
+                    )}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              {getLocalizedValue({ en: `Total: ${completedItems}/${items.length}`, ko: `전체: ${completedItems}/${items.length}` }, currentLocale)}
+            </Typography>
+          </Box>
+        )}
 
+        {/* Navigation Row */}
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            px: 2,
+            gap: 0.5,
+            px: 1.5,
+            py: 1,
           }}
         >
-          <Typography variant="h6" fontWeight="bold" color="primary">
-            {currentIndex + 1}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            / {items.length}
-          </Typography>
-        </Box>
-
-        <Button
-          variant={currentIndex === items.length - 1 && canSubmit ? 'contained' : 'outlined'}
-          color={currentIndex === items.length - 1 && canSubmit ? 'success' : 'primary'}
-          onClick={currentIndex === items.length - 1 && canSubmit && !isCompleted ? handleSubmit : goNext}
-          disabled={currentIndex === items.length - 1 && !canSubmit}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderRadius: 2,
-            fontWeight: 'bold',
-          }}
-          endIcon={currentIndex === items.length - 1 && canSubmit ? <SubmitIcon /> : <NextIcon />}
-        >
-          {currentIndex === items.length - 1 && canSubmit
-            ? getLocalizedValue({ en: 'Submit', ko: '제출' }, currentLocale)
-            : getLocalizedValue({ en: 'Next', ko: '다음' }, currentLocale)}
-        </Button>
-      </Box>
-
-      {/* FAB for Save */}
-      {!isCompleted && (
-        <Zoom in>
-          <Fab
-            color="primary"
-            size="medium"
-            onClick={handleSave}
-            disabled={saving}
+          <IconButton
+            onClick={goPrev}
+            disabled={currentIndex === 0}
             sx={{
-              position: 'fixed',
-              right: 16,
-              bottom: 'calc(env(safe-area-inset-bottom) + 100px)',
-              boxShadow: 3,
+              bgcolor: alpha(theme.palette.grey[500], 0.08),
+              '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.15) },
+              '&.Mui-disabled': { bgcolor: 'transparent' },
             }}
           >
-            {saving ? <CircularProgress size={24} color="inherit" /> : <SaveIcon />}
-          </Fab>
-        </Zoom>
-      )}
+            <PrevIcon />
+          </IconButton>
+
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+            }}
+          >
+            {items.map((_, idx) => (
+              <Box
+                key={idx}
+                onClick={() => goToItem(idx)}
+                sx={{
+                  width: idx === currentIndex ? 16 : 6,
+                  height: 6,
+                  borderRadius: 3,
+                  bgcolor: idx === currentIndex
+                    ? 'primary.main'
+                    : itemStatuses[idx]
+                      ? 'success.main'
+                      : alpha(theme.palette.grey[500], 0.3),
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              />
+            ))}
+          </Box>
+
+          <IconButton
+            onClick={goNext}
+            disabled={currentIndex === items.length - 1}
+            sx={{
+              bgcolor: alpha(theme.palette.grey[500], 0.08),
+              '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.15) },
+              '&.Mui-disabled': { bgcolor: 'transparent' },
+            }}
+          >
+            <NextIcon />
+          </IconButton>
+        </Box>
+
+        {/* Action Buttons Row */}
+        {!isCompleted && (
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1.5,
+              px: 2,
+              py: 1.5,
+            }}
+          >
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveIcon />}
+              onClick={handleSave}
+              disabled={saving}
+              sx={{
+                flex: 1,
+                py: 1.25,
+                borderRadius: 2,
+                fontWeight: 'bold',
+                borderWidth: 2,
+                '&:hover': { borderWidth: 2 },
+              }}
+            >
+              {getLocalizedValue({ en: 'Save', ko: '저장' }, currentLocale)}
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              color="success"
+              startIcon={<SubmitIcon />}
+              onClick={handleSubmit}
+              disabled={saving || !canSubmit}
+              sx={{
+                flex: 1.5,
+                py: 1.25,
+                borderRadius: 2,
+                fontWeight: 'bold',
+                boxShadow: canSubmit ? 3 : 0,
+              }}
+            >
+              {getLocalizedValue({ en: 'Submit', ko: '제출' }, currentLocale)}
+            </Button>
+          </Box>
+        )}
+
+        {/* Completed State */}
+        {isCompleted && (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              py: 2,
+              bgcolor: alpha(theme.palette.success.main, 0.08),
+            }}
+          >
+            <CheckIcon sx={{ color: 'success.main' }} />
+            <Typography variant="body2" color="success.main" fontWeight="medium">
+              {getLocalizedValue({ en: 'Inspection Completed', ko: '점검 완료' }, currentLocale)}
+            </Typography>
+          </Box>
+        )}
+      </Box>
 
       {/* Menu Drawer */}
       <SwipeableDrawer
