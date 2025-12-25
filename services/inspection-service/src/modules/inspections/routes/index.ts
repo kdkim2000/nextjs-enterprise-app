@@ -83,7 +83,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Inspection not found' });
     }
 
-    res.json(inspection);
+    res.json({ inspection });
   } catch (error) {
     logger.error('Get inspection error:', error);
     res.status(500).json({ error: 'Failed to fetch inspection' });
@@ -252,7 +252,7 @@ router.get('/:id/results', authenticateToken, async (req: Request, res: Response
     }
 
     const results = await inspectionService.getInspectionResults(id);
-    res.json(results);
+    res.json({ results });
   } catch (error) {
     logger.error('Get results error:', error);
     res.status(500).json({ error: 'Failed to fetch results' });
