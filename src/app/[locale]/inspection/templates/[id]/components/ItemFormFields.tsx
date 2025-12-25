@@ -149,8 +149,8 @@ export default function ItemFormFields({
       {/* Preview select options */}
       {item.item_type === 'select' && item.options && (
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {item.options.split(',').map((opt, idx) => (
-            <Chip key={idx} label={opt.trim()} size="small" variant="outlined" />
+          {(Array.isArray(item.options) ? item.options : typeof item.options === 'string' ? item.options.split(',').map((o) => o.trim()) : []).map((opt, idx) => (
+            <Chip key={idx} label={typeof opt === 'string' ? opt.trim() : opt} size="small" variant="outlined" />
           ))}
         </Box>
       )}
