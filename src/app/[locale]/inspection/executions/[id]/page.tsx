@@ -75,6 +75,7 @@ const getStatusLabel = (status: InspectionStatus, locale: string): string => {
     draft: { ko: '초안', en: 'Draft' },
     in_progress: { ko: '진행중', en: 'In Progress' },
     completed: { ko: '완료', en: 'Completed' },
+    submitted: { ko: '제출됨', en: 'Submitted' },
     cancelled: { ko: '취소', en: 'Cancelled' },
   };
   return labels[status]?.[locale] || labels[status]?.['en'] || status;

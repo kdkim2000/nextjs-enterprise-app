@@ -41,6 +41,10 @@ const getStatusConfig = (status: InspectionStatus, locale: string) => {
       label: getLocalizedValue({ ko: '대기', en: 'Pending' }, locale),
       color: 'warning'
     },
+    submitted: {
+      label: getLocalizedValue({ ko: '제출됨', en: 'Submitted' }, locale),
+      color: 'info'
+    },
     cancelled: {
       label: getLocalizedValue({ ko: '취소', en: 'Cancelled' }, locale),
       color: 'error'

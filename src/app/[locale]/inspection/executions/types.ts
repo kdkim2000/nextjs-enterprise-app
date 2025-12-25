@@ -1,4 +1,4 @@
-export type InspectionStatus = 'draft' | 'in_progress' | 'completed' | 'cancelled';
+export type InspectionStatus = 'draft' | 'in_progress' | 'completed' | 'submitted' | 'cancelled';
 export type ItemType = 'checkbox' | 'text' | 'number' | 'select' | 'photo' | 'signature' | 'date' | 'time';
 
 export interface Inspection {

@@ -27,6 +27,7 @@ const getStatusLabel = (status: InspectionStatus, locale: string): string => {
     draft: { ko: '초안', en: 'Draft', zh: '草稿', vi: 'Bản nháp' },
     in_progress: { ko: '진행중', en: 'In Progress', zh: '进行中', vi: 'Đang tiến hành' },
     completed: { ko: '완료', en: 'Completed', zh: '已完成', vi: 'Đã hoàn thành' },
+    submitted: { ko: '제출됨', en: 'Submitted', zh: '已提交', vi: 'Đã nộp' },
     cancelled: { ko: '취소', en: 'Cancelled', zh: '已取消', vi: 'Đã hủy' },
   };
   return labels[status]?.[locale] || labels[status]?.['en'] || status;
