@@ -51,6 +51,8 @@ services:
     depends_on:
       core-service:
         condition: service_healthy
+      inspection-service:
+        condition: service_healthy
       frontend:
         condition: service_started
     restart: unless-stopped
@@ -278,6 +280,43 @@ services:
       - corenext-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Inspection Service (체크시트, 검사, 오프라인 동기화)
+  inspection-service:
+    build:
+      context: ../..
+      dockerfile: services/inspection-service/Dockerfile
+    container_name: corenext-inspection-service
+    # 보안: Nginx를 통해서만 접근 (내부 네트워크)
+    expose:
+      - "3013"
+    environment:
+      - NODE_ENV=production
+      - PORT=3013
+      - DB_HOST=corenext-postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-corenextdb}
+      - DB_USER=${DB_USER:-corenext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
+    volumes:
+      - /data/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      core-service:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - corenext-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3013/health"]
       interval: 30s
       timeout: 10s
       retries: 3

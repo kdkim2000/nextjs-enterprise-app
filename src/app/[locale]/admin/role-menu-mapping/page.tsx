@@ -107,7 +107,7 @@ export default function RoleMenuMappingPage() {
     try {
       setLoading(true);
       const response = await adminApi.get('/role-program-mappings', {
-        params: { programId: selectedProgram.id, includeDetails: 'true' }
+        params: { programCode: selectedProgram.code, includeDetails: 'true' }
       });
       const programMappings = response.mappings || [];
       setMappings(programMappings);
@@ -172,7 +172,7 @@ export default function RoleMenuMappingPage() {
       for (const role of roles) {
         await adminApi.post('/role-program-mappings', {
           roleId: role.id,
-          programId: selectedProgram.id,
+          programCode: selectedProgram.code,
           ...permissions
         });
       }

@@ -491,5 +491,19 @@ export const componentCategories = [
         tags: ['Date', 'Format', 'Utility', 'i18n']
       }
     ]
+  },
+  {
+    category: 'Offline & Sync',
+    description: 'Components for offline mode and data synchronization in PWA/mobile applications',
+    icon: Storage,
+    color: '#795548',
+    components: [
+      {
+        title: 'Offline Sync Components',
+        description: 'SyncStatusIndicator, OfflineStatusBar, DownloadOfflineButton, SyncDetailPanel - offline mode and sync management',
+        path: '/dev/components/offline-sync',
+        tags: ['Offline', 'Sync', 'PWA', 'Mobile', 'IndexedDB']
+      }
+    ]
   }
 ];

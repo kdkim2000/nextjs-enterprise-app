@@ -25,6 +25,7 @@ import {
   Assessment,
   Settings,
   List as ListIcon,
+  ListAlt,
   AdminPanelSettings,
   GridOn,
   TrendingUp,
@@ -49,6 +50,7 @@ import {
   Storage,
   Notifications,
   Email,
+  PlaylistAddCheck,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
@@ -81,11 +83,13 @@ const iconMap: Record<string, React.ReactElement> = {
   Info: <Info />,
   Link: <Link />,
   List: <ListIcon />,
+  ListAlt: <ListAlt />,
   Menu: <MenuIcon />,
   Message: <Message />,
   Notifications: <Notifications />,
   Palette: <Palette />,
   People: <People />,
+  PlaylistAddCheck: <PlaylistAddCheck />,
   School: <School />,
   Security: <Security />,
   Settings: <Settings />,

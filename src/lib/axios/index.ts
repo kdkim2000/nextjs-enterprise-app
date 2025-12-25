@@ -265,6 +265,7 @@ let _authApiInstance: ReturnType<typeof createServiceApi> | null = null;
 let _contentApiInstance: ReturnType<typeof createServiceApi> | null = null;
 let _commonApiInstance: ReturnType<typeof createServiceApi> | null = null;
 let _commApiInstance: ReturnType<typeof createServiceApi> | null = null;
+let _inspectionApiInstance: ReturnType<typeof createServiceApi> | null = null;
 
 const getAdminBaseUrl = (): string => {
   const config = getApiConfig();
@@ -284,6 +285,11 @@ const getCommonBaseUrl = (): string => {
 const getCommBaseUrl = (): string => {
   const config = getApiConfig();
   return config.comm;
+};
+
+const getInspectionBaseUrl = (): string => {
+  const config = getApiConfig();
+  return config.inspection;
 };
 
 // Admin service API client (for menus, users, roles, permissions)
@@ -454,5 +460,39 @@ export const commApi = {
       _commApiInstance = createServiceApi(getCommBaseUrl());
     }
     return _commApiInstance.delete<T>(url, config);
+  },
+};
+
+// Inspection service API client (for checksheet templates, inspections, sync)
+export const inspectionApi = {
+  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_inspectionApiInstance) {
+      _inspectionApiInstance = createServiceApi(getInspectionBaseUrl());
+    }
+    return _inspectionApiInstance.get<T>(url, config);
+  },
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_inspectionApiInstance) {
+      _inspectionApiInstance = createServiceApi(getInspectionBaseUrl());
+    }
+    return _inspectionApiInstance.post<T>(url, data, config);
+  },
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_inspectionApiInstance) {
+      _inspectionApiInstance = createServiceApi(getInspectionBaseUrl());
+    }
+    return _inspectionApiInstance.put<T>(url, data, config);
+  },
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    if (!_inspectionApiInstance) {
+      _inspectionApiInstance = createServiceApi(getInspectionBaseUrl());
+    }
+    return _inspectionApiInstance.patch<T>(url, data, config);
+  },
+  delete: <T = any>(url: string, config?: AxiosRequestConfig) => {
+    if (!_inspectionApiInstance) {
+      _inspectionApiInstance = createServiceApi(getInspectionBaseUrl());
+    }
+    return _inspectionApiInstance.delete<T>(url, config);
   },
 };
