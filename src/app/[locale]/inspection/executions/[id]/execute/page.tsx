@@ -55,6 +55,73 @@ interface InspectionData {
   results: Record<string, InspectionResult>;
 }
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+// Parse options from various formats to SelectOption[]
+const parseSelectOptions = (options?: string | string[] | object): SelectOption[] => {
+  if (!options) return [];
+
+  // Already an array
+  if (Array.isArray(options)) {
+    if (options.length > 0 && typeof options[0] === 'object' && 'value' in options[0]) {
+      return options as SelectOption[];
+    }
+    return options.map(o => ({ value: String(o), label: String(o) }));
+  }
+
+  // Object with choices property (JSON format from DB)
+  if (typeof options === 'object' && options !== null) {
+    const obj = options as any;
+    if (obj.choices && Array.isArray(obj.choices)) {
+      return obj.choices.map((c: any) => ({
+        value: c.value || c.label || String(c),
+        label: c.label || c.value || String(c),
+      }));
+    }
+    return Object.entries(options).map(([key, val]) => ({
+      value: key,
+      label: String(val),
+    }));
+  }
+
+  // String - could be JSON or comma-separated
+  if (typeof options === 'string') {
+    const trimmed = options.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          if (parsed.length > 0 && typeof parsed[0] === 'object' && 'value' in parsed[0]) {
+            return parsed as SelectOption[];
+          }
+          return parsed.map(o => ({ value: String(o), label: String(o) }));
+        }
+        if (parsed.choices && Array.isArray(parsed.choices)) {
+          return parsed.choices.map((c: any) => ({
+            value: c.value || c.label || String(c),
+            label: c.label || c.value || String(c),
+          }));
+        }
+        return Object.entries(parsed).map(([key, val]) => ({
+          value: key,
+          label: String(val),
+        }));
+      } catch (e) {
+        console.warn('Failed to parse options JSON:', e);
+      }
+    }
+    return trimmed.split(',').map(o => {
+      const val = o.trim();
+      return { value: val, label: val };
+    });
+  }
+
+  return [];
+};
+
 interface ResultState {
   value: string;
   notes: string;
@@ -352,7 +419,7 @@ export default function InspectionExecutePage() {
         );
 
       case 'select':
-        const options = Array.isArray(item.options) ? item.options : typeof item.options === 'string' ? item.options.split(',').map((o) => o.trim()) : [];
+        const selectOptions = parseSelectOptions(item.options);
         return (
           <FormControl fullWidth size="small">
             <Select
@@ -363,9 +430,9 @@ export default function InspectionExecutePage() {
               <MenuItem value="">
                 {getLocalizedValue({ en: 'Select option', ko: '옵션 선택' }, currentLocale)}
               </MenuItem>
-              {options.map((opt, idx) => (
-                <MenuItem key={idx} value={opt}>
-                  {opt}
+              {selectOptions.map((opt, idx) => (
+                <MenuItem key={idx} value={opt.value}>
+                  {opt.label}
                 </MenuItem>
               ))}
             </Select>

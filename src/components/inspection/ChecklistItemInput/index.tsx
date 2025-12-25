@@ -39,48 +39,56 @@ export interface ChecklistItemInputProps {
   signaturePreview?: string;
 }
 
-// Large touch-friendly checkbox
+// Large touch-friendly checkbox with 3 states: unselected, OK (true), NG (false)
 const TouchCheckbox: React.FC<{
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  value: string; // '', 'true', or 'false'
+  onChange: (value: string) => void;
   disabled?: boolean;
   locale?: string;
-}> = ({ checked, onChange, disabled, locale = 'ko' }) => (
-  <Box sx={{ display: 'flex', gap: 2 }}>
-    <Button
-      variant={checked ? 'contained' : 'outlined'}
-      color="success"
-      size="large"
-      onClick={() => !disabled && onChange(true)}
-      disabled={disabled}
-      sx={{
-        flex: 1,
-        py: 2,
-        fontSize: '1.1rem',
-        borderRadius: 2,
-      }}
-      startIcon={<CheckIcon />}
-    >
-      {getLocalizedValue({ en: 'OK', ko: '양호', zh: '良好', vi: 'Tốt' }, locale)}
-    </Button>
-    <Button
-      variant={!checked && checked !== undefined ? 'contained' : 'outlined'}
-      color="error"
-      size="large"
-      onClick={() => !disabled && onChange(false)}
-      disabled={disabled}
-      sx={{
-        flex: 1,
-        py: 2,
-        fontSize: '1.1rem',
-        borderRadius: 2,
-      }}
-      startIcon={<CancelIcon />}
-    >
-      {getLocalizedValue({ en: 'NG', ko: '불량', zh: '不良', vi: 'Không tốt' }, locale)}
-    </Button>
-  </Box>
-);
+}> = ({ value, onChange, disabled, locale = 'ko' }) => {
+  const isOK = value === 'true' || value === '1';
+  const isNG = value === 'false' || value === '0';
+  const isUnselected = !isOK && !isNG;
+
+  return (
+    <Box sx={{ display: 'flex', gap: 2 }}>
+      <Button
+        variant={isOK ? 'contained' : 'outlined'}
+        color="success"
+        size="large"
+        onClick={() => !disabled && onChange('true')}
+        disabled={disabled}
+        sx={{
+          flex: 1,
+          py: 2,
+          fontSize: '1.1rem',
+          borderRadius: 2,
+          opacity: isUnselected ? 0.7 : 1,
+        }}
+        startIcon={<CheckIcon />}
+      >
+        {getLocalizedValue({ en: 'OK', ko: '양호', zh: '良好', vi: 'Tốt' }, locale)}
+      </Button>
+      <Button
+        variant={isNG ? 'contained' : 'outlined'}
+        color="error"
+        size="large"
+        onClick={() => !disabled && onChange('false')}
+        disabled={disabled}
+        sx={{
+          flex: 1,
+          py: 2,
+          fontSize: '1.1rem',
+          borderRadius: 2,
+          opacity: isUnselected ? 0.7 : 1,
+        }}
+        startIcon={<CancelIcon />}
+      >
+        {getLocalizedValue({ en: 'NG', ko: '불량', zh: '不良', vi: 'Không tốt' }, locale)}
+      </Button>
+    </Box>
+  );
+};
 
 // Touch-friendly number input with +/- buttons
 const TouchNumberInput: React.FC<{
@@ -267,8 +275,8 @@ export default function ChecklistItemInput({
     case 'checkbox':
       return (
         <TouchCheckbox
-          checked={value === 'true' || value === '1'}
-          onChange={(checked) => onChange(checked ? 'true' : 'false')}
+          value={value}
+          onChange={onChange}
           disabled={disabled}
           locale={locale}
         />
