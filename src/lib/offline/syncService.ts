@@ -3,8 +3,17 @@
  * Handles syncing local changes to the server when online
  */
 
-import { inspectionStore, SyncQueueItem, OfflineResult } from './inspectionStore';
+import { inspectionStore, SyncQueueItem, OfflineResult, OfflineMetadata } from './inspectionStore';
 import { inspectionApi } from '@/lib/axios';
+
+export interface DownloadProgress {
+  stage: 'inspections' | 'templates' | 'items' | 'results' | 'complete';
+  current: number;
+  total: number;
+  message: string;
+}
+
+export type DownloadProgressCallback = (progress: DownloadProgress) => void;
 
 export interface SyncStatus {
   isOnline: boolean;
@@ -58,10 +67,22 @@ class SyncService {
 
   /**
    * Handle coming online
+   * Only auto-sync if offline mode is not explicitly enabled
    */
   private handleOnline = async (): Promise<void> => {
-    console.log('Network online - starting sync');
+    console.log('Network online');
     this.notifyStatusChange();
+
+    // Check if offline mode is explicitly enabled
+    const metadata = await this.getOfflineMetadata();
+    if (metadata?.isOfflineModeEnabled) {
+      // Offline mode is enabled - notify listeners but don't auto-sync
+      // Let user decide when to sync
+      console.log('Offline mode enabled - skipping auto-sync. User can manually sync.');
+      return;
+    }
+
+    // Auto-sync if not in offline mode
     await this.sync();
   };
 
@@ -502,6 +523,288 @@ class SyncService {
       await inspectionStore.removeSyncItem(item.id);
     }
 
+    await this.notifyStatusChange();
+  }
+
+  // ==================== Offline Mode Management ====================
+
+  private downloadProgressListeners: Set<DownloadProgressCallback> = new Set();
+  private isDownloading = false;
+
+  /**
+   * Subscribe to download progress
+   */
+  onDownloadProgress(callback: DownloadProgressCallback): () => void {
+    this.downloadProgressListeners.add(callback);
+    return () => this.downloadProgressListeners.delete(callback);
+  }
+
+  /**
+   * Notify download progress listeners
+   */
+  private notifyDownloadProgress(progress: DownloadProgress): void {
+    this.downloadProgressListeners.forEach((cb) => cb(progress));
+  }
+
+  /**
+   * Get offline metadata
+   */
+  async getOfflineMetadata(): Promise<OfflineMetadata | null> {
+    return inspectionStore.getOfflineMetadata();
+  }
+
+  /**
+   * Check if offline mode is enabled
+   */
+  async isOfflineModeEnabled(): Promise<boolean> {
+    return inspectionStore.isOfflineModeEnabled();
+  }
+
+  /**
+   * Set offline mode enabled/disabled
+   */
+  async setOfflineModeEnabled(enabled: boolean): Promise<void> {
+    await inspectionStore.setOfflineModeEnabled(enabled);
+    await this.notifyStatusChange();
+  }
+
+  /**
+   * Check if offline data is available
+   */
+  async hasOfflineData(): Promise<boolean> {
+    return inspectionStore.hasOfflineData();
+  }
+
+  /**
+   * Get offline statistics
+   */
+  async getOfflineStats(): Promise<{
+    inspectionCount: number;
+    templateCount: number;
+    itemCount: number;
+    resultCount: number;
+    pendingSyncCount: number;
+    lastDownloadTime: number | null;
+  }> {
+    return inspectionStore.getOfflineStats();
+  }
+
+  /**
+   * Check if currently downloading
+   */
+  isCurrentlyDownloading(): boolean {
+    return this.isDownloading;
+  }
+
+  /**
+   * Download all inspection data for offline use
+   * Downloads all in_progress inspections assigned to the current user
+   */
+  async downloadAllForOffline(): Promise<{
+    success: boolean;
+    inspections: number;
+    templates: number;
+    items: number;
+    error?: string;
+  }> {
+    if (!this.isOnline()) {
+      return { success: false, inspections: 0, templates: 0, items: 0, error: 'Cannot download while offline' };
+    }
+
+    if (this.isDownloading) {
+      return { success: false, inspections: 0, templates: 0, items: 0, error: 'Download already in progress' };
+    }
+
+    this.isDownloading = true;
+
+    try {
+      // Step 1: Fetch all inspections (in_progress status)
+      this.notifyDownloadProgress({
+        stage: 'inspections',
+        current: 0,
+        total: 1,
+        message: 'Fetching inspections...',
+      });
+
+      const inspectionsResponse = await inspectionApi.get('/executions?status=in_progress&limit=100');
+      const inspections = inspectionsResponse.inspections || [];
+
+      this.notifyDownloadProgress({
+        stage: 'inspections',
+        current: 1,
+        total: 1,
+        message: `Found ${inspections.length} inspections`,
+      });
+
+      // Step 2: Collect unique template IDs
+      const templateIds = [...new Set(inspections.map((i: { template_id: string }) => i.template_id))] as string[];
+
+      // Step 3: Fetch all templates
+      this.notifyDownloadProgress({
+        stage: 'templates',
+        current: 0,
+        total: templateIds.length,
+        message: 'Downloading templates...',
+      });
+
+      const templates: Array<{
+        id: string;
+        code: string;
+        name: string;
+        description?: string;
+        category?: string;
+      }> = [];
+
+      for (let i = 0; i < templateIds.length; i++) {
+        try {
+          const templateResponse = await inspectionApi.get(`/templates/${templateIds[i]}`);
+          if (templateResponse.template) {
+            templates.push(templateResponse.template);
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch template ${templateIds[i]}:`, err);
+        }
+        this.notifyDownloadProgress({
+          stage: 'templates',
+          current: i + 1,
+          total: templateIds.length,
+          message: `Downloaded ${i + 1}/${templateIds.length} templates`,
+        });
+      }
+
+      // Step 4: Fetch all items for templates
+      this.notifyDownloadProgress({
+        stage: 'items',
+        current: 0,
+        total: templateIds.length,
+        message: 'Downloading items...',
+      });
+
+      let totalItems = 0;
+      for (let i = 0; i < templateIds.length; i++) {
+        try {
+          const itemsResponse = await inspectionApi.get(`/items?template_id=${templateIds[i]}`);
+          const items = itemsResponse.items || [];
+          totalItems += items.length;
+
+          // Save items to IndexedDB
+          await inspectionStore.saveItems(
+            items.map((item: {
+              id: string;
+              template_id: string;
+              item_code: string;
+              item_name: string;
+              item_type: string;
+              description?: string;
+              options?: string;
+              required: boolean;
+              sort_order: number;
+              parent_id?: string;
+            }) => ({
+              id: item.id,
+              template_id: item.template_id,
+              item_code: item.item_code,
+              item_name: item.item_name,
+              item_type: item.item_type,
+              description: item.description,
+              options: item.options,
+              required: item.required,
+              sort_order: item.sort_order,
+              parent_id: item.parent_id,
+            }))
+          );
+        } catch (err) {
+          console.warn(`Failed to fetch items for template ${templateIds[i]}:`, err);
+        }
+        this.notifyDownloadProgress({
+          stage: 'items',
+          current: i + 1,
+          total: templateIds.length,
+          message: `Downloaded items for ${i + 1}/${templateIds.length} templates`,
+        });
+      }
+
+      // Step 5: Save templates to IndexedDB
+      await inspectionStore.saveTemplates(
+        templates.map((t) => ({
+          id: t.id,
+          template_code: t.code,
+          template_name: t.name,
+          description: t.description,
+          category: t.category,
+        }))
+      );
+
+      // Step 6: Save inspections to IndexedDB
+      await inspectionStore.saveInspections(
+        inspections.map((i: {
+          id: string;
+          template_id: string;
+          inspection_code: string;
+          title: string;
+          status: string;
+          scheduled_date?: string;
+          location?: string;
+          inspector_id?: string;
+          template_name?: string;
+        }) => ({
+          id: i.id,
+          template_id: i.template_id,
+          inspection_code: i.inspection_code,
+          title: i.title,
+          status: i.status,
+          scheduled_date: i.scheduled_date,
+          location: i.location,
+          inspector_id: i.inspector_id,
+          template: templates.find((t) => t.id === i.template_id)
+            ? {
+                id: templates.find((t) => t.id === i.template_id)!.id,
+                template_code: templates.find((t) => t.id === i.template_id)!.code,
+                template_name: templates.find((t) => t.id === i.template_id)!.name,
+              }
+            : undefined,
+        }))
+      );
+
+      // Step 7: Update metadata
+      await inspectionStore.updateDownloadMetadata(
+        inspections.map((i: { id: string }) => i.id),
+        templateIds,
+        totalItems
+      );
+
+      this.notifyDownloadProgress({
+        stage: 'complete',
+        current: 1,
+        total: 1,
+        message: 'Download complete!',
+      });
+
+      return {
+        success: true,
+        inspections: inspections.length,
+        templates: templates.length,
+        items: totalItems,
+      };
+    } catch (error) {
+      console.error('Failed to download all for offline:', error);
+      return {
+        success: false,
+        inspections: 0,
+        templates: 0,
+        items: 0,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    } finally {
+      this.isDownloading = false;
+    }
+  }
+
+  /**
+   * Clear all offline data
+   */
+  async clearOfflineData(): Promise<void> {
+    await inspectionStore.clearAllOfflineData();
     await this.notifyStatusChange();
   }
 }

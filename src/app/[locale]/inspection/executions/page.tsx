@@ -19,6 +19,7 @@ import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useHelp } from '@/hooks/useHelp';
 import { useProgramId } from '@/hooks/useProgramId';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { OfflineModeBanner, OfflineModeToggle, BulkDownloadButton } from '@/components/offline';
 
 export default function InspectionExecutionPage() {
   const t = useI18n();
@@ -59,6 +60,11 @@ export default function InspectionExecutionPage() {
     deleteLoading,
     successMessage,
     errorMessage,
+    // Offline mode state
+    isEffectivelyOffline,
+    hasOfflineData,
+    isOfflineModeEnabled,
+    isNetworkAvailable,
     handleAdd,
     handleEdit,
     handleView,
@@ -231,9 +237,36 @@ export default function InspectionExecutionPage() {
       onMobileDeselectAll={handleMobileDeselectAll}
       onMobileDeleteSelected={gridPermissions.showDeleteButton ? handleMobileDeleteSelected : undefined}
     >
+      {/* Offline Mode Banner */}
+      <OfflineModeBanner locale={currentLocale} onSyncClick={handleRefresh} />
+
+      {/* Offline Mode Controls */}
+      {!isMobileLayout && (
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <OfflineModeToggle locale={currentLocale} size="small" onModeChange={() => handleRefresh()} />
+          <BulkDownloadButton
+            locale={currentLocale}
+            variant="chip"
+            size="small"
+            showLastDownload={false}
+            onDownloadComplete={() => handleRefresh()}
+          />
+        </Box>
+      )}
+
       {isMobileLayout ? (
         // Mobile: Simple list
         <Box sx={{ bgcolor: 'background.paper', flex: 1, overflow: 'auto' }}>
+          {/* Mobile Offline Controls */}
+          <Box sx={{ display: 'flex', gap: 1, p: 1, alignItems: 'center', borderBottom: 1, borderColor: 'divider' }}>
+            <OfflineModeToggle locale={currentLocale} size="small" showLabel={false} onModeChange={() => handleRefresh()} />
+            <BulkDownloadButton
+              locale={currentLocale}
+              variant="icon"
+              size="small"
+              onDownloadComplete={() => handleRefresh()}
+            />
+          </Box>
           {searching ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress size={24} />

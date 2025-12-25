@@ -21,6 +21,11 @@ export { default as OfflineStatusBar } from './OfflineStatusBar';
 export { default as DownloadOfflineButton } from './DownloadOfflineButton';
 export { default as SyncDetailPanel } from './SyncDetailPanel';
 
+// New offline mode components
+export { default as OfflineModeToggle } from './OfflineModeToggle';
+export { default as BulkDownloadButton } from './BulkDownloadButton';
+export { default as OfflineModeBanner } from './OfflineModeBanner';
+
 // Types
 export type { SyncStatusIndicatorProps } from './SyncStatusIndicator';
 export type { OfflineStatusBarProps } from './OfflineStatusBar';

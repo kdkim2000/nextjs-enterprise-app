@@ -3,6 +3,8 @@ import { inspectionApi } from '@/lib/axios';
 import { usePageState } from '@/hooks/usePageState';
 import { useMessage } from '@/hooks/useMessage';
 import { useCurrentLocale } from '@/lib/i18n/client';
+import { useOfflineMode } from '@/hooks/useOfflineMode';
+import { inspectionStore } from '@/lib/offline/inspectionStore';
 import { Inspection, ChecksheetTemplate, SearchCriteria, InspectionStatus } from '../types';
 
 interface UseInspectionManagementOptions {
@@ -43,6 +45,17 @@ export const useInspectionManagement = (options: UseInspectionManagementOptions 
   const locale = useCurrentLocale();
   const { successMessage, errorMessage, showSuccessMessage, showErrorMessage } = useMessage({ locale });
 
+  // Offline mode support
+  const {
+    isEffectivelyOffline,
+    hasOfflineData,
+    isOfflineModeEnabled,
+    isNetworkAvailable,
+    offlineStats,
+    downloadProgress,
+    isDownloading,
+  } = useOfflineMode();
+
   // States
   const [templates, setTemplates] = useState<ChecksheetTemplate[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -54,22 +67,83 @@ export const useInspectionManagement = (options: UseInspectionManagementOptions 
   const [selectedForDelete, setSelectedForDelete] = useState<(string | number)[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Fetch templates for dropdown
+  // Fetch templates for dropdown (offline-aware)
   const fetchTemplates = useCallback(async () => {
     try {
-      const response = await inspectionApi.get('/templates?status=active&limit=1000');
-      setTemplates(response.templates || []);
+      if (isEffectivelyOffline && hasOfflineData) {
+        // Fetch from IndexedDB
+        const offlineTemplates = await inspectionStore.getAllTemplates();
+        setTemplates(offlineTemplates as unknown as ChecksheetTemplate[]);
+      } else {
+        // Fetch from server
+        const response = await inspectionApi.get('/templates?status=active&limit=1000');
+        setTemplates(response.templates || []);
+      }
     } catch (error) {
       console.error('Failed to fetch templates:', error);
     }
-  }, []);
+  }, [isEffectivelyOffline, hasOfflineData]);
 
-  // Fetch inspections
+  // Fetch inspections (offline-aware)
   const fetchInspections = useCallback(
     async (page: number = 0, pageSize: number = 50, useQuickSearch: boolean = false) => {
       try {
         setSearching(true);
 
+        // Offline mode: fetch from IndexedDB
+        if (isEffectivelyOffline && hasOfflineData) {
+          const allInspections = await inspectionStore.getAllInspections();
+
+          // Apply filtering (use any type for offline data)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let filteredInspections: any[] = allInspections;
+
+          if (useQuickSearch && quickSearch) {
+            const searchLower = quickSearch.toLowerCase();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            filteredInspections = allInspections.filter((i: any) =>
+              i.inspection_code?.toLowerCase().includes(searchLower) ||
+              i.title?.toLowerCase().includes(searchLower) ||
+              i.location?.toLowerCase().includes(searchLower)
+            );
+          } else {
+            if (searchCriteria.inspection_code) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              filteredInspections = filteredInspections.filter((i: any) =>
+                i.inspection_code?.toLowerCase().includes(searchCriteria.inspection_code.toLowerCase())
+              );
+            }
+            if (searchCriteria.template_id) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              filteredInspections = filteredInspections.filter((i: any) =>
+                i.template_id === searchCriteria.template_id
+              );
+            }
+            if (searchCriteria.status) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              filteredInspections = filteredInspections.filter((i: any) =>
+                i.status === searchCriteria.status
+              );
+            }
+            if (searchCriteria.location) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              filteredInspections = filteredInspections.filter((i: any) =>
+                i.location?.toLowerCase().includes(searchCriteria.location.toLowerCase())
+              );
+            }
+          }
+
+          // Apply pagination
+          const totalCount = filteredInspections.length;
+          const startIndex = page * pageSize;
+          const paginatedInspections = filteredInspections.slice(startIndex, startIndex + pageSize);
+
+          setInspections(paginatedInspections as Inspection[]);
+          setRowCount(totalCount);
+          return;
+        }
+
+        // Online mode: fetch from server
         const params = new URLSearchParams();
 
         if (useQuickSearch && quickSearch) {
@@ -104,7 +178,7 @@ export const useInspectionManagement = (options: UseInspectionManagementOptions 
         setSearching(false);
       }
     },
-    [quickSearch, searchCriteria, setInspections, setRowCount, showErrorMessage]
+    [quickSearch, searchCriteria, setInspections, setRowCount, showErrorMessage, isEffectivelyOffline, hasOfflineData]
   );
 
   // CRUD operations
@@ -278,6 +352,15 @@ export const useInspectionManagement = (options: UseInspectionManagementOptions 
     deleteLoading,
     successMessage,
     errorMessage,
+
+    // Offline mode state
+    isEffectivelyOffline,
+    hasOfflineData,
+    isOfflineModeEnabled,
+    isNetworkAvailable,
+    offlineStats,
+    downloadProgress,
+    isDownloading,
 
     // Handlers
     handleAdd,

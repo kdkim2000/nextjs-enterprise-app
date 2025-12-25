@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'inspection-offline-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Bumped for OFFLINE_META store
 
 // Store names
 export const STORES = {
@@ -13,6 +13,7 @@ export const STORES = {
   RESULTS: 'results',
   SYNC_QUEUE: 'sync_queue',
   TEMPLATES: 'templates',
+  OFFLINE_META: 'offline_meta', // New: offline mode metadata
 } as const;
 
 export interface SyncQueueItem {
@@ -75,6 +76,19 @@ export interface OfflineResult {
   signature_url?: string;
   lastModified: number;
   isSynced: boolean;
+}
+
+/**
+ * Offline mode metadata - singleton record
+ */
+export interface OfflineMetadata {
+  id: 'singleton'; // Always 'singleton' for single record
+  isOfflineModeEnabled: boolean;
+  lastDownloadTime: number | null;
+  downloadedInspectionIds: string[];
+  downloadedTemplateIds: string[];
+  downloadedItemCount: number;
+  serverDataVersion?: string;
 }
 
 class InspectionStore {
@@ -144,6 +158,11 @@ class InspectionStore {
           const syncStore = db.createObjectStore(STORES.SYNC_QUEUE, { keyPath: 'id' });
           syncStore.createIndex('status', 'status', { unique: false });
           syncStore.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+
+        // Offline metadata store (v2)
+        if (!db.objectStoreNames.contains(STORES.OFFLINE_META)) {
+          db.createObjectStore(STORES.OFFLINE_META, { keyPath: 'id' });
         }
       };
     });
@@ -464,6 +483,150 @@ class InspectionStore {
       failed: items.filter((i) => i.status === 'failed').length,
       total: items.length,
     };
+  }
+
+  // ==================== Offline Mode Metadata methods ====================
+
+  /**
+   * Get offline metadata
+   */
+  async getOfflineMetadata(): Promise<OfflineMetadata | null> {
+    const metadata = await this.get<OfflineMetadata>(STORES.OFFLINE_META, 'singleton');
+    return metadata || null;
+  }
+
+  /**
+   * Save offline metadata
+   */
+  async saveOfflineMetadata(metadata: Partial<OfflineMetadata>): Promise<void> {
+    const existing = await this.getOfflineMetadata();
+    const updated: OfflineMetadata = {
+      id: 'singleton',
+      isOfflineModeEnabled: metadata.isOfflineModeEnabled ?? existing?.isOfflineModeEnabled ?? false,
+      lastDownloadTime: metadata.lastDownloadTime ?? existing?.lastDownloadTime ?? null,
+      downloadedInspectionIds: metadata.downloadedInspectionIds ?? existing?.downloadedInspectionIds ?? [],
+      downloadedTemplateIds: metadata.downloadedTemplateIds ?? existing?.downloadedTemplateIds ?? [],
+      downloadedItemCount: metadata.downloadedItemCount ?? existing?.downloadedItemCount ?? 0,
+      serverDataVersion: metadata.serverDataVersion ?? existing?.serverDataVersion,
+    };
+    await this.put(STORES.OFFLINE_META, updated);
+  }
+
+  /**
+   * Set offline mode enabled/disabled
+   */
+  async setOfflineModeEnabled(enabled: boolean): Promise<void> {
+    await this.saveOfflineMetadata({ isOfflineModeEnabled: enabled });
+  }
+
+  /**
+   * Check if offline mode is enabled
+   */
+  async isOfflineModeEnabled(): Promise<boolean> {
+    const metadata = await this.getOfflineMetadata();
+    return metadata?.isOfflineModeEnabled ?? false;
+  }
+
+  /**
+   * Check if offline data is available
+   */
+  async hasOfflineData(): Promise<boolean> {
+    const metadata = await this.getOfflineMetadata();
+    if (!metadata) return false;
+    return (
+      metadata.downloadedInspectionIds.length > 0 ||
+      metadata.downloadedTemplateIds.length > 0
+    );
+  }
+
+  /**
+   * Update download metadata after bulk download
+   */
+  async updateDownloadMetadata(
+    inspectionIds: string[],
+    templateIds: string[],
+    itemCount: number
+  ): Promise<void> {
+    await this.saveOfflineMetadata({
+      lastDownloadTime: Date.now(),
+      downloadedInspectionIds: inspectionIds,
+      downloadedTemplateIds: templateIds,
+      downloadedItemCount: itemCount,
+    });
+  }
+
+  /**
+   * Clear all offline data and reset metadata
+   */
+  async clearAllOfflineData(): Promise<void> {
+    await this.clear(STORES.INSPECTIONS);
+    await this.clear(STORES.TEMPLATES);
+    await this.clear(STORES.ITEMS);
+    await this.clear(STORES.RESULTS);
+    await this.saveOfflineMetadata({
+      isOfflineModeEnabled: false,
+      lastDownloadTime: null,
+      downloadedInspectionIds: [],
+      downloadedTemplateIds: [],
+      downloadedItemCount: 0,
+    });
+  }
+
+  /**
+   * Get offline data statistics
+   */
+  async getOfflineStats(): Promise<{
+    inspectionCount: number;
+    templateCount: number;
+    itemCount: number;
+    resultCount: number;
+    pendingSyncCount: number;
+    lastDownloadTime: number | null;
+  }> {
+    const [inspections, templates, items, results, syncQueue, metadata] = await Promise.all([
+      this.getAllInspections(),
+      this.getAll<OfflineTemplate>(STORES.TEMPLATES),
+      this.getAll<OfflineItem>(STORES.ITEMS),
+      this.getAll<OfflineResult>(STORES.RESULTS),
+      this.getSyncQueueCount(),
+      this.getOfflineMetadata(),
+    ]);
+
+    return {
+      inspectionCount: inspections.length,
+      templateCount: templates.length,
+      itemCount: items.length,
+      resultCount: results.length,
+      pendingSyncCount: syncQueue.pending,
+      lastDownloadTime: metadata?.lastDownloadTime ?? null,
+    };
+  }
+
+  /**
+   * Save multiple templates at once
+   */
+  async saveTemplates(templates: OfflineTemplate[]): Promise<void> {
+    await this.putMany(STORES.TEMPLATES, templates.map((t) => ({
+      ...t,
+      lastSynced: Date.now(),
+    })));
+  }
+
+  /**
+   * Save multiple inspections at once
+   */
+  async saveInspections(inspections: OfflineInspection[]): Promise<void> {
+    await this.putMany(STORES.INSPECTIONS, inspections.map((i) => ({
+      ...i,
+      lastSynced: Date.now(),
+    })));
+  }
+
+  /**
+   * Get all templates
+   */
+  async getAllTemplates(): Promise<OfflineTemplate[]> {
+    return this.getAll<OfflineTemplate>(STORES.TEMPLATES);
   }
 }
 
