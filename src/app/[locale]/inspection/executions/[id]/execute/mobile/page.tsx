@@ -16,6 +16,11 @@ import {
   Chip,
   ToggleButton,
   ToggleButtonGroup,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -25,6 +30,11 @@ import {
   Send as SubmitIcon,
   CameraAlt as CameraIcon,
   Draw as SignatureIcon,
+  CloudOff as OfflineIcon,
+  Cloud as OnlineIcon,
+  CloudDownload as DownloadIcon,
+  CloudUpload as SyncIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
 import PhotoCapture from '@/components/inspection/PhotoCapture';
 import SignaturePad from '@/components/inspection/SignaturePad';
@@ -32,6 +42,9 @@ import { inspectionApi } from '@/lib/axios';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { useMessage } from '@/hooks/useMessage';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { syncService, SyncStatus } from '@/lib/offline/syncService';
+import { inspectionStore } from '@/lib/offline/inspectionStore';
 import { Inspection, ChecksheetItem, InspectionResult } from '../../../types';
 
 interface ResultState {
@@ -47,6 +60,7 @@ export default function MobileInspectionExecutePage() {
   const router = useRouter();
   const params = useParams();
   const inspectionId = params.id as string;
+  const { isOnline } = useNetworkStatus();
 
   const { showSuccessMessage, showErrorMessage } = useMessage({ locale: currentLocale });
 
@@ -58,14 +72,77 @@ export default function MobileInspectionExecutePage() {
   const [saving, setSaving] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Offline state
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [showOfflineDialog, setShowOfflineDialog] = useState(false);
+
   // Modals
   const [photoCaptureOpen, setPhotoCaptureOpen] = useState(false);
   const [signaturePadOpen, setSignaturePadOpen] = useState(false);
 
-  // Fetch data
+  // Snackbar
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning' }>({
+    open: false,
+    message: '',
+    severity: 'info',
+  });
+
+  // Initialize sync service
+  useEffect(() => {
+    syncService.init();
+    const unsubscribe = syncService.onStatusChange((status) => setSyncStatus(status));
+    return () => unsubscribe();
+  }, []);
+
+  // Check if data is downloaded for offline
+  useEffect(() => {
+    const checkOfflineData = async () => {
+      try {
+        await inspectionStore.init();
+        const offlineInspection = await inspectionStore.getInspection(inspectionId);
+        setIsDownloaded(!!offlineInspection);
+      } catch (error) {
+        console.error('Failed to check offline data:', error);
+      }
+    };
+    checkOfflineData();
+  }, [inspectionId]);
+
+  // Fetch data (online or offline)
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+
+      // Try offline data first if not online
+      if (!isOnline) {
+        const offlineData = await syncService.getInspectionData(inspectionId);
+        if (offlineData) {
+          setInspection(offlineData.inspection as Inspection);
+          setItems(offlineData.items as ChecksheetItem[]);
+          setIsOfflineMode(true);
+
+          // Load offline results
+          const resultsState: Record<string, ResultState> = {};
+          (offlineData.results as Array<{ item_id: string; value: string; notes?: string }>).forEach((r) => {
+            resultsState[r.item_id] = {
+              value: r.value || '',
+              notes: r.notes || '',
+            };
+          });
+          (offlineData.items as ChecksheetItem[]).forEach((item) => {
+            if (!resultsState[item.id]) {
+              resultsState[item.id] = { value: '', notes: '' };
+            }
+          });
+          setResults(resultsState);
+          return;
+        }
+      }
+
+      // Online fetch
       const inspectionResponse = await inspectionApi.get(`/executions/${inspectionId}`);
       setInspection(inspectionResponse.inspection);
 
@@ -98,17 +175,105 @@ export default function MobileInspectionExecutePage() {
         }
       });
       setResults(resultsState);
+      setIsOfflineMode(false);
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      await showErrorMessage('COMMON_LOAD_FAIL');
+
+      // Try offline as fallback
+      const offlineData = await syncService.getInspectionData(inspectionId);
+      if (offlineData) {
+        setInspection(offlineData.inspection as Inspection);
+        setItems(offlineData.items as ChecksheetItem[]);
+        setIsOfflineMode(true);
+        setSnackbar({
+          open: true,
+          message: getLocalizedValue({ en: 'Loaded from offline storage', ko: '오프라인 데이터를 불러왔습니다' }, currentLocale),
+          severity: 'info',
+        });
+      } else {
+        await showErrorMessage('COMMON_LOAD_FAIL');
+      }
     } finally {
       setLoading(false);
     }
-  }, [inspectionId, showErrorMessage]);
+  }, [inspectionId, isOnline, showErrorMessage, currentLocale]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Download for offline
+  const handleDownloadForOffline = async () => {
+    if (!isOnline) {
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Cannot download while offline', ko: '오프라인 상태에서는 다운로드할 수 없습니다' }, currentLocale),
+        severity: 'error',
+      });
+      return;
+    }
+
+    try {
+      setDownloading(true);
+      await syncService.downloadForOffline(inspectionId);
+      setIsDownloaded(true);
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Downloaded for offline use', ko: '오프라인 사용을 위해 다운로드되었습니다' }, currentLocale),
+        severity: 'success',
+      });
+    } catch (error) {
+      console.error('Failed to download:', error);
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Download failed', ko: '다운로드 실패' }, currentLocale),
+        severity: 'error',
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  // Manual sync
+  const handleSync = async () => {
+    if (!isOnline) {
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Cannot sync while offline', ko: '오프라인 상태에서는 동기화할 수 없습니다' }, currentLocale),
+        severity: 'warning',
+      });
+      return;
+    }
+
+    try {
+      const result = await syncService.sync();
+      if (result.synced > 0) {
+        setSnackbar({
+          open: true,
+          message: getLocalizedValue(
+            { en: `Synced ${result.synced} items`, ko: `${result.synced}개 항목 동기화 완료` },
+            currentLocale
+          ),
+          severity: 'success',
+        });
+        // Refresh data after sync
+        await fetchData();
+      } else {
+        setSnackbar({
+          open: true,
+          message: getLocalizedValue({ en: 'Nothing to sync', ko: '동기화할 항목이 없습니다' }, currentLocale),
+          severity: 'info',
+        });
+      }
+    } catch (error) {
+      console.error('Sync failed:', error);
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Sync failed', ko: '동기화 실패' }, currentLocale),
+        severity: 'error',
+      });
+    }
+  };
 
   // Progress calculation
   const completedItems = Object.values(results).filter((r) => r.value !== '').length;
@@ -152,7 +317,7 @@ export default function MobileInspectionExecutePage() {
     setSignaturePadOpen(false);
   };
 
-  // Save & Submit
+  // Save (with offline support)
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -167,17 +332,59 @@ export default function MobileInspectionExecutePage() {
           photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
         };
       });
-      await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
-      await showSuccessMessage('COMMON_SAVE_SUCCESS');
+
+      if (isOnline && !isOfflineMode) {
+        // Direct save when online
+        await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
+        await showSuccessMessage('COMMON_SAVE_SUCCESS');
+      } else {
+        // Offline save - queue for sync
+        await syncService.saveResults(
+          inspectionId,
+          resultsToSave.map((r) => ({
+            item_id: r.item_id,
+            value: r.value,
+            notes: r.remarks,
+          }))
+        );
+        setSnackbar({
+          open: true,
+          message: getLocalizedValue({ en: 'Saved offline (will sync when online)', ko: '오프라인 저장됨 (온라인시 동기화)' }, currentLocale),
+          severity: 'info',
+        });
+      }
     } catch (error) {
       console.error('Failed to save:', error);
-      await showErrorMessage('COMMON_SAVE_FAIL');
+      // Try offline save as fallback
+      try {
+        await syncService.saveResults(
+          inspectionId,
+          Object.entries(results).map(([itemId, result]) => ({
+            item_id: itemId,
+            value: result.value,
+            notes: result.notes,
+          }))
+        );
+        setSnackbar({
+          open: true,
+          message: getLocalizedValue({ en: 'Saved offline (will sync when online)', ko: '오프라인 저장됨 (온라인시 동기화)' }, currentLocale),
+          severity: 'warning',
+        });
+      } catch (offlineError) {
+        await showErrorMessage('COMMON_SAVE_FAIL');
+      }
     } finally {
       setSaving(false);
     }
   };
 
+  // Submit (with offline support)
   const handleSubmit = async () => {
+    if (!isOnline) {
+      setShowOfflineDialog(true);
+      return;
+    }
+
     try {
       setSaving(true);
       const resultsToSave = Object.entries(results).map(([itemId, result]) => {
@@ -203,6 +410,38 @@ export default function MobileInspectionExecutePage() {
     }
   };
 
+  // Offline submit (queue for later)
+  const handleOfflineSubmit = async () => {
+    try {
+      setSaving(true);
+      await syncService.saveResults(
+        inspectionId,
+        Object.entries(results).map(([itemId, result]) => ({
+          item_id: itemId,
+          value: result.value,
+          notes: result.notes,
+        }))
+      );
+      await syncService.submitInspection(inspectionId);
+      setShowOfflineDialog(false);
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Queued for submission (will submit when online)', ko: '제출 대기중 (온라인시 제출됨)' }, currentLocale),
+        severity: 'info',
+      });
+      router.push(`/${currentLocale}/inspection/executions`);
+    } catch (error) {
+      console.error('Failed to queue submission:', error);
+      setSnackbar({
+        open: true,
+        message: getLocalizedValue({ en: 'Failed to queue submission', ko: '제출 대기 실패' }, currentLocale),
+        severity: 'error',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleBack = () => router.push(`/${currentLocale}/inspection/executions`);
 
   // Loading state
@@ -218,7 +457,9 @@ export default function MobileInspectionExecutePage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
-          {getLocalizedValue({ en: 'Failed to load inspection', ko: '점검을 불러올 수 없습니다' }, currentLocale)}
+          {isOnline
+            ? getLocalizedValue({ en: 'Failed to load inspection', ko: '점검을 불러올 수 없습니다' }, currentLocale)
+            : getLocalizedValue({ en: 'No offline data available. Please download while online.', ko: '오프라인 데이터가 없습니다. 온라인에서 먼저 다운로드해주세요.' }, currentLocale)}
         </Alert>
         <Button onClick={handleBack} sx={{ mt: 2 }}>{getLocalizedValue({ en: 'Back', ko: '돌아가기' }, currentLocale)}</Button>
       </Box>
@@ -313,11 +554,11 @@ export default function MobileInspectionExecutePage() {
       case 'photo':
         return (
           <Box sx={{ mt: 2, textAlign: 'center' }}>
-            {currentResult.photoData ? (
+            {currentResult.photoData && (
               <Box sx={{ mb: 2 }}>
                 <img src={currentResult.photoData} alt="captured" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }} />
               </Box>
-            ) : null}
+            )}
             <Button
               variant="contained"
               size="large"
@@ -337,11 +578,11 @@ export default function MobileInspectionExecutePage() {
       case 'signature':
         return (
           <Box sx={{ mt: 2, textAlign: 'center' }}>
-            {currentResult.signatureData ? (
+            {currentResult.signatureData && (
               <Box sx={{ mb: 2, p: 2, border: 1, borderColor: 'divider', borderRadius: 2, bgcolor: 'grey.50' }}>
                 <img src={currentResult.signatureData} alt="signature" style={{ maxWidth: '100%', maxHeight: 150 }} />
               </Box>
-            ) : null}
+            )}
             <Button
               variant="contained"
               size="large"
@@ -375,8 +616,67 @@ export default function MobileInspectionExecutePage() {
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'grey.50' }}>
-      {/* Simple Header */}
+      {/* Header with Network Status */}
       <Box sx={{ bgcolor: 'white', borderBottom: 1, borderColor: 'divider', pt: 'env(safe-area-inset-top)' }}>
+        {/* Network Status Bar */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 2,
+            py: 0.75,
+            bgcolor: isOnline ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.warning.main, 0.15),
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isOnline ? (
+              <OnlineIcon sx={{ fontSize: 16, color: 'success.main' }} />
+            ) : (
+              <OfflineIcon sx={{ fontSize: 16, color: 'warning.main' }} />
+            )}
+            <Typography variant="caption" fontWeight="medium" color={isOnline ? 'success.main' : 'warning.main'}>
+              {isOnline
+                ? getLocalizedValue({ en: 'Online', ko: '온라인' }, currentLocale)
+                : getLocalizedValue({ en: 'Offline', ko: '오프라인' }, currentLocale)}
+              {isOfflineMode && ` (${getLocalizedValue({ en: 'offline data', ko: '오프라인 데이터' }, currentLocale)})`}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isOnline && !isDownloaded && (
+              <Button
+                size="small"
+                startIcon={downloading ? <CircularProgress size={14} /> : <DownloadIcon />}
+                onClick={handleDownloadForOffline}
+                disabled={downloading}
+                sx={{ fontSize: '0.7rem', py: 0.25, minWidth: 0 }}
+              >
+                {getLocalizedValue({ en: 'Download', ko: '다운로드' }, currentLocale)}
+              </Button>
+            )}
+            {isDownloaded && (
+              <Chip
+                label={getLocalizedValue({ en: 'Offline Ready', ko: '오프라인 준비됨' }, currentLocale)}
+                size="small"
+                color="success"
+                sx={{ height: 20, fontSize: '0.65rem' }}
+              />
+            )}
+            {isOnline && syncStatus && syncStatus.pendingCount > 0 && (
+              <Button
+                size="small"
+                startIcon={<SyncIcon />}
+                onClick={handleSync}
+                color="primary"
+                sx={{ fontSize: '0.7rem', py: 0.25, minWidth: 0 }}
+              >
+                {getLocalizedValue({ en: `Sync (${syncStatus.pendingCount})`, ko: `동기화 (${syncStatus.pendingCount})` }, currentLocale)}
+              </Button>
+            )}
+          </Box>
+        </Box>
+
+        {/* Title Bar */}
         <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 1.5 }}>
           <IconButton onClick={handleBack}>
             <BackIcon />
@@ -432,56 +732,36 @@ export default function MobileInspectionExecutePage() {
       <Box sx={{ bgcolor: 'white', borderTop: 1, borderColor: 'divider', pb: 'env(safe-area-inset-bottom)' }}>
         {/* Navigation */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
-          <Button
-            variant="text"
-            startIcon={<PrevIcon />}
-            onClick={goPrev}
-            disabled={currentIndex === 0}
-            sx={{ minWidth: 80 }}
-          >
+          <Button variant="text" startIcon={<PrevIcon />} onClick={goPrev} disabled={currentIndex === 0} sx={{ minWidth: 80 }}>
             {getLocalizedValue({ en: 'Prev', ko: '이전' }, currentLocale)}
           </Button>
-
           <Typography variant="body2" color="text.secondary" fontWeight="medium">
             {currentIndex + 1} / {items.length}
           </Typography>
-
-          <Button
-            variant="text"
-            endIcon={<NextIcon />}
-            onClick={goNext}
-            disabled={currentIndex === items.length - 1}
-            sx={{ minWidth: 80 }}
-          >
+          <Button variant="text" endIcon={<NextIcon />} onClick={goNext} disabled={currentIndex === items.length - 1} sx={{ minWidth: 80 }}>
             {getLocalizedValue({ en: 'Next', ko: '다음' }, currentLocale)}
           </Button>
         </Box>
 
-        {/* Submit Area - Always Visible */}
+        {/* Submit Area */}
         {!isCompleted && (
           <Box sx={{ px: 2, pb: 2 }}>
             {canSubmit ? (
-              // Ready to submit - prominent green button
               <Button
                 variant="contained"
-                color="success"
+                color={isOnline ? 'success' : 'warning'}
                 size="large"
                 fullWidth
-                startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <SubmitIcon />}
+                startIcon={saving ? <CircularProgress size={20} color="inherit" /> : isOnline ? <SubmitIcon /> : <WarningIcon />}
                 onClick={handleSubmit}
                 disabled={saving}
-                sx={{
-                  py: 2,
-                  fontSize: '1.1rem',
-                  fontWeight: 'bold',
-                  borderRadius: 3,
-                  boxShadow: 4,
-                }}
+                sx={{ py: 2, fontSize: '1.1rem', fontWeight: 'bold', borderRadius: 3, boxShadow: 4 }}
               >
-                {getLocalizedValue({ en: 'Submit Inspection', ko: '점검 제출' }, currentLocale)}
+                {isOnline
+                  ? getLocalizedValue({ en: 'Submit Inspection', ko: '점검 제출' }, currentLocale)
+                  : getLocalizedValue({ en: 'Submit (Offline)', ko: '제출 (오프라인)' }, currentLocale)}
               </Button>
             ) : (
-              // Not ready - show save button with progress hint
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
                   variant="outlined"
@@ -492,17 +772,8 @@ export default function MobileInspectionExecutePage() {
                 >
                   {saving ? <CircularProgress size={20} /> : getLocalizedValue({ en: 'Save', ko: '저장' }, currentLocale)}
                 </Button>
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  size="large"
-                  disabled
-                  sx={{ flex: 2, py: 1.5, borderRadius: 2, bgcolor: 'grey.200' }}
-                >
-                  {getLocalizedValue(
-                    { en: `Required ${completedRequiredItems}/${requiredItems.length}`, ko: `필수 ${completedRequiredItems}/${requiredItems.length}` },
-                    currentLocale
-                  )}
+                <Button variant="contained" color="inherit" size="large" disabled sx={{ flex: 2, py: 1.5, borderRadius: 2, bgcolor: 'grey.200' }}>
+                  {getLocalizedValue({ en: `Required ${completedRequiredItems}/${requiredItems.length}`, ko: `필수 ${completedRequiredItems}/${requiredItems.length}` }, currentLocale)}
                 </Button>
               </Box>
             )}
@@ -522,21 +793,51 @@ export default function MobileInspectionExecutePage() {
         )}
       </Box>
 
+      {/* Offline Submit Dialog */}
+      <Dialog open={showOfflineDialog} onClose={() => setShowOfflineDialog(false)}>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <OfflineIcon color="warning" />
+          {getLocalizedValue({ en: 'Offline Submission', ko: '오프라인 제출' }, currentLocale)}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {getLocalizedValue(
+              {
+                en: 'You are currently offline. The inspection will be saved and submitted automatically when you are back online.',
+                ko: '현재 오프라인 상태입니다. 점검 결과가 저장되고 온라인이 되면 자동으로 제출됩니다.',
+              },
+              currentLocale
+            )}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowOfflineDialog(false)}>
+            {getLocalizedValue({ en: 'Cancel', ko: '취소' }, currentLocale)}
+          </Button>
+          <Button variant="contained" onClick={handleOfflineSubmit} disabled={saving}>
+            {saving ? <CircularProgress size={20} /> : getLocalizedValue({ en: 'Save for Later', ko: '나중에 제출' }, currentLocale)}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Photo Capture */}
-      <PhotoCapture
-        open={photoCaptureOpen}
-        onClose={() => setPhotoCaptureOpen(false)}
-        onCapture={handlePhotoCaptured}
-        locale={currentLocale}
-      />
+      <PhotoCapture open={photoCaptureOpen} onClose={() => setPhotoCaptureOpen(false)} onCapture={handlePhotoCaptured} locale={currentLocale} />
 
       {/* Signature Pad */}
-      <SignaturePad
-        open={signaturePadOpen}
-        onClose={() => setSignaturePadOpen(false)}
-        onSave={handleSignatureSaved}
-        locale={currentLocale}
-      />
+      <SignaturePad open={signaturePadOpen} onClose={() => setSignaturePadOpen(false)} onSave={handleSignatureSaved} locale={currentLocale} />
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{ bottom: 100 }}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
