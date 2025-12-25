@@ -137,6 +137,13 @@ export default function InspectionExecutePage() {
   const inspectionId = params.id as string;
   const { isMobileLayout } = useMobile();
 
+  // Redirect to mobile page on mobile devices
+  useEffect(() => {
+    if (isMobileLayout) {
+      router.replace(`/${currentLocale}/inspection/executions/${inspectionId}/execute/mobile`);
+    }
+  }, [isMobileLayout, currentLocale, inspectionId, router]);
+
   const { successMessage, errorMessage, showSuccessMessage, showErrorMessage } = useMessage({
     locale: currentLocale,
   });
