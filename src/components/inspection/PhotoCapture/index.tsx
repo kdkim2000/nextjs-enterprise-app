@@ -167,10 +167,10 @@ export default function PhotoCapture({
     } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
       type = 'notfound';
       errorMessage = {
-        en: 'No camera found. Please connect a camera and try again.',
-        ko: '카메라를 찾을 수 없습니다. 카메라를 연결하고 다시 시도해주세요.',
-        zh: '未找到相机。请连接相机后重试。',
-        vi: 'Không tìm thấy camera. Vui lòng kết nối camera và thử lại.',
+        en: 'No camera found. You can select an image from your gallery instead.',
+        ko: '카메라를 찾을 수 없습니다. 갤러리에서 이미지를 선택할 수 있습니다.',
+        zh: '未找到相机。您可以从相册中选择图片。',
+        vi: 'Không tìm thấy camera. Bạn có thể chọn hình ảnh từ thư viện.',
       };
     } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
       type = 'inuse';
@@ -454,31 +454,52 @@ export default function PhotoCapture({
                 </Box>
               )}
 
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {errorType === 'permission' && (
+                  <Button
+                    variant="contained"
+                    startIcon={<VideocamIcon />}
+                    onClick={requestPermission}
+                    sx={{ mt: 1 }}
+                  >
+                    {getLocalizedValue({
+                      en: 'Request Permission',
+                      ko: '권한 요청',
+                      zh: '请求权限',
+                      vi: 'Yêu cầu quyền',
+                    }, locale)}
+                  </Button>
+                )}
+                {errorType !== 'notfound' && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<RetakeIcon />}
+                    onClick={startCamera}
+                    sx={{ mt: 1, color: 'white', borderColor: 'grey.500' }}
+                  >
+                    {getLocalizedValue({
+                      en: 'Retry',
+                      ko: '재시도',
+                      zh: '重试',
+                      vi: 'Thử lại',
+                    }, locale)}
+                  </Button>
+                )}
                 <Button
                   variant="contained"
-                  startIcon={<VideocamIcon />}
-                  onClick={requestPermission}
+                  color="primary"
+                  startIcon={<FileUploadIcon />}
+                  onClick={() => {
+                    setUseFileInput(true);
+                    setError(null);
+                  }}
                   sx={{ mt: 1 }}
                 >
                   {getLocalizedValue({
-                    en: 'Request Permission',
-                    ko: '권한 요청',
-                    zh: '请求权限',
-                    vi: 'Yêu cầu quyền',
-                  }, locale)}
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<RetakeIcon />}
-                  onClick={startCamera}
-                  sx={{ mt: 1, color: 'white', borderColor: 'grey.500' }}
-                >
-                  {getLocalizedValue({
-                    en: 'Retry',
-                    ko: '재시도',
-                    zh: '重试',
-                    vi: 'Thử lại',
+                    en: 'Select from Gallery',
+                    ko: '갤러리에서 선택',
+                    zh: '从相册选择',
+                    vi: 'Chọn từ thư viện',
                   }, locale)}
                 </Button>
               </Box>
