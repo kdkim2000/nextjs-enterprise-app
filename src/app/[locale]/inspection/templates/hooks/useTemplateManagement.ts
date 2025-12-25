@@ -79,7 +79,7 @@ export const useTemplateManagement = (options: UseTemplateManagementOptions = {}
         setTemplates(response.templates || []);
 
         if (response.pagination) {
-          setRowCount(response.pagination.totalCount || 0);
+          setRowCount(response.pagination.total || response.pagination.totalCount || 0);
         } else {
           setRowCount(response.templates?.length || 0);
         }

@@ -91,7 +91,7 @@ export const useInspectionManagement = (options: UseInspectionManagementOptions 
         setInspections(response.inspections || []);
 
         if (response.pagination) {
-          setRowCount(response.pagination.totalCount || 0);
+          setRowCount(response.pagination.total || response.pagination.totalCount || 0);
         } else {
           setRowCount(response.inspections?.length || 0);
         }
