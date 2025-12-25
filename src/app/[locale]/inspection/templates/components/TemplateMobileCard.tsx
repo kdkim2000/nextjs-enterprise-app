@@ -1,27 +1,16 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { Typography, Box, useTheme } from '@mui/material';
+import React from 'react';
+import { Box, Typography, IconButton, alpha, useTheme } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   ContentCopy as CloneIcon,
-  Visibility as ViewIcon,
+  ChevronRight as ChevronRightIcon,
+  MoreVert as MoreIcon,
 } from '@mui/icons-material';
-import MobileEntityCard, {
-  EntityAvatarConfig,
-  EntityStatusIndicator,
-  EntityRoleBadge,
-  EntityFeatureBadge,
-  EntitySwipeAction,
-} from '@/components/mobile/MobileEntityCard';
-import { useI18n } from '@/lib/i18n/client';
+import { MinimalBadge } from '@/components/common/MinimalListItem';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
-import {
-  getTemplateStatusLabel,
-  getTemplateStatusColor,
-  getTemplateStatusIcon,
-} from '@/lib/inspection';
 import { ChecksheetTemplate, TemplateStatus } from '../types';
 import { format } from 'date-fns';
 
@@ -39,6 +28,28 @@ export interface TemplateMobileCardProps {
   showSwipeActions?: boolean;
 }
 
+const getStatusConfig = (status: TemplateStatus, locale: string) => {
+  const configs: Record<TemplateStatus, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
+    active: {
+      label: getLocalizedValue({ ko: '활성', en: 'Active' }, locale),
+      color: 'success'
+    },
+    draft: {
+      label: getLocalizedValue({ ko: '초안', en: 'Draft' }, locale),
+      color: 'warning'
+    },
+    inactive: {
+      label: getLocalizedValue({ ko: '비활성', en: 'Inactive' }, locale),
+      color: 'default'
+    },
+    archived: {
+      label: getLocalizedValue({ ko: '보관', en: 'Archived' }, locale),
+      color: 'error'
+    },
+  };
+  return configs[status] || configs.draft;
+};
+
 export default function TemplateMobileCard({
   template,
   locale = 'ko',
@@ -46,160 +57,187 @@ export default function TemplateMobileCard({
   onEdit,
   onDelete,
   onClone,
-  onView,
   selected = false,
   selectable = false,
   onSelectionChange,
-  showSwipeActions = true,
 }: TemplateMobileCardProps) {
-  const t = useI18n();
   const theme = useTheme();
-  const isActive = template.status === 'active';
+  const statusConfig = getStatusConfig(template.status as TemplateStatus, locale);
 
-  // Get avatar color using centralized function
-  const avatarColor = getTemplateStatusColor(template.status as TemplateStatus, theme) || theme.palette.grey[500];
-
-  // Avatar config
-  const avatar: EntityAvatarConfig = useMemo(
-    () => ({
-      initials: template.code?.substring(0, 2).toUpperCase() || 'T',
-      bgcolor: avatarColor,
-      size: 48,
-    }),
-    [template.code, avatarColor]
-  );
-
-  // Status indicator
-  const status: EntityStatusIndicator = useMemo(
-    () => ({
-      active: isActive,
-    }),
-    [isActive]
-  );
-
-  // Role badge (status) - using centralized status functions
-  const roleBadge: EntityRoleBadge = useMemo(() => {
-    const statusBgMap: Record<string, string> = {
-      active: 'success.50',
-      draft: 'warning.50',
-      archived: 'error.50',
-      inactive: 'grey.100',
-    };
-    const statusColorMap: Record<string, string> = {
-      active: 'success.dark',
-      draft: 'warning.dark',
-      archived: 'error.dark',
-      inactive: 'text.secondary',
-    };
-    return {
-      label: getTemplateStatusLabel(template.status as TemplateStatus, locale),
-      icon: getTemplateStatusIcon(template.status as TemplateStatus),
-      bgcolor: statusBgMap[template.status] || 'grey.100',
-      color: statusColorMap[template.status] || 'text.secondary',
-    };
-  }, [template.status, locale]);
-
-  // Feature badges
-  const featureBadges: EntityFeatureBadge[] = useMemo(
-    () => [
-      {
-        key: 'version',
-        label: `v${template.version}`,
-        show: true,
-      },
-      {
-        key: 'items',
-        label: `${template.item_count || 0} ${getLocalizedValue({ en: 'items', ko: '항목', zh: '项', vi: 'mục' }, locale)}`,
-        show: (template.item_count || 0) > 0,
-      },
-      {
-        key: 'category',
-        label: template.category || '',
-        show: !!template.category,
-      },
-    ],
-    [template.version, template.item_count, template.category, locale]
-  );
-
-  // Swipe actions
-  const swipeActions: EntitySwipeAction<ChecksheetTemplate>[] = useMemo(() => {
-    const actions: EntitySwipeAction<ChecksheetTemplate>[] = [];
-
-    if (onDelete) {
-      actions.push({
-        icon: <DeleteIcon />,
-        label: t('common.delete'),
-        color: '#fff',
-        backgroundColor: '#f44336',
-        onClick: onDelete,
-      });
-    }
-
-    if (onClone) {
-      actions.push({
-        icon: <CloneIcon />,
-        label: getLocalizedValue({ en: 'Clone', ko: '복제', zh: '克隆', vi: 'Nhân bản' }, locale),
-        color: '#fff',
-        backgroundColor: '#9c27b0',
-        onClick: onClone,
-      });
-    }
-
-    if (onEdit) {
-      actions.push({
-        icon: <EditIcon />,
-        label: t('common.edit'),
-        color: '#fff',
-        backgroundColor: '#2196f3',
-        onClick: onEdit,
-      });
-    }
-
-    return actions;
-  }, [onDelete, onClone, onEdit, t, locale]);
-
-  // Format date
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return '-';
-    try {
-      return format(new Date(dateStr), 'yyyy-MM-dd');
-    } catch {
-      return '-';
+  const handleClick = () => {
+    if (selectable && onSelectionChange) {
+      onSelectionChange(!selected);
+    } else if (onClick) {
+      onClick(template);
     }
   };
 
-  // Right content
-  const rightContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-      <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
-        {formatDate(template.created_at)}
-      </Typography>
-      {template.created_by_name && (
-        <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
-          {template.created_by_name}
-        </Typography>
-      )}
-    </Box>
-  );
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    try {
+      return format(new Date(dateStr), 'MM.dd');
+    } catch {
+      return '';
+    }
+  };
 
   return (
-    <MobileEntityCard
-      item={template}
-      avatar={avatar}
-      status={status}
-      primaryText={template.name}
-      roleBadge={roleBadge}
-      secondaryText={template.code}
-      secondarySubtext={template.description}
-      featureBadges={featureBadges}
-      rightContent={rightContent}
-      isActive={isActive}
-      onClick={onClick}
-      swipeActions={swipeActions}
-      showSwipeActions={showSwipeActions}
-      selected={selected}
-      selectable={selectable}
-      onSelectionChange={onSelectionChange}
-    />
+    <Box
+      onClick={handleClick}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        bgcolor: selected ? alpha(theme.palette.primary.main, 0.06) : 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: alpha(theme.palette.divider, 0.5),
+        cursor: 'pointer',
+        transition: 'background-color 0.15s',
+        '&:active': {
+          bgcolor: alpha(theme.palette.primary.main, 0.08),
+        },
+      }}
+    >
+      {/* Selection checkbox */}
+      {selectable && (
+        <Box
+          sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            border: '2px solid',
+            borderColor: selected ? 'primary.main' : 'grey.300',
+            bgcolor: selected ? 'primary.main' : 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          {selected && (
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'white' }} />
+          )}
+        </Box>
+      )}
+
+      {/* Content */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* Title row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.9375rem',
+              color: 'text.primary',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+            }}
+          >
+            {template.name}
+          </Typography>
+          <MinimalBadge label={statusConfig.label} color={statusConfig.color} />
+        </Box>
+
+        {/* Info row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              color: 'text.secondary',
+            }}
+          >
+            {template.code}
+          </Typography>
+          <Typography sx={{ color: 'text.disabled', fontSize: '0.75rem' }}>·</Typography>
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              color: 'text.disabled',
+            }}
+          >
+            v{template.version}
+          </Typography>
+          {template.item_count > 0 && (
+            <>
+              <Typography sx={{ color: 'text.disabled', fontSize: '0.75rem' }}>·</Typography>
+              <Typography
+                sx={{
+                  fontSize: '0.75rem',
+                  color: 'text.disabled',
+                }}
+              >
+                {template.item_count} {getLocalizedValue({ ko: '항목', en: 'items' }, locale)}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Box>
+
+      {/* Actions (only visible on hover for desktop, or via menu for mobile) */}
+      {!selectable && (onEdit || onDelete || onClone) && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            opacity: { xs: 1, sm: 0 },
+            transition: 'opacity 0.15s',
+            '.MuiBox-root:hover > &': {
+              opacity: 1,
+            },
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {onEdit && (
+            <IconButton
+              size="small"
+              onClick={() => onEdit(template)}
+              sx={{
+                color: 'text.secondary',
+                p: 0.5,
+                '&:hover': { color: 'primary.main', bgcolor: 'primary.50' }
+              }}
+            >
+              <EditIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+          {onClone && (
+            <IconButton
+              size="small"
+              onClick={() => onClone(template)}
+              sx={{
+                color: 'text.secondary',
+                p: 0.5,
+                '&:hover': { color: 'secondary.main', bgcolor: 'secondary.50' }
+              }}
+            >
+              <CloneIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+          {onDelete && (
+            <IconButton
+              size="small"
+              onClick={() => onDelete(template)}
+              sx={{
+                color: 'text.secondary',
+                p: 0.5,
+                '&:hover': { color: 'error.main', bgcolor: 'error.50' }
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+        </Box>
+      )}
+
+      {/* Chevron for navigation hint */}
+      {onClick && !selectable && (
+        <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 20, ml: -0.5 }} />
+      )}
+    </Box>
   );
 }

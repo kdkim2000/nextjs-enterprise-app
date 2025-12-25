@@ -1,28 +1,15 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { Typography, Box, useTheme } from '@mui/material';
+import React from 'react';
+import { Box, Typography, IconButton, alpha, useTheme } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   PlayArrow as StartIcon,
-  Visibility as ViewIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
-import MobileEntityCard, {
-  EntityAvatarConfig,
-  EntityStatusIndicator,
-  EntityRoleBadge,
-  EntityFeatureBadge,
-  EntitySwipeAction,
-} from '@/components/mobile/MobileEntityCard';
-import { useI18n } from '@/lib/i18n/client';
+import { MinimalBadge } from '@/components/common/MinimalListItem';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
-import {
-  getInspectionStatusLabel,
-  getInspectionStatusColor,
-  getInspectionStatusIcon,
-  InspectionStatus as LibInspectionStatus,
-} from '@/lib/inspection';
 import { Inspection, InspectionStatus } from '../types';
 import { format } from 'date-fns';
 
@@ -40,6 +27,28 @@ export interface InspectionMobileCardProps {
   showSwipeActions?: boolean;
 }
 
+const getStatusConfig = (status: InspectionStatus, locale: string) => {
+  const configs: Record<InspectionStatus, { label: string; color: 'success' | 'warning' | 'error' | 'info' | 'default' }> = {
+    completed: {
+      label: getLocalizedValue({ ko: '완료', en: 'Completed' }, locale),
+      color: 'success'
+    },
+    in_progress: {
+      label: getLocalizedValue({ ko: '진행중', en: 'In Progress' }, locale),
+      color: 'info'
+    },
+    draft: {
+      label: getLocalizedValue({ ko: '대기', en: 'Pending' }, locale),
+      color: 'warning'
+    },
+    cancelled: {
+      label: getLocalizedValue({ ko: '취소', en: 'Cancelled' }, locale),
+      color: 'error'
+    },
+  };
+  return configs[status] || configs.draft;
+};
+
 export default function InspectionMobileCard({
   inspection,
   locale = 'ko',
@@ -47,150 +56,195 @@ export default function InspectionMobileCard({
   onEdit,
   onDelete,
   onStart,
-  onView,
   selected = false,
   selectable = false,
   onSelectionChange,
-  showSwipeActions = true,
 }: InspectionMobileCardProps) {
-  const t = useI18n();
   const theme = useTheme();
-  const isCompleted = inspection.status === 'completed';
+  const statusConfig = getStatusConfig(inspection.status as InspectionStatus, locale);
   const canStart = inspection.status === 'draft' || inspection.status === 'in_progress';
+  const canEdit = inspection.status === 'draft';
+  const canDelete = inspection.status === 'draft';
 
-  // Get avatar color using centralized function
-  const avatarColor = getInspectionStatusColor(inspection.status as LibInspectionStatus, theme) || theme.palette.grey[500];
-
-  const avatar: EntityAvatarConfig = useMemo(
-    () => ({
-      initials: inspection.inspection_code?.substring(0, 2).toUpperCase() || 'IN',
-      bgcolor: avatarColor,
-      size: 48,
-    }),
-    [inspection.inspection_code, avatarColor]
-  );
-
-  const status: EntityStatusIndicator = useMemo(
-    () => ({
-      active: isCompleted,
-    }),
-    [isCompleted]
-  );
-
-  // Role badge (status) - using centralized status functions
-  const roleBadge: EntityRoleBadge = useMemo(() => {
-    const statusBgMap: Record<string, string> = {
-      completed: 'success.50',
-      in_progress: 'primary.50',
-      cancelled: 'error.50',
-      draft: 'warning.50',
-    };
-    const statusColorMap: Record<string, string> = {
-      completed: 'success.dark',
-      in_progress: 'primary.dark',
-      cancelled: 'error.dark',
-      draft: 'warning.dark',
-    };
-    return {
-      label: getInspectionStatusLabel(inspection.status as LibInspectionStatus, locale),
-      icon: getInspectionStatusIcon(inspection.status as LibInspectionStatus),
-      bgcolor: statusBgMap[inspection.status] || 'warning.50',
-      color: statusColorMap[inspection.status] || 'warning.dark',
-    };
-  }, [inspection.status, locale]);
-
-  const featureBadges: EntityFeatureBadge[] = useMemo(
-    () => [
-      {
-        key: 'template',
-        label: inspection.template_name || '',
-        show: !!inspection.template_name,
-      },
-      {
-        key: 'location',
-        label: inspection.location || '',
-        show: !!inspection.location,
-      },
-    ],
-    [inspection.template_name, inspection.location]
-  );
-
-  const swipeActions: EntitySwipeAction<Inspection>[] = useMemo(() => {
-    const actions: EntitySwipeAction<Inspection>[] = [];
-
-    if (onDelete && inspection.status === 'draft') {
-      actions.push({
-        icon: <DeleteIcon />,
-        label: t('common.delete'),
-        color: '#fff',
-        backgroundColor: '#f44336',
-        onClick: onDelete,
-      });
-    }
-
-    if (onStart && canStart) {
-      actions.push({
-        icon: <StartIcon />,
-        label: getLocalizedValue({ en: 'Start', ko: '시작' }, locale),
-        color: '#fff',
-        backgroundColor: '#4caf50',
-        onClick: onStart,
-      });
-    }
-
-    if (onEdit && inspection.status === 'draft') {
-      actions.push({
-        icon: <EditIcon />,
-        label: t('common.edit'),
-        color: '#fff',
-        backgroundColor: '#2196f3',
-        onClick: onEdit,
-      });
-    }
-
-    return actions;
-  }, [onDelete, onStart, onEdit, inspection.status, canStart, t, locale]);
-
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return '-';
-    try {
-      return format(new Date(dateStr), 'yyyy-MM-dd');
-    } catch {
-      return '-';
+  const handleClick = () => {
+    if (selectable && onSelectionChange) {
+      onSelectionChange(!selected);
+    } else if (onClick) {
+      onClick(inspection);
     }
   };
 
-  const rightContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-      <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
-        {formatDate(inspection.inspection_date)}
-      </Typography>
-      {inspection.inspector_name && (
-        <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
-          {inspection.inspector_name}
-        </Typography>
-      )}
-    </Box>
-  );
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    try {
+      return format(new Date(dateStr), 'MM.dd');
+    } catch {
+      return '';
+    }
+  };
 
   return (
-    <MobileEntityCard
-      item={inspection}
-      avatar={avatar}
-      status={status}
-      primaryText={inspection.title}
-      roleBadge={roleBadge}
-      secondaryText={inspection.inspection_code}
-      secondarySubtext={inspection.description}
-      featureBadges={featureBadges}
-      rightContent={rightContent}
-      isActive={isCompleted}
-      onClick={onClick}
-      swipeActions={swipeActions}
-      showSwipeActions={showSwipeActions}
-      selected={selected}
-      selectable={selectable}
-      onSelectionChange={onSelectionChange}
-    />
+    <Box
+      onClick={handleClick}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        bgcolor: selected ? alpha(theme.palette.primary.main, 0.06) : 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: alpha(theme.palette.divider, 0.5),
+        cursor: 'pointer',
+        transition: 'background-color 0.15s',
+        '&:active': {
+          bgcolor: alpha(theme.palette.primary.main, 0.08),
+        },
+      }}
+    >
+      {/* Selection checkbox */}
+      {selectable && (
+        <Box
+          sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            border: '2px solid',
+            borderColor: selected ? 'primary.main' : 'grey.300',
+            bgcolor: selected ? 'primary.main' : 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          {selected && (
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'white' }} />
+          )}
+        </Box>
+      )}
+
+      {/* Content */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* Title row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.9375rem',
+              color: 'text.primary',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+            }}
+          >
+            {inspection.title}
+          </Typography>
+          <MinimalBadge label={statusConfig.label} color={statusConfig.color} />
+        </Box>
+
+        {/* Info row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              color: 'text.secondary',
+            }}
+          >
+            {inspection.inspection_code}
+          </Typography>
+          {inspection.template_name && (
+            <>
+              <Typography sx={{ color: 'text.disabled', fontSize: '0.75rem' }}>·</Typography>
+              <Typography
+                sx={{
+                  fontSize: '0.75rem',
+                  color: 'text.disabled',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 120,
+                }}
+              >
+                {inspection.template_name}
+              </Typography>
+            </>
+          )}
+          {inspection.inspection_date && (
+            <>
+              <Typography sx={{ color: 'text.disabled', fontSize: '0.75rem' }}>·</Typography>
+              <Typography
+                sx={{
+                  fontSize: '0.75rem',
+                  color: 'text.disabled',
+                }}
+              >
+                {formatDate(inspection.inspection_date)}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Box>
+
+      {/* Actions */}
+      {!selectable && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Start/Continue button - always visible if available */}
+          {onStart && canStart && (
+            <IconButton
+              size="small"
+              onClick={() => onStart(inspection)}
+              sx={{
+                color: 'success.main',
+                p: 0.5,
+                bgcolor: 'success.50',
+                '&:hover': { bgcolor: 'success.100' }
+              }}
+            >
+              <StartIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+          {onEdit && canEdit && (
+            <IconButton
+              size="small"
+              onClick={() => onEdit(inspection)}
+              sx={{
+                color: 'text.secondary',
+                p: 0.5,
+                '&:hover': { color: 'primary.main', bgcolor: 'primary.50' }
+              }}
+            >
+              <EditIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+          {onDelete && canDelete && (
+            <IconButton
+              size="small"
+              onClick={() => onDelete(inspection)}
+              sx={{
+                color: 'text.secondary',
+                p: 0.5,
+                '&:hover': { color: 'error.main', bgcolor: 'error.50' }
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          )}
+        </Box>
+      )}
+
+      {/* Chevron for navigation hint */}
+      {onClick && !selectable && (
+        <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 20, ml: -0.5 }} />
+      )}
+    </Box>
   );
 }

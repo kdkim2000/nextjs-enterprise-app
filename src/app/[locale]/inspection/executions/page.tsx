@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, Paper, Typography, CircularProgress } from '@mui/material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
-import MobileCardList from '@/components/mobile/MobileCardList';
 import InspectionMobileCard from './components/InspectionMobileCard';
 import InspectionFormFields from './components/InspectionFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
@@ -233,38 +232,41 @@ export default function InspectionExecutionPage() {
       onMobileDeleteSelected={gridPermissions.showDeleteButton ? handleMobileDeleteSelected : undefined}
     >
       {isMobileLayout ? (
-        <MobileCardList
-          data={inspections}
-          loading={searching}
-          emptyMessage={t('grid.noRows')}
-          renderCard={(inspection, index) => (
-            <InspectionMobileCard
-              key={inspection.id}
-              inspection={inspection}
-              locale={currentLocale}
-              onClick={handleMobileInspectionClick}
-              onEdit={gridPermissions.editable ? handleMobileInspectionEdit : undefined}
-              onDelete={gridPermissions.showDeleteButton ? handleMobileInspectionDelete : undefined}
-              onStart={gridPermissions.editable ? handleMobileInspectionStart : undefined}
-              selected={mobileSelectedIds.has(inspection.id)}
-              selectable={mobileSelectionMode}
-              onSelectionChange={(selected) => {
-                const newIds = new Set(mobileSelectedIds);
-                if (selected) {
-                  newIds.add(inspection.id);
-                } else {
-                  newIds.delete(inspection.id);
-                }
-                setMobileSelectedIds(newIds);
-              }}
-              showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
-            />
+        // Mobile: Simple list
+        <Box sx={{ bgcolor: 'background.paper', flex: 1, overflow: 'auto' }}>
+          {searching ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : inspections.length === 0 ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <Typography color="text.secondary">{t('grid.noRows')}</Typography>
+            </Box>
+          ) : (
+            inspections.map((inspection) => (
+              <InspectionMobileCard
+                key={inspection.id}
+                inspection={inspection}
+                locale={currentLocale}
+                onClick={handleMobileInspectionClick}
+                onEdit={gridPermissions.editable ? handleMobileInspectionEdit : undefined}
+                onDelete={gridPermissions.showDeleteButton ? handleMobileInspectionDelete : undefined}
+                onStart={gridPermissions.editable ? handleMobileInspectionStart : undefined}
+                selected={mobileSelectedIds.has(inspection.id)}
+                selectable={mobileSelectionMode}
+                onSelectionChange={(selected) => {
+                  const newIds = new Set(mobileSelectedIds);
+                  if (selected) {
+                    newIds.add(inspection.id);
+                  } else {
+                    newIds.delete(inspection.id);
+                  }
+                  setMobileSelectedIds(newIds);
+                }}
+              />
+            ))
           )}
-          keyExtractor={(inspection) => inspection.id}
-          hasMore={mobileHasMore}
-          onLoadMore={handleMobileLoadMore}
-          onRefresh={handleMobileRefresh}
-        />
+        </Box>
       ) : (
         <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
           <Box sx={{ flex: 1, minHeight: 0 }}>

@@ -8,7 +8,6 @@ import {
   Typography,
   Button,
   IconButton,
-  Chip,
   Divider,
   Grid,
   CircularProgress,
@@ -17,18 +16,19 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  alpha,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
   Edit as EditIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon,
+  Close as CloseIcon,
   Add as AddIcon,
-  ContentCopy as CloneIcon,
 } from '@mui/icons-material';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
+import { MinimalBadge } from '@/components/common/MinimalListItem';
 import ItemTreeView from './components/ItemTreeView';
 import ItemFormFields from './components/ItemFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
@@ -44,16 +44,12 @@ const statusOptions: { value: TemplateStatus; label: Record<string, string> }[] 
   { value: 'archived', label: { ko: '보관', en: 'Archived' } },
 ];
 
-const getStatusColor = (status: string): 'default' | 'success' | 'warning' | 'error' => {
+const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'default' => {
   switch (status) {
-    case 'active':
-      return 'success';
-    case 'draft':
-      return 'warning';
-    case 'archived':
-      return 'error';
-    default:
-      return 'default';
+    case 'active': return 'success';
+    case 'draft': return 'warning';
+    case 'archived': return 'error';
+    default: return 'default';
   }
 };
 
@@ -99,7 +95,7 @@ export default function TemplateDetailPage() {
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return '-';
     try {
-      return format(new Date(dateStr), 'yyyy-MM-dd HH:mm');
+      return format(new Date(dateStr), 'yyyy.MM.dd');
     } catch {
       return '-';
     }
@@ -109,7 +105,7 @@ export default function TemplateDetailPage() {
     return (
       <StandardCrudPageLayout useMenu showBreadcrumb>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <CircularProgress />
+          <CircularProgress size={28} />
         </Box>
       </StandardCrudPageLayout>
     );
@@ -118,10 +114,13 @@ export default function TemplateDetailPage() {
   if (!template) {
     return (
       <StandardCrudPageLayout useMenu showBreadcrumb>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <Typography color="error">
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
+          <Typography color="text.secondary" sx={{ mb: 2 }}>
             {getLocalizedValue({ en: 'Template not found', ko: '템플릿을 찾을 수 없습니다' }, currentLocale)}
           </Typography>
+          <Button onClick={handleBack} startIcon={<BackIcon />} size="small">
+            {getLocalizedValue({ en: 'Go back', ko: '돌아가기' }, currentLocale)}
+          </Button>
         </Box>
       </StandardCrudPageLayout>
     );
@@ -135,101 +134,120 @@ export default function TemplateDetailPage() {
       errorMessage={errorMessage}
     >
       {/* Header */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton onClick={handleBack}>
-              <BackIcon />
-            </IconButton>
-            <Typography variant="h6">
-              {editMode
-                ? getLocalizedValue({ en: 'Edit Template', ko: '템플릿 수정' }, currentLocale)
-                : template.name}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          px: 2,
+          py: 1.5,
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+        }}
+      >
+        <IconButton onClick={handleBack} size="small" sx={{ mr: 0.5 }}>
+          <BackIcon fontSize="small" />
+        </IconButton>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+            {editMode
+              ? getLocalizedValue({ en: 'Edit Template', ko: '템플릿 수정' }, currentLocale)
+              : template.name}
+          </Typography>
+          {!editMode && (
+            <Typography variant="caption" color="text.secondary">
+              {template.code}
             </Typography>
-            {!editMode && (
-              <Chip
-                label={getLocalizedValue(
-                  statusOptions.find((s) => s.value === template.status)?.label || { en: template.status },
-                  currentLocale
-                )}
-                size="small"
-                color={getStatusColor(template.status)}
-              />
-            )}
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {editMode ? (
-              <>
-                <Button
-                  variant="outlined"
-                  startIcon={<CancelIcon />}
-                  onClick={handleCancelEdit}
-                  disabled={saveLoading}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  onClick={handleSaveTemplate}
-                  disabled={saveLoading}
-                >
-                  {t('common.save')}
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={() => setEditMode(true)}
-              >
-                {t('common.edit')}
-              </Button>
-            )}
-          </Box>
+          )}
         </Box>
 
-        {/* Template Details */}
+        {!editMode && (
+          <MinimalBadge
+            label={getLocalizedValue(
+              statusOptions.find((s) => s.value === template.status)?.label || { en: template.status },
+              currentLocale
+            )}
+            color={getStatusColor(template.status)}
+          />
+        )}
+
+        {editMode ? (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              size="small"
+              onClick={handleCancelEdit}
+              disabled={saveLoading}
+              sx={{ minWidth: 'auto', px: 1.5 }}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={handleSaveTemplate}
+              disabled={saveLoading}
+              disableElevation
+              sx={{ minWidth: 'auto', px: 1.5 }}
+            >
+              {t('common.save')}
+            </Button>
+          </Box>
+        ) : (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+            onClick={() => setEditMode(true)}
+            sx={{ minWidth: 'auto', px: 1.5 }}
+          >
+            {t('common.edit')}
+          </Button>
+        )}
+      </Box>
+
+      {/* Template Details */}
+      <Box sx={{ p: 2 }}>
         {editMode && editingTemplate ? (
-          <Grid container spacing={2}>
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <TextField
-                label={getLocalizedValue({ en: 'Code', ko: '코드' }, currentLocale)}
-                value={editingTemplate.code}
-                onChange={(e) => setEditingTemplate({ ...editingTemplate, code: e.target.value })}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <TextField
-                label={getLocalizedValue({ en: 'Name', ko: '이름' }, currentLocale)}
-                value={editingTemplate.name}
-                onChange={(e) => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item size={{ xs: 12 }}>
-              <TextField
-                label={getLocalizedValue({ en: 'Description', ko: '설명' }, currentLocale)}
-                value={editingTemplate.description || ''}
-                onChange={(e) => setEditingTemplate({ ...editingTemplate, description: e.target.value })}
-                fullWidth
-                multiline
-                rows={2}
-              />
-            </Grid>
-            <Grid item size={{ xs: 12, md: 6 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label={getLocalizedValue({ en: 'Code', ko: '코드' }, currentLocale)}
+              value={editingTemplate.code}
+              onChange={(e) => setEditingTemplate({ ...editingTemplate, code: e.target.value })}
+              fullWidth
+              size="small"
+              required
+            />
+            <TextField
+              label={getLocalizedValue({ en: 'Name', ko: '이름' }, currentLocale)}
+              value={editingTemplate.name}
+              onChange={(e) => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
+              fullWidth
+              size="small"
+              required
+            />
+            <TextField
+              label={getLocalizedValue({ en: 'Description', ko: '설명' }, currentLocale)}
+              value={editingTemplate.description || ''}
+              onChange={(e) => setEditingTemplate({ ...editingTemplate, description: e.target.value })}
+              fullWidth
+              size="small"
+              multiline
+              rows={2}
+            />
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 label={getLocalizedValue({ en: 'Category', ko: '카테고리' }, currentLocale)}
                 value={editingTemplate.category || ''}
                 onChange={(e) => setEditingTemplate({ ...editingTemplate, category: e.target.value })}
                 fullWidth
+                size="small"
               />
-            </Grid>
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 <InputLabel>
                   {getLocalizedValue({ en: 'Status', ko: '상태' }, currentLocale)}
                 </InputLabel>
@@ -245,82 +263,98 @@ export default function TemplateDetailPage() {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         ) : (
-          <Grid container spacing={2}>
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <Typography variant="caption" color="text.secondary">
-                {getLocalizedValue({ en: 'Code', ko: '코드' }, currentLocale)}
-              </Typography>
-              <Typography variant="body1">{template.code}</Typography>
-            </Grid>
-            <Grid item size={{ xs: 12, md: 6 }}>
-              <Typography variant="caption" color="text.secondary">
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+            <Box sx={{ minWidth: 100 }}>
+              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6875rem' }}>
                 {getLocalizedValue({ en: 'Category', ko: '카테고리' }, currentLocale)}
               </Typography>
-              <Typography variant="body1">{template.category || '-'}</Typography>
-            </Grid>
-            <Grid item size={{ xs: 12 }}>
-              <Typography variant="caption" color="text.secondary">
-                {getLocalizedValue({ en: 'Description', ko: '설명' }, currentLocale)}
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {template.category || '-'}
               </Typography>
-              <Typography variant="body1">{template.description || '-'}</Typography>
-            </Grid>
-            <Grid item size={{ xs: 6, md: 3 }}>
-              <Typography variant="caption" color="text.secondary">
+            </Box>
+            <Box sx={{ minWidth: 60 }}>
+              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6875rem' }}>
                 {getLocalizedValue({ en: 'Version', ko: '버전' }, currentLocale)}
               </Typography>
-              <Typography variant="body1">v{template.version}</Typography>
-            </Grid>
-            <Grid item size={{ xs: 6, md: 3 }}>
-              <Typography variant="caption" color="text.secondary">
-                {getLocalizedValue({ en: 'Items', ko: '항목수' }, currentLocale)}
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                v{template.version}
               </Typography>
-              <Typography variant="body1">{items.length}</Typography>
-            </Grid>
-            <Grid item size={{ xs: 6, md: 3 }}>
-              <Typography variant="caption" color="text.secondary">
-                {getLocalizedValue({ en: 'Created', ko: '작성일' }, currentLocale)}
+            </Box>
+            <Box sx={{ minWidth: 60 }}>
+              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6875rem' }}>
+                {getLocalizedValue({ en: 'Items', ko: '항목' }, currentLocale)}
               </Typography>
-              <Typography variant="body1">{formatDate(template.created_at)}</Typography>
-            </Grid>
-            <Grid item size={{ xs: 6, md: 3 }}>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {items.length}
+              </Typography>
+            </Box>
+            <Box sx={{ minWidth: 80 }}>
+              <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6875rem' }}>
                 {getLocalizedValue({ en: 'Updated', ko: '수정일' }, currentLocale)}
               </Typography>
-              <Typography variant="body1">{formatDate(template.updated_at)}</Typography>
-            </Grid>
-          </Grid>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {formatDate(template.updated_at)}
+              </Typography>
+            </Box>
+          </Box>
         )}
-      </Paper>
+
+        {!editMode && template.description && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: '1px solid',
+              borderColor: alpha('#000', 0.06),
+              fontSize: '0.8125rem',
+            }}
+          >
+            {template.description}
+          </Typography>
+        )}
+      </Box>
 
       {/* Items Section */}
-      <Paper sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">
+      <Box sx={{ px: 2, pb: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            py: 1.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             {getLocalizedValue({ en: 'Checksheet Items', ko: '체크시트 항목' }, currentLocale)}
           </Typography>
           <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleAddItem()}
             size="small"
+            startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+            onClick={() => handleAddItem()}
+            sx={{ minWidth: 'auto', px: 1.5 }}
           >
-            {getLocalizedValue({ en: 'Add Item', ko: '항목 추가' }, currentLocale)}
+            {getLocalizedValue({ en: 'Add', ko: '추가' }, currentLocale)}
           </Button>
         </Box>
-        <Divider sx={{ mb: 2 }} />
 
-        <ItemTreeView
-          items={itemTree}
-          locale={currentLocale}
-          onEdit={handleEditItem}
-          onDelete={handleDeleteItemClick}
-          onAddChild={handleAddItem}
-          editable={true}
-        />
-      </Paper>
+        <Box sx={{ mt: 1 }}>
+          <ItemTreeView
+            items={itemTree}
+            locale={currentLocale}
+            onEdit={handleEditItem}
+            onDelete={handleDeleteItemClick}
+            onAddChild={handleAddItem}
+            editable={true}
+          />
+        </Box>
+      </Box>
 
       {/* Item Edit Drawer */}
       <EditDrawer

@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, Paper, Typography, CircularProgress } from '@mui/material';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
 import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
-import MobileCardList from '@/components/mobile/MobileCardList';
 import TemplateMobileCard from './components/TemplateMobileCard';
 import TemplateFormFields from './components/TemplateFormFields';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
@@ -248,39 +247,41 @@ export default function TemplateManagementPage() {
     >
       {/* Conditional rendering based on device */}
       {isMobileLayout ? (
-        // Mobile: Card List with infinite scroll
-        <MobileCardList
-          data={templates}
-          loading={searching}
-          emptyMessage={t('grid.noRows')}
-          renderCard={(template, index) => (
-            <TemplateMobileCard
-              key={template.id}
-              template={template}
-              locale={currentLocale}
-              onClick={handleMobileTemplateClick}
-              onEdit={gridPermissions.editable ? handleMobileTemplateEdit : undefined}
-              onDelete={gridPermissions.showDeleteButton ? handleMobileTemplateDelete : undefined}
-              onClone={gridPermissions.editable ? handleMobileTemplateClone : undefined}
-              selected={mobileSelectedIds.has(template.id)}
-              selectable={mobileSelectionMode}
-              onSelectionChange={(selected) => {
-                const newIds = new Set(mobileSelectedIds);
-                if (selected) {
-                  newIds.add(template.id);
-                } else {
-                  newIds.delete(template.id);
-                }
-                setMobileSelectedIds(newIds);
-              }}
-              showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
-            />
+        // Mobile: Simple list
+        <Box sx={{ bgcolor: 'background.paper', flex: 1, overflow: 'auto' }}>
+          {searching ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : templates.length === 0 ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <Typography color="text.secondary">{t('grid.noRows')}</Typography>
+            </Box>
+          ) : (
+            templates.map((template) => (
+              <TemplateMobileCard
+                key={template.id}
+                template={template}
+                locale={currentLocale}
+                onClick={handleMobileTemplateClick}
+                onEdit={gridPermissions.editable ? handleMobileTemplateEdit : undefined}
+                onDelete={gridPermissions.showDeleteButton ? handleMobileTemplateDelete : undefined}
+                onClone={gridPermissions.editable ? handleMobileTemplateClone : undefined}
+                selected={mobileSelectedIds.has(template.id)}
+                selectable={mobileSelectionMode}
+                onSelectionChange={(selected) => {
+                  const newIds = new Set(mobileSelectedIds);
+                  if (selected) {
+                    newIds.add(template.id);
+                  } else {
+                    newIds.delete(template.id);
+                  }
+                  setMobileSelectedIds(newIds);
+                }}
+              />
+            ))
           )}
-          keyExtractor={(template) => template.id}
-          hasMore={mobileHasMore}
-          onLoadMore={handleMobileLoadMore}
-          onRefresh={handleMobileRefresh}
-        />
+        </Box>
       ) : (
         // Desktop: DataGrid Area
         <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
