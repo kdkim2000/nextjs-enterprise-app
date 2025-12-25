@@ -5,7 +5,7 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   Select,
