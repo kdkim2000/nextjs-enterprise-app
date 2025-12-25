@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Box,
@@ -9,40 +9,23 @@ import {
   IconButton,
   CircularProgress,
   Alert,
-  Zoom,
-  Slide,
-  SwipeableDrawer,
-  List,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Divider,
-  Switch,
-  FormControlLabel,
-  Badge,
+  LinearProgress,
   useTheme,
   alpha,
-  Snackbar,
+  TextField,
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
-  Save as SaveIcon,
-  Send as SubmitIcon,
   ChevronLeft as PrevIcon,
   ChevronRight as NextIcon,
-  Menu as MenuIcon,
-  Close as CloseIcon,
   CheckCircle as CheckIcon,
-  RadioButtonUnchecked as UncheckedIcon,
-  ErrorOutline as RequiredIcon,
-  List as ListIcon,
-  Settings as SettingsIcon,
-  SkipNext as AutoNextIcon,
-  TouchApp as SwipeIcon,
+  Send as SubmitIcon,
+  CameraAlt as CameraIcon,
+  Draw as SignatureIcon,
 } from '@mui/icons-material';
-import MobileDetailSheet from '@/components/mobile/MobileDetailSheet';
-import MobileInspectionProgress from '@/components/inspection/MobileInspectionProgress';
-import MobileChecklistCard from '@/components/inspection/MobileChecklistCard';
 import PhotoCapture from '@/components/inspection/PhotoCapture';
 import SignaturePad from '@/components/inspection/SignaturePad';
 import { inspectionApi } from '@/lib/axios';
@@ -64,11 +47,8 @@ export default function MobileInspectionExecutePage() {
   const router = useRouter();
   const params = useParams();
   const inspectionId = params.id as string;
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  const { showSuccessMessage, showErrorMessage } = useMessage({
-    locale: currentLocale,
-  });
+  const { showSuccessMessage, showErrorMessage } = useMessage({ locale: currentLocale });
 
   // State
   const [inspection, setInspection] = useState<Inspection | null>(null);
@@ -78,41 +58,18 @@ export default function MobileInspectionExecutePage() {
   const [saving, setSaving] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // UX Settings
-  const [autoAdvance, setAutoAdvance] = useState(true);
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
-
-  // Modals & Drawers
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [itemListOpen, setItemListOpen] = useState(false);
+  // Modals
   const [photoCaptureOpen, setPhotoCaptureOpen] = useState(false);
   const [signaturePadOpen, setSignaturePadOpen] = useState(false);
-  const [activeItemId, setActiveItemId] = useState<string | null>(null);
-
-  // Animation state
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
-  const [animating, setAnimating] = useState(false);
-
-  // Touch handling for swipe
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const minSwipeDistance = 50;
-
-  // Snackbar for feedback
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
 
   // Fetch data
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-
       const inspectionResponse = await inspectionApi.get(`/executions/${inspectionId}`);
       setInspection(inspectionResponse.inspection);
 
-      const itemsResponse = await inspectionApi.get(
-        `/items?template_id=${inspectionResponse.inspection.template_id}`
-      );
+      const itemsResponse = await inspectionApi.get(`/items?template_id=${inspectionResponse.inspection.template_id}`);
       const fetchedItems = (itemsResponse.items || [])
         .filter((i: ChecksheetItem) => !i.parent_id)
         .sort((a: ChecksheetItem, b: ChecksheetItem) => a.sort_order - b.sort_order);
@@ -127,7 +84,6 @@ export default function MobileInspectionExecutePage() {
         const photoData = photoUrls.find((url: string) => url && !url.startsWith('signature:'));
         const signatureEntry = photoUrls.find((url: string) => url && url.startsWith('signature:'));
         const signatureData = signatureEntry ? signatureEntry.replace('signature:', '') : undefined;
-
         resultsState[r.item_id] = {
           value: r.value || '',
           notes: r.remarks || r.notes || '',
@@ -141,7 +97,6 @@ export default function MobileInspectionExecutePage() {
           resultsState[item.id] = { value: '', notes: '' };
         }
       });
-
       setResults(resultsState);
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -155,157 +110,56 @@ export default function MobileInspectionExecutePage() {
     fetchData();
   }, [fetchData]);
 
-  // Hide swipe hint after first swipe
-  useEffect(() => {
-    if (!showSwipeHint) return;
-    const timer = setTimeout(() => setShowSwipeHint(false), 5000);
-    return () => clearTimeout(timer);
-  }, [showSwipeHint]);
-
-  // Calculate progress
+  // Progress calculation
   const completedItems = Object.values(results).filter((r) => r.value !== '').length;
   const requiredItems = items.filter((i) => i.required);
   const completedRequiredItems = requiredItems.filter((i) => results[i.id]?.value !== '').length;
-  const canSubmit = completedRequiredItems === requiredItems.length;
-  const itemStatuses = items.map((item) => results[item.id]?.value !== '');
+  const canSubmit = requiredItems.length === 0 || completedRequiredItems === requiredItems.length;
+  const progressPercent = items.length > 0 ? (completedItems / items.length) * 100 : 0;
 
-  // Navigation with animation
-  const goToItem = useCallback((index: number, direction?: 'left' | 'right') => {
-    if (index >= 0 && index < items.length && !animating) {
-      setSlideDirection(direction || (index > currentIndex ? 'left' : 'right'));
-      setAnimating(true);
-      setTimeout(() => {
-        setCurrentIndex(index);
-        setAnimating(false);
-        setSwipeOffset(0);
-      }, 150);
-    }
-  }, [items.length, currentIndex, animating]);
+  // Navigation
+  const goNext = () => currentIndex < items.length - 1 && setCurrentIndex(currentIndex + 1);
+  const goPrev = () => currentIndex > 0 && setCurrentIndex(currentIndex - 1);
 
-  const goNext = useCallback(() => {
-    if (currentIndex < items.length - 1) {
-      goToItem(currentIndex + 1, 'left');
-      setShowSwipeHint(false);
-    }
-  }, [currentIndex, items.length, goToItem]);
-
-  const goPrev = useCallback(() => {
-    if (currentIndex > 0) {
-      goToItem(currentIndex - 1, 'right');
-      setShowSwipeHint(false);
-    }
-  }, [currentIndex, goToItem]);
-
-  // Touch handlers for swipe with visual feedback
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    const currentTouch = e.targetTouches[0].clientX;
-    setTouchEnd(currentTouch);
-
-    if (touchStart !== null) {
-      const diff = touchStart - currentTouch;
-      // Limit swipe offset
-      const maxOffset = 100;
-      setSwipeOffset(Math.max(-maxOffset, Math.min(maxOffset, diff)));
-    }
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) {
-      setSwipeOffset(0);
-      return;
-    }
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && currentIndex < items.length - 1) {
-      goNext();
-    } else if (isRightSwipe && currentIndex > 0) {
-      goPrev();
-    } else {
-      setSwipeOffset(0);
-    }
-
-    setTouchStart(null);
-    setTouchEnd(null);
-  };
-
-  // Result handlers with auto-advance
-  const handleResultChange = useCallback((itemId: string, newResult: ResultState) => {
-    const previousValue = results[itemId]?.value || '';
+  // Result change handler
+  const handleResultChange = (value: string) => {
+    const currentItem = items[currentIndex];
+    if (!currentItem) return;
     setResults((prev) => ({
       ...prev,
-      [itemId]: newResult,
+      [currentItem.id]: { ...prev[currentItem.id], value },
     }));
-
-    // Auto-advance if enabled and value changed from empty to filled
-    if (autoAdvance && previousValue === '' && newResult.value !== '' && currentIndex < items.length - 1) {
-      setTimeout(() => {
-        goNext();
-        setSnackbar({
-          open: true,
-          message: getLocalizedValue({ en: 'Moving to next item', ko: '다음 항목으로 이동' }, currentLocale),
-        });
-      }, 500);
-    }
-  }, [autoAdvance, currentIndex, items.length, goNext, currentLocale, results]);
-
-  // Photo capture
-  const handlePhotoCapture = (itemId: string) => {
-    setActiveItemId(itemId);
-    setPhotoCaptureOpen(true);
   };
 
+  // Photo/Signature handlers
   const handlePhotoCaptured = (imageData: string) => {
-    if (activeItemId) {
-      handleResultChange(activeItemId, {
-        ...results[activeItemId],
-        value: 'captured',
-        photoData: imageData,
-      });
-    }
+    const currentItem = items[currentIndex];
+    if (!currentItem) return;
+    setResults((prev) => ({
+      ...prev,
+      [currentItem.id]: { ...prev[currentItem.id], value: 'captured', photoData: imageData },
+    }));
     setPhotoCaptureOpen(false);
-    setActiveItemId(null);
-  };
-
-  // Signature capture
-  const handleSignatureCapture = (itemId: string) => {
-    setActiveItemId(itemId);
-    setSignaturePadOpen(true);
   };
 
   const handleSignatureSaved = (signatureData: string) => {
-    if (activeItemId) {
-      handleResultChange(activeItemId, {
-        ...results[activeItemId],
-        value: 'signed',
-        signatureData: signatureData,
-      });
-    }
+    const currentItem = items[currentIndex];
+    if (!currentItem) return;
+    setResults((prev) => ({
+      ...prev,
+      [currentItem.id]: { ...prev[currentItem.id], value: 'signed', signatureData: signatureData },
+    }));
     setSignaturePadOpen(false);
-    setActiveItemId(null);
   };
 
-  // Save
+  // Save & Submit
   const handleSave = async () => {
     try {
       setSaving(true);
-
       const resultsToSave = Object.entries(results).map(([itemId, result]) => {
         const photoUrls: string[] = [];
-        if (result.photoData) {
-          photoUrls.push(result.photoData);
-        }
-        if (result.signatureData) {
-          photoUrls.push(`signature:${result.signatureData}`);
-        }
-
+        if (result.photoData) photoUrls.push(result.photoData);
+        if (result.signatureData) photoUrls.push(`signature:${result.signatureData}`);
         return {
           item_id: itemId,
           value: result.value,
@@ -313,10 +167,8 @@ export default function MobileInspectionExecutePage() {
           photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
         };
       });
-
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
       await showSuccessMessage('COMMON_SAVE_SUCCESS');
-      setMenuOpen(false);
     } catch (error) {
       console.error('Failed to save:', error);
       await showErrorMessage('COMMON_SAVE_FAIL');
@@ -325,20 +177,13 @@ export default function MobileInspectionExecutePage() {
     }
   };
 
-  // Submit
   const handleSubmit = async () => {
     try {
       setSaving(true);
-
       const resultsToSave = Object.entries(results).map(([itemId, result]) => {
         const photoUrls: string[] = [];
-        if (result.photoData) {
-          photoUrls.push(result.photoData);
-        }
-        if (result.signatureData) {
-          photoUrls.push(`signature:${result.signatureData}`);
-        }
-
+        if (result.photoData) photoUrls.push(result.photoData);
+        if (result.signatureData) photoUrls.push(`signature:${result.signatureData}`);
         return {
           item_id: itemId,
           value: result.value,
@@ -346,11 +191,9 @@ export default function MobileInspectionExecutePage() {
           photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
         };
       });
-
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
       await inspectionApi.post(`/executions/${inspectionId}/submit`);
       await showSuccessMessage('COMMON_SUBMIT_SUCCESS');
-
       router.push(`/${currentLocale}/inspection/executions`);
     } catch (error) {
       console.error('Failed to submit:', error);
@@ -360,533 +203,339 @@ export default function MobileInspectionExecutePage() {
     }
   };
 
-  const handleBack = () => {
-    router.push(`/${currentLocale}/inspection/executions`);
-  };
+  const handleBack = () => router.push(`/${currentLocale}/inspection/executions`);
 
+  // Loading state
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          gap: 2,
-        }}
-      >
-        <CircularProgress size={48} />
-        <Typography variant="body2" color="text.secondary">
-          {getLocalizedValue({ en: 'Loading inspection...', ko: '점검 데이터 로딩중...' }, currentLocale)}
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
       </Box>
     );
   }
 
   if (!inspection || items.length === 0) {
     return (
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 3 }}>
         <Alert severity="error">
           {getLocalizedValue({ en: 'Failed to load inspection', ko: '점검을 불러올 수 없습니다' }, currentLocale)}
         </Alert>
-        <Button onClick={handleBack} sx={{ mt: 2 }}>
-          {getLocalizedValue({ en: 'Go Back', ko: '돌아가기' }, currentLocale)}
-        </Button>
+        <Button onClick={handleBack} sx={{ mt: 2 }}>{getLocalizedValue({ en: 'Back', ko: '돌아가기' }, currentLocale)}</Button>
       </Box>
     );
   }
 
   const currentItem = items[currentIndex];
+  const currentResult = results[currentItem?.id] || { value: '', notes: '' };
   const isCompleted = inspection.status === 'completed' || inspection.status === 'submitted';
 
-  return (
-    <Box
-      sx={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: alpha(theme.palette.primary.main, 0.02),
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header */}
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: 'white',
-          pt: 'env(safe-area-inset-top)',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 1 }}>
-          <IconButton onClick={handleBack} sx={{ color: 'white' }}>
-            <BackIcon />
-          </IconButton>
-          <Box sx={{ flex: 1, mx: 1, minWidth: 0 }}>
-            <Typography variant="subtitle1" fontWeight="bold" noWrap>
-              {inspection.template_name || inspection.title}
-            </Typography>
-            <Typography variant="caption" sx={{ opacity: 0.8 }}>
-              {inspection.inspection_code}
-            </Typography>
-          </Box>
-          <IconButton onClick={() => setMenuOpen(true)} sx={{ color: 'white' }}>
-            <Badge badgeContent={items.length - completedItems} color="error" max={99}>
-              <MenuIcon />
-            </Badge>
-          </IconButton>
-        </Box>
+  // Parse options for select type
+  const getOptions = (item: ChecksheetItem): string[] => {
+    if (!item.options) return [];
+    if (Array.isArray(item.options)) return item.options;
+    try {
+      const parsed = JSON.parse(item.options);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return item.options.split(',').map((o) => o.trim()).filter(Boolean);
+    }
+  };
 
-        {/* Progress Section */}
-        <Box sx={{ px: 2, pb: 2 }}>
-          <MobileInspectionProgress
-            totalItems={items.length}
-            completedItems={completedItems}
-            requiredItems={requiredItems.length}
-            completedRequiredItems={completedRequiredItems}
-            currentIndex={currentIndex}
-            locale={currentLocale}
-            variant="detailed"
-            itemStatuses={itemStatuses}
-            onItemClick={(idx) => goToItem(idx)}
-          />
-        </Box>
-      </Box>
+  // Render input based on item type
+  const renderInput = () => {
+    if (!currentItem) return null;
 
-      {/* Main Content - Swipeable */}
-      <Box
-        ref={containerRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        sx={{
-          flex: 1,
-          overflow: 'auto',
-          p: 2,
-          WebkitOverflowScrolling: 'touch',
-          transform: `translateX(${-swipeOffset * 0.3}px)`,
-          transition: swipeOffset === 0 ? 'transform 0.2s ease-out' : 'none',
-        }}
-      >
-        <Slide direction={slideDirection} in={!animating} mountOnEnter unmountOnExit>
-          <Box>
-            {currentItem && (
-              <MobileChecklistCard
-                item={currentItem}
-                result={results[currentItem.id] || { value: '', notes: '' }}
-                onChange={(result) => handleResultChange(currentItem.id, result)}
-                onPhotoCapture={
-                  currentItem.item_type === 'photo' ? () => handlePhotoCapture(currentItem.id) : undefined
-                }
-                onSignatureCapture={
-                  currentItem.item_type === 'signature' ? () => handleSignatureCapture(currentItem.id) : undefined
-                }
-                locale={currentLocale}
-                isActive
-                itemNumber={currentIndex + 1}
-                totalItems={items.length}
-                disabled={isCompleted}
-              />
-            )}
-          </Box>
-        </Slide>
-
-        {/* Swipe Hint */}
-        <Zoom in={showSwipeHint}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-              mt: 3,
-              py: 1,
-              px: 2,
-              borderRadius: 2,
-              bgcolor: alpha(theme.palette.info.main, 0.1),
-            }}
+    switch (currentItem.item_type) {
+      case 'checkbox':
+        return (
+          <ToggleButtonGroup
+            value={currentResult.value}
+            exclusive
+            onChange={(_, val) => val && handleResultChange(val)}
+            fullWidth
+            sx={{ mt: 2 }}
           >
-            <SwipeIcon sx={{ fontSize: 20, color: 'info.main' }} />
-            <Typography variant="caption" color="info.main">
-              {getLocalizedValue(
-                { en: 'Swipe left/right to navigate', ko: '좌우로 스와이프하여 이동하세요' },
-                currentLocale
-              )}
-            </Typography>
-          </Box>
-        </Zoom>
-      </Box>
+            <ToggleButton value="OK" sx={{ py: 2, fontSize: '1.1rem', fontWeight: 'bold' }} color="success">
+              OK
+            </ToggleButton>
+            <ToggleButton value="NG" sx={{ py: 2, fontSize: '1.1rem', fontWeight: 'bold' }} color="error">
+              NG
+            </ToggleButton>
+          </ToggleButtonGroup>
+        );
 
-      {/* Bottom Action Bar */}
-      <Box
-        sx={{
-          bgcolor: 'background.paper',
-          borderTop: 1,
-          borderColor: 'divider',
-          boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
-          pb: 'env(safe-area-inset-bottom)',
-        }}
-      >
-        {/* Progress Summary Bar */}
-        {!isCompleted && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: 2,
-              py: 1,
-              bgcolor: canSubmit
-                ? alpha(theme.palette.success.main, 0.08)
-                : alpha(theme.palette.warning.main, 0.08),
-              borderBottom: 1,
-              borderColor: 'divider',
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {canSubmit ? (
-                <CheckIcon sx={{ fontSize: 18, color: 'success.main' }} />
-              ) : (
-                <RequiredIcon sx={{ fontSize: 18, color: 'warning.main' }} />
-              )}
-              <Typography variant="caption" fontWeight="medium" color={canSubmit ? 'success.main' : 'warning.main'}>
-                {canSubmit
-                  ? getLocalizedValue({ en: 'All required items completed', ko: '필수 항목 모두 완료' }, currentLocale)
-                  : getLocalizedValue(
-                      { en: `Required: ${completedRequiredItems}/${requiredItems.length}`, ko: `필수: ${completedRequiredItems}/${requiredItems.length}` },
-                      currentLocale
-                    )}
-              </Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary">
-              {getLocalizedValue({ en: `Total: ${completedItems}/${items.length}`, ko: `전체: ${completedItems}/${items.length}` }, currentLocale)}
-            </Typography>
-          </Box>
-        )}
-
-        {/* Navigation Row */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1.5,
-            py: 1,
-          }}
-        >
-          <IconButton
-            onClick={goPrev}
-            disabled={currentIndex === 0}
-            sx={{
-              bgcolor: alpha(theme.palette.grey[500], 0.08),
-              '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.15) },
-              '&.Mui-disabled': { bgcolor: 'transparent' },
-            }}
-          >
-            <PrevIcon />
-          </IconButton>
-
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 0.5,
-            }}
-          >
-            {items.map((_, idx) => (
-              <Box
-                key={idx}
-                onClick={() => goToItem(idx)}
-                sx={{
-                  width: idx === currentIndex ? 16 : 6,
-                  height: 6,
-                  borderRadius: 3,
-                  bgcolor: idx === currentIndex
-                    ? 'primary.main'
-                    : itemStatuses[idx]
-                      ? 'success.main'
-                      : alpha(theme.palette.grey[500], 0.3),
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
+      case 'select':
+        const options = getOptions(currentItem);
+        return (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+            {options.map((option) => (
+              <Chip
+                key={option}
+                label={option}
+                onClick={() => handleResultChange(option)}
+                color={currentResult.value === option ? 'primary' : 'default'}
+                variant={currentResult.value === option ? 'filled' : 'outlined'}
+                sx={{ py: 2.5, px: 1, fontSize: '1rem', fontWeight: currentResult.value === option ? 'bold' : 'normal' }}
               />
             ))}
           </Box>
+        );
 
-          <IconButton
-            onClick={goNext}
-            disabled={currentIndex === items.length - 1}
-            sx={{
-              bgcolor: alpha(theme.palette.grey[500], 0.08),
-              '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.15) },
-              '&.Mui-disabled': { bgcolor: 'transparent' },
-            }}
-          >
-            <NextIcon />
-          </IconButton>
-        </Box>
+      case 'number':
+        return (
+          <TextField
+            type="number"
+            value={currentResult.value}
+            onChange={(e) => handleResultChange(e.target.value)}
+            fullWidth
+            variant="outlined"
+            placeholder={getLocalizedValue({ en: 'Enter number', ko: '숫자 입력' }, currentLocale)}
+            disabled={isCompleted}
+            sx={{ mt: 2, '& input': { fontSize: '1.5rem', textAlign: 'center', py: 2 } }}
+          />
+        );
 
-        {/* Action Buttons Row */}
-        {!isCompleted && (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 1.5,
-              px: 2,
-              py: 1.5,
-            }}
-          >
-            <Button
-              variant="outlined"
-              size="large"
-              startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveIcon />}
-              onClick={handleSave}
-              disabled={saving}
-              sx={{
-                flex: 1,
-                py: 1.25,
-                borderRadius: 2,
-                fontWeight: 'bold',
-                borderWidth: 2,
-                '&:hover': { borderWidth: 2 },
-              }}
-            >
-              {getLocalizedValue({ en: 'Save', ko: '저장' }, currentLocale)}
-            </Button>
+      case 'text':
+        return (
+          <TextField
+            value={currentResult.value}
+            onChange={(e) => handleResultChange(e.target.value)}
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            placeholder={getLocalizedValue({ en: 'Enter text', ko: '텍스트 입력' }, currentLocale)}
+            disabled={isCompleted}
+            sx={{ mt: 2 }}
+          />
+        );
+
+      case 'photo':
+        return (
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            {currentResult.photoData ? (
+              <Box sx={{ mb: 2 }}>
+                <img src={currentResult.photoData} alt="captured" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }} />
+              </Box>
+            ) : null}
             <Button
               variant="contained"
               size="large"
-              color="success"
-              startIcon={<SubmitIcon />}
-              onClick={handleSubmit}
-              disabled={saving || !canSubmit}
-              sx={{
-                flex: 1.5,
-                py: 1.25,
-                borderRadius: 2,
-                fontWeight: 'bold',
-                boxShadow: canSubmit ? 3 : 0,
-              }}
+              startIcon={<CameraIcon />}
+              onClick={() => setPhotoCaptureOpen(true)}
+              disabled={isCompleted}
+              fullWidth
+              sx={{ py: 2 }}
             >
-              {getLocalizedValue({ en: 'Submit', ko: '제출' }, currentLocale)}
+              {currentResult.photoData
+                ? getLocalizedValue({ en: 'Retake Photo', ko: '다시 촬영' }, currentLocale)
+                : getLocalizedValue({ en: 'Take Photo', ko: '사진 촬영' }, currentLocale)}
             </Button>
+          </Box>
+        );
+
+      case 'signature':
+        return (
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            {currentResult.signatureData ? (
+              <Box sx={{ mb: 2, p: 2, border: 1, borderColor: 'divider', borderRadius: 2, bgcolor: 'grey.50' }}>
+                <img src={currentResult.signatureData} alt="signature" style={{ maxWidth: '100%', maxHeight: 150 }} />
+              </Box>
+            ) : null}
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<SignatureIcon />}
+              onClick={() => setSignaturePadOpen(true)}
+              disabled={isCompleted}
+              fullWidth
+              sx={{ py: 2 }}
+            >
+              {currentResult.signatureData
+                ? getLocalizedValue({ en: 'Re-sign', ko: '다시 서명' }, currentLocale)
+                : getLocalizedValue({ en: 'Sign', ko: '서명하기' }, currentLocale)}
+            </Button>
+          </Box>
+        );
+
+      default:
+        return (
+          <TextField
+            value={currentResult.value}
+            onChange={(e) => handleResultChange(e.target.value)}
+            fullWidth
+            variant="outlined"
+            placeholder={getLocalizedValue({ en: 'Enter value', ko: '값 입력' }, currentLocale)}
+            disabled={isCompleted}
+            sx={{ mt: 2 }}
+          />
+        );
+    }
+  };
+
+  return (
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'grey.50' }}>
+      {/* Simple Header */}
+      <Box sx={{ bgcolor: 'white', borderBottom: 1, borderColor: 'divider', pt: 'env(safe-area-inset-top)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 1.5 }}>
+          <IconButton onClick={handleBack}>
+            <BackIcon />
+          </IconButton>
+          <Typography variant="subtitle1" fontWeight="bold" sx={{ flex: 1 }} noWrap>
+            {inspection.template_name || inspection.title}
+          </Typography>
+          <Chip
+            label={`${completedItems}/${items.length}`}
+            size="small"
+            color={canSubmit ? 'success' : 'default'}
+            sx={{ fontWeight: 'bold' }}
+          />
+        </Box>
+        <LinearProgress variant="determinate" value={progressPercent} sx={{ height: 3 }} />
+      </Box>
+
+      {/* Main Content */}
+      <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        {/* Item Card */}
+        <Box sx={{ bgcolor: 'white', borderRadius: 3, p: 3, boxShadow: 1 }}>
+          {/* Item Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="caption" sx={{ px: 1.5, py: 0.5, bgcolor: 'grey.100', borderRadius: 1, fontWeight: 'bold' }}>
+                {currentIndex + 1}/{items.length}
+              </Typography>
+              {currentItem?.required && (
+                <Chip label={getLocalizedValue({ en: 'Required', ko: '필수' }, currentLocale)} size="small" color="error" />
+              )}
+            </Box>
+            {currentResult.value && <CheckIcon color="success" />}
+          </Box>
+
+          {/* Item Name */}
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+            {currentItem?.item_name}
+          </Typography>
+
+          {/* Item Description */}
+          {currentItem?.description && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {currentItem.description}
+            </Typography>
+          )}
+
+          {/* Input */}
+          {renderInput()}
+        </Box>
+      </Box>
+
+      {/* Bottom Action Bar */}
+      <Box sx={{ bgcolor: 'white', borderTop: 1, borderColor: 'divider', pb: 'env(safe-area-inset-bottom)' }}>
+        {/* Navigation */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
+          <Button
+            variant="text"
+            startIcon={<PrevIcon />}
+            onClick={goPrev}
+            disabled={currentIndex === 0}
+            sx={{ minWidth: 80 }}
+          >
+            {getLocalizedValue({ en: 'Prev', ko: '이전' }, currentLocale)}
+          </Button>
+
+          <Typography variant="body2" color="text.secondary" fontWeight="medium">
+            {currentIndex + 1} / {items.length}
+          </Typography>
+
+          <Button
+            variant="text"
+            endIcon={<NextIcon />}
+            onClick={goNext}
+            disabled={currentIndex === items.length - 1}
+            sx={{ minWidth: 80 }}
+          >
+            {getLocalizedValue({ en: 'Next', ko: '다음' }, currentLocale)}
+          </Button>
+        </Box>
+
+        {/* Submit Area - Always Visible */}
+        {!isCompleted && (
+          <Box sx={{ px: 2, pb: 2 }}>
+            {canSubmit ? (
+              // Ready to submit - prominent green button
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                fullWidth
+                startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <SubmitIcon />}
+                onClick={handleSubmit}
+                disabled={saving}
+                sx={{
+                  py: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  borderRadius: 3,
+                  boxShadow: 4,
+                }}
+              >
+                {getLocalizedValue({ en: 'Submit Inspection', ko: '점검 제출' }, currentLocale)}
+              </Button>
+            ) : (
+              // Not ready - show save button with progress hint
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={handleSave}
+                  disabled={saving}
+                  sx={{ flex: 1, py: 1.5, borderRadius: 2 }}
+                >
+                  {saving ? <CircularProgress size={20} /> : getLocalizedValue({ en: 'Save', ko: '저장' }, currentLocale)}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="inherit"
+                  size="large"
+                  disabled
+                  sx={{ flex: 2, py: 1.5, borderRadius: 2, bgcolor: 'grey.200' }}
+                >
+                  {getLocalizedValue(
+                    { en: `Required ${completedRequiredItems}/${requiredItems.length}`, ko: `필수 ${completedRequiredItems}/${requiredItems.length}` },
+                    currentLocale
+                  )}
+                </Button>
+              </Box>
+            )}
           </Box>
         )}
 
         {/* Completed State */}
         {isCompleted && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-              py: 2,
-              bgcolor: alpha(theme.palette.success.main, 0.08),
-            }}
-          >
-            <CheckIcon sx={{ color: 'success.main' }} />
-            <Typography variant="body2" color="success.main" fontWeight="medium">
-              {getLocalizedValue({ en: 'Inspection Completed', ko: '점검 완료' }, currentLocale)}
-            </Typography>
+          <Box sx={{ px: 2, pb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, py: 2, bgcolor: alpha(theme.palette.success.main, 0.1), borderRadius: 2 }}>
+              <CheckIcon color="success" />
+              <Typography color="success.main" fontWeight="bold">
+                {getLocalizedValue({ en: 'Inspection Completed', ko: '점검 완료됨' }, currentLocale)}
+              </Typography>
+            </Box>
           </Box>
         )}
       </Box>
 
-      {/* Menu Drawer */}
-      <SwipeableDrawer
-        anchor="right"
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        onOpen={() => setMenuOpen(true)}
-        PaperProps={{
-          sx: {
-            width: '85%',
-            maxWidth: 360,
-            borderTopLeftRadius: 16,
-            borderBottomLeftRadius: 16,
-          },
-        }}
-      >
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" fontWeight="bold">
-              {getLocalizedValue({ en: 'Menu', ko: '메뉴' }, currentLocale)}
-            </Typography>
-            <IconButton onClick={() => setMenuOpen(false)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </Box>
-
-        {/* Actions */}
-        <Box sx={{ p: 2 }}>
-          {!isCompleted && (
-            <>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={saving ? <CircularProgress size={20} /> : <SaveIcon />}
-                onClick={handleSave}
-                disabled={saving}
-                fullWidth
-                sx={{ mb: 1.5, py: 1.5, borderRadius: 2 }}
-              >
-                {getLocalizedValue({ en: 'Save Draft', ko: '임시 저장' }, currentLocale)}
-              </Button>
-              <Button
-                variant="contained"
-                size="large"
-                color="success"
-                startIcon={<SubmitIcon />}
-                onClick={handleSubmit}
-                disabled={saving || !canSubmit}
-                fullWidth
-                sx={{ mb: 2, py: 1.5, borderRadius: 2 }}
-              >
-                {getLocalizedValue({ en: 'Submit Inspection', ko: '점검 제출' }, currentLocale)}
-                {!canSubmit && ` (${completedRequiredItems}/${requiredItems.length})`}
-              </Button>
-            </>
-          )}
-        </Box>
-
-        <Divider />
-
-        {/* Settings */}
-        <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            <SettingsIcon sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
-            {getLocalizedValue({ en: 'Settings', ko: '설정' }, currentLocale)}
-          </Typography>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={autoAdvance}
-                onChange={(e) => setAutoAdvance(e.target.checked)}
-                color="primary"
-              />
-            }
-            label={
-              <Box>
-                <Typography variant="body2">
-                  {getLocalizedValue({ en: 'Auto-advance', ko: '자동 다음 이동' }, currentLocale)}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {getLocalizedValue(
-                    { en: 'Move to next item after input', ko: '입력 후 자동으로 다음 항목 이동' },
-                    currentLocale
-                  )}
-                </Typography>
-              </Box>
-            }
-            sx={{ ml: 0 }}
-          />
-        </Box>
-
-        <Divider />
-
-        {/* Item List */}
-        <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            <ListIcon sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
-            {getLocalizedValue({ en: 'Item List', ko: '항목 목록' }, currentLocale)} ({completedItems}/{items.length})
-          </Typography>
-        </Box>
-        <List sx={{ flex: 1, overflow: 'auto', py: 0 }}>
-          {items.map((item, idx) => {
-            const isItemCompleted = results[item.id]?.value !== '';
-            const isCurrent = idx === currentIndex;
-
-            return (
-              <ListItemButton
-                key={item.id}
-                selected={isCurrent}
-                onClick={() => {
-                  goToItem(idx);
-                  setMenuOpen(false);
-                }}
-                sx={{
-                  borderLeft: isCurrent ? `4px solid ${theme.palette.primary.main}` : '4px solid transparent',
-                  bgcolor: isCurrent ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 36 }}>
-                  {isItemCompleted ? (
-                    <CheckIcon color="success" fontSize="small" />
-                  ) : item.required ? (
-                    <RequiredIcon color="error" fontSize="small" />
-                  ) : (
-                    <UncheckedIcon color="disabled" fontSize="small" />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        {idx + 1}.
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          fontWeight: isCurrent ? 'bold' : 'normal',
-                          color: isItemCompleted ? 'success.main' : 'text.primary',
-                        }}
-                      >
-                        {item.item_name}
-                      </Typography>
-                    </Box>
-                  }
-                  secondary={
-                    <Typography variant="caption" color="text.secondary">
-                      {item.item_code}
-                    </Typography>
-                  }
-                />
-                {item.required && !isItemCompleted && (
-                  <Typography variant="caption" color="error">
-                    {getLocalizedValue({ en: 'Required', ko: '필수' }, currentLocale)}
-                  </Typography>
-                )}
-              </ListItemButton>
-            );
-          })}
-        </List>
-      </SwipeableDrawer>
-
-      {/* Photo Capture Dialog */}
+      {/* Photo Capture */}
       <PhotoCapture
         open={photoCaptureOpen}
-        onClose={() => {
-          setPhotoCaptureOpen(false);
-          setActiveItemId(null);
-        }}
+        onClose={() => setPhotoCaptureOpen(false)}
         onCapture={handlePhotoCaptured}
         locale={currentLocale}
       />
 
-      {/* Signature Pad Dialog */}
+      {/* Signature Pad */}
       <SignaturePad
         open={signaturePadOpen}
-        onClose={() => {
-          setSignaturePadOpen(false);
-          setActiveItemId(null);
-        }}
+        onClose={() => setSignaturePadOpen(false)}
         onSave={handleSignatureSaved}
         locale={currentLocale}
-      />
-
-      {/* Feedback Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={1500}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        message={snackbar.message}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        sx={{ bottom: 140 }}
       />
     </Box>
   );
