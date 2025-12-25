@@ -39,6 +39,7 @@ import {
   ResponsiveContainer,
   Area,
   AreaChart,
+  PieLabelRenderProps,
 } from 'recharts';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { StatCard } from '@/components/inspection/common';
@@ -65,6 +66,7 @@ interface CategoryData {
   name: string;
   value: number;
   color: string;
+  [key: string]: string | number;
 }
 
 interface TemplatePerformance {
@@ -295,7 +297,7 @@ export default function InspectionDashboardPage() {
                   outerRadius={100}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={(props: PieLabelRenderProps) => `${props.name} ${(Number(props.percent || 0) * 100).toFixed(0)}%`}
                   labelLine={false}
                 >
                   {categoryData.map((entry, index) => (

@@ -2,6 +2,7 @@
 
 import { GridColDef } from '@mui/x-data-grid';
 import { Chip } from '@mui/material';
+import { ContentCopy as CloneIcon } from '@mui/icons-material';
 import ActionsCell from '@/components/common/ActionsCell';
 import { ChecksheetTemplate, TemplateStatus } from './types';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
@@ -134,10 +135,16 @@ export const createColumns = (
         <ActionsCell
           onEdit={() => handleEdit(params.row.id)}
           onView={() => handleView(params.row.id)}
-          onClone={handleClone ? () => handleClone(params.row.id) : undefined}
           editTooltip={getLocalizedValue({ en: 'Edit Template', ko: '템플릿 수정', zh: '编辑模板', vi: 'Sửa mẫu' }, locale)}
-          viewTooltip={getLocalizedValue({ en: 'View Details', ko: '상세 보기', zh: '查看详情', vi: 'Xem chi tiết' }, locale)}
-          cloneTooltip={getLocalizedValue({ en: 'Clone Template', ko: '템플릿 복제', zh: '克隆模板', vi: 'Nhân bản mẫu' }, locale)}
+          viewLabel={getLocalizedValue({ en: 'View Details', ko: '상세 보기', zh: '查看详情', vi: 'Xem chi tiết' }, locale)}
+          customActions={handleClone ? [
+            {
+              label: getLocalizedValue({ en: 'Clone Template', ko: '템플릿 복제', zh: '克隆模板', vi: 'Nhân bản mẫu' }, locale),
+              onClick: () => handleClone(params.row.id),
+              icon: <CloneIcon fontSize="small" />,
+              color: 'secondary',
+            }
+          ] : undefined}
         />
       ),
     });

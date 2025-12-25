@@ -4,8 +4,8 @@ import React, { useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import MobileEntityCard, {
   MobileEntityCardProps,
-  SwipeAction,
-  FeatureBadge,
+  EntitySwipeAction,
+  EntityFeatureBadge,
 } from '@/components/mobile/MobileEntityCard';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
@@ -114,69 +114,77 @@ export default function GenericStatusMobileCard<T extends BaseEntity>({
   // Generate role badge (status indicator)
   const roleBadge = statusConfig
     ? {
-        text: getLocalizedValue(statusConfig.label, locale),
+        label: getLocalizedValue(statusConfig.label, locale),
         color: statusConfig.color,
       }
     : undefined;
 
   // Generate feature badges
-  const featureBadges: FeatureBadge[] = useMemo(() => {
+  const featureBadges: EntityFeatureBadge[] = useMemo(() => {
     return badges
-      .map((badge) => {
+      .map((badge, index) => {
         const value = badge.getValue(entity);
         if (value === undefined || value === null) return null;
 
         return {
+          key: badge.key || `badge-${index}`,
           label: badge.label ? getLocalizedValue(badge.label, locale) : String(value),
-          value: String(value),
           color: badge.color || 'default',
-        } as FeatureBadge;
+        } as EntityFeatureBadge;
       })
-      .filter((badge): badge is FeatureBadge => badge !== null);
+      .filter((badge): badge is EntityFeatureBadge => badge !== null);
   }, [badges, entity, locale]);
 
   // Generate swipe actions
-  const swipeActions: SwipeAction[] = useMemo(() => {
+  const swipeActions: EntitySwipeAction<T>[] = useMemo(() => {
     return actions
       .filter((action) => !action.show || action.show(entity))
       .map((action) => {
-        let handler: () => void;
+        let handler: (item: T) => void;
         let defaultColor: string;
+        let defaultBgColor: string;
 
         switch (action.type) {
           case 'edit':
             handler = () => onEdit?.(entity);
-            defaultColor = theme.palette.primary.main;
+            defaultColor = '#fff';
+            defaultBgColor = theme.palette.primary.main;
             break;
           case 'delete':
             handler = () => onDelete?.(entity);
-            defaultColor = theme.palette.error.main;
+            defaultColor = '#fff';
+            defaultBgColor = theme.palette.error.main;
             break;
           case 'clone':
             handler = () => onClone?.(entity);
-            defaultColor = theme.palette.info.main;
+            defaultColor = '#fff';
+            defaultBgColor = theme.palette.info.main;
             break;
           case 'view':
             handler = () => onView?.(entity);
-            defaultColor = theme.palette.info.main;
+            defaultColor = '#fff';
+            defaultBgColor = theme.palette.info.main;
             break;
           case 'start':
             handler = () => onStart?.(entity);
-            defaultColor = theme.palette.success.main;
+            defaultColor = '#fff';
+            defaultBgColor = theme.palette.success.main;
             break;
           case 'custom':
           default:
             handler = () => onCustomAction?.(entity, action.type);
-            defaultColor = theme.palette.grey[500];
+            defaultColor = '#fff';
+            defaultBgColor = theme.palette.grey[500];
             break;
         }
 
         return {
           label: getLocalizedValue(action.label, locale),
           color: action.color || defaultColor,
+          backgroundColor: defaultBgColor,
           icon: action.icon,
           onClick: handler,
-        } as SwipeAction;
+        } as EntitySwipeAction<T>;
       });
   }, [actions, entity, locale, theme, onEdit, onDelete, onClone, onView, onStart, onCustomAction]);
 
@@ -213,18 +221,20 @@ export default function GenericStatusMobileCard<T extends BaseEntity>({
   };
 
   return (
-    <MobileEntityCard
-      code={code}
-      name={getName(entity)}
-      description={getDescription?.(entity)}
-      avatarLetter={avatarLetter}
-      avatarColor={avatarColor}
+    <MobileEntityCard<T>
+      item={entity}
+      avatar={{
+        initials: avatarLetter,
+        bgcolor: avatarColor,
+      }}
+      primaryText={getName(entity)}
+      secondaryText={code}
+      tertiaryText={metaInfo}
       roleBadge={roleBadge}
       featureBadges={featureBadges}
-      metaInfo={metaInfo}
       swipeActions={swipeActions}
-      selectionMode={selectionMode}
-      isSelected={isSelected}
+      selectable={selectionMode}
+      selected={isSelected}
       onSelectionChange={handleSelectionChange}
       onClick={handleClick}
     />

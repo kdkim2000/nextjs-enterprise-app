@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Grid, Paper, Typography, Button } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography, Button } from '@mui/material';
 import {
   Assignment as TemplateIcon,
   PlaylistAddCheck as ExecutionIcon,
@@ -71,7 +71,7 @@ export default function InspectionHomePage() {
 
         <Grid container spacing={3}>
           {menuCards.map((card, index) => (
-            <Grid item size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
               <Paper
                 sx={{
                   p: 3,

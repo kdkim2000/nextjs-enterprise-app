@@ -137,9 +137,9 @@ export default function InspectionResultsPage() {
     [currentLocale, router]
   );
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     const useQuickSearch = quickSearch.trim() !== '';
-    fetchInspections(paginationModel.page, paginationModel.pageSize, useQuickSearch);
+    await fetchInspections(paginationModel.page, paginationModel.pageSize, useQuickSearch);
   }, [fetchInspections, quickSearch, paginationModel]);
 
   const handleSearchChange = useCallback((field: keyof SearchCriteria, value: string | string[]) => {
@@ -302,12 +302,12 @@ export default function InspectionResultsPage() {
       {
         name: 'date_from',
         label: getLocalizedValue({ en: 'Date From', ko: '시작일' }, currentLocale),
-        type: 'date',
+        type: 'datetime-local',
       },
       {
         name: 'date_to',
         label: getLocalizedValue({ en: 'Date To', ko: '종료일' }, currentLocale),
-        type: 'date',
+        type: 'datetime-local',
       },
     ],
     [currentLocale, templates]
@@ -393,7 +393,7 @@ export default function InspectionResultsPage() {
               rowCount={rowCount}
               paginationModel={paginationModel}
               onPaginationModelChange={handlePaginationModelChange}
-              onRowDoubleClick={(params) => handleView(params.row.id)}
+              onRowClick={(params) => handleView(params.row.id)}
             />
           </Box>
         </Paper>

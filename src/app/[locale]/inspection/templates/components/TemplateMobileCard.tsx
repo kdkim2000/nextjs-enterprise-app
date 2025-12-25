@@ -161,7 +161,7 @@ export default function TemplateMobileCard({
           >
             v{template.version}
           </Typography>
-          {template.item_count > 0 && (
+          {(template.item_count || 0) > 0 && (
             <>
               <Typography sx={{ color: 'text.disabled', fontSize: '0.75rem' }}>·</Typography>
               <Typography

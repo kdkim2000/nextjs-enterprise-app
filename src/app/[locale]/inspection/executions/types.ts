@@ -29,6 +29,7 @@ export interface InspectionResult {
   item_type?: ItemType;
   value: string;
   notes?: string;
+  remarks?: string; // Backend uses 'remarks', frontend uses 'notes'
   photo_url?: string;
   created_at: string;
   updated_at: string;

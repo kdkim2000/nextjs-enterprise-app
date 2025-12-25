@@ -39,12 +39,12 @@ export const createFilterFields = (t: any, locale: string, templates: Checksheet
   {
     name: 'date_from',
     label: getLocalizedValue({ en: 'Date From', ko: '시작일', zh: '开始日期', vi: 'Từ ngày' }, locale),
-    type: 'date',
+    type: 'datetime-local',
   },
   {
     name: 'date_to',
     label: getLocalizedValue({ en: 'Date To', ko: '종료일', zh: '结束日期', vi: 'Đến ngày' }, locale),
-    type: 'date',
+    type: 'datetime-local',
   },
 ];
 

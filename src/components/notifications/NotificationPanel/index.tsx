@@ -10,9 +10,9 @@ import {
   Popover,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   ListItemIcon,
-  ListItemSecondaryAction,
   Divider,
   Button,
   Chip,
@@ -224,48 +224,8 @@ export default function NotificationPanel({
                 <React.Fragment key={notification.id}>
                   {index > 0 && <Divider component="li" />}
                   <ListItem
-                    button
-                    onClick={() => handleNotificationClick(notification)}
-                    sx={{
-                      bgcolor: notification.read ? 'transparent' : 'action.hover',
-                      borderLeft: 3,
-                      borderColor: getPriorityColor(notification.priority),
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      {getNotificationIcon(notification.type)}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Typography
-                          variant="body2"
-                          fontWeight={notification.read ? 'normal' : 'bold'}
-                          noWrap
-                        >
-                          {notification.title}
-                        </Typography>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {notification.message}
-                          </Typography>
-                          <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }}>
-                            {formatTime(notification.createdAt)}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                    <ListItemSecondaryAction>
+                    disablePadding
+                    secondaryAction={
                       <IconButton
                         edge="end"
                         size="small"
@@ -276,7 +236,52 @@ export default function NotificationPanel({
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
-                    </ListItemSecondaryAction>
+                    }
+                    sx={{
+                      borderLeft: 3,
+                      borderColor: getPriorityColor(notification.priority),
+                    }}
+                  >
+                    <ListItemButton
+                      onClick={() => handleNotificationClick(notification)}
+                      sx={{
+                        bgcolor: notification.read ? 'transparent' : 'action.hover',
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        {getNotificationIcon(notification.type)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="body2"
+                            fontWeight={notification.read ? 'normal' : 'bold'}
+                            noWrap
+                          >
+                            {notification.title}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                            >
+                              {notification.message}
+                            </Typography>
+                            <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }}>
+                              {formatTime(notification.createdAt)}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItemButton>
                   </ListItem>
                 </React.Fragment>
               ))}

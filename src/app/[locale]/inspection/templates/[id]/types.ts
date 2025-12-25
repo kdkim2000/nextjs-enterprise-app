@@ -1,4 +1,5 @@
 export type ItemType = 'checkbox' | 'text' | 'number' | 'select' | 'photo' | 'signature' | 'date' | 'time';
+export type TemplateStatus = 'draft' | 'active' | 'inactive' | 'archived';
 
 export interface ChecksheetItem {
   id: string;

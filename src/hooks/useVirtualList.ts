@@ -17,7 +17,7 @@ export interface VirtualListItem<T> {
 export interface VirtualListResult<T> {
   virtualItems: VirtualListItem<T>[];
   totalHeight: number;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   scrollToIndex: (index: number, behavior?: ScrollBehavior) => void;
 }
 

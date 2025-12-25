@@ -9,7 +9,7 @@ import {
   Button,
   IconButton,
   Chip,
-  Grid,
+  Grid2 as Grid,
   CircularProgress,
   Alert,
   Divider,
@@ -520,43 +520,43 @@ export default function InspectionDetailPage() {
         )}
 
         <Grid container spacing={2}>
-          <Grid item size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Inspection Code', ko: '검사코드' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{inspection.inspection_code}</Typography>
           </Grid>
-          <Grid item size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Template', ko: '템플릿' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{inspection.template_name || inspection.template_code || '-'}</Typography>
           </Grid>
-          <Grid item size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Description', ko: '설명' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{inspection.description || '-'}</Typography>
           </Grid>
-          <Grid item size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 3 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Inspector', ko: '검사자' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{inspection.inspector_name || '-'}</Typography>
           </Grid>
-          <Grid item size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 3 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Location', ko: '위치' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{inspection.location || '-'}</Typography>
           </Grid>
-          <Grid item size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 3 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Inspection Date', ko: '검사일' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{formatDate(inspection.inspection_date)}</Typography>
           </Grid>
-          <Grid item size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, md: 3 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Completed At', ko: '완료일' }, currentLocale)}
             </Typography>

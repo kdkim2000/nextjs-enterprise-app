@@ -22,11 +22,12 @@ import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
 export type ExportFormat = 'excel' | 'pdf' | 'print';
 
-export interface ExportButtonProps extends Omit<ButtonProps, 'onClick'> {
+export interface ExportButtonProps extends Omit<ButtonProps, 'onClick' | 'variant'> {
   onExport: (format: ExportFormat) => Promise<void> | void;
   formats?: ExportFormat[];
   locale?: string;
   variant?: 'button' | 'icon' | 'menu';
+  buttonVariant?: 'text' | 'contained' | 'outlined';
   label?: string;
 }
 
