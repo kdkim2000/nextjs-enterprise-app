@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogContent,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   PhotoCamera as CameraIcon,
@@ -18,6 +19,8 @@ import {
   FlashOff as FlashOffIcon,
   Check as ConfirmIcon,
   Refresh as RetakeIcon,
+  Videocam as VideocamIcon,
+  VideocamOff as VideocamOffIcon,
 } from '@mui/icons-material';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
 
@@ -40,14 +43,117 @@ export default function PhotoCapture({
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<'permission' | 'notfound' | 'inuse' | 'notsupported' | 'unknown'>('unknown');
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [permissionState, setPermissionState] = useState<PermissionState | null>(null);
+
+  // Check camera permission status
+  const checkPermission = useCallback(async () => {
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const result = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        setPermissionState(result.state);
+        return result.state;
+      }
+    } catch (err) {
+      console.log('Permission API not supported, will try direct access');
+    }
+    return null;
+  }, []);
+
+  // Request camera permission explicitly
+  const requestPermission = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Try to get user media to trigger permission prompt
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      // Immediately stop - we just wanted permission
+      stream.getTracks().forEach(track => track.stop());
+      setPermissionState('granted');
+      // Now start the actual camera
+      startCamera();
+    } catch (err: any) {
+      console.error('Permission request failed:', err);
+      handleCameraError(err);
+    }
+  }, []);
+
+  // Handle camera errors with specific messages
+  const handleCameraError = useCallback((err: any) => {
+    console.error('Camera error:', err.name, err.message);
+
+    let errorMessage: Record<string, string>;
+    let type: typeof errorType = 'unknown';
+
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      type = 'permission';
+      errorMessage = {
+        en: 'Camera permission denied. Please allow camera access in your browser settings.',
+        ko: '카메라 권한이 거부되었습니다. 브라우저 설정에서 카메라 접근을 허용해주세요.',
+        zh: '相机权限被拒绝。请在浏览器设置中允许相机访问。',
+        vi: 'Quyền camera bị từ chối. Vui lòng cho phép truy cập camera trong cài đặt trình duyệt.',
+      };
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      type = 'notfound';
+      errorMessage = {
+        en: 'No camera found. Please connect a camera and try again.',
+        ko: '카메라를 찾을 수 없습니다. 카메라를 연결하고 다시 시도해주세요.',
+        zh: '未找到相机。请连接相机后重试。',
+        vi: 'Không tìm thấy camera. Vui lòng kết nối camera và thử lại.',
+      };
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+      type = 'inuse';
+      errorMessage = {
+        en: 'Camera is in use by another application. Please close other apps using the camera.',
+        ko: '카메라가 다른 앱에서 사용 중입니다. 카메라를 사용하는 다른 앱을 종료해주세요.',
+        zh: '相机正被其他应用程序使用。请关闭使用相机的其他应用。',
+        vi: 'Camera đang được ứng dụng khác sử dụng. Vui lòng đóng các ứng dụng khác đang dùng camera.',
+      };
+    } else if (err.name === 'OverconstrainedError') {
+      type = 'notfound';
+      errorMessage = {
+        en: 'Camera constraints not satisfied. Trying with default settings...',
+        ko: '카메라 설정을 만족할 수 없습니다. 기본 설정으로 시도합니다...',
+        zh: '相机约束不满足。正在尝试默认设置...',
+        vi: 'Không đáp ứng được ràng buộc camera. Đang thử với cài đặt mặc định...',
+      };
+    } else if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      type = 'notsupported';
+      errorMessage = {
+        en: 'Camera not supported in this browser. Please use a modern browser.',
+        ko: '이 브라우저에서는 카메라를 지원하지 않습니다. 최신 브라우저를 사용해주세요.',
+        zh: '此浏览器不支持相机。请使用现代浏览器。',
+        vi: 'Trình duyệt này không hỗ trợ camera. Vui lòng sử dụng trình duyệt hiện đại.',
+      };
+    } else {
+      type = 'unknown';
+      errorMessage = {
+        en: `Failed to access camera: ${err.message || 'Unknown error'}`,
+        ko: `카메라 접근에 실패했습니다: ${err.message || '알 수 없는 오류'}`,
+        zh: `无法访问相机: ${err.message || '未知错误'}`,
+        vi: `Không thể truy cập camera: ${err.message || 'Lỗi không xác định'}`,
+      };
+    }
+
+    setErrorType(type);
+    setError(getLocalizedValue(errorMessage, locale));
+    setLoading(false);
+  }, [locale]);
 
   // Start camera
   const startCamera = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    // Check browser support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      handleCameraError({ name: 'NotSupportedError', message: 'getUserMedia not supported' });
+      return;
+    }
 
     try {
       // Stop existing stream
@@ -64,7 +170,19 @@ export default function PhotoCapture({
         audio: false,
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (constraintError: any) {
+        // If constraints fail, try with simpler constraints
+        if (constraintError.name === 'OverconstrainedError') {
+          console.log('Trying with simpler constraints...');
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        } else {
+          throw constraintError;
+        }
+      }
+
       streamRef.current = stream;
 
       if (videoRef.current) {
@@ -80,22 +198,11 @@ export default function PhotoCapture({
       }
 
       setLoading(false);
-    } catch (err) {
-      console.error('Failed to start camera:', err);
-      setError(
-        getLocalizedValue(
-          {
-            en: 'Failed to access camera. Please check permissions.',
-            ko: '카메라 접근에 실패했습니다. 권한을 확인해주세요.',
-            zh: '无法访问相机。请检查权限。',
-            vi: 'Không thể truy cập camera. Vui lòng kiểm tra quyền.',
-          },
-          locale
-        )
-      );
-      setLoading(false);
+      setPermissionState('granted');
+    } catch (err: any) {
+      handleCameraError(err);
     }
-  }, [facingMode, locale]);
+  }, [facingMode, handleCameraError]);
 
   // Stop camera
   const stopCamera = useCallback(() => {
@@ -240,9 +347,62 @@ export default function PhotoCapture({
           )}
 
           {error && (
-            <Typography color="error" align="center" sx={{ px: 2 }}>
-              {error}
-            </Typography>
+            <Box sx={{ px: 3, textAlign: 'center', maxWidth: 400 }}>
+              <VideocamOffIcon sx={{ fontSize: 64, color: 'grey.500', mb: 2 }} />
+              <Alert severity="error" sx={{ mb: 2, textAlign: 'left' }}>
+                {error}
+              </Alert>
+
+              {errorType === 'permission' && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="grey.400" sx={{ mb: 1 }}>
+                    {getLocalizedValue({
+                      en: 'To allow camera access:',
+                      ko: '카메라 접근을 허용하려면:',
+                      zh: '要允许相机访问：',
+                      vi: 'Để cho phép truy cập camera:',
+                    }, locale)}
+                  </Typography>
+                  <Typography variant="caption" color="grey.500" component="div">
+                    {getLocalizedValue({
+                      en: '1. Click the camera icon in the address bar\n2. Select "Allow" for camera\n3. Refresh or click retry',
+                      ko: '1. 주소창의 카메라 아이콘을 클릭하세요\n2. 카메라 "허용"을 선택하세요\n3. 새로고침하거나 재시도를 클릭하세요',
+                      zh: '1. 点击地址栏中的相机图标\n2. 选择相机"允许"\n3. 刷新或点击重试',
+                      vi: '1. Nhấp vào biểu tượng camera trong thanh địa chỉ\n2. Chọn "Cho phép" cho camera\n3. Làm mới hoặc nhấp thử lại',
+                    }, locale)}
+                  </Typography>
+                </Box>
+              )}
+
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<VideocamIcon />}
+                  onClick={requestPermission}
+                  sx={{ mt: 1 }}
+                >
+                  {getLocalizedValue({
+                    en: 'Request Permission',
+                    ko: '권한 요청',
+                    zh: '请求权限',
+                    vi: 'Yêu cầu quyền',
+                  }, locale)}
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<RetakeIcon />}
+                  onClick={startCamera}
+                  sx={{ mt: 1, color: 'white', borderColor: 'grey.500' }}
+                >
+                  {getLocalizedValue({
+                    en: 'Retry',
+                    ko: '재시도',
+                    zh: '重试',
+                    vi: 'Thử lại',
+                  }, locale)}
+                </Button>
+              </Box>
+            </Box>
           )}
 
           {capturedImage ? (
