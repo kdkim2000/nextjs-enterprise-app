@@ -151,7 +151,13 @@ export default function PhotoCapture({
 
   // Handle camera errors with specific messages
   const handleCameraError = useCallback((err: any) => {
-    console.error('Camera error:', err.name, err.message);
+    // Use console.warn for expected errors (no camera found), console.error for unexpected ones
+    const isExpectedError = err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError';
+    if (isExpectedError) {
+      console.warn('Camera not available:', err.name, err.message);
+    } else {
+      console.error('Camera error:', err.name, err.message);
+    }
 
     let errorMessage: Record<string, string>;
     let type: typeof errorType = 'unknown';
@@ -165,13 +171,10 @@ export default function PhotoCapture({
         vi: 'Quyền camera bị từ chối. Vui lòng cho phép truy cập camera trong cài đặt trình duyệt.',
       };
     } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-      type = 'notfound';
-      errorMessage = {
-        en: 'No camera found. You can select an image from your gallery instead.',
-        ko: '카메라를 찾을 수 없습니다. 갤러리에서 이미지를 선택할 수 있습니다.',
-        zh: '未找到相机。您可以从相册中选择图片。',
-        vi: 'Không tìm thấy camera. Bạn có thể chọn hình ảnh từ thư viện.',
-      };
+      // Automatically switch to file input mode when no camera found
+      setUseFileInput(true);
+      setLoading(false);
+      return; // Don't show error, just switch to file input
     } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
       type = 'inuse';
       errorMessage = {
