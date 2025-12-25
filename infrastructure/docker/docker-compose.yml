@@ -51,6 +51,8 @@ services:
     depends_on:
       core-service:
         condition: service_healthy
+      app-service:
+        condition: service_healthy
       inspection-service:
         condition: service_healthy
       frontend:
@@ -187,7 +189,7 @@ services:
   frontend:
     build:
       context: ../..
-      dockerfile: docker/frontend.Dockerfile
+      dockerfile: infrastructure/docker/frontend.Dockerfile
     container_name: corenext-frontend
     # 보안: Nginx를 통해서만 접근 (내부 네트워크)
     expose:
