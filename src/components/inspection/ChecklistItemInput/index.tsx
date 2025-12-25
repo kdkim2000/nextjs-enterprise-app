@@ -139,21 +139,27 @@ const TouchNumberInput: React.FC<{
   );
 };
 
+// Option type for select items
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 // Touch-friendly select with chips
 const TouchSelect: React.FC<{
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  options: SelectOption[];
   disabled?: boolean;
 }> = ({ value, onChange, options, disabled }) => (
   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
     {options.map((option, idx) => (
       <Chip
         key={idx}
-        label={option}
-        onClick={() => !disabled && onChange(option)}
-        color={value === option ? 'primary' : 'default'}
-        variant={value === option ? 'filled' : 'outlined'}
+        label={option.label}
+        onClick={() => !disabled && onChange(option.value)}
+        color={value === option.value ? 'primary' : 'default'}
+        variant={value === option.value ? 'filled' : 'outlined'}
         disabled={disabled}
         sx={{
           py: 2.5,
@@ -168,6 +174,81 @@ const TouchSelect: React.FC<{
     ))}
   </Box>
 );
+
+// Parse options from various formats to SelectOption[]
+const parseSelectOptions = (options?: string | string[] | object): SelectOption[] => {
+  if (!options) return [];
+
+  // Already an array
+  if (Array.isArray(options)) {
+    // Check if it's an array of objects with value/label
+    if (options.length > 0 && typeof options[0] === 'object' && 'value' in options[0]) {
+      return options as SelectOption[];
+    }
+    // Simple string array
+    return options.map(o => ({ value: String(o), label: String(o) }));
+  }
+
+  // Object with choices property (JSON format from DB)
+  if (typeof options === 'object' && options !== null) {
+    const obj = options as any;
+    if (obj.choices && Array.isArray(obj.choices)) {
+      return obj.choices.map((c: any) => ({
+        value: c.value || c.label || String(c),
+        label: c.label || c.value || String(c),
+      }));
+    }
+    // Object with key-value pairs
+    return Object.entries(options).map(([key, val]) => ({
+      value: key,
+      label: String(val),
+    }));
+  }
+
+  // String - could be JSON or comma-separated
+  if (typeof options === 'string') {
+    const trimmed = options.trim();
+
+    // Try to parse as JSON
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+
+        // Array of objects or strings
+        if (Array.isArray(parsed)) {
+          if (parsed.length > 0 && typeof parsed[0] === 'object' && 'value' in parsed[0]) {
+            return parsed as SelectOption[];
+          }
+          return parsed.map(o => ({ value: String(o), label: String(o) }));
+        }
+
+        // Object with choices
+        if (parsed.choices && Array.isArray(parsed.choices)) {
+          return parsed.choices.map((c: any) => ({
+            value: c.value || c.label || String(c),
+            label: c.label || c.value || String(c),
+          }));
+        }
+
+        // Plain object with key-value
+        return Object.entries(parsed).map(([key, val]) => ({
+          value: key,
+          label: String(val),
+        }));
+      } catch (e) {
+        console.warn('Failed to parse options JSON:', e);
+      }
+    }
+
+    // Comma-separated string
+    return trimmed.split(',').map(o => {
+      const val = o.trim();
+      return { value: val, label: val };
+    });
+  }
+
+  return [];
+};
 
 export default function ChecklistItemInput({
   itemType,
@@ -204,7 +285,7 @@ export default function ChecklistItemInput({
       );
 
     case 'select':
-      const selectOptions = Array.isArray(options) ? options : typeof options === 'string' ? options.split(',').map((o) => o.trim()) : [];
+      const selectOptions = parseSelectOptions(options);
       return (
         <TouchSelect
           value={value}
