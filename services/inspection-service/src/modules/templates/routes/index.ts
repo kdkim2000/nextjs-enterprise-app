@@ -179,16 +179,17 @@ router.post('/:id/clone', authenticateToken, async (req: Request, res: Response)
     const { newCode, newName } = req.body;
     const userId = (req as any).user?.userId;
 
-    if (!newCode || !newName) {
-      return res.status(400).json({ error: 'New code and name are required' });
-    }
-
     const existingTemplate = await templateService.getTemplateById(id, true);
     if (!existingTemplate) {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    const clonedTemplate = await templateService.cloneTemplate(id, newCode, newName, userId);
+    // Auto-generate code and name if not provided
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const cloneCode = newCode || `${existingTemplate.code}_COPY_${timestamp}`;
+    const cloneName = newName || `${existingTemplate.name} (Copy)`;
+
+    const clonedTemplate = await templateService.cloneTemplate(id, cloneCode, cloneName, userId);
     res.status(201).json(clonedTemplate);
   } catch (error) {
     logger.error('Clone template error:', error);
