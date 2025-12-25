@@ -352,7 +352,7 @@ export default function InspectionExecutePage() {
         );
 
       case 'select':
-        const options = item.options?.split(',').map((o) => o.trim()) || [];
+        const options = Array.isArray(item.options) ? item.options : typeof item.options === 'string' ? item.options.split(',').map((o) => o.trim()) : [];
         return (
           <FormControl fullWidth size="small">
             <Select
