@@ -11,6 +11,26 @@ const router = Router();
 const logger = getLogger('inspection-service:items');
 
 /**
+ * GET /inspection/items
+ * List items by template_id
+ */
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { template_id } = req.query;
+
+    if (!template_id) {
+      return res.status(400).json({ error: 'template_id query parameter is required' });
+    }
+
+    const items = await itemService.getItemsByTemplateId(template_id as string);
+    res.json({ items });
+  } catch (error) {
+    logger.error('Get items error:', error);
+    res.status(500).json({ error: 'Failed to fetch items' });
+  }
+});
+
+/**
  * GET /inspection/items/:id
  * Get item by ID
  */
