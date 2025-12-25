@@ -70,7 +70,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
     }
 
     const item = await itemService.createItem(itemData);
-    res.status(201).json(item);
+    res.status(201).json({ item });
   } catch (error) {
     logger.error('Create item error:', error);
     res.status(500).json({ error: 'Failed to create item' });
@@ -100,7 +100,7 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
     }
 
     const item = await itemService.updateItem(id, updates);
-    res.json(item);
+    res.json({ item });
   } catch (error) {
     logger.error('Update item error:', error);
     res.status(500).json({ error: 'Failed to update item' });

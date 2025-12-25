@@ -73,7 +73,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    res.json(template);
+    res.json({ template });
   } catch (error) {
     logger.error('Get template error:', error);
     res.status(500).json({ error: 'Failed to fetch template' });
@@ -135,7 +135,7 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
     }
 
     const template = await templateService.updateTemplate(id, updates);
-    res.json(template);
+    res.json({ template });
   } catch (error) {
     logger.error('Update template error:', error);
     res.status(500).json({ error: 'Failed to update template' });
