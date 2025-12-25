@@ -118,7 +118,7 @@ export default function InspectionExecutePage() {
 
       existingResults.forEach((r) => {
         resultsMap[r.item_id] = r;
-        resultsState[r.item_id] = { value: r.value || '', notes: r.notes || '' };
+        resultsState[r.item_id] = { value: r.value || '', notes: r.remarks || '' };
       });
 
       // Initialize empty results for items without existing results
@@ -158,7 +158,7 @@ export default function InspectionExecutePage() {
       const resultsToSave = Object.entries(results).map(([itemId, result]) => ({
         item_id: itemId,
         value: result.value,
-        notes: result.notes,
+        remarks: result.notes,
       }));
 
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
@@ -180,7 +180,7 @@ export default function InspectionExecutePage() {
       const resultsToSave = Object.entries(results).map(([itemId, result]) => ({
         item_id: itemId,
         value: result.value,
-        notes: result.notes,
+        remarks: result.notes,
       }));
 
       await inspectionApi.put(`/executions/${inspectionId}/results`, { results: resultsToSave });
