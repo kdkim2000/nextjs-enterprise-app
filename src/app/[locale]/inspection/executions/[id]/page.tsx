@@ -390,6 +390,7 @@ export default function InspectionDetailPage() {
                                 )}
                               </Box>
                             }
+                            primaryTypographyProps={{ component: 'div' }}
                             secondary={
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
                                 <Chip
@@ -409,6 +410,7 @@ export default function InspectionDetailPage() {
                                 )}
                               </Box>
                             }
+                            secondaryTypographyProps={{ component: 'div' }}
                           />
                           <ChevronRightIcon color="action" />
                         </ListItem>
