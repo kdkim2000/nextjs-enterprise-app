@@ -8,7 +8,7 @@ export interface ChecksheetItem {
   item_name: string;
   item_type: ItemType;
   description?: string;
-  options?: string; // JSON string for select options
+  options?: string | string[]; // array or JSON string for select options
   required: boolean;
   sort_order: number;
   created_at: string;

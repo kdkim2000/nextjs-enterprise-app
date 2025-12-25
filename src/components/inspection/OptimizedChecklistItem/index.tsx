@@ -22,7 +22,7 @@ export interface ChecklistItemData {
   item_name: string;
   item_type: ItemType;
   description?: string;
-  options?: string;
+  options?: string | string[];
   required: boolean;
 }
 

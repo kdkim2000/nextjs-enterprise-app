@@ -29,7 +29,7 @@ export interface ChecklistItemInputProps {
   itemType: ItemType;
   value: string;
   onChange: (value: string) => void;
-  options?: string; // comma-separated for select type
+  options?: string | string[]; // array or comma-separated string for select type
   required?: boolean;
   locale?: string;
   disabled?: boolean;

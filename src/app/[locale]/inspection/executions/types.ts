@@ -42,7 +42,7 @@ export interface ChecksheetItem {
   item_name: string;
   item_type: ItemType;
   description?: string;
-  options?: string;
+  options?: string | string[];
   required: boolean;
   sort_order: number;
   children?: ChecksheetItem[];
