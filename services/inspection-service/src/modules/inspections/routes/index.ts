@@ -136,9 +136,18 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Inspection not found' });
     }
 
-    // Don't allow updating submitted inspections
-    if (existingInspection.status === 'submitted' && updates.status !== 'submitted') {
-      return res.status(400).json({ error: 'Cannot modify submitted inspection' });
+    // For submitted inspections, only allow updating certain fields
+    if (existingInspection.status === 'submitted') {
+      const allowedFieldsForSubmitted = ['inspection_date', 'notes', 'title', 'location'];
+      const updateKeys = Object.keys(updates);
+      const hasDisallowedFields = updateKeys.some(key => !allowedFieldsForSubmitted.includes(key));
+
+      if (hasDisallowedFields) {
+        return res.status(400).json({
+          error: 'Cannot modify submitted inspection. Only inspection_date, notes, title, and location can be updated.',
+          allowedFields: allowedFieldsForSubmitted
+        });
+      }
     }
 
     const inspection = await inspectionService.updateInspection(id, updates);

@@ -14,7 +14,9 @@ export interface Inspection {
   location?: string;
   inspection_date: string;
   status: InspectionStatus;
+  started_at?: string;
   completed_at?: string;
+  submitted_at?: string;
   created_at: string;
   updated_at: string;
   results?: InspectionResult[];

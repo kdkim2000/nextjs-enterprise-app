@@ -28,6 +28,11 @@ import {
   AppBar,
   Toolbar,
   LinearProgress,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -43,6 +48,8 @@ import {
   CalendarToday as CalendarIcon,
   Assignment as AssignmentIcon,
   ChevronRight as ChevronRightIcon,
+  Save as SaveIcon,
+  EventAvailable as EventAvailableIcon,
 } from '@mui/icons-material';
 import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import MobileFab from '@/components/mobile/MobileFab';
@@ -101,13 +108,18 @@ export default function InspectionDetailPage() {
   const inspectionId = params.id as string;
   const { isMobileLayout } = useMobile();
 
-  const { successMessage, errorMessage, showErrorMessage } = useMessage({ locale: currentLocale });
+  const { successMessage, errorMessage, showErrorMessage, showSuccessMessage } = useMessage({ locale: currentLocale });
 
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [items, setItems] = useState<ChecksheetItem[]>([]);
   const [results, setResults] = useState<InspectionResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionSheetOpen, setActionSheetOpen] = useState(false);
+
+  // Inspection date editing state
+  const [dateDialogOpen, setDateDialogOpen] = useState(false);
+  const [editingDate, setEditingDate] = useState<string>('');
+  const [savingDate, setSavingDate] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -144,6 +156,36 @@ export default function InspectionDetailPage() {
   const handleStartInspection = () => {
     router.push(`/${currentLocale}/inspection/executions/${inspectionId}/execute`);
   };
+
+  // Handle opening inspection date dialog
+  const handleOpenDateDialog = useCallback(() => {
+    if (inspection?.inspection_date) {
+      setEditingDate(format(new Date(inspection.inspection_date), 'yyyy-MM-dd'));
+    } else {
+      setEditingDate(format(new Date(), 'yyyy-MM-dd'));
+    }
+    setDateDialogOpen(true);
+  }, [inspection?.inspection_date]);
+
+  // Handle saving inspection date
+  const handleSaveInspectionDate = useCallback(async () => {
+    if (!editingDate) return;
+
+    try {
+      setSavingDate(true);
+      await inspectionApi.put(`/executions/${inspectionId}`, {
+        inspection_date: editingDate,
+      });
+      setInspection((prev) => (prev ? { ...prev, inspection_date: editingDate } : null));
+      setDateDialogOpen(false);
+      await showSuccessMessage('COMMON_UPDATE_SUCCESS');
+    } catch (error) {
+      console.error('Failed to update inspection date:', error);
+      await showErrorMessage('COMMON_UPDATE_FAIL');
+    } finally {
+      setSavingDate(false);
+    }
+  }, [editingDate, inspectionId, showSuccessMessage, showErrorMessage]);
 
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return '-';
@@ -306,12 +348,22 @@ export default function InspectionDetailPage() {
                     />
                   </ListItem>
                 )}
-                <ListItem disablePadding sx={{ py: 0.5 }}>
+                <ListItem
+                  disablePadding
+                  sx={{ py: 0.5 }}
+                  secondaryAction={
+                    inspection.status === 'submitted' && (
+                      <IconButton edge="end" size="small" onClick={handleOpenDateDialog}>
+                        <EditIcon fontSize="small" color="primary" />
+                      </IconButton>
+                    )
+                  }
+                >
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <CalendarIcon fontSize="small" color="action" />
                   </ListItemIcon>
                   <ListItemText
-                    primary={formatShortDate(inspection.inspection_date)}
+                    primary={inspection.inspection_date ? format(new Date(inspection.inspection_date), 'yyyy-MM-dd') : '-'}
                     secondary={getLocalizedValue({ en: 'Inspection Date', ko: '검사일' }, currentLocale)}
                     primaryTypographyProps={{ variant: 'body2' }}
                     secondaryTypographyProps={{ variant: 'caption' }}
@@ -465,6 +517,48 @@ export default function InspectionDetailPage() {
             )}
           </List>
         </MobileDetailSheet>
+
+        {/* Inspection Date Edit Dialog (Mobile) */}
+        <Dialog open={dateDialogOpen} onClose={() => setDateDialogOpen(false)} maxWidth="xs" fullWidth>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <EventAvailableIcon color="primary" />
+            {getLocalizedValue({ en: 'Edit Inspection Date', ko: '검사일 수정' }, currentLocale)}
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {getLocalizedValue(
+                {
+                  en: 'Enter the actual date when the inspection was performed.',
+                  ko: '실제 검사가 수행된 날짜를 입력하세요.',
+                },
+                currentLocale
+              )}
+            </Typography>
+            <TextField
+              fullWidth
+              type="date"
+              label={getLocalizedValue({ en: 'Inspection Date', ko: '검사일' }, currentLocale)}
+              value={editingDate}
+              onChange={(e) => setEditingDate(e.target.value)}
+              slotProps={{
+                inputLabel: { shrink: true },
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDateDialogOpen(false)} disabled={savingDate}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSaveInspectionDate}
+              disabled={savingDate || !editingDate}
+              startIcon={savingDate ? <CircularProgress size={16} /> : <SaveIcon />}
+            >
+              {t('common.save')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     );
   }
@@ -555,13 +649,28 @@ export default function InspectionDetailPage() {
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Inspection Date', ko: '검사일' }, currentLocale)}
             </Typography>
-            <Typography variant="body1">{formatDate(inspection.inspection_date)}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body1">
+                {inspection.inspection_date ? format(new Date(inspection.inspection_date), 'yyyy-MM-dd') : '-'}
+              </Typography>
+              {inspection.status === 'submitted' && (
+                <IconButton size="small" onClick={handleOpenDateDialog} color="primary">
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              )}
+            </Box>
           </Grid>
           <Grid size={{ xs: 6, md: 3 }}>
             <Typography variant="caption" color="text.secondary">
               {getLocalizedValue({ en: 'Completed At', ko: '완료일' }, currentLocale)}
             </Typography>
             <Typography variant="body1">{inspection.completed_at ? formatDate(inspection.completed_at) : '-'}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6, md: 3 }}>
+            <Typography variant="caption" color="text.secondary">
+              {getLocalizedValue({ en: 'Submitted At', ko: '제출일' }, currentLocale)}
+            </Typography>
+            <Typography variant="body1">{inspection.submitted_at ? formatDate(inspection.submitted_at) : '-'}</Typography>
           </Grid>
         </Grid>
       </Paper>
@@ -640,6 +749,48 @@ export default function InspectionDetailPage() {
           </TableContainer>
         )}
       </Paper>
+
+      {/* Inspection Date Edit Dialog */}
+      <Dialog open={dateDialogOpen} onClose={() => setDateDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <EventAvailableIcon color="primary" />
+          {getLocalizedValue({ en: 'Edit Inspection Date', ko: '검사일 수정' }, currentLocale)}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {getLocalizedValue(
+              {
+                en: 'Enter the actual date when the inspection was performed.',
+                ko: '실제 검사가 수행된 날짜를 입력하세요.',
+              },
+              currentLocale
+            )}
+          </Typography>
+          <TextField
+            fullWidth
+            type="date"
+            label={getLocalizedValue({ en: 'Inspection Date', ko: '검사일' }, currentLocale)}
+            value={editingDate}
+            onChange={(e) => setEditingDate(e.target.value)}
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDateDialogOpen(false)} disabled={savingDate}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveInspectionDate}
+            disabled={savingDate || !editingDate}
+            startIcon={savingDate ? <CircularProgress size={16} /> : <SaveIcon />}
+          >
+            {t('common.save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StandardCrudPageLayout>
   );
 }
