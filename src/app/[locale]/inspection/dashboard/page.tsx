@@ -52,7 +52,7 @@ import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
 import { StatCard } from '@/components/inspection/common';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { getLocalizedValue } from '@/lib/i18n/multiLang';
-import axios from '@/lib/axios';
+import { inspectionApi } from '@/lib/axios';
 
 interface DashboardStats {
   total: number;
@@ -154,8 +154,8 @@ export default function InspectionDashboardPage() {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get('/inspection/dashboard');
-      setData(response.data);
+      const response = await inspectionApi.get('/dashboard');
+      setData(response);
     } catch (err: any) {
       console.error('Failed to fetch dashboard data:', err);
       setError(
