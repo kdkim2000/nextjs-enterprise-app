@@ -98,27 +98,32 @@
     "ce4269bf-88ca-4418-bc74-01f9c2ae0453",
     "ffb64355-2ee5-4f0a-a363-219cf71734ef",
     "1e492120-460a-4ec0-a8b8-096fefb8c5f6",
-    "98ff7939-bcca-4577-a29c-5354094d5703"
+    "98ff7939-bcca-4577-a29c-5354094d5703",
+    "61696de3-5b3b-4f74-b679-f836d52d503c",
+    "b3d2268e-b081-433f-bc09-a3d361444fe7",
+    "cc174154-e8dc-414e-a6d8-405b45cdde27",
+    "cf5310bd-e934-4aec-ad1b-479240c7d0be",
+    "f6b3a07c-2145-4ac3-a8d3-d05e2f528410"
   ],
-  "lastMigration": "2025-12-15T21:26:24.838Z",
-  "totalMigrated": 99,
+  "lastMigration": "2025-12-27T01:32:21.037Z",
+  "totalMigrated": 104,
   "stats": {
     "byCategory": {
-      "general": 5,
-      "bug-fix": 80,
+      "general": 6,
+      "bug-fix": 84,
       "refactor": 2,
       "feature": 2,
       "debugging": 9,
       "performance": 1
     },
     "byDifficulty": {
-      "medium": 5,
-      "hard": 89,
-      "easy": 5
+      "medium": 6,
+      "hard": 92,
+      "easy": 6
     },
     "byMonth": {
       "2025-11": 77,
-      "2025-12": 22
+      "2025-12": 27
     }
   }
 }
