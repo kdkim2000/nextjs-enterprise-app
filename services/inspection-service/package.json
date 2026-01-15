@@ -1,0 +1,36 @@
+{
+  "name": "@enterprise/inspection-service",
+  "version": "1.0.0",
+  "description": "Inspection microservice - Checksheet templates, items, and inspections",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@enterprise/shared": "file:../../shared",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.0",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.16.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@types/uuid": "^9.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}
