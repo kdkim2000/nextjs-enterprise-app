@@ -41,7 +41,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     },
     initialPaginationModel: {
       page: 0,
-      pageSize: 50
+      pageSize: 100000
     }
   });
 
@@ -87,7 +87,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
   // Fetch departments from API
   const fetchDepartments = useCallback(async (
     page: number = 0,
-    pageSize: number = 50,
+    pageSize: number = 100000,
     useQuickSearch: boolean = false
   ) => {
     try {
@@ -110,7 +110,8 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
       }
 
       params.append('page', (page + 1).toString()); // Backend uses 1-indexed
-      params.append('limit', pageSize.toString());
+      // Remove limit parameter to fetch all data, or use very large value
+      // params.append('limit', pageSize.toString());
 
       const response = await adminApi.get(`/departments?${params.toString()}`);
       setDepartments(response.departments || []);
@@ -262,7 +263,7 @@ export const useDepartmentManagement = (options: UseDepartmentManagementOptions 
     setQuickSearch('');
     setDepartments([]);
     setRowCount(0);
-    setPaginationModel({ page: 0, pageSize: 50 });
+    setPaginationModel({ page: 0, pageSize: 100000 });
     sessionStorage.removeItem(storageKey);
   }, [setQuickSearch, setDepartments, setRowCount, setPaginationModel, storageKey]);
 
