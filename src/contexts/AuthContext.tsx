@@ -10,7 +10,7 @@ interface AuthContextType extends AuthState {
   resendMFA: (mfaToken: string) => Promise<{ devCode?: string }>;
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
-  ssoLogin: () => Promise<void>;
+  ssoLogin: (loginid: string) => Promise<void>;
   updateUser: (user: any) => void;
 }
 
@@ -202,14 +202,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [logout]);
 
-  const ssoLogin = useCallback(async () => {
+  const ssoLogin = useCallback(async (loginid: string) => {
     try {
-      const response = await authApi.post('/sso');
+      const response = await authApi.post('/sso', { loginid });
 
+      // Extract data from response (handle both old and new API format)
       const data = response.data || response;
       const accessToken = data.accessToken || data.token;
       const refreshToken = data.refreshToken;
       const user = data.user;
+
+      if (!accessToken || !user) {
+        throw new Error('Invalid response from server');
+      }
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
@@ -224,7 +229,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (error: any) {
       console.error('SSO login error:', error);
-      throw error;
+      const message = error.response?.data?.message || error.message || 'SSO login failed';
+      throw new Error(message);
     }
   }, []);
 

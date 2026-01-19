@@ -358,6 +358,30 @@ export const validateToken = async (token: string): Promise<UserInfo | null> => 
 };
 
 /**
+ * SSO Login - Login using loginid from SSO provider (EpTray)
+ * MFA is skipped for SSO login
+ */
+export const ssoLogin = async (loginid: string): Promise<LoginResponse> => {
+  // Find user by loginid
+  const user = await getUserByUsername(loginid);
+
+  if (!user) {
+    throw new Error('사용자를 찾을 수 없습니다');
+  }
+
+  // Check account status
+  if (user.status !== 'active') {
+    throw new Error('계정이 비활성화되었습니다');
+  }
+
+  // SSO login skips MFA and password verification
+  // Generate tokens directly
+  logger.info(`SSO login successful for user: ${loginid}`);
+
+  return await generateTokensForUser(user);
+};
+
+/**
  * Get current user info
  */
 export const getCurrentUser = async (userId: string): Promise<UserInfo | null> => {

@@ -82,3 +82,23 @@ export const registerLimiter = rateLimit({
     res.status(429).json(options.message);
   },
 });
+
+/**
+ * SSO login rate limiter - 15 attempts per minute
+ * SSO는 자동 로그인이므로 일반 로그인보다 더 관대한 제한 적용
+ */
+export const ssoLoginLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 15,
+  message: {
+    success: false,
+    message: 'Too many SSO login attempts, please try again later',
+    code: 'SSO_RATE_LIMIT_EXCEEDED',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    logger.warn(`SSO login rate limit exceeded for IP: ${req.ip}, loginid: ${req.body?.loginid}`);
+    res.status(429).json(options.message);
+  },
+});
