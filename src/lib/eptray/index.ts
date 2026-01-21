@@ -21,8 +21,8 @@ declare const forge: {
 export const getEpTrayLoginId = async (): Promise<string | null> => {
   // 환경 변수에서 설정값 읽기
   const wsUrl = process.env.NEXT_PUBLIC_KNOX_WS_URL || "ws://localhost:29282";
-  const systemId = process.env.NEXT_PUBLIC_KNOX_SYSTEM_ID || "KCC60TRAY0089";
-  const token = process.env.NEXT_PUBLIC_KNOX_TOKEN || "-----BEGIN PRIVATE KEY-----\r\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCXNYciOtTPFT78\r\ngu+K9dW++peFlfwOewQBG/1gsF8h54aRwolrDWVuXM3Z0/gkw+W6o+XmNHKTY8hP\r\nFzYh380+jVxuP+LRgnAjh8zeLh+L5kcnAHX3UjbZtRxWZF2DpWjL9aXcLtpZ79BH\r\nibQlLo3CMo6VQV/OeAoVbVY1MT9aemwu/ljt+mmrjkUqnuJFDYNbWChuTeglvu1c\r\nS7xgmscP25xfT9Le+XkM8k0uSAUmCc3kKd12bbexVdovB+9TR9JcLJcq+UnvWR3s\r\neS5BlgLCJr0oVgt0rgJfDJ1Dt57ZRDj7CMrma3+OXhzFz8hcOBVzU3wCjKF+vEj6\r\n++8OY+0ZAgMBAAECggEAfq7m/6Oghbq8IZylipu6L54NcmsdWRhxW2iS2P4LRgGO\r\nufHtZZY8o8D26gfwPwUtJDiKtVq9n4Sa3sCIpsq1TzHp/ahipLsOroXo+0BTR8dv\r\nV1rIeqQTtkRJcIv32QKtESxGgHl0kKMdscHJ/tjJBamL0bqKxRXHBPqsnjYbaPYc\r\nlhx1QYkzWRbBJYmTqiCbxIcIzR7ZqrxXxGwROJfqe6bQMGd1a+NaEC9ygMmA/I+9\r\nFk+ChPHx1MvaaP9eBloYykJNGZxEp8c6oSsrmedMCIgCrttvWwJTRtUb19dEGWfE\r\n+jW6TYuFNFN7jbZuWY+eWRWqiZ7MlqfXqTcWmB2lgQKBgQDHfiHC3Xh78dVEt1jg\r\nxlHuc/ROIJUuYsAI5FE6DUZhSr7wthVHnsMYuHd0wfXF+2XS7eb5KHJEjbINKsYO\r\nPAUuiyX96zftWLnC8Bv5FWZ2re0QT17t13gPh2krPVCMuV1HvrmmtW8sBeEdJB02\r\ndC3+YZHLFN1pzv/6jqA5O5piiQKBgQDCCjGP2XhX3BMw0SS4ReHpdzjlcQD5wpg7\r\nlSSPqpKJvOsxj3J05JLLkWpZ5wD1VjGOfra9b72fUSMmQ/rUEevX7UQD3+J93Skx\r\njbiOGnpx2og9o87ypwRuqWdtbsjZ/sMefT1QhAsBOl7oZdiT6UoB/e1e2riEohFn\r\nTT4LShfSEQKBgQCiURKPRzxdPOvWOYhre3H2nwpM913qnBa8JWmh3mNBjlvF56Fw\r\n4NDFMHKh4Z9kM6Up9sBUQoCXHuOcqwzzUAq3UCjdbaHX0LV004EvLiZssh+Ngccv\r\npn3dxMPhlsYPelNXqOvNpRqLq0z7NQM/50/1BtZlctik2vSUna/oYYLAYQKBgFsR\r\nOa2PnSFvEjqpDZjGg351C+jzHkgaAiSEnMIohdnLJn7+GfOuiw6rUsSa3CJIr712\r\nzwEdfltVUy/UW9ZICu4uVuuSmdQEhh7RqrpWxvzEWYjEZo4PwM7HBtmfUviszppy\r\noOI29os+/+gGVJ0msis5J7yK3mqxPYXEBMh7n65hAoGBALbm83/pwuTrMTMa03Xm\r\nh4JZP9Rd5mkE1rRZJaiN7/yy5doLHFJq5ojKkk8B2zDiHjaLxItxVJcLNycFfG2x\r\nxzthDG8dHvZC8jaweZkFCEEDOwP9eIUvH+xJ+EHLxFxt8QdUPdX7IJRho42sHg9K\r\nExoFqo4FYYDb4cVKkil4Wt+O\r\n-----END PRIVATE KEY-----";
+  const systemId = process.env.NEXT_PUBLIC_KNOX_SYSTEM_ID || "";
+  const token = process.env.NEXT_PUBLIC_KNOX_TOKEN || "-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----";
   
   if (!token) {
     console.error("KNOX_PRIVATE_KEY is not configured");
@@ -355,3 +355,4 @@ async function decryptUserInfoWithAes(encryptedUserInfo: string, aesKey: ArrayBu
     throw error;
   }
 }
+
