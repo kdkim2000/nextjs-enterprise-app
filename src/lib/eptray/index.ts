@@ -1,3 +1,15 @@
+// node-forge 타입 선언 (라이브러리가 설치되지 않은 경우를 대비)
+declare const forge: {
+  pki: {
+    privateKeyFromPem: (pem: string) => {
+      decrypt: (data: string, scheme: string) => string;
+    };
+  };
+  util: {
+    decode64: (base64: string) => string;
+  };
+};
+
 /** 
  * EpTray에서 현재 인증된 사용자의 loginid를 읽어옵니다.
  * 
@@ -34,6 +46,26 @@ export const getEpTrayLoginId = async (): Promise<string | null> => {
       return null;
     }
 
+    // 가이드에 따른 응답 구조 검증
+    // rpcode가 EMPTY_BOX면 SSO가 없는 상태
+    if (parsedResponse.rpcode === "EMPTY_BOX") {
+      console.log("SSO is not available (EMPTY_BOX)");
+      return null;
+    }
+
+    // result가 fail이면 에러
+    if (parsedResponse.result === "fail") {
+      console.error("SSO request failed:", parsedResponse.errorCode, parsedResponse.errorMsg);
+      return null;
+    }
+
+    // detail 필드가 있으면 에러
+    if (parsedResponse.detail) {
+      console.error("SSO request error detail:", parsedResponse.detail);
+      return null;
+    }
+
+    // data 파싱
     let innerData;
     if (typeof parsedResponse.data === "string") {
       try {
@@ -46,9 +78,12 @@ export const getEpTrayLoginId = async (): Promise<string | null> => {
       innerData = parsedResponse.data;
     }
 
-    const { userInfo, key } = innerData;
+    // 가이드에 따르면 필드명은 UserInfo와 Key (대문자)
+    const userInfo = innerData.UserInfo || innerData.userInfo;
+    const key = innerData.Key || innerData.key;
+
     if (!userInfo || !key) {
-      console.error("Missing userInfo or key in response");
+      console.error("Missing UserInfo or Key in response. Available keys:", Object.keys(innerData));
       return null;
     }
 
@@ -56,34 +91,40 @@ export const getEpTrayLoginId = async (): Promise<string | null> => {
     console.log("Encrypted key:", key);
 
     //AES 키 복호화 (RSA)
-    // let aesKeyBuffer: ArrayBuffer;
-    // try {
-    //   aesKeyBuffer = await decryptAesKey(key, token);
-    // } catch (e) {
-    //   console.error("Failed to decrypt AES key:", e);
-    //   return null;
-    // }
+    let aesKeyBuffer: ArrayBuffer;
+    try {
+      aesKeyBuffer = await decryptAesKey(key, token);
+    } catch (e) {
+      console.error("Failed to decrypt AES key:", e);
+      return null;
+    }
 
-    // 사용자 정보 복호화 (AES)
-    // let decodedUserInfo: string;
-    // try {
-    //   decodedUserInfo = await decryptUserInfoWithAes(userInfo, aesKeyBuffer);
-    // } catch (e) {
-    //   console.error("Failed to decrypt user info:", e);
-    //   return null;
-    // }
+    //사용자 정보 복호화 (AES)
+    let decodedUserInfo: string;
+    try {
+      decodedUserInfo = await decryptUserInfoWithAes(userInfo, aesKeyBuffer);
+    } catch (e) {
+      console.error("Failed to decrypt user info:", e);
+      return null;
+    }
 
-    // console.log("Decoded user info:", decodedUserInfo);
+    console.log("Decoded user info:", decodedUserInfo);
 
-    return "admin";
-    // loginid 추출
-    // const loginIdMatch = decodedUserInfo.match(/loginid=([^|]+)/);
-    // if (loginIdMatch && loginIdMatch[1]) {
-    //   return loginIdMatch[1];
-    // }
+    // 가이드에 따르면 EP_LOGINID 형식 (대문자)
+    // 형식: EP_LOGINID=값|EP_COMPID=값|...
+    const loginIdMatch = decodedUserInfo.match(/EP_LOGINID=([^|]+)/i);
+    if (loginIdMatch && loginIdMatch[1]) {
+      return loginIdMatch[1].trim();
+    }
 
-    // console.error("loginid not found in decoded user info");
-    // return null;
+    // 소문자 형식도 시도 (하위 호환성)
+    const loginIdMatchLower = decodedUserInfo.match(/loginid=([^|]+)/i);
+    if (loginIdMatchLower && loginIdMatchLower[1]) {
+      return loginIdMatchLower[1].trim();
+    }
+
+    console.error("EP_LOGINID not found in decoded user info. Full content:", decodedUserInfo);
+    return null;
   } catch (error) {
     console.error("Error getting EpTray login id:", error);
     return null;
@@ -101,11 +142,12 @@ interface WebSocketRequest {
 
 /**
  * 웹소켓 응답 데이터 인터페이스
+ * (현재 사용되지 않지만 향후 확장을 위해 유지)
  */
-interface WebSocketResponse {
-  EP_LOGINID: string;
-  [key: string]: any;
-}
+// interface WebSocketResponse {
+//   EP_LOGINID: string;
+//   [key: string]: any;
+// }
 
 /**
  * Knox SSO 웹소켓 연결 및 통신을 처리합니다.
@@ -131,11 +173,11 @@ export const connectKnoxWebSocket = async (
     }, 10000);
 
     // 웹소켓 연결 후 정의된 JSON 데이터 전송
-    websocket.onopen = (event: Event): void => {
+    websocket.onopen = (_event: Event): void => {
       try {
         const requestData: WebSocketRequest = {
           rqtype: "getknoxsso",
-          token: token,
+          token: "", // 가이드에 따르면 token은 빈 값
           data: systemId
         };
         websocket.send(JSON.stringify(requestData));
@@ -235,7 +277,10 @@ async function decryptAesKey(encryptedAesKey: string, privateKeyPem: string): Pr
     let decryptedKeyBuffer: ArrayBuffer;
     try {
       // 1️⃣ PEM 형식 검증 (forge 가 자동 처리)
-      // @ts-ignore // node-forge type definitions may be missing
+      // forge는 런타임에 동적으로 로드되거나 전역 변수로 사용됨
+      if (typeof forge === 'undefined') {
+        throw new Error('forge library is not available. Please install node-forge package.');
+      }
       const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
 
       // 2️⃣ 암호화된 AES 키를 Base64 디코드 (URL‑safe 변환 포함)
@@ -246,7 +291,7 @@ async function decryptAesKey(encryptedAesKey: string, privateKeyPem: string): Pr
       const decrypted = privateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5');
 
       // 4️⃣ 문자열(바이너리) → Uint8Array → ArrayBuffer 변환
-      const uintArray = Uint8Array.from(decrypted, c => c.charCodeAt(0));
+      const uintArray = Uint8Array.from(decrypted, (c: string) => c.charCodeAt(0));
       decryptedKeyBuffer = uintArray.buffer;
     } catch (e) {
       console.error('RSA decryption with forge failed:', e);
