@@ -1,67 +1,67 @@
 # 3 연계 개발 가이드
 ## 3.1 WebSocket HOST 정보
-ws	localhost	29282	ws://localhost:29282
-wss	localhost	29283	wss://localhost:29283
+- ws	localhost	29282	ws://localhost:29282
+- wss	localhost	29283	wss://localhost:29283
 ## 3.2 WebSocket Interface
 ### REQUEST(JSON)
-Key 	Value (type) 	Description
-rqtype	getknoxsso (string)	예약된 이름 사용
-data	%SystemID% (string)	발급받은 연계용 system ID
-token	빈 값 (string)	현재 미사용
-Example	{"rqtype":"getknoxsso","data":"KCTEST0001","token":""}
+- Key 	Value (type) 	Description
+- rqtype	getknoxsso (string)	예약된 이름 사용
+- data	%SystemID% (string)	발급받은 연계용 system ID
+- token	빈 값 (string)	현재 미사용
+- Example	{"rqtype":"getknoxsso","data":"","token":""}
 
 ### RESPONSE (JSON)
-Key 	Value (type) 	Description
-rpcode	EMPTY_BOX	SSO 없는 상태 (Knox 미로그인)
-RETURN_SUCCESS	서버 호출 성공
-서버 호출 성공	KnoxTray 내부 에러 발생, detail 값 리턴
-data	%data% (json)	서버 호출 성공 시 서버 리턴 value
-data	UserInfo	%data% (string)	암호화된 SSO 정보
-Key	%data% (string)	UserInfo Pair key
-result	success | fail (string)	서버 통신 결과
-errorCode	%ErrorCode% (string)	서버 fail 리턴시 오류코드 (ErrorCode 정의표 참조)
-errorMsg	%ErrorMsg% (string)	서버 fail 리턴시 오류메시지(ErrorCode 정의표 참조)
-detail	ERR_JSON_PARSING	Request JSON 포맷이 맞지 않는 경우
-HAVE_NO_DATA	System ID 가 없는 경우
-NONE_ERROR	정의된 I/F 대로 호출되지 않을 경우
-CONNECTION_FAILED	서버 연결이 실패한 경우
+- Key 	Value (type) 	Description
+- rpcode	EMPTY_BOX	SSO 없는 상태 (Knox 미로그인)
+- RETURN_SUCCESS	서버 호출 성공
+- 서버 호출 성공	KnoxTray 내부 에러 발생, detail 값 리턴
+- data	%data% (json)	서버 호출 성공 시 서버 리턴 value
+- data	UserInfo	%data% (string)	암호화된 SSO 정보
+- Key	%data% (string)	UserInfo Pair key
+- result	success | fail (string)	서버 통신 결과
+- errorCode	%ErrorCode% (string)	서버 fail 리턴시 오류코드 (ErrorCode 정의표 참조)
+- errorMsg	%ErrorMsg% (string)	서버 fail 리턴시 오류메시지(ErrorCode 정의표 참조)
+- detail	ERR_JSON_PARSING	Request JSON 포맷이 맞지 않는 경우
+- HAVE_NO_DATA	System ID 가 없는 경우
+- NONE_ERROR	정의된 I/F 대로 호출되지 않을 경우
+- CONNECTION_FAILED	서버 연결이 실패한 경우
 
 ## 3.3 KnoxTray 연계 사용자정보
-EP_LOGINID	Knox Login ID
-EP_COMPID	회사코드
-EP_DEPTID	부서코드
-EP_GRDID	직급코드
-EP_SORGID	총괄코드
-EP_SABUN	사번
-EP_LOCALE	로그인 언어 정보
-한국어: ko_KR.EUC-KR
-영어: en_US.UTF-8
-중국어: zh_CN.UTF-8
-일본어: ja_JP.UTF-8
-EP_MAIL	메일주소
-EP_USERID	EPID
-EP_DCOMP	원소속/파견소속 구분 (O:원소속, S:파견소속)
-EP_TIMEZONE	Knox Portal에 설정된 TIMEZONE
-EP_SUMMERTIMEYN	타임존의 Summer Time 여부
-EP_USERNAME	사용자명
-EP_COMPNAME	회사명
-EP_DEPTNAME	부서명
-EP_GRDNAME	직급명
-EP_SORGNAME	총괄명
-EP_USERNAME_EN	영문 사용자명
-EP_COMPNAME_EN	영문 회사명
-EP_DEPTNAME_EN	영문 부서명
-EP_GRDNAME_EN	영문 직급명
-EP_SORGNAME_EN	영문 총괄명
-EP_ISBLUE	임원여부
-EP_LOGINIP	Knox Portal 로그인 IP
-EP_LOGINPOSITION	로그인 거점정보
-EP_GLOBALPOSITION	사용자 거점정보
-EP_SECID	보안등급
-EP_COMPTEL	사용자 회사전화번호
-EP_MOBILE	사용자 휴대폰 번호
-EP_PREFERREDLANGUAGE	사용자 설정 선호 언어
-EP_LOGINTIMEFORMIS	Knox Portal로그인 시간
+- EP_LOGINID	Knox Login ID
+- EP_COMPID	회사코드
+- EP_DEPTID	부서코드
+- EP_GRDID	직급코드
+- EP_SORGID	총괄코드
+- EP_SABUN	사번
+- EP_LOCALE	로그인 언어 정보
+- 한국어: ko_KR.EUC-KR
+- 영어: en_US.UTF-8
+- 중국어: zh_CN.UTF-8
+- 일본어: ja_JP.UTF-8
+- EP_MAIL	메일주소
+- EP_USERID	EPID
+- EP_DCOMP	원소속/파견소속 구분 (O:원소속, S:파견소속)
+- EP_TIMEZONE	Knox Portal에 설정된 TIMEZONE
+- EP_SUMMERTIMEYN	타임존의 Summer Time 여부
+- EP_USERNAME	사용자명
+- EP_COMPNAME	회사명
+- EP_DEPTNAME	부서명
+- EP_GRDNAME	직급명
+- EP_SORGNAME	총괄명
+- EP_USERNAME_EN	영문 사용자명
+- EP_COMPNAME_EN	영문 회사명
+- EP_DEPTNAME_EN	영문 부서명
+- EP_GRDNAME_EN	영문 직급명
+- EP_SORGNAME_EN	영문 총괄명
+- EP_ISBLUE	임원여부
+- EP_LOGINIP	Knox Portal 로그인 IP
+- EP_LOGINPOSITION	로그인 거점정보
+- EP_GLOBALPOSITION	사용자 거점정보
+- EP_SECID	보안등급
+- EP_COMPTEL	사용자 회사전화번호
+- EP_MOBILE	사용자 휴대폰 번호
+- EP_PREFERREDLANGUAGE	사용자 설정 선호 언어
+- EP_LOGINTIMEFORMIS	Knox Portal로그인 시간
 
 ### 1) 사용자 정보 복호화 Sample (Java)
 ```java
