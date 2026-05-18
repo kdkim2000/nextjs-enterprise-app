@@ -25,6 +25,7 @@ export interface DatabaseConfig {
   database: string;
   user: string;
   password: string;
+  ssl?: boolean | { rejectUnauthorized: boolean };
   max?: number;
   idleTimeoutMillis?: number;
   connectionTimeoutMillis?: number;
@@ -40,7 +41,12 @@ export function getDatabaseConfig(options?: Partial<DatabaseConfig>): DatabaseCo
     database: options?.database || process.env.DB_NAME || 'corenextdb',
     user: options?.user || process.env.DB_USER || 'corenext',
     password: options?.password || process.env.DB_PASSWORD || '',
-    max: options?.max || parseInt(process.env.DB_POOL_MAX || '20', 10),
+    ssl: options?.ssl !== undefined
+      ? options.ssl
+      : process.env.DB_SSL === 'true'
+        ? { rejectUnauthorized: false }
+        : false,
+    max: options?.max || parseInt(process.env.DB_POOL_MAX || '5', 10),
     idleTimeoutMillis: options?.idleTimeoutMillis || parseInt(process.env.DB_IDLE_TIMEOUT || '30000', 10),
     connectionTimeoutMillis: options?.connectionTimeoutMillis || parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000', 10),
   };
@@ -71,6 +77,7 @@ export function getPool(options?: Partial<DatabaseConfig>): Pool {
       database: config.database,
       user: config.user,
       password: config.password,
+      ssl: config.ssl,
       max: config.max,
       idleTimeoutMillis: config.idleTimeoutMillis,
       connectionTimeoutMillis: config.connectionTimeoutMillis,
