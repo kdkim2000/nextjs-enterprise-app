@@ -26,9 +26,10 @@
    │        │            │
    └────────┼────────────┘
             ▼
-   ┌────────────────┐
-   │  PostgreSQL 16 │  (공유 DB, 서비스별 스키마)
-   └────────────────┘
+   ┌────────────────────────────────┐
+   │  Supabase PostgreSQL 16        │  (클라우드 DB, Transaction Pooler)
+   │  aws-0-ap-southeast-1:6543     │
+   └────────────────────────────────┘
             │
    ┌────────────────┐
    │    Redis 7     │  (세션/토큰 관리)
@@ -269,6 +270,34 @@ User ──N:M──> Role ──N:M──> Program
 ---
 
 ## 6. 데이터베이스
+
+### 6.0 Supabase 운영 DB 연결 정보
+
+프로덕션 DB는 Supabase 클라우드 PostgreSQL (프로젝트: `yomarhbjvsdtnjlawhkd`, 리전: `ap-southeast-1`)을 사용한다.
+
+| 항목 | 값 |
+|------|-----|
+| 프로젝트 ID | `yomarhbjvsdtnjlawhkd` |
+| 리전 | `ap-southeast-1` (서울 인근) |
+| 연결 방식 | Transaction Pooler (IPv4 지원) |
+| **DB_HOST** | `aws-0-ap-southeast-1.pooler.supabase.com` |
+| **DB_PORT** | `6543` |
+| **DB_NAME** | `postgres` |
+| **DB_USER** | `postgres.yomarhbjvsdtnjlawhkd` |
+| **DB_SSL** | `true` |
+| **DB_POOL_MAX** | `5` (서비스 3개 × 5 = 15 연결, 무료 플랜 상한 내) |
+
+**연결 방식 비고:**
+- **Transaction Pooler (port 6543)** — IPv4 지원, 무상태 쿼리에 최적 (권장)
+- **Direct (db.*.supabase.co:5432)** — IPv6 전용 (Supabase 무료 플랜), 서버가 IPv6를 지원하는 경우 사용 가능
+- Supabase 대시보드: `https://supabase.com/dashboard/project/yomarhbjvsdtnjlawhkd`
+
+**마이그레이션 도구** (`database/` 디렉토리):
+- `migrate-to-supabase.js` — 전체 마이그레이션 (로컬 pg → Supabase, Management API 사용)
+- `migrate-failed-tables.js` — 특수 타입 테이블 재임포트 (text[], tsvector, 대용량 JSONB)
+- `supabase-schema-only.sql` — 스키마 참조용
+
+---
 
 ### 6.1 마이그레이션 순서 (Liquibase)
 
