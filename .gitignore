@@ -94,3 +94,11 @@ infrastructure/*/data/
 infrastructure/*/logs/
 docker/ssl/
 infrastructure/*/ssl/
+
+.vercel
+
+# Runtime logs
+logs/
+
+# Supabase CLI temp state
+supabase/.temp/

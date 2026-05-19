@@ -1,7 +1,6 @@
 # 3 연계 개발 가이드
 ## 3.1 WebSocket HOST 정보
 - ws	localhost	29282	ws://localhost:29282
-- wss	localhost	29283	wss://localhost:29283
 ## 3.2 WebSocket Interface
 ### REQUEST(JSON)
 - Key 	Value (type) 	Description
