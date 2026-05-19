@@ -35,7 +35,7 @@ services:
       - key: JWT_REFRESH_EXPIRES_IN
         value: "7d"
       - key: CORS_ORIGINS
-        sync: false
+        value: "https://*.vercel.app,https://*.onrender.com"
       - key: REDIS_ENABLED
         value: "false"
       - key: SUPABASE_URL
@@ -75,7 +75,7 @@ services:
       - key: JWT_REFRESH_SECRET
         sync: false
       - key: CORS_ORIGINS
-        sync: false
+        value: "https://*.vercel.app,https://*.onrender.com"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_KEY
@@ -109,7 +109,7 @@ services:
       - key: DB_POOL_MAX
         value: "5"
       - key: CORS_ORIGINS
-        sync: false
+        value: "https://*.vercel.app,https://*.onrender.com"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_KEY
