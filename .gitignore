@@ -84,7 +84,6 @@ uploads/
 services/*/node_modules/
 services/*/dist/
 services/*/*.log
-services/*/package-lock.json
 
 # Shared library
 shared/node_modules/
