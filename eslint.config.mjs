@@ -43,6 +43,7 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off", // 이스케이프되지 않은 문자 허용
       "react-hooks/exhaustive-deps": "warn", // useEffect 의존성 경고만 표시
       "@next/next/no-img-element": "warn", // img 태그 사용 경고만 표시
+      "react-compiler/react-compiler": "warn", // eslint-config-next 16 vs Next.js 15 버전 불일치로 인한 오류 완화
     },
   },
 ]);
