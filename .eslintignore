@@ -23,3 +23,7 @@ debug-auth.js
 force-clear-blacklist.js
 fix_menu.py
 fix_menu_routes.py
+
+# Root-level test/debug scripts (CommonJS)
+test-*.js
+test/

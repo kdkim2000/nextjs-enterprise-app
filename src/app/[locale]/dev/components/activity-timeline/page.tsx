@@ -18,6 +18,7 @@ export default function ActivityTimelineDemoPage() {
       user: '김철수',
       action: '새 게시글을 작성했습니다',
       target: '프로젝트 진행 상황 보고',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 5) // 5 minutes ago
     },
     {
@@ -27,6 +28,7 @@ export default function ActivityTimelineDemoPage() {
       action: '댓글을 남겼습니다',
       target: '주간 회의록',
       meta: '공지사항',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
     },
     {
@@ -35,6 +37,7 @@ export default function ActivityTimelineDemoPage() {
       user: 'System',
       action: '서버 오류가 발생했습니다',
       target: 'API Gateway Timeout',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 60) // 1 hour ago
     },
     {
@@ -43,6 +46,7 @@ export default function ActivityTimelineDemoPage() {
       user: '박지민',
       action: '로그인했습니다',
       meta: 'Chrome / Windows',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2 hours ago
     }
   ];
@@ -68,6 +72,7 @@ export default function ActivityTimelineDemoPage() {
       user: 'Admin',
       action: 'created a new project',
       target: 'E-commerce Platform',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 15)
     },
     {
@@ -77,6 +82,7 @@ export default function ActivityTimelineDemoPage() {
       action: 'updated the settings',
       target: 'Payment Gateway',
       meta: 'Production',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 45)
     },
     {
@@ -85,6 +91,7 @@ export default function ActivityTimelineDemoPage() {
       user: 'Jane Smith',
       action: 'deleted a record',
       target: 'Legacy Database',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 120)
     },
     {
@@ -93,6 +100,7 @@ export default function ActivityTimelineDemoPage() {
       user: 'Mike Johnson',
       action: 'joined the team',
       meta: 'Developer',
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 1000 * 60 * 180)
     }
   ];

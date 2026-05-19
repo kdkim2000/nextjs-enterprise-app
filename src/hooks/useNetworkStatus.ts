@@ -105,7 +105,7 @@ export function useNetworkStatus(): NetworkStatus {
     if (typeof window === 'undefined') return;
 
     // Set initial status
-    updateNetworkStatus();
+    const initTimer = setTimeout(updateNetworkStatus, 0);
 
     // Register event listeners
     window.addEventListener('online', updateNetworkStatus);
@@ -119,6 +119,7 @@ export function useNetworkStatus(): NetworkStatus {
     }
 
     return () => {
+      clearTimeout(initTimer);
       window.removeEventListener('online', updateNetworkStatus);
       window.removeEventListener('offline', updateNetworkStatus);
 

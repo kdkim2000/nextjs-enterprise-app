@@ -26,7 +26,8 @@ const getPool = (): Pool => {
       database: process.env.DB_NAME || 'corenextdb',
       user: process.env.DB_USER || 'corenext',
       password: process.env.DB_PASSWORD || '',
-      max: 20,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      max: parseInt(process.env.DB_POOL_MAX || '5', 10),
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     });

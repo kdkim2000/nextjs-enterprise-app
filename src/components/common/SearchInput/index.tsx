@@ -191,7 +191,8 @@ export function useSearchNavigation<T>(
 
   // Reset current index when search changes
   useEffect(() => {
-    setCurrentMatchIndex(0);
+    const timer = setTimeout(() => setCurrentMatchIndex(0), 0);
+    return () => clearTimeout(timer);
   }, [searchTerm]);
 
   // Navigate between matches

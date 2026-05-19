@@ -42,6 +42,7 @@ interface DatabaseConfig {
   database: string;
   user: string;
   password: string;
+  ssl?: boolean | { rejectUnauthorized: boolean };
   max?: number; // 최대 연결 수
   idleTimeoutMillis?: number;
   connectionTimeoutMillis?: number;
@@ -57,7 +58,8 @@ export function getDatabaseConfig(): DatabaseConfig {
     database: process.env.DB_NAME || 'corenextdb',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
-    max: parseInt(process.env.DB_POOL_MAX || '20'),
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    max: parseInt(process.env.DB_POOL_MAX || '5'),
     idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
     connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000'),
   };

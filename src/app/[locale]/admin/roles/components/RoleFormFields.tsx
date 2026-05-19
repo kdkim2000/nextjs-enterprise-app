@@ -40,13 +40,16 @@ export default function RoleFormFields({
 
   // Initialize user names when editing role
   useEffect(() => {
-    if (role) {
-      setManagerName(role.managerName || '');
-      setRepresentativeName(role.representativeName || '');
-    } else {
-      setManagerName('');
-      setRepresentativeName('');
-    }
+    const timer = setTimeout(() => {
+      if (role) {
+        setManagerName(role.managerName || '');
+        setRepresentativeName(role.representativeName || '');
+      } else {
+        setManagerName('');
+        setRepresentativeName('');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [role]);
 
   const handleUserSelect = (user: User) => {

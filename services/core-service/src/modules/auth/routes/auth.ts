@@ -13,6 +13,7 @@ import {
   register,
   validateToken,
   getCurrentUser,
+  ssoLogin,
 } from '../services/authService';
 import { authenticateToken } from '../../../middleware/authMiddleware';
 import {
@@ -20,6 +21,7 @@ import {
   mfaLimiter,
   registerLimiter,
   authLimiter,
+  ssoLoginLimiter,
 } from '../../../middleware/rateLimiter';
 
 const router = Router();
@@ -200,6 +202,43 @@ router.post('/logout', async (req: Request, res: Response) => {
     res.json({
       success: true,
       message: 'Logged out',
+    });
+  }
+});
+
+/**
+ * POST /auth/sso
+ * SSO login using loginid from EpTray
+ */
+router.post('/sso', ssoLoginLimiter, async (req: Request, res: Response) => {
+  try {
+    const { loginid } = req.body;
+
+    if (!loginid) {
+      res.status(400).json({
+        success: false,
+        message: 'Login ID is required',
+      });
+      return;
+    }
+
+    const result = await ssoLogin(loginid);
+
+    logger.info(`SSO login successful: ${loginid}`);
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      },
+    });
+  } catch (error: any) {
+    logger.warn(`SSO login failed: ${error.message}`);
+    res.status(401).json({
+      success: false,
+      message: error.message || 'SSO login failed',
     });
   }
 });

@@ -5,10 +5,10 @@
 import { query, getClient } from '../../../utils/database';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
-import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
 import * as attachmentTypeService from './attachmentTypeService';
 import { Attachment, AttachmentFile } from '../types';
+import { uploadFile as supabaseUpload, deleteFile as supabaseDelete } from '../utils/supabaseStorage';
 
 // ==========================================
 // UTILITY FUNCTIONS
@@ -308,49 +308,58 @@ export async function incrementDownloadCount(fileId: string): Promise<any> {
 }
 
 // ==========================================
-// PHYSICAL FILE OPERATIONS
+// PHYSICAL FILE OPERATIONS (Supabase Storage)
 // ==========================================
 
 async function deletePhysicalFile(file: any): Promise<void> {
   try {
-    if (file.full_path) {
-      await fs.unlink(file.full_path);
-    } else if (file.storage_path && file.stored_filename) {
-      const fullPath = path.join(process.cwd(), 'uploads', file.storage_path, file.stored_filename);
-      await fs.unlink(fullPath);
+    // file.storage_path holds the Supabase object path (e.g. "general/2024/01/01/uuid.jpg")
+    // file.full_path also stores the Supabase object path when set
+    const supabasePath = file.storage_path
+      ? `${file.storage_path}/${file.stored_filename}`
+      : file.full_path;
+
+    if (supabasePath) {
+      await supabaseDelete(supabasePath);
     }
 
     if (file.thumbnail_path) {
       try {
-        await fs.unlink(file.thumbnail_path);
+        await supabaseDelete(file.thumbnail_path);
       } catch (e) {
         // Ignore thumbnail deletion errors
       }
     }
   } catch (error) {
-    console.error('Error deleting physical file:', error);
+    console.error('Error deleting file from Supabase Storage:', error);
   }
 }
 
-export async function ensureStorageDirectory(storagePath: string): Promise<string> {
-  const fullPath = path.join(process.cwd(), 'uploads', storagePath);
-  await fs.mkdir(fullPath, { recursive: true });
-  return fullPath;
+export async function ensureStorageDirectory(_storagePath: string): Promise<string> {
+  // No-op: Supabase Storage does not require pre-created directories
+  return _storagePath;
 }
 
 export async function saveFileToStorage(
   buffer: Buffer,
   baseStoragePath: string,
-  storedFilename: string
+  storedFilename: string,
+  mimeType: string = 'application/octet-stream',
+  originalName: string = storedFilename
 ): Promise<{ fullPath: string; relativePath: string }> {
   const datePath = getDateBasedPath();
-  const relativePath = path.join(baseStoragePath, datePath).replace(/\\/g, '/');
+  const folder = `${baseStoragePath}/${datePath}`.replace(/\\/g, '/');
 
-  const dirPath = await ensureStorageDirectory(relativePath);
-  const fullPath = path.join(dirPath, storedFilename);
-  await fs.writeFile(fullPath, buffer);
+  const { path: supabasePath, publicUrl } = await supabaseUpload(
+    buffer,
+    originalName,
+    mimeType,
+    folder
+  );
 
-  return { fullPath, relativePath };
+  // relativePath = Supabase object path (used as storage_path in DB)
+  // fullPath = public URL (used as full_path in DB for direct access)
+  return { fullPath: publicUrl, relativePath: supabasePath };
 }
 
 // ==========================================
@@ -425,7 +434,9 @@ export async function uploadFiles(
       const { fullPath, relativePath } = await saveFileToStorage(
         file.buffer,
         baseStoragePath,
-        storedFilename
+        storedFilename,
+        file.mimetype,
+        file.originalname
       );
 
       const isImage = isImageFile(file.mimetype);

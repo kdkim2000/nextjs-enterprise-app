@@ -63,6 +63,7 @@ export default function NotificationPanel({
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [tab, setTab] = useState(0);
+  const [now] = useState(() => Date.now());
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -114,8 +115,7 @@ export default function NotificationPanel({
     }
   };
 
-  const formatTime = (timestamp: number) => {
-    const now = Date.now();
+  const formatTime = (timestamp: number, now: number) => {
     const diff = now - timestamp;
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
@@ -276,7 +276,7 @@ export default function NotificationPanel({
                               {notification.message}
                             </Typography>
                             <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }}>
-                              {formatTime(notification.createdAt)}
+                              {formatTime(notification.createdAt, now)}
                             </Typography>
                           </Box>
                         }

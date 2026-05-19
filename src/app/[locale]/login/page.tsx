@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Container,
   Box,
@@ -19,18 +19,20 @@ import {
   alpha
 } from '@mui/material';
 import { Visibility, VisibilityOff, Login as LoginIcon, ArrowForward } from '@mui/icons-material';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 import { useMobile } from '@/hooks/useMobile';
+import { getEpTrayLoginId } from '@/lib/eptray';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useCurrentLocale();
   const t = useI18n();
   const theme = useTheme();
-  const { isMobile, isMobileLayout } = useMobile();
-  const { login, verifyMFA, ssoLogin } = useAuth();
+  const { isMobile } = useMobile();
+  const { login, verifyMFA, ssoLogin, isAuthenticated } = useAuth();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -44,6 +46,70 @@ export default function LoginPage() {
   const [mfaCode, setMfaCode] = useState('');
   const [mfaEmail, setMfaEmail] = useState('');
   const [devCode, setDevCode] = useState('');
+
+  // 자동 로그인 시도 중복 방지
+  const autoLoginAttempted = useRef(false);
+
+  const handleSSOLogin = useCallback(async (loginid: string) => {
+    setError('');
+    setLoading(true);
+
+    try {
+      await ssoLogin(loginid);
+      router.push(`/${locale}/dashboard`);
+    } catch (err: any) {
+      const errorMessage = err.message || err.response?.data?.message || t('auth.ssoLoginFailed');
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [ssoLogin, router, locale, t]);
+
+  // EpTray 자동 로그인 처리
+  useEffect(() => {
+    // 이미 로그인된 상태면 대시보드로 리다이렉트
+    if (isAuthenticated) {
+      router.push(`/${locale}/dashboard`);
+      return;
+    }
+
+    // 이미 자동 로그인을 시도했다면 중복 시도 방지
+    if (autoLoginAttempted.current) {
+      return;
+    }
+
+    const attemptAutoSSO = async () => {
+      // 자동 로그인 시도 플래그 설정
+      autoLoginAttempted.current = true;
+
+      try {
+        // EpTray에서 loginid 읽어오기 시도
+        const eptrayLoginId = await getEpTrayLoginId();
+        
+        if (eptrayLoginId) {
+          // EpTray에서 loginid를 가져올 수 있으면 자동 로그인
+          await handleSSOLogin(eptrayLoginId);
+          return;
+        }
+
+        // URL 파라미터로 SSO 로그인 시도 (기존 로직)
+        const sso = searchParams.get('sso');
+        const loginid = searchParams.get('loginid');
+
+        if (sso === 'true' && loginid) {
+          await handleSSOLogin(loginid);
+        }
+      } catch (error) {
+        // 에러 발생 시 플래그 리셋하여 재시도 가능하도록
+        // (하지만 rate limit을 피하기 위해 짧은 딜레이 후)
+        setTimeout(() => {
+          autoLoginAttempted.current = false;
+        }, 5000); // 5초 후 재시도 가능
+      }
+    };
+
+    attemptAutoSSO();
+  }, [isAuthenticated, searchParams, handleSSOLogin, router, locale]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,11 +155,25 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await ssoLogin();
-      router.push(`/${locale}/dashboard`);
+      // EpTray에서 loginid 읽어오기
+      const eptrayLoginId = await getEpTrayLoginId();
+      
+      if (eptrayLoginId) {
+        // EpTray에서 읽어온 loginid로 로그인
+        await handleSSOLogin(eptrayLoginId);
+      } else {
+        // EpTray에서 읽어오지 못한 경우 URL 파라미터 확인
+        const loginid = searchParams.get('loginid');
+        if (loginid) {
+          await handleSSOLogin(loginid);
+        } else {
+          setError('SSO login requires loginid parameter');
+          setLoading(false);
+        }
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error || t('auth.ssoLoginFailed'));
-    } finally {
+      const errorMessage = err.message || err.response?.data?.message || 'SSO login failed';
+      setError(errorMessage);
       setLoading(false);
     }
   };

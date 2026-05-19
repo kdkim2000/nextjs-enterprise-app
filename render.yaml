@@ -1,0 +1,116 @@
+services:
+  - type: web
+    name: corenext-core-service
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: .
+    buildCommand: "npm ci --prefix shared && npm run build --prefix shared && npm ci --prefix services/core-service && npm run build --prefix services/core-service"
+    startCommand: "node services/core-service/dist/server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3011"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "6543"
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_POOL_MAX
+        value: "5"
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: "15m"
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: "7d"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: REDIS_ENABLED
+        value: "false"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+
+  - type: web
+    name: corenext-app-service
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: .
+    buildCommand: "npm ci --prefix shared && npm run build --prefix shared && npm ci --prefix services/app-service && npm run build --prefix services/app-service"
+    startCommand: "node services/app-service/dist/server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3012"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "6543"
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_POOL_MAX
+        value: "5"
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+
+  - type: web
+    name: corenext-inspection-service
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: .
+    buildCommand: "npm ci --prefix shared && npm run build --prefix shared && npm ci --prefix services/inspection-service && npm run build --prefix services/inspection-service"
+    startCommand: "node services/inspection-service/dist/server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3013"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "6543"
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_POOL_MAX
+        value: "5"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false

@@ -44,13 +44,16 @@ export function useNotifications(locale: string = 'ko'): UseNotificationsResult 
 
   // Subscribe to new notifications
   useEffect(() => {
-    refreshState();
+    const initTimer = setTimeout(refreshState, 0);
 
     const unsubscribe = notificationService.subscribe(() => {
       refreshState();
     });
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(initTimer);
+      unsubscribe();
+    };
   }, [refreshState]);
 
   // Mark as read
