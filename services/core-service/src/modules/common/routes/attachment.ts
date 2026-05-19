@@ -3,8 +3,6 @@
  */
 
 import { Router, Request, Response } from 'express';
-import * as path from 'path';
-import * as fs from 'fs';
 import * as attachmentService from '../services/attachmentService';
 import * as attachmentTypeService from '../services/attachmentTypeService';
 import { authenticateToken } from '../../../middleware/authMiddleware';
@@ -206,24 +204,14 @@ router.get('/file/:fileId/view', async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    let fullPath: string;
-    if (file.full_path) {
-      fullPath = file.full_path;
-    } else {
-      fullPath = path.join(process.cwd(), 'uploads', file.storage_path, file.stored_filename);
-    }
-
-    if (!fs.existsSync(fullPath)) {
-      res.status(404).json({ error: 'File not found on server' });
+    // full_path stores the Supabase public URL; redirect the client there
+    const publicUrl = file.full_path;
+    if (!publicUrl) {
+      res.status(404).json({ error: 'File not found in storage' });
       return;
     }
 
-    // Set content type for inline display
-    res.setHeader('Content-Type', file.mime_type || 'application/octet-stream');
-    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.original_filename)}"`);
-
-    const fileStream = fs.createReadStream(fullPath);
-    fileStream.pipe(res);
+    res.redirect(publicUrl);
   } catch (error: any) {
     logger.error('View file error:', error);
     res.status(500).json({ error: 'Failed to view file' });
@@ -238,20 +226,20 @@ router.get('/file/:fileId/download', authenticateToken, async (req: Request, res
       return;
     }
 
-    let fullPath: string;
-    if (file.full_path) {
-      fullPath = file.full_path;
-    } else {
-      fullPath = path.join(process.cwd(), 'uploads', file.storage_path, file.stored_filename);
-    }
-
-    if (!fs.existsSync(fullPath)) {
-      res.status(404).json({ error: 'File not found on server' });
+    // full_path stores the Supabase public URL; redirect the client there
+    const publicUrl = file.full_path;
+    if (!publicUrl) {
+      res.status(404).json({ error: 'File not found in storage' });
       return;
     }
 
     await attachmentService.incrementDownloadCount(req.params.fileId);
-    res.download(fullPath, file.original_filename);
+
+    // Redirect with Content-Disposition hint via query param (Supabase supports ?download=)
+    const downloadUrl = publicUrl.includes('?')
+      ? `${publicUrl}&download=${encodeURIComponent(file.original_filename)}`
+      : `${publicUrl}?download=${encodeURIComponent(file.original_filename)}`;
+    res.redirect(downloadUrl);
   } catch (error: any) {
     logger.error('Download file error:', error);
     res.status(500).json({ error: 'Failed to download file' });

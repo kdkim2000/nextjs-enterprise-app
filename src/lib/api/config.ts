@@ -42,15 +42,16 @@ const API_CONFIG: ApiConfig = {
     legacy: process.env.NEXT_PUBLIC_LEGACY_API_URL || 'http://localhost:3001/api',
   },
 
-  // 서버 운영 환경: Nginx Reverse Proxy 경유 (상대 경로)
+  // 서버 운영 환경: Vercel + Render.com 또는 Nginx Reverse Proxy 경유
+  // NEXT_PUBLIC_*_API_URL 환경변수 우선 사용, 미설정 시 상대경로 (Nginx) 사용
   production: {
-    auth: '/auth',
-    admin: '/admin',
-    content: '/content',
-    comm: '/comm',
-    common: '/common',
-    inspection: '/inspection',
-    legacy: '/api',
+    auth: process.env.NEXT_PUBLIC_AUTH_API_URL || '/auth',
+    admin: process.env.NEXT_PUBLIC_ADMIN_API_URL || '/admin',
+    content: process.env.NEXT_PUBLIC_CONTENT_API_URL || '/content',
+    comm: process.env.NEXT_PUBLIC_COMM_API_URL || '/comm',
+    common: process.env.NEXT_PUBLIC_COMMON_API_URL || '/common',
+    inspection: process.env.NEXT_PUBLIC_INSPECTION_API_URL || '/inspection',
+    legacy: process.env.NEXT_PUBLIC_LEGACY_API_URL || '/api',
   },
 };
 

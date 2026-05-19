@@ -191,3 +191,165 @@ getCurrentUser() 함수를 추가해줘.
 | 결과 확인 없이 바로 커밋 | 에이전트 출력은 의도한 것이지 실제 변경이 아닐 수 있음 |
 | 서비스 경계 무시 지시 | 의존성 오염 발생 |
 | 병렬로 같은 파일 수정 | 충돌 발생 |
+
+---
+
+## 7. 배포 전용 에이전트
+
+배포 작업은 아래 전문화된 에이전트로 분리하여 수행한다. 각 에이전트는 단일 책임을 갖는다.
+
+### 7.1 DeployStorageAgent
+
+**역할:** 파일 저장소를 로컬 디스크에서 Supabase Storage로 마이그레이션한다.
+
+**트리거 조건:**
+- multer diskStorage를 사용하는 라우트가 발견될 때
+- 파일 업로드 관련 `attachmentService` 변경이 필요할 때
+- 서비스에 `supabaseStorage.ts` 헬퍼가 없을 때
+
+**수행 작업:**
+1. `services/*/src/routes/` 에서 multer diskStorage 설정 파악
+2. `services/*/src/services/attachmentService.ts` 읽기
+3. `multer.diskStorage()` → `multer.memoryStorage()` 교체
+4. `services/*/src/utils/supabaseStorage.ts` 헬퍼 생성 (업로드/삭제/URL 반환)
+5. 정적 파일 서빙(`express.static('uploads/')`) 제거
+
+**예시 프롬프트:**
+```
+"services/ 아래 3개 서비스의 파일 업로드를 Supabase Storage로 마이그레이션해줘.
+multer memoryStorage 패턴과 supabaseStorage.ts 헬퍼를 각 서비스에 생성하고,
+attachmentService.ts가 Supabase SDK를 사용하도록 업데이트해줘."
+```
+
+---
+
+### 7.2 DeployRenderAgent
+
+**역할:** Render.com 배포용 Blueprint 파일(`render.yaml`)과 빌드 파이프라인을 설정한다.
+
+**트리거 조건:**
+- `render.yaml`이 없거나 서비스 구성이 변경될 때
+- Render.com에 신규 서비스를 추가할 때
+- CORS 설정을 업데이트해야 할 때
+
+**수행 작업:**
+1. `render.yaml` 생성/수정 — 3개 서비스(core/app/inspection) 정의
+2. 각 서비스의 buildCommand에 `shared` 빌드 선행 포함
+3. `sync: false` 시크릿(DB 비밀번호, JWT 시크릿 등) 처리
+4. 각 서비스 `.env` 파일의 `CORS_ORIGINS` 업데이트
+
+**주의사항:**
+- 빌드 명령에 반드시 `shared` 빌드가 먼저 실행되어야 한다
+- `CORS_ORIGINS` 환경변수 이름을 사용한다 (`ALLOWED_ORIGINS` 아님)
+- 시크릿은 `sync: false`로 표시하고 Render 대시보드에서 수동 설정
+
+**예시 프롬프트:**
+```
+"render.yaml을 생성해줘. 3개 Express 서비스를 정의하고,
+shared 라이브러리를 먼저 빌드하는 buildCommand를 포함해줘.
+DB 비밀번호와 JWT 시크릿은 sync: false로 표시해줘."
+```
+
+---
+
+### 7.3 DeployVercelAgent
+
+**역할:** Next.js 프론트엔드를 Vercel에 배포하기 위한 환경 설정을 구성한다.
+
+**트리거 조건:**
+- Vercel 배포를 처음 설정할 때
+- Render.com 서비스 URL이 변경될 때
+- `.env.production`의 API URL을 업데이트해야 할 때
+
+**수행 작업:**
+1. `.env.production` 파일에 `NEXT_PUBLIC_*_API_URL` 값 설정
+2. `src/lib/api/config.ts` production 섹션 검토 및 업데이트
+3. `next.config.ts`에 localhost를 가리키는 프록시 rewrites가 없는지 확인
+4. `output: 'standalone'` 비활성화 상태 유지 확인 (Next.js 16 버그)
+
+**절대 금지:**
+- `.env.local`, `.env` 파일에 시크릿 커밋
+- `.env.production`에 DB 비밀번호, JWT 시크릿 포함
+- `NEXT_PUBLIC_*` 변수에 시크릿 값 저장
+
+**예시 프롬프트:**
+```
+".env.production을 Render.com 서비스 URL로 업데이트해줘.
+NEXT_PUBLIC_*_API_URL 환경변수 6개를 설정하고,
+src/lib/api/config.ts가 이 값을 올바르게 읽는지 확인해줘."
+```
+
+---
+
+### 7.4 DeployDocAgent
+
+**역할:** 배포 관련 변경 사항이 발생할 때 `docs/claude/` 문서를 최신 상태로 유지한다.
+
+**트리거 조건:**
+- 배포 아키텍처가 변경될 때 (서비스 추가, URL 변경 등)
+- 다른 배포 에이전트 작업이 완료된 후
+- `render.yaml`, `.env.production`, `src/lib/api/config.ts` 변경 후
+
+**수행 작업:**
+1. `docs/claude/ARCHITECTURE.md` — 배포 아키텍처 섹션 업데이트
+2. `docs/claude/AGENT.md` — 신규 에이전트 타입 추가/수정
+3. `docs/claude/RULE.md` — 배포 규칙 섹션 최신화
+4. `docs/claude/DEPLOY.md` — 단계별 배포 가이드 업데이트
+
+**주의사항:**
+- `docs/claude/` 이외의 문서 파일은 수정하지 않는다
+- 기존 내용을 삭제하지 않고 섹션을 추가/업데이트한다
+
+**예시 프롬프트:**
+```
+"배포 아키텍처 변경 사항을 docs/claude/ 문서에 반영해줘.
+ARCHITECTURE.md에 새 배포 구조도를 추가하고,
+DEPLOY.md의 환경변수 목록을 업데이트해줘."
+```
+
+---
+
+### 7.5 DeployTokenAgent
+
+**역할:** 배포 세션 완료 후 토큰 사용량을 D1 서버에 기록한다.
+
+**트리거 조건:**
+- 배포 관련 다중 에이전트 세션이 완료될 때
+- 일일 보고서 제출이 필요할 때
+
+**수행 작업:**
+1. MCP 클라우드 도구(`mcp__mcp-server-cloud__get_my_stats`)로 현재 사용량 조회
+2. 작업 내용 요약 및 토큰 사용량 집계
+3. `mcp__mcp-server-cloud__submit_daily_report`로 보고서 제출
+
+**예시 프롬프트:**
+```
+"오늘 배포 작업 완료. DeployTokenAgent로 토큰 사용량을 기록하고
+일일 보고서를 제출해줘."
+```
+
+---
+
+### 7.6 배포 에이전트 실행 순서
+
+새 환경 배포 시 권장 순서:
+
+```
+순차 실행:
+1. DeployStorageAgent  — Supabase Storage 마이그레이션
+2. DeployRenderAgent   — render.yaml 생성
+3. DeployVercelAgent   — .env.production + config.ts 업데이트
+4. DeployDocAgent      — 문서 동기화
+5. DeployTokenAgent    — 토큰 사용량 기록
+```
+
+기존 서비스 재배포 (URL/CORS 변경 시):
+
+```
+병렬 가능:
+├─ DeployRenderAgent  — render.yaml CORS 업데이트
+└─ DeployVercelAgent  — .env.production URL 업데이트
+
+완료 후 순차:
+└─ DeployDocAgent     — 문서 최신화
+```

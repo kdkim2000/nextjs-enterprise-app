@@ -238,3 +238,76 @@ npm run type-check
 - TypeScript strict 모드 사용 중. `any` 타입 남용 금지.
 - ESLint 규칙 위반 코드는 커밋하지 않는다.
 - 테스트 스크립트 없음 — `npm run lint && npm run type-check`가 CI 대용.
+
+---
+
+## 12. 배포 규칙 (Vercel + Render.com)
+
+### 시크릿 관리
+
+| 규칙 | 설명 |
+|------|------|
+| `.env` 파일 커밋 금지 | DB 비밀번호, JWT 시크릿, Supabase 서비스 키 포함 파일은 절대 커밋하지 않는다 |
+| `.env.production` 커밋 허용 | `NEXT_PUBLIC_*` URL만 포함, 시크릿 없음 — 커밋 안전 |
+| `sync: false` 변수 수동 설정 | `render.yaml`에서 `sync: false`로 표시된 변수는 Render 대시보드에서 직접 설정한다 |
+
+**`.env.production`에 포함 가능한 변수 (시크릿 아님):**
+```
+NEXT_PUBLIC_AUTH_API_URL=https://corenext-core-service.onrender.com/auth
+NEXT_PUBLIC_ADMIN_API_URL=...
+NEXT_PUBLIC_ENV=production
+```
+
+**절대 커밋하지 않을 변수:**
+```
+DB_PASSWORD, JWT_SECRET, JWT_REFRESH_SECRET, SUPABASE_SERVICE_KEY
+```
+
+### CORS 설정 규칙
+
+- CORS 허용 오리진 환경변수명은 **`CORS_ORIGINS`** 를 사용한다 (`ALLOWED_ORIGINS` 사용 금지).
+- Vercel 앱 도메인(`https://<app>.vercel.app`)을 각 Render.com 서비스의 `CORS_ORIGINS`에 추가한다.
+- 개발 환경: `http://localhost:3000`
+- 운영 환경: `https://<app>.vercel.app` (실제 배포 후 Vercel URL로 업데이트)
+
+### render.yaml 규칙
+
+- `render.yaml` 변경 후 `git push` 시 Render.com이 자동으로 재배포를 트리거한다.
+- 빌드 명령에 반드시 `shared` 라이브러리 빌드가 선행되어야 한다:
+  ```
+  npm ci --prefix shared && npm run build --prefix shared && ...
+  ```
+- 무료 플랜(free): 15분 비활성 시 슬립, 최초 요청 시 약 30초 콜드 스타트 발생.
+
+### Supabase Storage 규칙
+
+- 파일 업로드 버킷 이름은 **`uploads`** (대소문자 구분 없음, 소문자 권장).
+- 버킷은 **Public** 접근으로 설정해야 클라이언트가 URL 직접 접근 가능.
+- 버킷 수동 생성 필수 — 코드에서 자동 생성하지 않는다 (Supabase 대시보드 → Storage).
+- 파일 업로드 패턴: **`memoryStorage` (multer) + `supabaseStorage.ts` 헬퍼** 조합.
+  ```typescript
+  // 올바른 패턴
+  const upload = multer({ storage: multer.memoryStorage() });
+  // supabaseStorage.ts의 uploadFile() 사용
+  
+  // 금지: diskStorage 사용
+  const upload = multer({ dest: 'uploads/' }); // ❌
+  ```
+- `express.static('uploads/')` 정적 서빙 코드는 추가하지 않는다 (Supabase가 서빙).
+
+### Vercel 배포 규칙
+
+- `output: 'standalone'` 은 활성화하지 않는다 (Next.js 16 middleware 버그, 기존 규칙 9번 참조).
+- 환경변수는 Vercel 대시보드에서 설정하거나 `.env.production`에 커밋한다 (시크릿 제외).
+- `next.config.ts`에 `localhost`를 가리키는 rewrites 추가 금지 (운영 환경에서 동작 안 함).
+
+### 배포 후 검증 체크리스트
+
+```
+□ https://<app>.vercel.app/ko/login — 로그인 성공
+□ https://corenext-core-service.onrender.com/health — {"status":"healthy"}
+□ https://corenext-app-service.onrender.com/health — {"status":"healthy"}
+□ https://corenext-inspection-service.onrender.com/health — {"status":"healthy"}
+□ 파일 업로드 → Supabase Storage 버킷에 저장 확인
+□ CORS 에러 없음 (브라우저 개발자 도구 → Network 탭)
+```

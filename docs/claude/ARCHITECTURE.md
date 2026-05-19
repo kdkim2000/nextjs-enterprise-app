@@ -400,3 +400,106 @@ Docker Compose profile `monitoring`으로 활성화:
 | `shared/src/database/index.ts` | DB 풀 관리 |
 | `infrastructure/docker/docker-compose.yml` | 전체 스택 정의 |
 | `infrastructure/nginx/nginx.conf` | 리버스 프록시 설정 |
+
+---
+
+## 10. 배포 아키텍처 (Vercel + Render.com)
+
+> 프로덕션 배포 방식: Next.js 프론트엔드는 Vercel, 3개 마이크로서비스는 Render.com에 배포한다.
+
+### 10.1 배포 구조도
+
+```
+브라우저
+    │
+    ▼
+┌─────────────────────────────────┐
+│  Vercel (Next.js 프론트엔드)     │
+│  https://<app>.vercel.app        │
+└──────────────┬──────────────────┘
+               │ NEXT_PUBLIC_*_API_URL
+               ▼
+┌─────────────────────────────────────────────────────┐
+│                  Render.com                          │
+│                                                      │
+│  ┌──────────────────────────────────────────────┐   │
+│  │ corenext-core-service                        │   │
+│  │ https://corenext-core-service.onrender.com   │   │
+│  │ 담당: /auth  /admin  /common                 │   │
+│  └──────────────────────────────────────────────┘   │
+│                                                      │
+│  ┌──────────────────────────────────────────────┐   │
+│  │ corenext-app-service                         │   │
+│  │ https://corenext-app-service.onrender.com    │   │
+│  │ 담당: /content  /comm                        │   │
+│  └──────────────────────────────────────────────┘   │
+│                                                      │
+│  ┌──────────────────────────────────────────────┐   │
+│  │ corenext-inspection-service                  │   │
+│  │ https://corenext-inspection-service.onrender.com │
+│  │ 담당: /inspection                            │   │
+│  └──────────────────────────────────────────────┘   │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+          ┌───────────────────────┐
+          │  Supabase             │
+          │  PostgreSQL 16        │  (트랜잭션 풀러)
+          │  + Storage (uploads)  │  (파일 업로드)
+          └───────────────────────┘
+```
+
+### 10.2 Render.com 서비스 매핑
+
+| Render 서비스명 | URL | 담당 모듈 |
+|----------------|-----|----------|
+| `corenext-core-service` | `https://corenext-core-service.onrender.com` | 인증, 관리자, 공통 데이터 |
+| `corenext-app-service` | `https://corenext-app-service.onrender.com` | 게시판, 커뮤니케이션 |
+| `corenext-inspection-service` | `https://corenext-inspection-service.onrender.com` | 체크시트, 검수, 동기화 |
+
+**Render Blueprint 파일:** `render.yaml` (프로젝트 루트)
+
+### 10.3 Vercel 환경변수 (NEXT_PUBLIC_*)
+
+Vercel 대시보드에 설정하는 환경변수:
+
+| 환경변수 | 값 |
+|---------|-----|
+| `NEXT_PUBLIC_AUTH_API_URL` | `https://corenext-core-service.onrender.com/auth` |
+| `NEXT_PUBLIC_ADMIN_API_URL` | `https://corenext-core-service.onrender.com/admin` |
+| `NEXT_PUBLIC_COMMON_API_URL` | `https://corenext-core-service.onrender.com/common` |
+| `NEXT_PUBLIC_CONTENT_API_URL` | `https://corenext-app-service.onrender.com/content` |
+| `NEXT_PUBLIC_COMM_API_URL` | `https://corenext-app-service.onrender.com/comm` |
+| `NEXT_PUBLIC_INSPECTION_API_URL` | `https://corenext-inspection-service.onrender.com/inspection` |
+
+**파일:** `.env.production` — 위 값들이 커밋되어 있다 (시크릿 없음, URL만 포함).
+
+### 10.4 Supabase Storage (파일 업로드)
+
+파일 업로드는 로컬 디스크 대신 Supabase Storage를 사용한다.
+
+| 항목 | 값 |
+|------|-----|
+| 버킷명 | `uploads` |
+| 접근 방식 | Public (공개 URL 직접 접근) |
+| 헬퍼 파일 | 각 서비스의 `src/utils/supabaseStorage.ts` |
+| Multer 설정 | `memoryStorage()` (디스크 저장 없음) |
+
+**업로드 흐름:**
+1. 클라이언트 → 서비스 API (multipart/form-data)
+2. 서비스: `multer memoryStorage` → `buffer` 획득
+3. 서비스: `supabaseStorage.ts` → Supabase Storage SDK로 업로드
+4. 서비스: 반환된 공개 URL을 DB에 저장
+
+**Render.com 서비스 환경변수 (수동 설정, `sync: false`):**
+
+```
+SUPABASE_URL=https://yomarhbjvsdtnjlawhkd.supabase.co
+SUPABASE_SERVICE_KEY=<service-role-key>  # Supabase 대시보드에서 발급
+```
+
+### 10.5 URL 설정 파일
+
+**`src/lib/api/config.ts`** — 환경별 API URL 분기:
+- 개발: `localhost:3011/3012/3013` 직접 호출
+- 운영: `NEXT_PUBLIC_*_API_URL` 환경변수 우선, 미설정 시 상대경로 (`/auth` 등, Nginx용) 폴백
