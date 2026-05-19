@@ -12,8 +12,8 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "node node_modules/typescript/bin/tsc",
+    "watch": "node node_modules/typescript/bin/tsc -w",
     "clean": "rimraf dist"
   },
   "dependencies": {
