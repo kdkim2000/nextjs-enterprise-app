@@ -10,7 +10,7 @@ const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const SRC = { host: 'localhost', port: 5050, database: 'corenextdb', user: 'corenext', password: 'CoreNext2025#' };
+const SRC = { host: process.env.SRC_DB_HOST || 'localhost', port: parseInt(process.env.SRC_DB_PORT || '5050'), database: process.env.SRC_DB_NAME || 'corenextdb', user: process.env.SRC_DB_USER || 'corenext', password: process.env.SRC_DB_PASSWORD || '' };
 const BATCH_SIZE = 1000;
 const TMP_DIR = path.join(__dirname, 'supabase-import-tmp');
 const ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN || '';
