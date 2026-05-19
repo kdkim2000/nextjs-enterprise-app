@@ -43,9 +43,20 @@ const app = express();
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
 
+// CORS origin checker — supports wildcard patterns like *.vercel.app
+const corsOrigins = config.cors.origins;
+const corsOriginFn = (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+  if (!origin) return cb(null, true);
+  const allowed = corsOrigins.some(o => {
+    if (o.includes('*')) return new RegExp('^' + o.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$').test(origin);
+    return o === origin;
+  });
+  cb(allowed ? null : new Error('Not allowed by CORS'), allowed);
+};
+
 // Middleware
 app.use(cors({
-  origin: config.cors.origins,
+  origin: corsOriginFn,
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
