@@ -83,23 +83,23 @@
 
 **corenext-core-service:**
 ```
-DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_HOST=aws-1-ap-southeast-1.pooler.supabase.com
 DB_USER=postgres.yomarhbjvsdtnjlawhkd
 DB_PASSWORD=<supabase-db-password>
-JWT_SECRET=<generate-secure-random>
-JWT_REFRESH_SECRET=<generate-secure-random>
+JWT_SECRET=<services/core-service/.env의 JWT_SECRET 값>
+JWT_REFRESH_SECRET=<services/core-service/.env의 JWT_REFRESH_SECRET 값>
 CORS_ORIGINS=https://<your-vercel-app>.vercel.app
 SUPABASE_URL=https://yomarhbjvsdtnjlawhkd.supabase.co
-SUPABASE_SERVICE_KEY=<service-role-key>
+SUPABASE_SERVICE_KEY=<service-role-key>  ← Supabase 대시보드 > Settings > API > service_role
 ```
 
 **corenext-app-service:**
 ```
-DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_HOST=aws-1-ap-southeast-1.pooler.supabase.com
 DB_USER=postgres.yomarhbjvsdtnjlawhkd
 DB_PASSWORD=<supabase-db-password>
-JWT_SECRET=<same-as-core-service>
-JWT_REFRESH_SECRET=<same-as-core-service>
+JWT_SECRET=<core-service와 동일한 값>
+JWT_REFRESH_SECRET=<core-service와 동일한 값>
 CORS_ORIGINS=https://<your-vercel-app>.vercel.app
 SUPABASE_URL=https://yomarhbjvsdtnjlawhkd.supabase.co
 SUPABASE_SERVICE_KEY=<service-role-key>
@@ -107,7 +107,7 @@ SUPABASE_SERVICE_KEY=<service-role-key>
 
 **corenext-inspection-service:**
 ```
-DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_HOST=aws-1-ap-southeast-1.pooler.supabase.com
 DB_USER=postgres.yomarhbjvsdtnjlawhkd
 DB_PASSWORD=<supabase-db-password>
 CORS_ORIGINS=https://<your-vercel-app>.vercel.app
@@ -256,7 +256,7 @@ Error: connect ECONNREFUSED
 ```
 
 **해결:**
-- `DB_HOST`가 Transaction Pooler 주소인지 확인: `aws-0-ap-southeast-1.pooler.supabase.com`
+- `DB_HOST`가 Transaction Pooler 주소인지 확인: `aws-1-ap-southeast-1.pooler.supabase.com`
 - `DB_PORT=6543` 확인
 - `DB_SSL=true` 확인
 
