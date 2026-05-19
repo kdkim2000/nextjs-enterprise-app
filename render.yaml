@@ -5,7 +5,7 @@ services:
     region: singapore
     plan: free
     rootDir: .
-    buildCommand: "npm ci --prefix shared && npm run build --prefix shared && npm ci --prefix services/core-service && npm run build --prefix services/core-service"
+    buildCommand: "npm ci --include=dev --prefix shared && npm run build --prefix shared && npm ci --include=dev --prefix services/core-service && npm run build --prefix services/core-service"
     startCommand: "node services/core-service/dist/server.js"
     envVars:
       - key: NODE_ENV
@@ -49,7 +49,7 @@ services:
     region: singapore
     plan: free
     rootDir: .
-    buildCommand: "npm ci --prefix shared && npm run build --prefix shared && npm ci --prefix services/app-service && npm run build --prefix services/app-service"
+    buildCommand: "npm ci --include=dev --prefix shared && npm run build --prefix shared && npm ci --include=dev --prefix services/app-service && npm run build --prefix services/app-service"
     startCommand: "node services/app-service/dist/server.js"
     envVars:
       - key: NODE_ENV
@@ -87,7 +87,7 @@ services:
     region: singapore
     plan: free
     rootDir: .
-    buildCommand: "npm ci --prefix shared && npm run build --prefix shared && npm ci --prefix services/inspection-service && npm run build --prefix services/inspection-service"
+    buildCommand: "npm ci --include=dev --prefix shared && npm run build --prefix shared && npm ci --include=dev --prefix services/inspection-service && npm run build --prefix services/inspection-service"
     startCommand: "node services/inspection-service/dist/server.js"
     envVars:
       - key: NODE_ENV
