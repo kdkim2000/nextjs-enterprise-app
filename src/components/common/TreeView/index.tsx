@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -321,20 +321,20 @@ export default function TreeView<T extends BaseTreeNode>({
   const isKorean = locale === 'ko';
 
   // Count total items
-  const countAllItems = useCallback((items: T[]): number => {
+  function countAllItems(items: T[]): number {
     return items.reduce((count, item) => {
       return count + 1 + (item.children ? countAllItems(item.children as T[]) : 0);
     }, 0);
-  }, []);
+  }
 
-  const totalCount = useMemo(() => countAllItems(data), [data, countAllItems]);
+  const totalCount = useMemo(() => countAllItems(data), [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Render tree recursively
-  const renderTree = useCallback((
+  function renderTree(
     items: T[],
     level: number = 0,
     parentLines: boolean[] = []
-  ): React.ReactNode => {
+  ): React.ReactNode {
     return items.map((item, index) => {
       const isLast = index === items.length - 1;
       const newParentLines = [...parentLines, !isLast];
@@ -366,21 +366,7 @@ export default function TreeView<T extends BaseTreeNode>({
         </TreeItem>
       );
     });
-  }, [
-    expandedIds,
-    selectedIds,
-    locale,
-    columns,
-    actions,
-    searchQuery,
-    checkboxSelection,
-    rowHeight,
-    getDisplayName,
-    getIcon,
-    getFolderIcon,
-    onToggleExpand,
-    onToggleSelect
-  ]);
+  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

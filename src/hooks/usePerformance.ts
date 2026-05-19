@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 
 interface PerformanceMetrics {
   componentName: string;
@@ -43,8 +43,10 @@ export function usePerformance(
   }, [trackMountTime]);
 
   // Track render start
-  renderStartRef.current = performance.now();
-  renderCountRef.current += 1;
+  useLayoutEffect(() => {
+    renderStartRef.current = performance.now();
+    renderCountRef.current += 1;
+  });
 
   // Track render end and update metrics
   useEffect(() => {

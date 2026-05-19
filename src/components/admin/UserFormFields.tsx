@@ -72,6 +72,16 @@ export interface UserFormFieldsProps {
   locale?: string;
 }
 
+// Required field indicator
+function RequiredLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Box component="span">
+      {children}
+      <Typography component="span" color="error.main" sx={{ ml: 0.5 }}>*</Typography>
+    </Box>
+  );
+}
+
 // Validation functions
 const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -143,8 +153,11 @@ export default function UserFormFields({
   useEffect(() => {
     if (!user) return;
     const newErrors = validateForm();
-    setErrors(newErrors);
-    onValidationChange?.(Object.keys(newErrors).length === 0, newErrors);
+    const timer = setTimeout(() => {
+      setErrors(newErrors);
+      onValidationChange?.(Object.keys(newErrors).length === 0, newErrors);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [user, validateForm, onValidationChange]);
 
   // Early return AFTER all hooks
@@ -164,14 +177,6 @@ export default function UserFormFields({
 
   // Use loginidLabel if provided, otherwise fall back to usernameLabel or default
   const finalLoginidLabel = loginidLabel || usernameLabel || 'Login ID (로그인 ID)';
-
-  // Required field indicator
-  const RequiredLabel = ({ children }: { children: React.ReactNode }) => (
-    <Box component="span">
-      {children}
-      <Typography component="span" color="error.main" sx={{ ml: 0.5 }}>*</Typography>
-    </Box>
-  );
 
   return (
     <>

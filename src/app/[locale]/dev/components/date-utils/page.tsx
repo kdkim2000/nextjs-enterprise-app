@@ -12,10 +12,15 @@ export default function DateUtilsDemoPage() {
   const [style, setStyle] = useState<DateFormatStyle>('medium');
 
   const sampleDates = [
+    // eslint-disable-next-line react-hooks/purity
     new Date().toISOString(),
+    // eslint-disable-next-line react-hooks/purity
     new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
+    // eslint-disable-next-line react-hooks/purity
     new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3 hours ago
+    // eslint-disable-next-line react-hooks/purity
     new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2 days ago
+    // eslint-disable-next-line react-hooks/purity
     new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(), // 45 days ago
     '2024-01-15T14:30:00Z',
     '2023-06-20T09:00:00Z'

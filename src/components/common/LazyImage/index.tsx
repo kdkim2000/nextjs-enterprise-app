@@ -69,7 +69,7 @@ export default function LazyImage({
   useEffect(() => {
     if (!isInView || !src) return;
 
-    setLoadingState('loading');
+    const timer = setTimeout(() => setLoadingState('loading'), 0);
 
     const img = new Image();
     img.src = src;
@@ -85,6 +85,7 @@ export default function LazyImage({
     };
 
     return () => {
+      clearTimeout(timer);
       img.onload = null;
       img.onerror = null;
     };
