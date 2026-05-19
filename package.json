@@ -10,7 +10,7 @@
     "dev:inspection": "cd services/inspection-service && npm run dev",
     "dev:services": "concurrently -n core,app,inspection -c blue,green,yellow \"npm run dev:core\" \"npm run dev:app\" \"npm run dev:inspection\"",
     "dev:msa": "concurrently -n frontend,core,app,inspection -c white,blue,green,yellow \"npm run dev:frontend\" \"npm run dev:core\" \"npm run dev:app\" \"npm run dev:inspection\"",
-    "build": "next build",
+    "build": "next build && node -e \"const fs=require('fs'),p='.next/server/middleware.js.nft.json';if(!fs.existsSync(p)){fs.mkdirSync('.next/server',{recursive:true});fs.writeFileSync(p,JSON.stringify({version:1,files:[]}))}\"",
     "build:shared": "cd shared && npm run build",
     "build:core": "cd services/core-service && npm run build",
     "build:app": "cd services/app-service && npm run build",
