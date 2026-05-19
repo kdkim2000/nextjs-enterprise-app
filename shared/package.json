@@ -17,20 +17,20 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.3.0",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.0",
     "pg-promise": "^11.5.0",
-    "jsonwebtoken": "^9.0.2",
-    "bcrypt": "^5.1.0",
-    "winston": "^3.18.0",
-    "dotenv": "^16.3.0"
+    "winston": "^3.18.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.0.0",
     "@types/pg": "^8.10.0",
-    "typescript": "^5.0.0",
-    "rimraf": "^5.0.0"
+    "rimraf": "^5.0.0",
+    "typescript": "~5.7.3"
   }
 }
