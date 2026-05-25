@@ -25,7 +25,7 @@ export default function MasterDetailLayout({
   gutterSize = 10
 }: MasterDetailLayoutProps) {
   return (
-    <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
+    <Box sx={{ height: '100%', overflow: 'hidden', display: 'flex' }}>
       <Split
         sizes={[masterSize, detailSize]}
         minSize={[minMasterSize, minDetailSize]}
