@@ -71,13 +71,7 @@ function RecentActivityFeed({ data, loading }: RecentActivityFeedProps) {
     <Box sx={{ ...cardStyle, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ ...cardContentStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography
-            sx={{
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: 'text.primary'
-            }}
-          >
+          <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
             최근 활동
           </Typography>
           <Box
@@ -87,10 +81,10 @@ function RecentActivityFeed({ data, loading }: RecentActivityFeedProps) {
               gap: 0.5,
               cursor: 'pointer',
               color: 'text.secondary',
-              '&:hover': { color: chartColors.primary[0] }
+              '&:hover': { color: 'primary.main' }
             }}
           >
-            <Typography sx={{ fontSize: '0.7rem' }}>더보기</Typography>
+            <Typography variant="caption">더보기</Typography>
             <MoreHoriz sx={{ fontSize: 16 }} />
           </Box>
         </Box>

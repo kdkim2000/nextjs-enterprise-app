@@ -44,15 +44,11 @@ export const COLORS = {
 
 // Card Styles
 export const cardStyle: SxProps<Theme> = {
-  borderRadius: 3,
+  borderRadius: 1,
   border: '1px solid',
   borderColor: 'divider',
-  boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-  transition: 'all 0.2s ease-in-out',
+  bgcolor: 'background.paper',
   overflow: 'hidden',
-  '&:hover': {
-    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-  }
 };
 
 export const cardContentStyle: SxProps<Theme> = {

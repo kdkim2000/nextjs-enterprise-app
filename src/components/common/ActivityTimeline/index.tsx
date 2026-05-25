@@ -126,7 +126,7 @@ function ActivityTimeline({
           py: 4
         }}
       >
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>{emptyMessage}</Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{emptyMessage}</Typography>
       </Box>
     );
   }
@@ -164,18 +164,18 @@ function ActivityTimeline({
             </Avatar>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.primary' }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   {activity.user}
                 </Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {activity.action}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                 {activity.target && (
                   <Typography
+                    variant="caption"
                     sx={{
-                      fontSize: '0.7rem',
                       color: 'text.secondary',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -194,7 +194,7 @@ function ActivityTimeline({
                       py: 0.25,
                       borderRadius: 1,
                       bgcolor: theme.palette.action.hover,
-                      fontSize: '0.6rem',
+                      fontSize: '0.65rem',
                       color: 'text.secondary'
                     }}
                   >
@@ -205,8 +205,8 @@ function ActivityTimeline({
             </Box>
             {showTimestamp && (
               <Typography
+                variant="caption"
                 sx={{
-                  fontSize: '0.65rem',
                   color: 'text.secondary',
                   flexShrink: 0,
                   whiteSpace: 'nowrap'
