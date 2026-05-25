@@ -42,11 +42,10 @@ const eslintConfig = defineConfig([
       // React/Next.js 관련 규칙 완화
       "react/no-unescaped-entities": "off", // 이스케이프되지 않은 문자 허용
       "react-hooks/exhaustive-deps": "warn", // useEffect 의존성 경고만 표시
+      "react-hooks/preserve-manual-memoization": "warn", // react-hooks v7: React Compiler 호환 불가 memoization 경고만 표시
       "@next/next/no-img-element": "warn", // img 태그 사용 경고만 표시
       // App Router uses root layout.tsx for fonts, not pages/_document.js
       "@next/next/no-page-custom-font": "warn",
-      // React Compiler 최적화 실패는 경고로만 처리 (빌드 실패 방지)
-      "react-compiler/react-compiler": "warn",
     },
   },
 ]);

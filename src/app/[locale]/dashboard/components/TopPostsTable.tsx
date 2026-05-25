@@ -51,13 +51,13 @@ function TopPostsTable({ data, loading }: TopPostsTableProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Visibility sx={{ fontSize: 14, color: 'text.secondary' }} />
-                <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {item.views.toLocaleString()}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <ThumbUp sx={{ fontSize: 14, color: 'text.secondary' }} />
-                <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {item.likes}
                 </Typography>
               </Box>

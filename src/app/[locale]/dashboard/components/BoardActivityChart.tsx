@@ -32,14 +32,7 @@ function BoardActivityChart({ data, loading }: BoardActivityChartProps) {
   return (
     <Box sx={{ ...cardStyle, height: '100%' }}>
       <Box sx={cardContentStyle}>
-        <Typography
-          sx={{
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            color: 'text.primary',
-            mb: 2
-          }}
-        >
+        <Typography variant="subtitle2" sx={{ color: 'text.primary', mb: 2 }}>
           게시판별 활동
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1 }}>
@@ -54,13 +47,13 @@ function BoardActivityChart({ data, loading }: BoardActivityChartProps) {
                   flex: '0 0 auto',
                   minWidth: 140,
                   p: 2,
-                  borderRadius: 2,
-                  bgcolor: 'rgba(0, 0, 0, 0.02)',
+                  borderRadius: 1,
+                  bgcolor: 'transparent',
                   border: '1px solid',
                   borderColor: 'divider',
-                  transition: 'all 0.2s',
+                  transition: 'background-color 0.15s, border-color 0.15s',
                   '&:hover': {
-                    bgcolor: 'rgba(0, 0, 0, 0.04)',
+                    bgcolor: 'action.hover',
                     borderColor: color
                   }
                 }}
@@ -75,10 +68,11 @@ function BoardActivityChart({ data, loading }: BoardActivityChartProps) {
                   }}
                 />
                 <Typography
+                  variant="caption"
                   sx={{
-                    fontSize: '0.75rem',
                     color: 'text.secondary',
                     mb: 0.5,
+                    display: 'block',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
@@ -96,7 +90,7 @@ function BoardActivityChart({ data, loading }: BoardActivityChartProps) {
                 >
                   {item.postCount.toLocaleString()}
                 </Typography>
-                <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mb: 1.5 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1.5, display: 'block' }}>
                   게시글
                 </Typography>
                 <LinearProgress
@@ -112,7 +106,7 @@ function BoardActivityChart({ data, loading }: BoardActivityChartProps) {
                     }
                   }}
                 />
-                <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mt: 1 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
                   조회 {item.totalViews.toLocaleString()}
                 </Typography>
               </Box>

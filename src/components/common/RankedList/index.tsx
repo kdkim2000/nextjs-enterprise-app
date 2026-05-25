@@ -87,11 +87,11 @@ function RankedList<T extends RankedItem = RankedItem>({
     return (
       <Box>
         {title && (
-          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'text.primary', mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ color: 'text.primary', mb: 2 }}>
             {title}
           </Typography>
         )}
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', textAlign: 'center', py: 4 }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', textAlign: 'center', py: 4, display: 'block' }}>
           {emptyMessage}
         </Typography>
       </Box>
@@ -101,7 +101,7 @@ function RankedList<T extends RankedItem = RankedItem>({
   return (
     <Box>
       {title && (
-        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'text.primary', mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ color: 'text.primary', mb: 2 }}>
           {title}
         </Typography>
       )}
@@ -119,12 +119,12 @@ function RankedList<T extends RankedItem = RankedItem>({
                 alignItems: 'flex-start',
                 gap: 1.5,
                 p: 1.5,
-                borderRadius: 2,
-                bgcolor: 'rgba(0, 0, 0, 0.02)',
-                transition: 'all 0.2s',
+                borderRadius: 1,
+                bgcolor: 'transparent',
+                transition: 'background-color 0.15s',
                 cursor: onItemClick ? 'pointer' : 'default',
                 '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  bgcolor: 'action.hover'
                 }
               }}
             >
@@ -154,8 +154,8 @@ function RankedList<T extends RankedItem = RankedItem>({
                 ) : (
                   <>
                     <Typography
+                      variant="body2"
                       sx={{
-                        fontSize: '0.8rem',
                         fontWeight: 500,
                         color: 'text.primary',
                         overflow: 'hidden',
@@ -169,20 +169,20 @@ function RankedList<T extends RankedItem = RankedItem>({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                       {item.subtitle && (
                         <Typography
+                          variant="caption"
                           sx={{
-                            fontSize: '0.65rem',
                             color: 'text.secondary',
                             px: 0.75,
                             py: 0.25,
                             borderRadius: 1,
-                            bgcolor: 'rgba(0, 0, 0, 0.04)'
+                            bgcolor: 'action.hover'
                           }}
                         >
                           {item.subtitle}
                         </Typography>
                       )}
                       {item.meta && (
-                        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                           {item.meta}
                         </Typography>
                       )}
@@ -198,12 +198,12 @@ function RankedList<T extends RankedItem = RankedItem>({
                 (item.value !== undefined || item.secondaryValue !== undefined) && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
                     {item.value !== undefined && (
-                      <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.primary' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary' }}>
                         {formatValue(item.value)}
                       </Typography>
                     )}
                     {item.secondaryValue !== undefined && (
-                      <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         {formatSecondaryValue(item.secondaryValue)}
                       </Typography>
                     )}
