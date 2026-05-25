@@ -2,17 +2,18 @@
 
 import React, { memo, useMemo } from 'react';
 import { Box, Typography, Skeleton, LinearProgress } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { tokens } from '@/theme';
 
-// Default color palette
+// Default color palette — sourced from design tokens
 const DEFAULT_COLORS = [
-  '#6366f1', // Indigo
-  '#8b5cf6', // Purple
-  '#ec4899', // Pink
-  '#f43f5e', // Rose
-  '#f59e0b', // Amber
-  '#10b981', // Emerald
-  '#06b6d4', // Cyan
-  '#3b82f6' // Blue
+  tokens.accent[500],
+  tokens.accent[400],
+  tokens.accent[300],
+  tokens.accent[600],
+  tokens.accent[700],
+  tokens.status.success,
+  tokens.status.warning,
 ];
 
 export interface ProgressBarItem {
@@ -67,6 +68,7 @@ function ProgressBarList({
   formatValue = (v) => v.toLocaleString(),
   formatMeta
 }: ProgressBarListProps) {
+  const theme = useTheme();
   const maxValue = useMemo(() => {
     return Math.max(...items.map((item) => item.max ?? item.value), 1);
   }, [items]);
@@ -173,7 +175,7 @@ function ProgressBarList({
                 sx={{
                   height: barHeight,
                   borderRadius: barHeight / 2,
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  bgcolor: theme.palette.action.hover,
                   '& .MuiLinearProgress-bar': {
                     borderRadius: barHeight / 2,
                     bgcolor: color

@@ -5,7 +5,8 @@ import { Box } from '@mui/material';
 import { People, Article, Business, Assessment, Settings, Shield } from '@mui/icons-material';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import QuickActionGrid, { QuickAction } from '@/components/common/QuickActionGrid';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 function QuickActions() {
   const locale = useCurrentLocale();
@@ -18,7 +19,7 @@ function QuickActions() {
         description: '사용자 목록 및 권한',
         icon: People,
         href: `/${locale}/admin/users`,
-        color: COLORS.info
+        color: chartColors.info
       },
       {
         id: 'boards',
@@ -26,7 +27,7 @@ function QuickActions() {
         description: '게시판 유형 설정',
         icon: Article,
         href: `/${locale}/admin/board-types`,
-        color: COLORS.warning
+        color: chartColors.warning
       },
       {
         id: 'departments',
@@ -34,7 +35,7 @@ function QuickActions() {
         description: '조직 구조 관리',
         icon: Business,
         href: `/${locale}/admin/departments`,
-        color: COLORS.success
+        color: chartColors.success
       },
       {
         id: 'logs',
@@ -42,7 +43,7 @@ function QuickActions() {
         description: '시스템 로그 조회',
         icon: Assessment,
         href: `/${locale}/admin/logs`,
-        color: COLORS.secondary
+        color: chartColors.primary[1]
       },
       {
         id: 'roles',
@@ -50,7 +51,7 @@ function QuickActions() {
         description: '역할 및 메뉴 권한',
         icon: Shield,
         href: `/${locale}/admin/roles`,
-        color: COLORS.primary
+        color: chartColors.primary[0]
       },
       {
         id: 'settings',
@@ -58,7 +59,7 @@ function QuickActions() {
         description: '앱 환경 설정',
         icon: Settings,
         href: `/${locale}/dashboard/settings`,
-        color: '#64748b'
+        color: chartColors.neutral
       }
     ],
     [locale]

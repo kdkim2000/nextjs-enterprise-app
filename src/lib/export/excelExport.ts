@@ -315,10 +315,12 @@ export function exportTemplateItems(
   });
 }
 
-export default {
+const excelExport = {
   exportToExcel,
   exportToExcelMultiSheet,
   exportInspectionResults,
   exportInspectionList,
   exportTemplateItems,
 };
+
+export default excelExport;

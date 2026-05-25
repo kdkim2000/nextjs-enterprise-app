@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
 import PostViewDialog from '@/components/admin/PostViewDialog';
 import PostMobileCard from './components/PostMobileCard';
@@ -156,87 +156,57 @@ export default function PostManagementPage() {
   ), [currentLocale, gridPermissions, handleMobileView, handleMobileEdit, handleMobileDelete, handleMobileApprove, handleMobilePin]);
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search posts by title, author, or content..."
-      searching={searching}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
-          locale={currentLocale}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '게시물 관리']}
+          title="게시물 관리"
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleQuickSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-    >
-      {isMobileLayout ? (
-        // Mobile: Card List
-        <MobileCardList
-          data={posts}
-          loading={searching}
-          renderCard={renderMobileCard}
-          keyExtractor={(post) => post.id}
-          emptyMessage={currentLocale === 'ko' ? '게시물이 없습니다' : 'No posts found'}
-        />
-      ) : (
-        // Desktop: DataGrid
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          {posts.length === 0 && !searching ? (
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder="Search posts by title, author, or content..."
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+              sx={{ width: 320 }}
+            />
+          }
+        >
+          {isMobileLayout ? (
+            <MobileCardList
+              data={posts}
+              loading={searching}
+              renderCard={renderMobileCard}
+              keyExtractor={(post) => post.id}
+              emptyMessage={currentLocale === 'ko' ? '게시물이 없습니다' : 'No posts found'}
+            />
+          ) : posts.length === 0 && !searching ? (
             <EmptyState
               icon={Search}
               title="No posts found"
               description="Use the search filters above to find posts"
             />
           ) : (
-            <Box sx={{ flex: 1, minHeight: 0 }}>
-              <ExcelDataGrid
-                rows={posts}
-                columns={columns}
-                onRowsChange={(rows) => setPosts(rows as Post[])}
-                {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-                onRefresh={handleRefresh}
-                checkboxSelection={gridPermissions.checkboxSelection}
-                editable={false}
-                exportFileName="posts"
-                loading={searching}
-                paginationMode="server"
-                rowCount={rowCount}
-                paginationModel={paginationModel}
-                onPaginationModelChange={handlePaginationModelChange}
-              />
-            </Box>
+            <ExcelDataGrid
+              rows={posts}
+              columns={columns}
+              onRowsChange={(rows) => setPosts(rows as Post[])}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+              onRefresh={handleRefresh}
+              checkboxSelection={gridPermissions.checkboxSelection}
+              editable={false}
+              exportFileName="posts"
+              loading={searching}
+              paginationMode="server"
+              rowCount={rowCount}
+              paginationModel={paginationModel}
+              onPaginationModelChange={handlePaginationModelChange}
+            />
           )}
-        </Paper>
-      )}
+        </DataShell>
+      </Box>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
@@ -256,6 +226,6 @@ export default function PostManagementPage() {
         onClose={() => setViewDialogOpen(false)}
         onEdit={handleEdit}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

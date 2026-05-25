@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
 import UserMobileCard from './components/UserMobileCard';
 import UserFormFields, { UserFormData } from '@/components/admin/UserFormFields';
@@ -178,100 +178,66 @@ export default function UserManagementPage() {
   );
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by login ID, name, email, or employee #..."
-      searching={searching}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
-          locale={currentLocale}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '사용자 관리']}
+          title="사용자 관리"
+          actions={
+            gridPermissions.showAddButton ? (
+              <Button variant="contained" onClick={handleAdd}>
+                + {t('common.create')}
+              </Button>
+            ) : undefined
+          }
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleQuickSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-      // Mobile specific props
-      mobileFab={gridPermissions.showAddButton ? {
-        onClick: handleAdd,
-        label: t('common.create'),
-      } : undefined}
-      mobileSelectionMode={mobileSelectionMode}
-      mobileSelectedCount={mobileSelectedIds.size}
-      mobileTotalCount={users.length}
-      onMobileSelectionModeToggle={gridPermissions.showDeleteButton ? handleMobileSelectionModeToggle : undefined}
-      onMobileSelectAll={handleMobileSelectAll}
-      onMobileDeselectAll={handleMobileDeselectAll}
-      onMobileDeleteSelected={gridPermissions.showDeleteButton ? handleMobileDeleteSelected : undefined}
-    >
-      {/* Conditional rendering based on device */}
-      {isMobileLayout ? (
-        // Mobile: Card List with infinite scroll
-        <MobileCardList
-          data={users}
-          loading={searching}
-          emptyMessage={t('grid.noRows')}
-          renderCard={(user, index) => (
-            <UserMobileCard
-              key={user.id}
-              user={user}
-              locale={currentLocale}
-              departments={allDepartments}
-              onClick={handleMobileUserClick}
-              onEdit={gridPermissions.editable ? handleMobileUserEdit : undefined}
-              onDelete={gridPermissions.showDeleteButton ? handleMobileUserDelete : undefined}
-              onResetPassword={gridPermissions.editable ? handleMobileResetPassword : undefined}
-              selected={mobileSelectedIds.has(user.id)}
-              selectable={mobileSelectionMode}
-              onSelectionChange={(selected) => {
-                const newIds = new Set(mobileSelectedIds);
-                if (selected) {
-                  newIds.add(user.id);
-                } else {
-                  newIds.delete(user.id);
-                }
-                setMobileSelectedIds(newIds);
-              }}
-              showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder="Search by login ID, name, email, or employee #..."
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+              sx={{ width: 320 }}
             />
-          )}
-          keyExtractor={(user) => user.id}
-          hasMore={mobileHasMore}
-          onLoadMore={handleMobileLoadMore}
-          onRefresh={handleMobileRefresh}
-        />
-      ) : (
-        // Desktop: DataGrid Area
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          <Box sx={{ flex: 1, minHeight: 0 }}>
+          }
+        >
+          {isMobileLayout ? (
+            <MobileCardList
+              data={users}
+              loading={searching}
+              emptyMessage={t('grid.noRows')}
+              renderCard={(user, index) => (
+                <UserMobileCard
+                  key={user.id}
+                  user={user}
+                  locale={currentLocale}
+                  departments={allDepartments}
+                  onClick={handleMobileUserClick}
+                  onEdit={gridPermissions.editable ? handleMobileUserEdit : undefined}
+                  onDelete={gridPermissions.showDeleteButton ? handleMobileUserDelete : undefined}
+                  onResetPassword={gridPermissions.editable ? handleMobileResetPassword : undefined}
+                  selected={mobileSelectedIds.has(user.id)}
+                  selectable={mobileSelectionMode}
+                  onSelectionChange={(selected) => {
+                    const newIds = new Set(mobileSelectedIds);
+                    if (selected) {
+                      newIds.add(user.id);
+                    } else {
+                      newIds.delete(user.id);
+                    }
+                    setMobileSelectedIds(newIds);
+                  }}
+                  showSwipeActions={!mobileSelectionMode && gridPermissions.editable}
+                />
+              )}
+              keyExtractor={(user) => user.id}
+              hasMore={mobileHasMore}
+              onLoadMore={handleMobileLoadMore}
+              onRefresh={handleMobileRefresh}
+            />
+          ) : (
             <ExcelDataGrid
               rows={users}
               columns={columns}
@@ -290,9 +256,9 @@ export default function UserManagementPage() {
               paginationModel={paginationModel}
               onPaginationModelChange={handlePaginationModelChange}
             />
-          </Box>
-        </Paper>
-      )}
+          )}
+        </DataShell>
+      </Box>
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -339,6 +305,6 @@ export default function UserManagementPage() {
         onConfirm={handleResetPasswordConfirm}
         onCancel={handleResetPasswordCancel}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

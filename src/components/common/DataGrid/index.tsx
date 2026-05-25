@@ -21,6 +21,7 @@ import {
   Tooltip,
   Menu
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   FileDownload,
   FileUpload,
@@ -301,6 +302,7 @@ export default function ExcelDataGrid({
   onRowSelectionModelChange
 }: ExcelDataGridProps) {
   const t = useI18n();
+  const theme = useTheme();
   const [internalSelectionModel, setInternalSelectionModel] = useState<GridRowSelectionModel>([]);
   const selectionModel = rowSelectionModel !== undefined ? rowSelectionModel : internalSelectionModel;
 
@@ -525,18 +527,18 @@ export default function ExcelDataGrid({
         }
         sx={{
           '& .MuiDataGrid-cell:focus': {
-            outline: '2px solid #1976d2'
+            outline: `2px solid ${theme.palette.primary.main}`
           },
           '& .MuiDataGrid-cell:focus-within': {
-            outline: '2px solid #1976d2'
+            outline: `2px solid ${theme.palette.primary.main}`
           },
           // Excel-like styling
           '& .MuiDataGrid-columnHeader': {
-            backgroundColor: '#f5f5f5',
+            backgroundColor: theme.palette.action.hover,
             fontWeight: 600
           },
           '& .MuiDataGrid-row:hover': {
-            backgroundColor: '#f0f7ff'
+            backgroundColor: theme.palette.action.selected
           }
         }}
       />

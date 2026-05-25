@@ -4,7 +4,8 @@ import React, { memo, useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import ProgressBarList, { ProgressBarItem } from '@/components/common/ProgressBarList';
 import { HttpStatusItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface HttpStatusChartProps {
   data: HttpStatusItem[];
@@ -12,10 +13,10 @@ interface HttpStatusChartProps {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
-  '2xx': { color: COLORS.success, label: '성공' },
-  '3xx': { color: COLORS.info, label: '리다이렉트' },
-  '4xx': { color: COLORS.warning, label: '클라이언트 에러' },
-  '5xx': { color: COLORS.error, label: '서버 에러' }
+  '2xx': { color: chartColors.success, label: '성공' },
+  '3xx': { color: chartColors.info, label: '리다이렉트' },
+  '4xx': { color: chartColors.warning, label: '클라이언트 에러' },
+  '5xx': { color: chartColors.danger, label: '서버 에러' },
 };
 
 function HttpStatusChart({ data, loading }: HttpStatusChartProps) {
@@ -23,7 +24,7 @@ function HttpStatusChart({ data, loading }: HttpStatusChartProps) {
 
   const progressItems = useMemo<ProgressBarItem[]>(() => {
     return data.map((item) => {
-      const config = STATUS_CONFIG[item.status] || { color: '#94a3b8', label: item.status };
+      const config = STATUS_CONFIG[item.status] || { color: chartColors.neutral, label: item.status };
       return {
         id: item.status,
         label: config.label,

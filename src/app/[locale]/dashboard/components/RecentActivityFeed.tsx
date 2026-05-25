@@ -6,7 +6,8 @@ import { Article, Comment, Error as ErrorIcon, Login, MoreHoriz } from '@mui/ico
 import FilterTabs from '@/components/common/FilterTabs';
 import ActivityTimeline, { ActivityItem, ActivityTypeConfig } from '@/components/common/ActivityTimeline';
 import { RecentActivityItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface RecentActivityFeedProps {
   data: RecentActivityItem[];
@@ -23,10 +24,10 @@ const FILTER_TABS: { value: ActivityFilter; label: string }[] = [
 ];
 
 const ACTIVITY_TYPE_CONFIG: Record<string, ActivityTypeConfig> = {
-  post: { icon: Article, color: COLORS.info },
-  comment: { icon: Comment, color: COLORS.success },
-  error: { icon: ErrorIcon, color: COLORS.error },
-  login: { icon: Login, color: COLORS.warning }
+  post: { icon: Article, color: chartColors.info },
+  comment: { icon: Comment, color: chartColors.success },
+  error: { icon: ErrorIcon, color: chartColors.danger },
+  login: { icon: Login, color: chartColors.warning },
 };
 
 function RecentActivityFeed({ data, loading }: RecentActivityFeedProps) {
@@ -86,7 +87,7 @@ function RecentActivityFeed({ data, loading }: RecentActivityFeedProps) {
               gap: 0.5,
               cursor: 'pointer',
               color: 'text.secondary',
-              '&:hover': { color: COLORS.primary }
+              '&:hover': { color: chartColors.primary[0] }
             }}
           >
             <Typography sx={{ fontSize: '0.7rem' }}>더보기</Typography>
@@ -99,7 +100,7 @@ function RecentActivityFeed({ data, loading }: RecentActivityFeedProps) {
             tabs={FILTER_TABS}
             value={filter}
             onChange={handleFilterChange}
-            activeColor={COLORS.primary}
+            activeColor={chartColors.primary[0]}
           />
         </Box>
 

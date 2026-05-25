@@ -4,7 +4,8 @@ import React, { memo, useMemo } from 'react';
 import { Box, Typography, Skeleton } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { UserStatusItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface UserStatusChartProps {
   data: UserStatusItem[];
@@ -12,10 +13,10 @@ interface UserStatusChartProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  active: COLORS.success,
-  inactive: '#94a3b8',
-  pending: COLORS.warning,
-  suspended: COLORS.error
+  active: chartColors.success,
+  inactive: chartColors.neutral,
+  pending: chartColors.warning,
+  suspended: chartColors.danger,
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -30,7 +31,7 @@ function UserStatusChart({ data, loading }: UserStatusChartProps) {
     return data.map((item) => ({
       ...item,
       name: STATUS_LABELS[item.status] || item.status,
-      color: STATUS_COLORS[item.status] || '#94a3b8'
+      color: STATUS_COLORS[item.status] || chartColors.neutral
     }));
   }, [data]);
 

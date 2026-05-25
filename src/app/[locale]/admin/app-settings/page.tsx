@@ -3,7 +3,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   Box,
-  Paper,
   Typography,
   IconButton,
   Button,
@@ -18,7 +17,8 @@ import {
   Add as AddIcon,
   Settings
 } from '@mui/icons-material';
-import StandardCrudPageLayout from '@/components/common/StandardCrudPageLayout';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import MasterDetailLayout from '@/components/common/MasterDetailLayout';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import EditDrawer from '@/components/common/EditDrawer';
@@ -234,7 +234,7 @@ export default function AppSettingsPage() {
 
   // Detail Panel - Inline Settings List
   const detailPanel = (
-    <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Header with Title */}
       <Box sx={{ mb: 1 }}>
         {selectedCategory ? (
@@ -425,25 +425,26 @@ export default function AppSettingsPage() {
           }, locale)}
         </Typography>
       </Box>
-    </Paper>
+    </Box>
   );
 
   return (
-    <StandardCrudPageLayout
-      useMenu
-      showBreadcrumb
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      showQuickSearch={false}
-      showAdvancedFilter={false}
-    >
-      {/* Master-Detail Layout */}
-      <MasterDetailLayout
-        masterSize={25}
-        detailSize={75}
-        master={masterPanel}
-        detail={detailPanel}
-      />
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '앱 설정']}
+          title="앱 설정"
+        />
+        <DataShell>
+          {/* Master-Detail Layout */}
+          <MasterDetailLayout
+            masterSize={25}
+            detailSize={75}
+            master={masterPanel}
+            detail={detailPanel}
+          />
+        </DataShell>
+      </Box>
 
       {/* Add Setting Drawer */}
       <EditDrawer
@@ -477,6 +478,6 @@ export default function AppSettingsPage() {
         onConfirm={handleDeleteConfirm}
         loading={saveLoading}
       />
-    </StandardCrudPageLayout>
+    </>
   );
 }

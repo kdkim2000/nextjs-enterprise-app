@@ -1,293 +1,562 @@
-import { Components, Theme } from '@mui/material/styles';
+/**
+ * Component overrides — refined from MUI defaults using design tokens.
+ *
+ * Key changes vs old components.ts:
+ *  - RADIUS UNIFIED: was 4 different radii (8/12/16/1.5). Now everything reads
+ *    tokens.radius.md (6px). Cards, dialogs, buttons, inputs share the same curvature.
+ *  - HOVER SHADOWS REMOVED on buttons. The old "boxShadow on hover" was distracting in
+ *    an admin tool where you hover hundreds of times per session.
+ *  - DataGrid: rounded corners removed (now 0), hairline borders, dense header.
+ *  - TableCell: hairlines use tokens.line.default instead of rgba.
+ *  - Chip / Alert: backgrounds derived from semantic palette tokens with alpha.
+ *  - AppBar: NEW override. Was using primary blue full bleed → now neutral with hairline.
+ *  - Drawer/Sidebar: NEW override. Sets background to surface.sunken.
+ *  - ListItemButton: NEW override. Selected state uses subtle accent tint instead of
+ *    solid primary fill (which made the active menu item visually dominate the canvas).
+ *  - Tooltip: bg from ink.primary so it contrasts cleanly on both modes.
+ *  - Focus ring globally: all focused elements get tokens.shadow.focus.
+ */
 
-export const components: Components<Theme> & Record<string, any> = {
-  // Button
-  MuiButton: {
-    styleOverrides: {
-      root: {
-        borderRadius: 8,
-        fontWeight: 500,
-        padding: '8px 16px',
-        boxShadow: 'none',
-        '&:hover': {
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        },
+import type { Components, Theme } from '@mui/material/styles';
+import { tokens } from './tokens';
+
+export const components: Components<Theme> = {
+  // ----------------------------------------------------------------------
+  // BASELINE — fix the Arial leak. globals.css used to set body { font-family: Arial }
+  // which beat the MUI theme for any non-Typography element. We re-assert here.
+  // ----------------------------------------------------------------------
+  MuiCssBaseline: {
+    styleOverrides: (theme) => ({
+      body: {
+        fontFamily: theme.typography.fontFamily,
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
       },
-      sizeLarge: {
-        padding: '12px 24px',
-        fontSize: '1rem',
+      // Make number-heavy table cells use tabular figures by default
+      'td.num, .num': {
+        fontVariantNumeric: 'tabular-nums',
       },
-      sizeSmall: {
-        padding: '4px 12px',
-        fontSize: '0.8125rem',
+      // Global focus-visible ring
+      '*:focus-visible': {
+        outline: 'none',
+        boxShadow: tokens.shadow.focus,
+        borderRadius: tokens.radius.md,
       },
-    },
+    }),
+  },
+
+  // ----------------------------------------------------------------------
+  // APP BAR — was MUI default primary blue full bleed. Now neutral, hairline.
+  // ----------------------------------------------------------------------
+  MuiAppBar: {
     defaultProps: {
-      disableElevation: true,
+      color: 'transparent',
+      elevation: 0,
+    },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        boxShadow: 'none',
+      }),
     },
   },
 
-  // IconButton
+  MuiToolbar: {
+    styleOverrides: {
+      root: {
+        minHeight: tokens.layout.headerHeight,
+        '@media (min-width: 600px)': {
+          minHeight: tokens.layout.headerHeight,
+        },
+      },
+    },
+  },
+
+  // ----------------------------------------------------------------------
+  // DRAWER (Sidebar) — neutral sunken bg, hairline right border, no shadow
+  // ----------------------------------------------------------------------
+  MuiDrawer: {
+    styleOverrides: {
+      paper: ({ theme }) => ({
+        backgroundColor: theme.palette.surface?.sunken ?? theme.palette.background.default,
+        borderRight: `1px solid ${theme.palette.divider}`,
+        boxShadow: 'none',
+        backgroundImage: 'none',
+      }),
+    },
+  },
+
+  // ----------------------------------------------------------------------
+  // BUTTON — radius unified, hover shadow REMOVED
+  // ----------------------------------------------------------------------
+  MuiButton: {
+    defaultProps: {
+      disableElevation: true,
+      disableRipple: false,
+    },
+    styleOverrides: {
+      root: {
+        borderRadius: tokens.radius.md,
+        fontWeight: tokens.weight.medium,
+        padding: '8px 16px',
+        boxShadow: 'none',
+        textTransform: 'none',
+        transition: `background-color ${tokens.motion.smooth} ${tokens.motion.ease.out}, color ${tokens.motion.smooth} ${tokens.motion.ease.out}`,
+        '&:hover': {
+          boxShadow: 'none',          // ← removed shadow on hover
+        },
+        '&:active': {
+          transform: 'translateY(0.5px)',
+        },
+      },
+      sizeLarge: { padding: '12px 20px', fontSize: tokens.size.md },
+      sizeSmall: { padding: '4px 12px', fontSize: tokens.size.sm },
+      // Outlined button: hairline border
+      outlined: ({ theme }) => ({
+        borderColor: theme.palette.divider,
+        '&:hover': {
+          borderColor: theme.palette.text.secondary,
+          backgroundColor: theme.palette.action.hover,
+        },
+      }),
+      // Text button: no padding bloat
+      text: {
+        padding: '6px 10px',
+      },
+    },
+  },
+
   MuiIconButton: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: tokens.radius.md,
+        transition: `background-color ${tokens.motion.instant} linear`,
       },
     },
   },
 
-  // Card
+  // ----------------------------------------------------------------------
+  // CARD / PAPER — unified radius 6 (was 12), softer default shadow
+  // ----------------------------------------------------------------------
   MuiCard: {
+    defaultProps: { elevation: 0 },
     styleOverrides: {
-      root: {
-        borderRadius: 12,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)',
+      root: ({ theme }) => ({
+        borderRadius: tokens.radius.md,
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: 'none',
+        backgroundImage: 'none',
         '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.10)',
+          // No automatic hover shadow — let consumers opt in
         },
-      },
+      }),
     },
   },
 
-  // Paper
   MuiPaper: {
+    defaultProps: { elevation: 0 },
     styleOverrides: {
       root: {
-        borderRadius: 12,
+        borderRadius: tokens.radius.md,
+        backgroundImage: 'none',
       },
-      elevation1: {
-        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)',
-      },
+      elevation1: { boxShadow: tokens.shadow.sm },
+      elevation2: { boxShadow: tokens.shadow.md },
+      elevation3: { boxShadow: tokens.shadow.lg },
+      elevation4: { boxShadow: tokens.shadow.xl },
     },
   },
 
-  // TextField
+  // ----------------------------------------------------------------------
+  // TEXT FIELD — radius unified, hairline border, focused state uses accent
+  // ----------------------------------------------------------------------
   MuiTextField: {
-    styleOverrides: {
-      root: {
-        '& .MuiOutlinedInput-root': {
-          borderRadius: 8,
-        },
-      },
-    },
     defaultProps: {
       size: 'small',
       variant: 'outlined',
     },
-  },
-
-  // Dialog
-  MuiDialog: {
     styleOverrides: {
-      paper: {
-        borderRadius: 16,
-      },
+      root: ({ theme }) => ({
+        '& .MuiOutlinedInput-root': {
+          borderRadius: tokens.radius.md,
+          backgroundColor: theme.palette.background.paper,
+          '& fieldset': {
+            borderColor: theme.palette.divider,
+          },
+          '&:hover fieldset': {
+            borderColor: theme.palette.text.secondary,
+          },
+          '&.Mui-focused fieldset': {
+            borderWidth: 1,
+            borderColor: theme.palette.primary.main,
+          },
+        },
+      }),
     },
   },
 
-  // Chip
+  MuiInputLabel: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        color: theme.palette.text.secondary,
+        fontSize: tokens.size.base,
+      }),
+    },
+  },
+
+  MuiSelect: {
+    defaultProps: { size: 'small' },
+    styleOverrides: {
+      select: { borderRadius: tokens.radius.md },
+    },
+  },
+
+  // ----------------------------------------------------------------------
+  // DIALOG — radius matches the rest, soft overlay
+  // ----------------------------------------------------------------------
+  MuiDialog: {
+    styleOverrides: {
+      paper: ({ theme }) => ({
+        borderRadius: tokens.radius.md,
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: tokens.shadow.xl,
+        backgroundImage: 'none',
+      }),
+    },
+  },
+
+  MuiDialogTitle: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        fontSize: tokens.size.lg,
+        fontWeight: tokens.weight.semibold,
+        padding: '20px 24px 8px',
+        borderBottom: `1px solid ${theme.palette.divider}`,
+      }),
+    },
+  },
+
+  MuiDialogContent: {
+    styleOverrides: {
+      root: { padding: '20px 24px' },
+    },
+  },
+
+  MuiDialogActions: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        padding: '12px 20px',
+        borderTop: `1px solid ${theme.palette.divider}`,
+        gap: 8,
+      }),
+    },
+  },
+
+  // ----------------------------------------------------------------------
+  // CHIP — smaller radius, status-color aware backgrounds
+  // ----------------------------------------------------------------------
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
-        fontWeight: 500,
+        borderRadius: tokens.radius.sm,
+        fontWeight: tokens.weight.medium,
+        fontSize: tokens.size.xs,
+        height: 22,
       },
     },
   },
 
-  // Alert
+  // ----------------------------------------------------------------------
+  // ALERT — subtle tints, hairline border
+  // ----------------------------------------------------------------------
   MuiAlert: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
+        borderRadius: tokens.radius.md,
+        border: '1px solid transparent',
       },
-      standardSuccess: {
-        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-      },
-      standardError: {
-        backgroundColor: 'rgba(244, 67, 54, 0.1)',
-      },
-      standardWarning: {
-        backgroundColor: 'rgba(255, 152, 0, 0.1)',
-      },
-      standardInfo: {
-        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-      },
+      standardSuccess: ({ theme }) => ({
+        backgroundColor: 'rgba(66, 130, 82, 0.08)',
+        borderColor: 'rgba(66, 130, 82, 0.24)',
+        color: theme.palette.text.primary,
+      }),
+      standardError: ({ theme }) => ({
+        backgroundColor: 'rgba(189, 65, 63, 0.08)',
+        borderColor: 'rgba(189, 65, 63, 0.24)',
+        color: theme.palette.text.primary,
+      }),
+      standardWarning: ({ theme }) => ({
+        backgroundColor: 'rgba(189, 130, 26, 0.08)',
+        borderColor: 'rgba(189, 130, 26, 0.24)',
+        color: theme.palette.text.primary,
+      }),
+      standardInfo: ({ theme }) => ({
+        backgroundColor: 'rgba(44, 98, 141, 0.08)',
+        borderColor: 'rgba(44, 98, 141, 0.24)',
+        color: theme.palette.text.primary,
+      }),
     },
   },
 
-  // Tooltip
+  // ----------------------------------------------------------------------
+  // TOOLTIP — dark ink bg, readable on both light & dark modes
+  // ----------------------------------------------------------------------
   MuiTooltip: {
     styleOverrides: {
       tooltip: {
-        borderRadius: 8,
-        fontSize: '0.75rem',
-        fontWeight: 500,
-        padding: '8px 12px',
+        backgroundColor: tokens.ink.primary,
+        color: tokens.ink.inverse,
+        borderRadius: tokens.radius.sm,
+        fontSize: tokens.size.xs,
+        fontWeight: tokens.weight.medium,
+        padding: '6px 10px',
       },
+      arrow: { color: tokens.ink.primary },
     },
   },
 
-  // Menu
+  // ----------------------------------------------------------------------
+  // MENU / MENU ITEM
+  // ----------------------------------------------------------------------
   MuiMenu: {
     styleOverrides: {
-      paper: {
-        borderRadius: 12,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-      },
+      paper: ({ theme }) => ({
+        borderRadius: tokens.radius.md,
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: tokens.shadow.lg,
+        backgroundImage: 'none',
+      }),
+      list: { padding: 4 },
     },
   },
 
-  // MenuItem
   MuiMenuItem: {
     styleOverrides: {
-      root: {
-        borderRadius: 8,
-        margin: '4px 8px',
+      root: ({ theme }) => ({
+        borderRadius: tokens.radius.sm,
+        margin: '1px 4px',
+        fontSize: tokens.size.base,
+        minHeight: 36,
         '&:hover': {
-          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          backgroundColor: theme.palette.action.hover,
         },
         '&.Mui-selected': {
-          backgroundColor: 'rgba(25, 118, 210, 0.08)',
+          backgroundColor: theme.palette.action.selected,
+          fontWeight: tokens.weight.medium,
           '&:hover': {
-            backgroundColor: 'rgba(25, 118, 210, 0.12)',
+            backgroundColor: theme.palette.action.selected,
           },
         },
-      },
+      }),
     },
   },
 
-  // Select
-  MuiSelect: {
-    defaultProps: {
-      size: 'small',
-    },
+  // ----------------------------------------------------------------------
+  // LIST (Sidebar uses this) — selected state is now subtle accent tint,
+  // not solid primary fill. Plus a 2px left accent rule for the selected row.
+  // ----------------------------------------------------------------------
+  MuiListItemButton: {
     styleOverrides: {
-      select: {
-        borderRadius: 8,
-      },
+      root: ({ theme }) => ({
+        borderRadius: tokens.radius.sm,
+        minHeight: 36,
+        paddingLeft: 12,
+        paddingRight: 12,
+        position: 'relative',
+        '&:hover': { backgroundColor: theme.palette.action.hover },
+        '&.Mui-selected': {
+          backgroundColor: theme.palette.action.selected,
+          color: theme.palette.primary.main,
+          '&:hover': { backgroundColor: theme.palette.action.selected },
+          '& .MuiListItemIcon-root': {
+            color: theme.palette.primary.main,
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            left: -4,
+            top: 6,
+            bottom: 6,
+            width: 2,
+            backgroundColor: theme.palette.primary.main,
+            borderRadius: 1,
+          },
+        },
+      }),
     },
   },
 
-  // Switch
-  MuiSwitch: {
+  MuiListItemIcon: {
     styleOverrides: {
-      root: {
-        padding: 8,
-      },
-      track: {
-        borderRadius: 12,
-      },
-      thumb: {
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-      },
+      root: ({ theme }) => ({
+        color: theme.palette.text.secondary,
+        minWidth: 32,
+      }),
     },
   },
 
-  // Tabs
+  // ----------------------------------------------------------------------
+  // TABS — thinner indicator, no rounded indicator caps
+  // ----------------------------------------------------------------------
   MuiTabs: {
     styleOverrides: {
-      root: {
-        minHeight: 48,
-      },
+      root: { minHeight: 40 },
       indicator: {
-        height: 3,
-        borderRadius: '3px 3px 0 0',
+        height: 2,
+        borderRadius: 0,
       },
     },
   },
 
-  // Tab
   MuiTab: {
     styleOverrides: {
       root: {
         textTransform: 'none',
-        fontWeight: 500,
-        fontSize: '0.875rem',
-        minHeight: 48,
-        '&:hover': {
-          backgroundColor: 'rgba(0, 0, 0, 0.04)',
-        },
+        fontWeight: tokens.weight.medium,
+        fontSize: tokens.size.base,
+        minHeight: 40,
+        padding: '8px 14px',
       },
     },
   },
 
-  // Table
+  // ----------------------------------------------------------------------
+  // TABLE — hairlines from divider token, dense header
+  // ----------------------------------------------------------------------
   MuiTableCell: {
     styleOverrides: {
-      root: {
-        borderBottom: '1px solid rgba(224, 224, 224, 1)',
-      },
-      head: {
-        fontWeight: 600,
-        backgroundColor: 'rgba(0, 0, 0, 0.02)',
-      },
+      root: ({ theme }) => ({
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        fontSize: tokens.size.base,
+        padding: '10px 14px',
+      }),
+      head: ({ theme }) => ({
+        fontWeight: tokens.weight.semibold,
+        fontSize: tokens.size.xs,
+        textTransform: 'uppercase',
+        letterSpacing: tokens.tracking.widest,
+        color: theme.palette.text.secondary,
+        backgroundColor: 'transparent',
+        borderBottom: `1px solid ${theme.palette.line?.strong ?? theme.palette.divider}`,
+      }),
     },
   },
 
-  // DataGrid
+  // ----------------------------------------------------------------------
+  // DATA GRID — radius removed (sharp data table), hairlines, dense header
+  // Premium overrides go through MuiDataGrid root class.
+  // ----------------------------------------------------------------------
+  // @ts-expect-error — MuiDataGrid is from X package, not in core Components<Theme>
   MuiDataGrid: {
+    defaultProps: {
+      density: 'compact',
+      disableColumnMenu: false,
+    },
     styleOverrides: {
-      root: {
-        border: 'none',
-        borderRadius: 12,
+      root: ({ theme }: any) => ({
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: 0,            // ← was 12, now sharp
+        backgroundColor: theme.palette.background.paper,
         '& .MuiDataGrid-cell': {
-          borderColor: 'rgba(224, 224, 224, 0.8)',
+          borderColor: theme.palette.divider,
+          fontSize: tokens.size.base,
+        },
+        '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+          outline: 'none',
         },
         '& .MuiDataGrid-columnHeaders': {
-          backgroundColor: 'rgba(0, 0, 0, 0.02)',
-          borderRadius: '12px 12px 0 0',
+          backgroundColor: theme.palette.surface?.sunken ?? 'transparent',
+          borderBottom: `1px solid ${theme.palette.line?.strong ?? theme.palette.divider}`,
+          borderRadius: 0,
         },
         '& .MuiDataGrid-columnHeaderTitle': {
-          fontWeight: 600,
+          fontWeight: tokens.weight.semibold,
+          fontSize: tokens.size.xs,
+          textTransform: 'uppercase',
+          letterSpacing: tokens.tracking.widest,
+          color: theme.palette.text.secondary,
         },
-      },
+        '& .MuiDataGrid-row:hover': {
+          backgroundColor: theme.palette.action.hover,
+        },
+        '& .MuiDataGrid-footerContainer': {
+          borderTop: `1px solid ${theme.palette.divider}`,
+        },
+      }),
     },
   },
 
-  // Accordion
-  MuiAccordion: {
+  // ----------------------------------------------------------------------
+  // SWITCH — flatter, no shadow on thumb
+  // ----------------------------------------------------------------------
+  MuiSwitch: {
     styleOverrides: {
-      root: {
-        borderRadius: 12,
-        '&:before': {
-          display: 'none',
-        },
-        '&:first-of-type': {
-          borderRadius: 12,
-        },
-        '&:last-of-type': {
-          borderRadius: 12,
-        },
-      },
+      root: { padding: 8 },
+      track: { borderRadius: 10, opacity: 1, backgroundColor: tokens.line.strong },
+      thumb: { boxShadow: 'none' },
     },
   },
 
-  // Badge
+  // ----------------------------------------------------------------------
+  // ACCORDION — sharp, hairline
+  // ----------------------------------------------------------------------
+  MuiAccordion: {
+    defaultProps: { disableGutters: true, elevation: 0 },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        borderRadius: 0,
+        border: 'none',
+        borderTop: `1px solid ${theme.palette.divider}`,
+        boxShadow: 'none',
+        '&:before': { display: 'none' },
+        '&:last-of-type': {
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        },
+      }),
+    },
+  },
+
+  // ----------------------------------------------------------------------
+  // BADGE / BREADCRUMBS / STEPPER
+  // ----------------------------------------------------------------------
   MuiBadge: {
     styleOverrides: {
-      badge: {
-        fontWeight: 600,
-      },
+      badge: { fontWeight: tokens.weight.semibold, fontSize: tokens.size.xs },
     },
   },
 
-  // Breadcrumbs
   MuiBreadcrumbs: {
     styleOverrides: {
-      separator: {
-        marginLeft: 12,
-        marginRight: 12,
-      },
+      root: ({ theme }) => ({
+        fontSize: tokens.size.xs,
+        color: theme.palette.text.secondary,
+        textTransform: 'uppercase',
+        letterSpacing: tokens.tracking.widest,
+      }),
+      separator: { marginLeft: 8, marginRight: 8 },
     },
   },
 
-  // Stepper
   MuiStepLabel: {
     styleOverrides: {
-      label: {
-        fontWeight: 500,
-      },
+      label: { fontWeight: tokens.weight.medium },
+    },
+  },
+
+  // ----------------------------------------------------------------------
+  // LINK
+  // ----------------------------------------------------------------------
+  MuiLink: {
+    defaultProps: { underline: 'hover' },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        color: theme.palette.primary.main,
+        textUnderlineOffset: 3,
+      }),
     },
   },
 };

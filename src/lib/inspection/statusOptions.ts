@@ -223,7 +223,7 @@ export function toItemTypeSelectOptions(locale: string): Array<{ value: ItemType
   }));
 }
 
-export default {
+const statusOptions = {
   TEMPLATE_STATUS_OPTIONS,
   INSPECTION_STATUS_OPTIONS,
   CATEGORY_OPTIONS,
@@ -240,3 +240,5 @@ export default {
   toCategorySelectOptions,
   toItemTypeSelectOptions,
 };
+
+export default statusOptions;

@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { syncService, DownloadProgress } from '@/lib/offline/syncService';
-import { OfflineMetadata } from '@/lib/offline/inspectionStore';
 import { useNetworkStatus } from './useNetworkStatus';
 
 export interface OfflineStats {
@@ -49,7 +48,6 @@ export function useOfflineMode(): UseOfflineModeReturn {
   const [lastDownloadTime, setLastDownloadTime] = useState<Date | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
-  const [initialized, setInitialized] = useState(false);
 
   // Load initial state
   useEffect(() => {
@@ -68,28 +66,12 @@ export function useOfflineMode(): UseOfflineModeReturn {
         if (metadata?.lastDownloadTime) {
           setLastDownloadTime(new Date(metadata.lastDownloadTime));
         }
-        setInitialized(true);
       } catch (error) {
         console.error('Failed to load offline mode state:', error);
-        setInitialized(true);
       }
     };
 
     loadState();
-  }, []);
-
-  // Subscribe to download progress
-  useEffect(() => {
-    const unsubscribe = syncService.onDownloadProgress((progress) => {
-      setDownloadProgress(progress);
-      if (progress.stage === 'complete') {
-        setIsDownloading(false);
-        // Refresh stats after download
-        refreshStats();
-      }
-    });
-
-    return unsubscribe;
   }, []);
 
   // Refresh stats
@@ -109,6 +91,19 @@ export function useOfflineMode(): UseOfflineModeReturn {
       console.error('Failed to refresh offline stats:', error);
     }
   }, []);
+
+  // Subscribe to download progress
+  useEffect(() => {
+    const unsubscribe = syncService.onDownloadProgress((progress) => {
+      setDownloadProgress(progress);
+      if (progress.stage === 'complete') {
+        setIsDownloading(false);
+        refreshStats();
+      }
+    });
+
+    return unsubscribe;
+  }, [refreshStats]);
 
   // Enable offline mode
   const enableOfflineMode = useCallback(async () => {

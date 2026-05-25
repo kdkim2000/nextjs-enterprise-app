@@ -9,7 +9,7 @@ export default function AdminLayout({
 }) {
   // Remove requireRole - use program-based permissions via RouteGuard in each page
   return (
-    <ResponsiveLayout>
+    <ResponsiveLayout fullBleed>
       {children}
     </ResponsiveLayout>
   );

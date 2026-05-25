@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
-import MobileCardList from '@/components/mobile/MobileCardList';
 import RouteGuard from '@/components/auth/RouteGuard';
+import MobileCardList from '@/components/mobile/MobileCardList';
 import RoleMobileCard from './components/RoleMobileCard';
 import RoleFormFields from './components/RoleFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
@@ -138,76 +138,47 @@ export default function RoleManagementPage() {
     />
   ), [locale, gridPermissions, handleMobileEdit, handleMobileDelete]);
 
-  // Mobile FAB config
-  const mobileFab = gridPermissions.showAddButton ? {
-    onClick: handleAdd,
-    label: getLocalizedValue({ en: 'Add', ko: '추가', zh: '添加', vi: 'Thêm' }, locale),
-  } : undefined;
-
   return (
     <RouteGuard programCode={programId || ''} requiredPermission="view" fallbackUrl="/dashboard">
-      <ResponsivePageLayout
-        // Page Header
-        useMenu
-        showBreadcrumb
-        // Messages
-        successMessage={successMessage}
-        errorMessage={errorMessage}
-        // Quick Search
-        quickSearch={quickSearch}
-        onQuickSearchChange={setQuickSearch}
-        onQuickSearch={handleQuickSearch}
-        onQuickSearchClear={handleQuickSearchClear}
-        quickSearchPlaceholder={quickSearchPlaceholder}
-        searching={searching}
-        // Advanced Filter
-        showAdvancedFilter
-        advancedFilterOpen={advancedFilterOpen}
-        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        activeFilterCount={activeFilterCount}
-        filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-        filterContent={
-          <SearchFilterFields
-            fields={filterFields}
-            values={searchCriteria}
-            onChange={handleSearchChange}
-            onEnter={handleAdvancedFilterApply}
-            locale={locale}
+      <>
+        <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+          <PageHeader
+            breadcrumb={['Admin', '역할 관리']}
+            title="역할 관리"
+            actions={
+              gridPermissions.showAddButton ? (
+                <Button variant="contained" onClick={handleAdd}>
+                  + {getLocalizedValue({ en: 'Add', ko: '추가', zh: '添加', vi: 'Thêm' }, locale)}
+                </Button>
+              ) : undefined
+            }
           />
-        }
-        onFilterApply={handleAdvancedFilterApply}
-        onFilterClear={handleQuickSearchClear}
-        onFilterClose={handleAdvancedFilterClose}
-        // Help
-        programId={programId || ''}
-        helpOpen={helpOpen}
-        onHelpOpenChange={setHelpOpen}
-        isAdmin={isAdmin}
-        helpExists={helpExists}
-        canManageHelp={canManageHelp}
-        onHelpEdit={navigateToHelpEdit}
-        language={language}
-        // Mobile FAB
-        mobileFab={mobileFab}
-      >
-        {isMobileLayout ? (
-          // Mobile: Card List
-          <MobileCardList
-            data={roles}
-            loading={searching}
-            renderCard={renderMobileCard}
-            keyExtractor={(role) => role.id}
-            emptyMessage={getLocalizedValue({
-              en: 'No roles found',
-              ko: '역할이 없습니다',
-              zh: '没有找到角色',
-              vi: 'Không tìm thấy vai trò'
-            }, locale)}
-          />
-        ) : (
-          // Desktop: DataGrid
-          <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-            <Box sx={{ flex: 1, minHeight: 0 }}>
+          <DataShell
+            toolbar={
+              <TextField
+                size="small"
+                placeholder={quickSearchPlaceholder}
+                value={quickSearch}
+                onChange={(e) => setQuickSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+                sx={{ width: 320 }}
+              />
+            }
+          >
+            {isMobileLayout ? (
+              <MobileCardList
+                data={roles}
+                loading={searching}
+                renderCard={renderMobileCard}
+                keyExtractor={(role) => role.id}
+                emptyMessage={getLocalizedValue({
+                  en: 'No roles found',
+                  ko: '역할이 없습니다',
+                  zh: '没有找到角色',
+                  vi: 'Không tìm thấy vai trò'
+                }, locale)}
+              />
+            ) : (
               <ExcelDataGrid
                 rows={roles}
                 columns={columns}
@@ -220,9 +191,9 @@ export default function RoleManagementPage() {
                 exportFileName="roles"
                 loading={searching}
               />
-            </Box>
-          </Paper>
-        )}
+            )}
+          </DataShell>
+        </Box>
 
         {/* Edit Drawer */}
         <EditDrawer
@@ -259,7 +230,7 @@ export default function RoleManagementPage() {
           onConfirm={handleDeleteConfirm}
           loading={deleteLoading}
         />
-      </ResponsivePageLayout>
+      </>
     </RouteGuard>
   );
 }

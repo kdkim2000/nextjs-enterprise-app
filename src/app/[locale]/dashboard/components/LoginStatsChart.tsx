@@ -6,7 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { LoginStatsItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface LoginStatsChartProps {
   data: LoginStatsItem[];
@@ -54,15 +55,15 @@ function LoginStatsChart({ data, loading }: LoginStatsChartProps) {
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: COLORS.success }} />
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: chartColors.success }} />
               <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                성공 <strong style={{ color: COLORS.success }}>{totalSuccess.toLocaleString()}</strong>
+                성공 <strong style={{ color: chartColors.success }}>{totalSuccess.toLocaleString()}</strong>
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: COLORS.error }} />
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: chartColors.danger }} />
               <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                실패 <strong style={{ color: COLORS.error }}>{totalFailed.toLocaleString()}</strong>
+                실패 <strong style={{ color: chartColors.danger }}>{totalFailed.toLocaleString()}</strong>
               </Typography>
             </Box>
           </Box>
@@ -70,18 +71,18 @@ function LoginStatsChart({ data, loading }: LoginStatsChartProps) {
         <Box sx={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
             <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false} />
+              <CartesianGrid strokeDasharray="0" stroke={chartColors.grid} vertical={false} />
               <XAxis
                 dataKey="displayDate"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: chartColors.text }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: chartColors.text }}
                 dx={-10}
               />
               <Tooltip
@@ -102,8 +103,8 @@ function LoginStatsChart({ data, loading }: LoginStatsChartProps) {
                   </span>
                 )}
               />
-              <Bar dataKey="success" name="success" fill={COLORS.success} radius={[4, 4, 0, 0]} barSize={20} />
-              <Bar dataKey="failed" name="failed" fill={COLORS.error} radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="success" name="success" fill={chartColors.success} radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="failed" name="failed" fill={chartColors.danger} radius={[4, 4, 0, 0]} barSize={20} />
             </BarChart>
           </ResponsiveContainer>
         </Box>

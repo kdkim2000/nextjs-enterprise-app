@@ -14,6 +14,7 @@ import {
   Stack,
   Tooltip
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Search, Add, Edit, Delete } from '@mui/icons-material';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import EmptyState from '@/components/common/EmptyState';
@@ -58,6 +59,7 @@ export default function MasterListPanel<T extends MasterItem>({
   showSearch = true,
   showActions = true
 }: MasterListPanelProps<T>) {
+  const theme = useTheme();
   const [searchText, setSearchText] = useState('');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -102,7 +104,7 @@ export default function MasterListPanel<T extends MasterItem>({
               onClick={onAddItem}
               sx={{
                 color: 'primary.main',
-                '&:hover': { bgcolor: 'primary.50' }
+                '&:hover': { bgcolor: 'action.hover' }
               }}
             >
               <Add fontSize="small" />
@@ -137,7 +139,7 @@ export default function MasterListPanel<T extends MasterItem>({
               gap: 0.5,
               px: 1,
               py: 0.5,
-              bgcolor: 'primary.50',
+              bgcolor: 'action.selected',
               borderRadius: 1,
               color: 'primary.main',
               fontWeight: 600,
@@ -229,11 +231,11 @@ export default function MasterListPanel<T extends MasterItem>({
                     px: 2,
                     minHeight: 48,
                     '&.Mui-selected': {
-                      bgcolor: 'primary.50',
+                      bgcolor: theme.palette.action.selected,
                       borderLeft: '3px solid',
                       borderLeftColor: 'primary.main',
                       '&:hover': {
-                        bgcolor: 'primary.100'
+                        bgcolor: theme.palette.action.focus
                       }
                     }
                   }}

@@ -135,7 +135,7 @@ export default function QuickSearchBar({
               position: 'relative',
               '&:hover': {
                 borderColor: 'primary.main',
-                bgcolor: 'primary.50'
+                bgcolor: 'action.hover'
               }
             }}
           >

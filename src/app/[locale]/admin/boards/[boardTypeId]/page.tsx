@@ -4,8 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Box,
-  Container,
-  Paper,
   Typography,
   Button,
   Chip,
@@ -18,10 +16,9 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  Breadcrumbs,
-  Link,
   Skeleton,
-  Alert
+  Alert,
+  Paper
 } from '@mui/material';
 import {
   Add,
@@ -30,10 +27,10 @@ import {
   Lock,
   ThumbUp,
   Visibility,
-  AttachFile,
-  Home,
-  AdminPanelSettings
+  AttachFile
 } from '@mui/icons-material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import { useCurrentLocale } from '@/lib/i18n/client';
 import { contentApiClient } from '@/lib/api/client';
 import { useBoardPermissions } from '@/hooks/useBoardPermissions';
@@ -135,202 +132,179 @@ export default function AdminBoardListPage() {
   // Loading state
   if (permLoading || loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ px: 4, py: 4 }}>
         <Skeleton variant="rectangular" height={400} />
-      </Container>
+      </Box>
     );
   }
 
   // Board not found
   if (!boardType) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ px: 4, py: 4 }}>
         <Alert severity="error">Board not found</Alert>
-      </Container>
+      </Box>
     );
   }
 
   // No read permission
   if (!canRead) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ px: 4, py: 4 }}>
         <Alert severity="error">
           You do not have permission to access this board.
         </Alert>
-      </Container>
+      </Box>
     );
   }
 
   // Admin only check
   if (!canWrite) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ px: 4, py: 4 }}>
         <Alert severity="error">
           Only administrators can manage this board.
         </Alert>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link
-          underline="hover"
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          color="inherit"
-          onClick={() => router.push('/')}
+    <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', boardName]}
+          title={boardName}
+          actions={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Chip label="Admin Board" size="small" color="error" variant="outlined" />
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={handleWriteClick}
+              >
+                Write Post
+              </Button>
+            </Box>
+          }
+        />
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder="Search posts..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleSearch}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ width: 300 }}
+            />
+          }
         >
-          <Home sx={{ mr: 0.5 }} fontSize="small" />
-          Home
-        </Link>
-        <Link
-          underline="hover"
-          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          color="inherit"
-          onClick={() => router.push('/admin')}
-        >
-          <AdminPanelSettings sx={{ mr: 0.5 }} fontSize="small" />
-          Admin
-        </Link>
-        <Typography color="text.primary">{boardName}</Typography>
-      </Breadcrumbs>
-
-      {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            {boardName}
-          </Typography>
-          <Chip label="Admin Board" size="small" color="error" variant="outlined" />
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={handleWriteClick}
-        >
-          Write Post
-        </Button>
+          <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <TableContainer sx={{ flex: 1 }}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell width="60%">Title</TableCell>
+                    <TableCell align="center" width="120px">Author</TableCell>
+                    <TableCell align="center" width="80px">
+                      <Visibility fontSize="small" />
+                    </TableCell>
+                    <TableCell align="center" width="80px">
+                      <ThumbUp fontSize="small" />
+                    </TableCell>
+                    <TableCell align="center" width="100px">Date</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: pageSize }).map((_, index) => (
+                      <TableRow key={index}>
+                        <TableCell colSpan={5}>
+                          <Skeleton />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : posts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                        <Typography color="text.secondary">
+                          No posts found
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    posts.map((post) => (
+                      <TableRow
+                        key={post.id}
+                        hover
+                        onClick={() => handlePostClick(post)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {post.isPinned && <PushPin fontSize="small" color="primary" />}
+                            {post.isSecret && <Lock fontSize="small" color="action" />}
+                            <Typography variant="body2">{post.title}</Typography>
+                            {post.commentCount > 0 && (
+                              <Chip
+                                label={post.commentCount}
+                                size="small"
+                                variant="outlined"
+                                sx={{ height: 20 }}
+                              />
+                            )}
+                            {post.attachmentCount > 0 && (
+                              <AttachFile fontSize="small" color="action" />
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2">
+                            {post.authorName}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" color="text.secondary">
+                            {post.viewCount}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" color="text.secondary">
+                            {post.likeCount}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(post.createdAt).toLocaleDateString()}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={totalCount}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={pageSize}
+              onRowsPerPageChange={(e) => {
+                setPageSize(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              rowsPerPageOptions={[10, 20, 50]}
+            />
+          </Paper>
+        </DataShell>
       </Box>
-
-      {/* Search */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <TextField
-          fullWidth
-          placeholder="Search posts..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyPress={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            )
-          }}
-        />
-      </Paper>
-
-      {/* Posts Table */}
-      <Paper>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell width="60%">Title</TableCell>
-                <TableCell align="center" width="120px">Author</TableCell>
-                <TableCell align="center" width="80px">
-                  <Visibility fontSize="small" />
-                </TableCell>
-                <TableCell align="center" width="80px">
-                  <ThumbUp fontSize="small" />
-                </TableCell>
-                <TableCell align="center" width="100px">Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: pageSize }).map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell colSpan={5}>
-                      <Skeleton />
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : posts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                    <Typography color="text.secondary">
-                      No posts found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                posts.map((post) => (
-                  <TableRow
-                    key={post.id}
-                    hover
-                    onClick={() => handlePostClick(post)}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {post.isPinned && <PushPin fontSize="small" color="primary" />}
-                        {post.isSecret && <Lock fontSize="small" color="action" />}
-                        <Typography variant="body2">{post.title}</Typography>
-                        {post.commentCount > 0 && (
-                          <Chip
-                            label={post.commentCount}
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 20 }}
-                          />
-                        )}
-                        {post.attachmentCount > 0 && (
-                          <AttachFile fontSize="small" color="action" />
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body2">
-                        {post.authorName}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body2" color="text.secondary">
-                        {post.viewCount}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body2" color="text.secondary">
-                        {post.likeCount}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          component="div"
-          count={totalCount}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          rowsPerPage={pageSize}
-          onRowsPerPageChange={(e) => {
-            setPageSize(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[10, 20, 50]}
-        />
-      </Paper>
-    </Container>
   );
 }

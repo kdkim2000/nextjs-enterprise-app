@@ -2,18 +2,10 @@
 
 import React, { memo } from 'react';
 import { Box, Typography, Skeleton, Avatar, SvgIconProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Schedule } from '@mui/icons-material';
 import { formatDistanceToNow, Locale } from 'date-fns';
 import { ko } from 'date-fns/locale';
-
-// Default colors
-const COLORS = {
-  primary: '#6366f1',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6'
-};
 
 export interface ActivityItem {
   /** Unique identifier */
@@ -59,30 +51,44 @@ export interface ActivityTimelineProps {
   formatTimestamp?: (date: Date) => string;
 }
 
-const defaultTypeConfig: ActivityTypeConfig = {
-  icon: Schedule,
-  color: COLORS.info,
-  bgColor: `${COLORS.info}15`
-};
-
 function ActivityTimeline({
   items,
   loading = false,
   emptyMessage = '활동 내역이 없습니다.',
   typeConfig = {},
-  defaultConfig = defaultTypeConfig,
+  defaultConfig,
   maxItems,
   showTimestamp = true,
   locale = ko,
   formatTimestamp
 }: ActivityTimelineProps) {
+  const theme = useTheme();
+  const p = theme.palette as any;
+
+  const resolvedDefaultConfig: ActivityTypeConfig = defaultConfig ?? {
+    icon: Schedule,
+    color: p.status?.info ?? theme.palette.info.main,
+    bgColor: theme.palette.action.hover,
+  };
+
   const displayItems = maxItems ? items.slice(0, maxItems) : items;
 
+  const getActivityColor = (type: string): string => {
+    const t = type.toLowerCase();
+    if (t === 'create' || t === 'add' || t === 'success') return p.status?.success ?? theme.palette.success.main;
+    if (t === 'update' || t === 'edit' || t === 'modify') return theme.palette.primary.main;
+    if (t === 'delete' || t === 'remove' || t === 'danger') return p.status?.error ?? theme.palette.error.main;
+    if (t === 'warning' || t === 'alert') return p.status?.warning ?? theme.palette.warning.main;
+    if (t === 'info' || t === 'view' || t === 'read') return p.status?.info ?? theme.palette.info.main;
+    return theme.palette.text.secondary;
+  };
+
   const getConfig = (type: string): ActivityTypeConfig => {
-    const config = typeConfig[type] || defaultConfig;
+    const knownColor = getActivityColor(type);
+    const config = typeConfig[type] || { ...resolvedDefaultConfig, color: knownColor };
     return {
       ...config,
-      bgColor: config.bgColor || `${config.color}15`
+      bgColor: config.bgColor || theme.palette.action.hover
     };
   };
 
@@ -142,7 +148,7 @@ function ActivityTimeline({
               borderRadius: 2,
               transition: 'all 0.2s',
               '&:hover': {
-                bgcolor: 'rgba(0, 0, 0, 0.02)'
+                bgcolor: theme.palette.action.hover
               }
             }}
           >
@@ -187,7 +193,7 @@ function ActivityTimeline({
                       px: 0.75,
                       py: 0.25,
                       borderRadius: 1,
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
+                      bgcolor: theme.palette.action.hover,
                       fontSize: '0.6rem',
                       color: 'text.secondary'
                     }}
@@ -216,5 +222,15 @@ function ActivityTimeline({
   );
 }
 
-export { COLORS as ActivityTimelineColors };
+import { tokens } from '@/theme';
+
+// Exported color palette for demo/reference pages — sourced from design tokens
+export const ActivityTimelineColors = {
+  primary: tokens.accent[600] as string,
+  success: tokens.status.success,
+  warning: tokens.status.warning,
+  error:   tokens.status.danger,
+  info:    tokens.status.info,
+};
+
 export default memo(ActivityTimeline);

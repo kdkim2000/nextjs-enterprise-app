@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 // Filter option type
 export interface FilterOption {
@@ -33,6 +34,7 @@ export function FilterChips({
   showCount = true,
   variant = 'outlined'
 }: FilterChipsProps) {
+  const theme = useTheme();
   const isSelected = (key: string) => {
     if (multiple && Array.isArray(selected)) {
       return selected.includes(key);
@@ -52,7 +54,7 @@ export function FilterChips({
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
       {options.map((option) => {
         const active = isSelected(option.key);
-        const color = option.color || '#6b7280';
+        const color = option.color || theme.palette.text.secondary;
 
         return (
           <Chip
@@ -133,7 +135,7 @@ export function ToggleFilter({ options, selected, onChange, size = 'small' }: To
     <Box
       sx={{
         display: 'inline-flex',
-        bgcolor: 'grey.100',
+        bgcolor: 'action.hover',
         borderRadius: 2,
         p: 0.5
       }}
@@ -147,11 +149,11 @@ export function ToggleFilter({ options, selected, onChange, size = 'small' }: To
             py: size === 'small' ? 0.5 : 0.75,
             borderRadius: 1.5,
             cursor: 'pointer',
-            bgcolor: selected === option.value ? 'white' : 'transparent',
+            bgcolor: selected === option.value ? 'background.paper' : 'transparent',
             boxShadow: selected === option.value ? 1 : 0,
             transition: 'all 0.2s ease',
             '&:hover': {
-              bgcolor: selected === option.value ? 'white' : 'grey.200'
+              bgcolor: selected === option.value ? 'background.paper' : 'action.selected'
             }
           }}
         >

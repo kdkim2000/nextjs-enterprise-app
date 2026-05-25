@@ -56,7 +56,6 @@ export default function ComingSoonPage({
           sx={{
             p: 6,
             bgcolor: 'background.paper',
-            borderRadius: 3,
             maxWidth: 600
           }}
         >

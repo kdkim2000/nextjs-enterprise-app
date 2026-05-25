@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import MasterDetailLayout from '@/components/common/MasterDetailLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
@@ -290,199 +291,149 @@ export default function UserRoleMappingPage() {
   );
 
   return (
-    <ResponsivePageLayout
-      useMenu
-      showBreadcrumb
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      quickSearch={isMobileLayout && mobileView === 'detail' ? quickSearch : undefined}
-      onQuickSearchChange={isMobileLayout && mobileView === 'detail' ? setQuickSearch : undefined}
-      onQuickSearch={() => {}}
-      onQuickSearchClear={() => {
-        setQuickSearch('');
-        setSearchCriteria({ userId: '', userName: '', userEmail: '', userDepartment: '', status: 'active' });
-      }}
-      quickSearchPlaceholder={currentLocale === 'ko' ? '사용자 검색...' : 'Search users...'}
-      searching={loading}
-      showAdvancedFilter={isMobileLayout && mobileView === 'detail'}
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={mobileView === 'detail' ? activeFilterCount : 0}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
-          onEnter={() => setAdvancedFilterOpen(false)}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '사용자-역할 매핑']}
+          title="사용자-역할 매핑"
         />
-      }
-      onFilterApply={() => setAdvancedFilterOpen(false)}
-      onFilterClear={() => {
-        setQuickSearch('');
-        setSearchCriteria({ userId: '', userName: '', userEmail: '', userDepartment: '', status: 'active' });
-      }}
-      onFilterClose={() => setAdvancedFilterOpen(false)}
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-      mobileFab={undefined}
-      mobileSelectionMode={mobileView === 'detail' ? mobileSelectionMode : false}
-      mobileSelectedCount={mobileSelectedIds.size}
-      mobileTotalCount={filteredMappings.length}
-      onMobileSelectionModeToggle={
-        mobileView === 'detail' && gridPermissions.showDeleteButton
-          ? handleMobileSelectionModeToggle
-          : undefined
-      }
-      onMobileSelectAll={handleMobileSelectAll}
-      onMobileDeselectAll={handleMobileDeselectAll}
-      onMobileDeleteSelected={
-        mobileView === 'detail' && gridPermissions.showDeleteButton
-          ? handleMobileDeleteSelected
-          : undefined
-      }
-      mobileCustomHeader={isMobileLayout ? <Box /> : undefined}
-    >
-      {isMobileLayout ? (
-        <MobileMasterDetail
-          view={mobileView}
-          onViewChange={setMobileView}
-          masterContent={renderMasterContent()}
-          detailContent={renderDetailContent()}
-          detailHeader={{
-            title: selectedRole?.displayName || '',
-            subtitle: selectedRole?.name,
-          }}
-          onBack={handleMobileBackClick}
-          masterFab={undefined}
-          detailFab={
-            gridPermissions.showAddButton
-              ? { onClick: handleAddMapping, label: t('common.create') }
-              : undefined
-          }
-          detailSelection={
-            gridPermissions.showDeleteButton
-              ? {
-                  active: mobileSelectionMode,
-                  selectedCount: mobileSelectedIds.size,
-                  totalCount: filteredMappings.length,
-                  onToggle: handleMobileSelectionModeToggle,
-                  onSelectAll: handleMobileSelectAll,
-                  onDeselectAll: handleMobileDeselectAll,
-                  onDeleteSelected: handleMobileDeleteSelected,
-                }
-              : undefined
-          }
-          enableSwipeBack
-          detailLoading={loading}
-          hasDetailContent={filteredMappings.length > 0}
-          detailEmptyState={
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                {currentLocale === 'ko' ? '매핑된 사용자가 없습니다' : 'No user mappings found'}
-              </Typography>
-            </Box>
-          }
-        />
-      ) : (
-        <MasterDetailLayout
-          masterSize={30}
-          detailSize={70}
-          master={
-            <RoleList
-              roles={roles}
-              selectedRole={selectedRole}
-              onSelectRole={setSelectedRole}
-              locale={currentLocale}
-              userCounts={userCounts}
-            />
-          }
-          detail={
-            <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              {!selectedRole ? (
-                <EmptyState
-                  icon={Search}
-                  title={currentLocale === 'ko' ? '역할을 선택하세요' : 'Select a Role'}
-                  description={
-                    currentLocale === 'ko'
-                      ? '왼쪽 목록에서 역할을 선택하여 사용자 매핑을 관리하세요'
-                      : 'Select a role from the list to manage user mappings'
-                  }
-                />
-              ) : (
-                <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ mb: 1 }}>
-                    <Typography variant="h6">
-                      {currentLocale === 'ko'
-                        ? `${selectedRole.displayName} 사용자`
-                        : `${selectedRole.displayName} Users`}
-                    </Typography>
-                  </Box>
-
-                  <QuickSearchBar
-                    searchValue={quickSearch}
-                    onSearchChange={setQuickSearch}
-                    onSearch={() => {}}
-                    onClear={() => {
-                      setQuickSearch('');
-                      setSearchCriteria({ userId: '', userName: '', userEmail: '', userDepartment: '', status: 'active' });
-                    }}
-                    onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-                    placeholder={currentLocale === 'ko' ? '사용자 검색...' : 'Search users...'}
-                    searching={loading}
-                    activeFilterCount={activeFilterCount}
-                    showAdvancedButton={true}
-                  />
-
-                  {advancedFilterOpen && (
-                    <SearchFilterPanel
-                      activeFilterCount={activeFilterCount}
-                      onApply={() => setAdvancedFilterOpen(false)}
-                      onClear={() => {
-                        setQuickSearch('');
-                        setSearchCriteria({ userId: '', userName: '', userEmail: '', userDepartment: '', status: 'active' });
-                      }}
-                      onClose={() => setAdvancedFilterOpen(false)}
-                      mode="advanced"
-                      expanded={true}
-                      showHeader={false}
-                    >
-                      <SearchFilterFields
-                        fields={filterFields}
-                        values={searchCriteria}
-                        onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
-                        onEnter={() => setAdvancedFilterOpen(false)}
-                      />
-                    </SearchFilterPanel>
-                  )}
-
-                  <Box sx={{ flex: 1, minHeight: 0 }}>
-                    <ExcelDataGrid
-                      rows={filteredMappings}
-                      columns={columns}
-                      onRowsChange={(rows) => setFilteredMappings(rows as UserRoleMapping[])}
-                      {...(gridPermissions.showAddButton && { onAdd: handleAddMapping })}
-                      {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteMappings })}
-                      onRefresh={fetchMappings}
-                      checkboxSelection={gridPermissions.checkboxSelection}
-                      editable={gridPermissions.editable}
-                      exportFileName={`user-role-mapping-${selectedRole.name}`}
-                      loading={loading}
-                      paginationMode="client"
-                    />
-                  </Box>
+        <DataShell>
+          {isMobileLayout ? (
+            <MobileMasterDetail
+              view={mobileView}
+              onViewChange={setMobileView}
+              masterContent={renderMasterContent()}
+              detailContent={renderDetailContent()}
+              detailHeader={{
+                title: selectedRole?.displayName || '',
+                subtitle: selectedRole?.name,
+              }}
+              onBack={handleMobileBackClick}
+              masterFab={undefined}
+              detailFab={
+                gridPermissions.showAddButton
+                  ? { onClick: handleAddMapping, label: t('common.create') }
+                  : undefined
+              }
+              detailSelection={
+                gridPermissions.showDeleteButton
+                  ? {
+                      active: mobileSelectionMode,
+                      selectedCount: mobileSelectedIds.size,
+                      totalCount: filteredMappings.length,
+                      onToggle: handleMobileSelectionModeToggle,
+                      onSelectAll: handleMobileSelectAll,
+                      onDeselectAll: handleMobileDeselectAll,
+                      onDeleteSelected: handleMobileDeleteSelected,
+                    }
+                  : undefined
+              }
+              enableSwipeBack
+              detailLoading={loading}
+              hasDetailContent={filteredMappings.length > 0}
+              detailEmptyState={
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography color="text.secondary">
+                    {currentLocale === 'ko' ? '매핑된 사용자가 없습니다' : 'No user mappings found'}
+                  </Typography>
                 </Box>
-              )}
-            </Paper>
-          }
-        />
-      )}
+              }
+            />
+          ) : (
+            <MasterDetailLayout
+              masterSize={30}
+              detailSize={70}
+              master={
+                <RoleList
+                  roles={roles}
+                  selectedRole={selectedRole}
+                  onSelectRole={setSelectedRole}
+                  locale={currentLocale}
+                  userCounts={userCounts}
+                />
+              }
+              detail={
+                <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  {!selectedRole ? (
+                    <EmptyState
+                      icon={Search}
+                      title={currentLocale === 'ko' ? '역할을 선택하세요' : 'Select a Role'}
+                      description={
+                        currentLocale === 'ko'
+                          ? '왼쪽 목록에서 역할을 선택하여 사용자 매핑을 관리하세요'
+                          : 'Select a role from the list to manage user mappings'
+                      }
+                    />
+                  ) : (
+                    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="h6">
+                          {currentLocale === 'ko'
+                            ? `${selectedRole.displayName} 사용자`
+                            : `${selectedRole.displayName} Users`}
+                        </Typography>
+                      </Box>
+
+                      <QuickSearchBar
+                        searchValue={quickSearch}
+                        onSearchChange={setQuickSearch}
+                        onSearch={() => {}}
+                        onClear={() => {
+                          setQuickSearch('');
+                          setSearchCriteria({ userId: '', userName: '', userEmail: '', userDepartment: '', status: 'active' });
+                        }}
+                        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
+                        placeholder={currentLocale === 'ko' ? '사용자 검색...' : 'Search users...'}
+                        searching={loading}
+                        activeFilterCount={activeFilterCount}
+                        showAdvancedButton={true}
+                      />
+
+                      {advancedFilterOpen && (
+                        <SearchFilterPanel
+                          activeFilterCount={activeFilterCount}
+                          onApply={() => setAdvancedFilterOpen(false)}
+                          onClear={() => {
+                            setQuickSearch('');
+                            setSearchCriteria({ userId: '', userName: '', userEmail: '', userDepartment: '', status: 'active' });
+                          }}
+                          onClose={() => setAdvancedFilterOpen(false)}
+                          mode="advanced"
+                          expanded={true}
+                          showHeader={false}
+                        >
+                          <SearchFilterFields
+                            fields={filterFields}
+                            values={searchCriteria}
+                            onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
+                            onEnter={() => setAdvancedFilterOpen(false)}
+                          />
+                        </SearchFilterPanel>
+                      )}
+
+                      <Box sx={{ flex: 1, minHeight: 0 }}>
+                        <ExcelDataGrid
+                          rows={filteredMappings}
+                          columns={columns}
+                          onRowsChange={(rows) => setFilteredMappings(rows as UserRoleMapping[])}
+                          {...(gridPermissions.showAddButton && { onAdd: handleAddMapping })}
+                          {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteMappings })}
+                          onRefresh={fetchMappings}
+                          checkboxSelection={gridPermissions.checkboxSelection}
+                          editable={gridPermissions.editable}
+                          exportFileName={`user-role-mapping-${selectedRole.name}`}
+                          loading={loading}
+                          paginationMode="client"
+                        />
+                      </Box>
+                    </Box>
+                  )}
+                </Paper>
+              }
+            />
+          )}
+        </DataShell>
+      </Box>
 
       <DeleteConfirmDialog
         open={mappingDeleteConfirmOpen}
@@ -512,6 +463,6 @@ export default function UserRoleMappingPage() {
         locale={currentLocale}
         filterByStatus="active"
       />
-    </ResponsivePageLayout>
+    </>
   );
 }
