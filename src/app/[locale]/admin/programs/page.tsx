@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
 import ProgramFormFields from '@/components/admin/ProgramFormFields';
 import ProgramMobileCard from './components/ProgramMobileCard';
@@ -133,61 +133,40 @@ export default function ProgramManagementPage() {
   ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete]);
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder={quickSearchPlaceholder}
-      searching={searching}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
-          locale={currentLocale}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '프로그램 관리']}
+          title="프로그램 관리"
+          actions={
+            gridPermissions.showAddButton ? (
+              <Button variant="contained" onClick={handleAdd}>
+                + {getLocalizedValue({ en: 'Add', ko: '추가', zh: '添加', vi: 'Thêm' }, currentLocale)}
+              </Button>
+            ) : undefined
+          }
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleQuickSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-    >
-      {isMobileLayout ? (
-        // Mobile: Card List
-        <MobileCardList
-          data={programs}
-          loading={searching}
-          renderCard={renderMobileCard}
-          keyExtractor={(program) => program.id!}
-          emptyMessage={currentLocale === 'ko' ? '프로그램이 없습니다' : 'No programs found'}
-        />
-      ) : (
-        // Desktop: DataGrid
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          <Box sx={{ flex: 1, minHeight: 0 }}>
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder={quickSearchPlaceholder}
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+              sx={{ width: 300 }}
+            />
+          }
+        >
+          {isMobileLayout ? (
+            <MobileCardList
+              data={programs}
+              loading={searching}
+              renderCard={renderMobileCard}
+              keyExtractor={(program) => program.id!}
+              emptyMessage={currentLocale === 'ko' ? '프로그램이 없습니다' : 'No programs found'}
+            />
+          ) : (
             <ExcelDataGrid
               rows={programs}
               columns={columns}
@@ -204,9 +183,9 @@ export default function ProgramManagementPage() {
               paginationModel={paginationModel}
               onPaginationModelChange={handlePaginationModelChange}
             />
-          </Box>
-        </Paper>
-      )}
+          )}
+        </DataShell>
+      </Box>
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -242,6 +221,6 @@ export default function ProgramManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

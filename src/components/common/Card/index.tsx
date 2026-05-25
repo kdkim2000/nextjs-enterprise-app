@@ -50,7 +50,7 @@ export default function Card({
           transition: 'all 0.3s',
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: 4
+            borderColor: 'text.secondary'
           }
         }),
         ...sx

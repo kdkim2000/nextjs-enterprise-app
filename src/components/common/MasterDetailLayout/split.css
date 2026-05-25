@@ -6,14 +6,15 @@
 }
 
 .gutter {
-  background-color: #e0e0e0;
+  background-color: var(--line-default);
   background-repeat: no-repeat;
   background-position: 50%;
   transition: background-color 0.2s ease;
+  cursor: col-resize;
 }
 
 .gutter:hover {
-  background-color: #c0c0c0;
+  background-color: var(--line-strong);
 }
 
 .gutter.gutter-horizontal {

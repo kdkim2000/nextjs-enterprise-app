@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Paper, Chip, Tooltip } from '@mui/material';
+import { Box, Chip, TextField, Tooltip } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields, { FilterFieldConfig } from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import RouteGuard from '@/components/auth/RouteGuard';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
 import LogMobileCard from './components/LogMobileCard';
 import { GridColDef } from '@mui/x-data-grid';
@@ -412,84 +413,60 @@ export default function LogsPage() {
 
   return (
     <RouteGuard programCode={programId || ''} requiredPermission="view" fallbackUrl="/dashboard">
-      <ResponsivePageLayout
-        // Page Header
-        useMenu
-        showBreadcrumb
-        // Messages
-        errorMessage={errorMessage}
-        // Quick Search
-        quickSearch={quickSearch}
-        onQuickSearchChange={setQuickSearch}
-        onQuickSearch={handleQuickSearch}
-        onQuickSearchClear={handleQuickSearchClear}
-        quickSearchPlaceholder={quickSearchPlaceholder}
-        searching={loading}
-        // Advanced Filter
-        showAdvancedFilter
-        advancedFilterOpen={advancedFilterOpen}
-        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-        activeFilterCount={activeFilterCount}
-        filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-        filterContent={
-          <SearchFilterFields
-            fields={filterFields}
-            values={searchCriteria}
-            onChange={handleSearchChange}
-            onEnter={handleAdvancedFilterApply}
-            locale={locale}
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+          <PageHeader
+            breadcrumb={['Admin', '시스템 로그']}
+            title="시스템 로그"
           />
-        }
-        onFilterApply={handleAdvancedFilterApply}
-        onFilterClear={handleAdvancedSearchClear}
-        onFilterClose={handleAdvancedFilterClose}
-        // Help
-        programId={programId || ''}
-      >
-        {isMobileLayout ? (
-          // Mobile: Card List with infinite scroll
-          <MobileCardList
-            data={logs}
-            loading={loading}
-            renderCard={renderMobileCard}
-            keyExtractor={(log) => log.id}
-            emptyIcon={<Search sx={{ fontSize: 64, opacity: 0.5 }} />}
-            emptyMessage={getLocalizedValue({
-              en: 'No logs loaded',
-              ko: '로그가 없습니다',
-              zh: '未加载日志',
-              vi: 'Không có nhật ký'
-            }, locale)}
-            hasMore={hasMore}
-            onLoadMore={handleLoadMore}
-          />
-        ) : (
-          // Desktop: DataGrid with server-side pagination
-          <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-            {logs.length === 0 && !loading ? (
+          <DataShell
+            toolbar={
+              <TextField
+                size="small"
+                placeholder={quickSearchPlaceholder}
+                value={quickSearch}
+                onChange={(e) => setQuickSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+                sx={{ width: 320 }}
+              />
+            }
+          >
+            {isMobileLayout ? (
+              <MobileCardList
+                data={logs}
+                loading={loading}
+                renderCard={renderMobileCard}
+                keyExtractor={(log) => log.id}
+                emptyIcon={<Search sx={{ fontSize: 64, opacity: 0.5 }} />}
+                emptyMessage={getLocalizedValue({
+                  en: 'No logs loaded',
+                  ko: '로그가 없습니다',
+                  zh: '未加载日志',
+                  vi: 'Không có nhật ký'
+                }, locale)}
+                hasMore={hasMore}
+                onLoadMore={handleLoadMore}
+              />
+            ) : logs.length === 0 && !loading ? (
               <EmptyState
                 icon={Search}
                 title={getLocalizedValue({ en: 'No logs loaded', ko: '로그가 없습니다', zh: '未加载日志', vi: 'Không có nhật ký' }, locale)}
                 description={getLocalizedValue({ en: 'Use the search filters above to load log data', ko: '검색 필터를 사용하여 로그 데이터를 불러오세요', zh: '使用上面的搜索过滤器加载日志数据', vi: 'Sử dụng bộ lọc tìm kiếm ở trên để tải dữ liệu nhật ký' }, locale)}
               />
             ) : (
-              <Box sx={{ flex: 1, minHeight: 0 }}>
-                <ExcelDataGrid
-                  rows={logs}
-                  columns={columns}
-                  onRefresh={handleRefresh}
-                  exportFileName="system-logs"
-                  loading={loading}
-                  paginationMode="server"
-                  rowCount={rowCount}
-                  paginationModel={paginationModel}
-                  onPaginationModelChange={handlePaginationModelChange}
-                />
-              </Box>
+              <ExcelDataGrid
+                rows={logs}
+                columns={columns}
+                onRefresh={handleRefresh}
+                exportFileName="system-logs"
+                loading={loading}
+                paginationMode="server"
+                rowCount={rowCount}
+                paginationModel={paginationModel}
+                onPaginationModelChange={handlePaginationModelChange}
+              />
             )}
-          </Paper>
-        )}
-      </ResponsivePageLayout>
+          </DataShell>
+      </Box>
     </RouteGuard>
   );
 }

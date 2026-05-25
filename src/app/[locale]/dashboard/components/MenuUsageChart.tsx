@@ -4,7 +4,8 @@ import React, { memo, useMemo } from 'react';
 import { Box, Typography, Skeleton } from '@mui/material';
 import ProgressBarList, { ProgressBarItem } from '@/components/common/ProgressBarList';
 import { MenuUsageItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface MenuUsageChartProps {
   data: MenuUsageItem[];
@@ -38,7 +39,7 @@ function MenuUsageChart({ data, loading }: MenuUsageChartProps) {
           items={progressItems}
           title="메뉴 접근 빈도"
           showPercentage={false}
-          colors={COLORS.chart}
+          colors={[...chartColors.primary]}
           barHeight={6}
         />
       </Box>

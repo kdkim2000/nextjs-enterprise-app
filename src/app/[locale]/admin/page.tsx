@@ -153,77 +153,72 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <Box>
-      <PageHeader useMenu />
+    <Box sx={{ px: 4, py: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin']}
+          title={t('admin.dashboard.title')}
+          subtitle={t('admin.dashboard.subtitle')}
+        />
 
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={600} gutterBottom>
-          {t('admin.dashboard.title')}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {t('admin.dashboard.subtitle')}
-        </Typography>
+        {featureCategories.map((category, categoryIndex) => (
+          <Box key={categoryIndex} sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              fontWeight={600}
+              color="text.secondary"
+              sx={{ mb: 2, pl: 1 }}
+            >
+              {category.title}
+            </Typography>
+
+            <Grid container spacing={3}>
+              {category.features.map((feature) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={feature.href}>
+                  <Link href={feature.href} style={{ textDecoration: 'none' }}>
+                    <Card
+                      sx={{
+                        height: '100%',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: 4
+                        }
+                      }}
+                    >
+                      <CardContent>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 56,
+                            height: 56,
+                            borderRadius: 2,
+                            bgcolor: `${feature.color}15`,
+                            mb: 2
+                          }}
+                        >
+                          <feature.icon sx={{ fontSize: 32, color: feature.color }} />
+                        </Box>
+                        <Typography variant="h6" fontWeight={600} gutterBottom>
+                          {feature.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {feature.description}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </Grid>
+              ))}
+            </Grid>
+
+            {categoryIndex < featureCategories.length - 1 && (
+              <Divider sx={{ mt: 4 }} />
+            )}
+          </Box>
+        ))}
       </Box>
-
-      {featureCategories.map((category, categoryIndex) => (
-        <Box key={categoryIndex} sx={{ mb: 4 }}>
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            color="text.secondary"
-            sx={{ mb: 2, pl: 1 }}
-          >
-            {category.title}
-          </Typography>
-
-          <Grid container spacing={3}>
-            {category.features.map((feature) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={feature.href}>
-                <Link href={feature.href} style={{ textDecoration: 'none' }}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 4
-                      }
-                    }}
-                  >
-                    <CardContent>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 56,
-                          height: 56,
-                          borderRadius: 2,
-                          bgcolor: `${feature.color}15`,
-                          mb: 2
-                        }}
-                      >
-                        <feature.icon sx={{ fontSize: 32, color: feature.color }} />
-                      </Box>
-                      <Typography variant="h6" fontWeight={600} gutterBottom>
-                        {feature.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {feature.description}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </Grid>
-            ))}
-          </Grid>
-
-          {categoryIndex < featureCategories.length - 1 && (
-            <Divider sx={{ mt: 4 }} />
-          )}
-        </Box>
-      ))}
-    </Box>
   );
 }

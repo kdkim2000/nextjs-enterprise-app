@@ -128,7 +128,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const displayName = user?.name_ko || user?.name_en || user?.name || '';
 
   return (
-    <AppBar position="static" elevation={1} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, flexShrink: 0 }}>
+    <AppBar position="static" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, flexShrink: 0 }}>
       <Toolbar>
         <IconButton
           edge="start"
@@ -153,7 +153,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               }}
             />
           )}
-          <Typography variant="h6" component="div">
+          <Typography variant="subtitle1" component="div" sx={{ fontWeight: 600 }}>
             {appName}
           </Typography>
         </Box>
@@ -169,7 +169,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             borderRadius: 1,
             transition: 'background-color 0.2s',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              backgroundColor: 'action.hover'
             }
           }}
         >

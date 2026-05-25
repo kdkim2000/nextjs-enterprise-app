@@ -5,7 +5,8 @@ import { Box, Typography } from '@mui/material';
 import { Visibility, ThumbUp } from '@mui/icons-material';
 import RankedList, { RankedItem } from '@/components/common/RankedList';
 import { TopPostItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface TopPostsTableProps {
   data: TopPostItem[];
@@ -45,7 +46,7 @@ function TopPostsTable({ data, loading }: TopPostsTableProps) {
         <RankedList
           items={rankedItems}
           title="인기 게시글"
-          rankColors={COLORS.chart.slice(0, 3)}
+          rankColors={chartColors.primary.slice(0, 3)}
           renderMetrics={(item) => (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

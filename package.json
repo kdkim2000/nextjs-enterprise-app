@@ -9,6 +9,7 @@
     "dev:app": "cd services/app-service && npm run dev",
     "dev:inspection": "cd services/inspection-service && npm run dev",
     "dev:services": "concurrently -n core,app,inspection -c blue,green,yellow \"npm run dev:core\" \"npm run dev:app\" \"npm run dev:inspection\"",
+    "predev:msa": "node -e \"const {execSync}=require('child_process');[3011,3012,3013].forEach(p=>{try{execSync('npx --yes kill-port '+p,{stdio:'ignore'})}catch(e){}})\"",
     "dev:msa": "concurrently -n frontend,core,app,inspection -c white,blue,green,yellow \"npm run dev:frontend\" \"npm run dev:core\" \"npm run dev:app\" \"npm run dev:inspection\"",
     "build": "next build",
     "build:shared": "cd shared && npm run build",

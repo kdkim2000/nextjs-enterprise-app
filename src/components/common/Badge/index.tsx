@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   BugReport,
   Build,
@@ -18,20 +19,35 @@ export interface CategoryConfig {
   label: string;
 }
 
+export function useCategoryConfigs(): Record<string, CategoryConfig> {
+  const theme = useTheme();
+  const p = theme.palette as any;
+  return {
+    'bug-fix': { icon: <BugReport sx={{ fontSize: 16 }} />, color: p.status?.error ?? theme.palette.error.main, label: 'Bug Fix' },
+    feature: { icon: <Build sx={{ fontSize: 16 }} />, color: p.status?.success ?? theme.palette.success.main, label: 'Feature' },
+    refactor: { icon: <Code sx={{ fontSize: 16 }} />, color: p.role?.moderator ?? theme.palette.secondary.main, label: 'Refactor' },
+    debugging: { icon: <Psychology sx={{ fontSize: 16 }} />, color: p.status?.warning ?? theme.palette.warning.main, label: 'Debugging' },
+    performance: { icon: <Speed sx={{ fontSize: 16 }} />, color: p.status?.info ?? theme.palette.info.main, label: 'Performance' },
+    general: { icon: <Chat sx={{ fontSize: 16 }} />, color: theme.palette.text.secondary, label: 'General' }
+  };
+}
+
+// Keep static export for backward-compat (uses raw tokens as fallback)
+import { tokens } from '@/theme';
 export const categoryConfigs: Record<string, CategoryConfig> = {
-  'bug-fix': { icon: <BugReport sx={{ fontSize: 16 }} />, color: '#ef4444', label: 'Bug Fix' },
-  feature: { icon: <Build sx={{ fontSize: 16 }} />, color: '#22c55e', label: 'Feature' },
-  refactor: { icon: <Code sx={{ fontSize: 16 }} />, color: '#a855f7', label: 'Refactor' },
-  debugging: { icon: <Psychology sx={{ fontSize: 16 }} />, color: '#f97316', label: 'Debugging' },
-  performance: { icon: <Speed sx={{ fontSize: 16 }} />, color: '#06b6d4', label: 'Performance' },
-  general: { icon: <Chat sx={{ fontSize: 16 }} />, color: '#6b7280', label: 'General' }
+  'bug-fix': { icon: <BugReport sx={{ fontSize: 16 }} />, color: tokens.status.danger, label: 'Bug Fix' },
+  feature: { icon: <Build sx={{ fontSize: 16 }} />, color: tokens.status.success, label: 'Feature' },
+  refactor: { icon: <Code sx={{ fontSize: 16 }} />, color: tokens.role.moderator, label: 'Refactor' },
+  debugging: { icon: <Psychology sx={{ fontSize: 16 }} />, color: tokens.status.warning, label: 'Debugging' },
+  performance: { icon: <Speed sx={{ fontSize: 16 }} />, color: tokens.status.info, label: 'Performance' },
+  general: { icon: <Chat sx={{ fontSize: 16 }} />, color: tokens.ink.tertiary, label: 'General' }
 };
 
-// Difficulty colors
+// Difficulty colors (static for non-component use — uses tokens)
 export const difficultyColors: Record<string, string> = {
-  easy: '#22c55e',
-  medium: '#eab308',
-  hard: '#ef4444'
+  easy: tokens.status.success,
+  medium: tokens.status.warning,
+  hard: tokens.status.danger
 };
 
 // Props
@@ -53,7 +69,8 @@ interface StatusBadgeProps {
 
 // Category Badge Component
 export function CategoryBadge({ category, size = 'small', variant = 'soft' }: CategoryBadgeProps) {
-  const config = categoryConfigs[category] || categoryConfigs.general;
+  const configs = useCategoryConfigs();
+  const config = configs[category] || configs.general;
 
   if (variant === 'soft') {
     return (
@@ -103,7 +120,14 @@ export function CategoryBadge({ category, size = 'small', variant = 'soft' }: Ca
 
 // Difficulty Badge Component
 export function DifficultyBadge({ difficulty, size = 'small' }: DifficultyBadgeProps) {
-  const color = difficultyColors[difficulty] || difficultyColors.medium;
+  const theme = useTheme();
+  const p = theme.palette as any;
+  const themeDifficultyColors: Record<string, string> = {
+    easy: p.status?.success ?? theme.palette.success.main,
+    medium: p.status?.warning ?? theme.palette.warning.main,
+    hard: p.status?.error ?? theme.palette.error.main
+  };
+  const color = themeDifficultyColors[difficulty] || themeDifficultyColors.medium;
 
   return (
     <Chip
@@ -123,15 +147,16 @@ export function DifficultyBadge({ difficulty, size = 'small' }: DifficultyBadgeP
 }
 
 // Generic Status Badge Component
-const statusColors: Record<string, { bg: string; color: string }> = {
-  active: { bg: '#dcfce7', color: '#16a34a' },
-  completed: { bg: '#dbeafe', color: '#2563eb' },
-  pending: { bg: '#fef3c7', color: '#d97706' },
-  error: { bg: '#fee2e2', color: '#dc2626' },
-  inactive: { bg: '#f3f4f6', color: '#6b7280' }
-};
-
 export function StatusBadge({ status, size = 'small' }: StatusBadgeProps) {
+  const theme = useTheme();
+  const p = theme.palette as any;
+  const statusColors: Record<string, { bg: string; color: string }> = {
+    active: { bg: `${p.status?.success ?? theme.palette.success.main}20`, color: p.status?.success ?? theme.palette.success.main },
+    completed: { bg: `${theme.palette.primary.main}20`, color: theme.palette.primary.main },
+    pending: { bg: `${p.status?.warning ?? theme.palette.warning.main}20`, color: p.status?.warning ?? theme.palette.warning.main },
+    error: { bg: `${p.status?.error ?? theme.palette.error.main}20`, color: p.status?.error ?? theme.palette.error.main },
+    inactive: { bg: theme.palette.action.hover, color: theme.palette.text.secondary }
+  };
   const colors = statusColors[status.toLowerCase()] || statusColors.inactive;
 
   return (

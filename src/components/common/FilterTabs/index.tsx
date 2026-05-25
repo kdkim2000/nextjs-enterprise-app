@@ -2,8 +2,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { Box, Skeleton } from '@mui/material';
-
-const DEFAULT_ACTIVE_COLOR = '#6366f1';
+import { useTheme } from '@mui/material/styles';
 
 export interface FilterTab<T extends string = string> {
   value: T;
@@ -21,7 +20,7 @@ export interface FilterTabsProps<T extends string = string> {
   onChange: (value: T) => void;
   /** Size variant */
   size?: 'small' | 'medium';
-  /** Active tab color */
+  /** Active tab color (defaults to theme.palette.primary.main) */
   activeColor?: string;
   /** Loading state */
   loading?: boolean;
@@ -34,10 +33,12 @@ function FilterTabs<T extends string = string>({
   value,
   onChange,
   size = 'small',
-  activeColor = DEFAULT_ACTIVE_COLOR,
+  activeColor,
   loading = false,
   fullWidth = false
 }: FilterTabsProps<T>) {
+  const theme = useTheme();
+  const resolvedActiveColor = activeColor ?? theme.palette.primary.main;
   const handleClick = useCallback(
     (tabValue: T, disabled?: boolean) => {
       if (!disabled) {
@@ -111,16 +112,16 @@ function FilterTabs<T extends string = string>({
               whiteSpace: 'nowrap',
               userSelect: 'none',
               opacity: isDisabled ? 0.5 : 1,
-              bgcolor: isActive ? activeColor : 'rgba(0, 0, 0, 0.04)',
+              bgcolor: isActive ? resolvedActiveColor : theme.palette.action.hover,
               color: isActive ? '#fff' : 'text.secondary',
               '&:hover': {
                 bgcolor: isDisabled
                   ? isActive
-                    ? activeColor
-                    : 'rgba(0, 0, 0, 0.04)'
+                    ? resolvedActiveColor
+                    : theme.palette.action.hover
                   : isActive
-                    ? activeColor
-                    : 'rgba(0, 0, 0, 0.08)'
+                    ? resolvedActiveColor
+                    : theme.palette.action.selected
               }
             }}
           >
@@ -134,7 +135,7 @@ function FilterTabs<T extends string = string>({
                   py: 0.125,
                   borderRadius: 1,
                   fontSize: '0.6rem',
-                  bgcolor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.08)'
+                  bgcolor: isActive ? 'rgba(255, 255, 255, 0.2)' : theme.palette.action.selected
                 }}
               >
                 {tab.count}

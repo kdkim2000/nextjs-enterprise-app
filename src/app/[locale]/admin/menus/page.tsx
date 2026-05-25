@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useMemo, useState, useCallback } from 'react';
-import { Paper, Box } from '@mui/material';
+import React, { useMemo, useCallback } from 'react';
+import { Box, TextField, Button } from '@mui/material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MenuFormFields from '@/components/admin/MenuFormFields';
 import { useDataGridPermissions } from '@/hooks/usePermissionControl';
 import { useI18n, useCurrentLocale } from '@/lib/i18n/client';
@@ -124,89 +125,68 @@ export default function MenuManagementPage() {
   );
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by code, name, path, or icon..."
-      searching={loading}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '메뉴 관리']}
+          title="메뉴 관리"
+          actions={
+            gridPermissions.showAddButton ? (
+              <Button variant="contained" onClick={() => handleAdd()}>+ Add Menu</Button>
+            ) : undefined
+          }
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleAdvancedSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-    >
-      {/* Conditional rendering based on device */}
-      {isMobileLayout ? (
-        // Mobile: Drill-down Tree View
-        <MenuMobileTreeView
-          menus={filteredMenus}
-          allMenus={allMenus}
-          locale={currentLocale}
-          loading={loading}
-          onEdit={gridPermissions.editable ? handleMobileMenuEdit : undefined}
-          onDelete={gridPermissions.showDeleteButton ? handleMobileMenuDelete : undefined}
-          onAdd={gridPermissions.showAddButton ? handleAdd : undefined}
-          onRefresh={handleRefresh}
-          canEdit={gridPermissions.editable}
-          canDelete={gridPermissions.showDeleteButton}
-          canAdd={gridPermissions.showAddButton}
-        />
-      ) : (
-        // Desktop: TreeView
-        <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          <MenuTreeView
-            menus={treeMenus}
-            expandedIds={expandedIds}
-            selectedIds={selectedIds}
-            locale={currentLocale}
-            loading={loading}
-            searchQuery={quickSearch}
-            onToggleExpand={handleToggleExpand}
-            onToggleSelect={handleToggleSelect}
-            onSelectAll={handleSelectAll}
-            onDeselectAll={handleDeselectAll}
-            onExpandAll={handleExpandAll}
-            onCollapseAll={handleCollapseAll}
-            onEdit={handleEdit}
-            onAdd={handleAdd}
-            onDelete={handleTreeDelete}
-            onRefresh={handleRefresh}
-            canEdit={gridPermissions.editable}
-            canDelete={gridPermissions.showDeleteButton}
-            canAdd={gridPermissions.showAddButton}
-          />
-        </Paper>
-      )}
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder="Search by code, name, path, or icon..."
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+              sx={{ width: 300 }}
+            />
+          }
+        >
+          {isMobileLayout ? (
+            <MenuMobileTreeView
+              menus={filteredMenus}
+              allMenus={allMenus}
+              locale={currentLocale}
+              loading={loading}
+              onEdit={gridPermissions.editable ? handleMobileMenuEdit : undefined}
+              onDelete={gridPermissions.showDeleteButton ? handleMobileMenuDelete : undefined}
+              onAdd={gridPermissions.showAddButton ? handleAdd : undefined}
+              onRefresh={handleRefresh}
+              canEdit={gridPermissions.editable}
+              canDelete={gridPermissions.showDeleteButton}
+              canAdd={gridPermissions.showAddButton}
+            />
+          ) : (
+            <MenuTreeView
+              menus={treeMenus}
+              expandedIds={expandedIds}
+              selectedIds={selectedIds}
+              locale={currentLocale}
+              loading={loading}
+              searchQuery={quickSearch}
+              onToggleExpand={handleToggleExpand}
+              onToggleSelect={handleToggleSelect}
+              onSelectAll={handleSelectAll}
+              onDeselectAll={handleDeselectAll}
+              onExpandAll={handleExpandAll}
+              onCollapseAll={handleCollapseAll}
+              onEdit={handleEdit}
+              onAdd={handleAdd}
+              onDelete={handleTreeDelete}
+              onRefresh={handleRefresh}
+              canEdit={gridPermissions.editable}
+              canDelete={gridPermissions.showDeleteButton}
+              canAdd={gridPermissions.showAddButton}
+            />
+          )}
+        </DataShell>
+      </Box>
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -241,6 +221,6 @@ export default function MenuManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

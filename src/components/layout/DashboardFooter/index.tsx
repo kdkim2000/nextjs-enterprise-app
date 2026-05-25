@@ -48,10 +48,7 @@ export default function DashboardFooter() {
         py: 2,
         px: 2,
         flexShrink: 0,
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'light'
-            ? theme.palette.grey[200]
-            : theme.palette.grey[800],
+        backgroundColor: 'background.paper',
         borderTop: 1,
         borderColor: 'divider'
       }}
@@ -116,7 +113,7 @@ export default function DashboardFooter() {
 
             <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
 
-            <Typography variant="body2" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
               {appName} v{appVersion}
             </Typography>
 

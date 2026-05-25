@@ -6,7 +6,8 @@ import { Warning, CheckCircle } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ErrorEndpointItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface ErrorEndpointsTableProps {
   data: ErrorEndpointItem[];
@@ -15,9 +16,9 @@ interface ErrorEndpointsTableProps {
 
 function ErrorEndpointsTable({ data, loading }: ErrorEndpointsTableProps) {
   const getStatusConfig = (statusCode: number) => {
-    if (statusCode >= 500) return { color: COLORS.error, label: 'Server' };
-    if (statusCode >= 400) return { color: COLORS.warning, label: 'Client' };
-    return { color: COLORS.info, label: 'Info' };
+    if (statusCode >= 500) return { color: chartColors.danger, label: 'Server' };
+    if (statusCode >= 400) return { color: chartColors.warning, label: 'Client' };
+    return { color: chartColors.info, label: 'Info' };
   };
 
   if (loading) {
@@ -64,8 +65,8 @@ function ErrorEndpointsTable({ data, loading }: ErrorEndpointsTableProps) {
               gap: 1
             }}
           >
-            <CheckCircle sx={{ fontSize: 40, color: COLORS.success, opacity: 0.7 }} />
-            <Typography sx={{ fontSize: '0.8rem', color: COLORS.success, fontWeight: 500 }}>
+            <CheckCircle sx={{ fontSize: 40, color: chartColors.success, opacity: 0.7 }} />
+            <Typography sx={{ fontSize: '0.8rem', color: chartColors.success, fontWeight: 500 }}>
               에러가 없습니다
             </Typography>
           </Box>
@@ -84,7 +85,7 @@ function ErrorEndpointsTable({ data, loading }: ErrorEndpointsTableProps) {
                     borderRadius: 2,
                     bgcolor: 'rgba(0, 0, 0, 0.02)',
                     border: '1px solid',
-                    borderColor: index === 0 ? `${COLORS.error}30` : 'transparent',
+                    borderColor: index === 0 ? `${chartColors.danger}30` : 'transparent',
                     transition: 'all 0.2s',
                     '&:hover': {
                       bgcolor: 'rgba(0, 0, 0, 0.04)',
@@ -97,8 +98,8 @@ function ErrorEndpointsTable({ data, loading }: ErrorEndpointsTableProps) {
                       width: 28,
                       height: 28,
                       borderRadius: 1.5,
-                      bgcolor: index === 0 ? `${COLORS.error}15` : 'rgba(0, 0, 0, 0.06)',
-                      color: index === 0 ? COLORS.error : 'text.secondary',
+                      bgcolor: index === 0 ? `${chartColors.danger}15` : 'rgba(0, 0, 0, 0.06)',
+                      color: index === 0 ? chartColors.danger : 'text.secondary',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -152,7 +153,7 @@ function ErrorEndpointsTable({ data, loading }: ErrorEndpointsTableProps) {
                       sx={{
                         fontSize: '1rem',
                         fontWeight: 700,
-                        color: COLORS.error,
+                        color: chartColors.danger,
                         lineHeight: 1
                       }}
                     >

@@ -58,9 +58,10 @@ import { MenuItem } from '@/types/menu';
 import { useMenu } from '@/hooks/useMenu';
 import { useCurrentLocale, useI18n } from '@/lib/i18n/client';
 import { getMenuIcon } from '@/lib/icons/menuIcons';
+import { tokens } from '@/theme';
 
-const DRAWER_WIDTH = 280;
-const DRAWER_WIDTH_COLLAPSED = 72;
+const DRAWER_WIDTH = tokens.layout.sidebarExpanded;       // 256
+const DRAWER_WIDTH_COLLAPSED = tokens.layout.sidebarCollapsed; // 64
 
 // Icon mapping - synchronized with ICON_TYPE codes in database
 const iconMap: Record<string, React.ReactElement> = {
@@ -220,31 +221,18 @@ export default function Sidebar({ expanded }: SidebarProps) {
               selected={isActive}
               onClick={() => handleMenuClick(menu)}
               sx={{
-                borderRadius: 1.5,
                 mx: 1,
                 my: 0.25,
-                minHeight: 44,
+                minHeight: 36,
                 justifyContent: expanded ? 'initial' : 'center',
-                '&.Mui-selected': {
-                  backgroundColor: 'primary.main',
-                  color: 'primary.contrastText',
-                  '&:hover': {
-                    backgroundColor: 'primary.dark'
-                  },
-                  '& .MuiListItemIcon-root': {
-                    color: 'primary.contrastText'
-                  }
-                },
-                '&:hover': {
-                  backgroundColor: 'action.hover'
-                }
+                // selected state styling lives in theme/components.ts → MuiListItemButton
               }}
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 40,
+                  minWidth: 32,
                   justifyContent: 'center',
-                  color: isActive ? 'inherit' : 'text.secondary'
+                  // color cascades from selected state in theme
                 }}
               >
                 {icon}
@@ -254,8 +242,8 @@ export default function Sidebar({ expanded }: SidebarProps) {
                   <ListItemText
                     primary={getMenuName(menu)}
                     primaryTypographyProps={{
-                      fontSize: level === 0 ? '0.95rem' : '0.9rem',
-                      fontWeight: level === 0 ? 500 : 400
+                      fontSize: '0.875rem',
+                      fontWeight: level === 0 ? 500 : 400,
                     }}
                   />
                   {hasChildren && (isExpanded ? <ExpandLess /> : <ExpandMore />)}
@@ -340,24 +328,11 @@ export default function Sidebar({ expanded }: SidebarProps) {
                     onClick={() => router.push(`/${locale}${menu.path}`)}
                     selected={pathname === `/${locale}${menu.path}`}
                     sx={{
-                      borderRadius: 1.5,
                       mx: 1,
                       my: 0.25,
-                      minHeight: 44,
+                      minHeight: 36,
                       justifyContent: expanded ? 'initial' : 'center',
-                      '&.Mui-selected': {
-                        backgroundColor: 'primary.main',
-                        color: 'primary.contrastText',
-                        '&:hover': {
-                          backgroundColor: 'primary.dark'
-                        },
-                        '& .MuiListItemIcon-root': {
-                          color: 'primary.contrastText'
-                        }
-                      },
-                      '&:hover': {
-                        backgroundColor: 'action.hover'
-                      }
+                      // selected state styling lives in theme/components.ts → MuiListItemButton
                     }}
                   >
                     <ListItemIcon
@@ -404,7 +379,7 @@ export default function Sidebar({ expanded }: SidebarProps) {
           border: 'none',
           borderRight: '1px solid',
           borderColor: 'divider',
-          backgroundColor: 'background.default',
+          backgroundColor: 'surface.sunken',
           transition: (theme) =>
             theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,

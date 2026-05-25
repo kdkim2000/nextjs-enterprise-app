@@ -2,26 +2,21 @@
 
 import React, { memo } from 'react';
 import { Box, Typography, Skeleton, SvgIconProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
+import { tokens } from '@/theme';
 
-// Color Palette
-const COLORS = {
-  primary: '#6366f1',
-  secondary: '#8b5cf6',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6',
-  gradients: {
-    primary: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-    success: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)',
-    warning: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-    error: 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)',
-    info: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
-    purple: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
-    teal: 'linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%)'
-  }
-};
+// Color Palette — derived from design tokens
+const STAT_COLORS = [
+  tokens.accent[500],
+  tokens.accent[400],
+  tokens.accent[300],
+  tokens.accent[600],
+  tokens.accent[700],
+  tokens.status.success,
+  tokens.status.warning,
+  tokens.status.danger,
+];
 
 export interface StatCardProps {
   /** Card title */
@@ -61,7 +56,9 @@ function StatCard({
   onClick,
   compact = false
 }: StatCardProps) {
-  const accentGradient = gradient || (color ? `linear-gradient(135deg, ${color} 0%, ${color}99 100%)` : COLORS.gradients.primary);
+  const theme = useTheme();
+  const defaultGradient = `linear-gradient(135deg, ${tokens.accent[600]} 0%, ${tokens.accent[400]} 100%)`;
+  const accentGradient = gradient || (color ? `linear-gradient(135deg, ${color} 0%, ${color}99 100%)` : defaultGradient);
 
   if (loading) {
     return (
@@ -96,8 +93,7 @@ function StatCard({
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
         '&:hover': {
-          transform: compact ? 'none' : 'translateY(-4px)',
-          boxShadow: compact ? '0 1px 3px 0 rgb(0 0 0 / 0.1)' : '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+          borderColor: 'text.secondary'
         },
         '&::before': {
           content: '""',
@@ -148,19 +144,19 @@ function StatCard({
                   px: 0.75,
                   py: 0.25,
                   borderRadius: 1,
-                  bgcolor: trend.value >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'
+                  bgcolor: trend.value >= 0 ? theme.palette.action.hover : theme.palette.action.hover
                 }}
               >
                 {trend.value >= 0 ? (
-                  <TrendingUp sx={{ fontSize: 12, color: COLORS.success }} />
+                  <TrendingUp sx={{ fontSize: 12, color: 'success.main' }} />
                 ) : (
-                  <TrendingDown sx={{ fontSize: 12, color: COLORS.error }} />
+                  <TrendingDown sx={{ fontSize: 12, color: 'error.main' }} />
                 )}
                 <Typography
                   sx={{
                     fontSize: '0.65rem',
                     fontWeight: 600,
-                    color: trend.value >= 0 ? COLORS.success : COLORS.error
+                    color: trend.value >= 0 ? 'success.main' : 'error.main'
                   }}
                 >
                   {trend.value >= 0 ? '+' : ''}
@@ -204,8 +200,18 @@ function StatCard({
   );
 }
 
-// Export preset gradients for convenience
-export const StatCardGradients = COLORS.gradients;
-export const StatCardColors = COLORS;
+// Export preset colors/gradients for convenience
+export const StatCardColors = STAT_COLORS;
+
+// Backward-compatible gradient presets — sourced from design tokens
+export const StatCardGradients = {
+  primary: `linear-gradient(135deg, ${tokens.accent[600]} 0%, ${tokens.accent[400]} 100%)`,
+  success: `linear-gradient(135deg, ${tokens.status.success} 0%, ${tokens.status.success}99 100%)`,
+  warning: `linear-gradient(135deg, ${tokens.status.warning} 0%, ${tokens.status.warning}99 100%)`,
+  error:   `linear-gradient(135deg, ${tokens.status.danger} 0%, ${tokens.status.danger}99 100%)`,
+  info:    `linear-gradient(135deg, ${tokens.status.info} 0%, ${tokens.status.info}99 100%)`,
+  purple:  `linear-gradient(135deg, ${tokens.role.moderator} 0%, ${tokens.role.moderator}99 100%)`,
+  teal:    `linear-gradient(135deg, ${tokens.accent[300]} 0%, ${tokens.accent[200]} 100%)`,
+};
 
 export default memo(StatCard);

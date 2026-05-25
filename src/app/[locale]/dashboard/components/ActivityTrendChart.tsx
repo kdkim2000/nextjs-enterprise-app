@@ -13,7 +13,8 @@ import {
   Legend
 } from 'recharts';
 import { ActivityTrendItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface ActivityTrendChartProps {
   data: ActivityTrendItem[];
@@ -60,30 +61,30 @@ function ActivityTrendChart({ data, loading }: ActivityTrendChartProps) {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
+                  <stop offset="5%" stopColor={chartColors.primary[0]} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={chartColors.primary[0]} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorComments" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.success} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.success} stopOpacity={0} />
+                  <stop offset="5%" stopColor={chartColors.success} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={chartColors.success} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.warning} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.warning} stopOpacity={0} />
+                  <stop offset="5%" stopColor={chartColors.warning} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={chartColors.warning} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false} />
+              <CartesianGrid strokeDasharray="0" stroke={chartColors.grid} vertical={false} />
               <XAxis
                 dataKey="date"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: chartColors.text }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: chartColors.text }}
                 dx={-10}
               />
               <Tooltip
@@ -103,7 +104,7 @@ function ActivityTrendChart({ data, loading }: ActivityTrendChartProps) {
                 type="monotone"
                 dataKey="posts"
                 name="게시글"
-                stroke={COLORS.primary}
+                stroke={chartColors.primary[0]}
                 strokeWidth={2}
                 fill="url(#colorPosts)"
                 dot={false}
@@ -113,7 +114,7 @@ function ActivityTrendChart({ data, loading }: ActivityTrendChartProps) {
                 type="monotone"
                 dataKey="comments"
                 name="댓글"
-                stroke={COLORS.success}
+                stroke={chartColors.success}
                 strokeWidth={2}
                 fill="url(#colorComments)"
                 dot={false}
@@ -123,7 +124,7 @@ function ActivityTrendChart({ data, loading }: ActivityTrendChartProps) {
                 type="monotone"
                 dataKey="views"
                 name="조회수"
-                stroke={COLORS.warning}
+                stroke={chartColors.warning}
                 strokeWidth={2}
                 fill="url(#colorViews)"
                 dot={false}

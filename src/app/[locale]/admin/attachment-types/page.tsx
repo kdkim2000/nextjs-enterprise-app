@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
 import AttachmentTypeFormFields from '@/components/admin/AttachmentTypeFormFields';
 import AttachmentTypeMobileCard from './components/AttachmentTypeMobileCard';
@@ -132,66 +132,45 @@ export default function AttachmentTypeManagementPage() {
   ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete]);
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder={getLocalizedValue({
-        en: 'Search by code or name...',
-        ko: '코드 또는 이름으로 검색...',
-        zh: '按代码或名称搜索...',
-        vi: 'Tìm theo mã hoặc tên...'
-      }, currentLocale)}
-      searching={searching}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
-          locale={currentLocale}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '첨부파일 종류']}
+          title="첨부파일 종류 관리"
+          actions={
+            gridPermissions.showAddButton ? (
+              <Button variant="contained" onClick={handleAdd}>
+                + {getLocalizedValue({ en: 'Add', ko: '추가', zh: '添加', vi: 'Thêm' }, currentLocale)}
+              </Button>
+            ) : undefined
+          }
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleQuickSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-    >
-      {isMobileLayout ? (
-        // Mobile: Card List
-        <MobileCardList
-          data={attachmentTypes}
-          loading={searching}
-          renderCard={renderMobileCard}
-          keyExtractor={(item) => item.id!}
-          emptyMessage={currentLocale === 'ko' ? '첨부파일 종류가 없습니다' : 'No attachment types found'}
-        />
-      ) : (
-        // Desktop: DataGrid
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          <Box sx={{ flex: 1, minHeight: 0 }}>
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder={getLocalizedValue({
+                en: 'Search by code or name...',
+                ko: '코드 또는 이름으로 검색...',
+                zh: '按代码或名称搜索...',
+                vi: 'Tìm theo mã hoặc tên...'
+              }, currentLocale)}
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+              sx={{ width: 300 }}
+            />
+          }
+        >
+          {isMobileLayout ? (
+            <MobileCardList
+              data={attachmentTypes}
+              loading={searching}
+              renderCard={renderMobileCard}
+              keyExtractor={(item) => item.id!}
+              emptyMessage={currentLocale === 'ko' ? '첨부파일 종류가 없습니다' : 'No attachment types found'}
+            />
+          ) : (
             <ExcelDataGrid
               rows={attachmentTypes}
               columns={columns}
@@ -208,9 +187,9 @@ export default function AttachmentTypeManagementPage() {
               paginationModel={paginationModel}
               onPaginationModelChange={handlePaginationModelChange}
             />
-          </Box>
-        </Paper>
-      )}
+          )}
+        </DataShell>
+      </Box>
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -246,6 +225,6 @@ export default function AttachmentTypeManagementPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

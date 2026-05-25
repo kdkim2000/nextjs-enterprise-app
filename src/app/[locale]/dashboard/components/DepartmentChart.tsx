@@ -4,13 +4,14 @@ import React from 'react';
 import { Card, CardContent, Typography, Box, Skeleton } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { DepartmentStatItem } from '../types';
+import { chartColors } from './charts/themeColors';
 
 interface DepartmentChartProps {
   data: DepartmentStatItem[];
   loading: boolean;
 }
 
-const COLORS = ['#1976d2', '#2196f3', '#42a5f5', '#64b5f6', '#90caf9', '#bbdefb', '#e3f2fd', '#f5f5f5'];
+const DEPT_COLORS = chartColors.primary;
 
 export default function DepartmentChart({ data, loading }: DepartmentChartProps) {
   if (loading) {
@@ -33,13 +34,13 @@ export default function DepartmentChart({ data, loading }: DepartmentChartProps)
         <Box sx={{ width: '100%', height: 280 }}>
           <ResponsiveContainer>
             <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: chartColors.text }} />
               <YAxis
                 type="category"
                 dataKey="name"
                 width={80}
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 11, fill: chartColors.text }}
                 tickFormatter={(value) => (value.length > 8 ? value.substring(0, 8) + '...' : value)}
               />
               <Tooltip
@@ -52,7 +53,7 @@ export default function DepartmentChart({ data, loading }: DepartmentChartProps)
               />
               <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={DEPT_COLORS[index % DEPT_COLORS.length]} />
                 ))}
               </Bar>
             </BarChart>

@@ -3,7 +3,8 @@
 import React, { memo, useMemo } from 'react';
 import { Box, Typography, Skeleton, LinearProgress } from '@mui/material';
 import { BoardActivityItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle } from '../styles';
+import { cardStyle, cardContentStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface BoardActivityChartProps {
   data: BoardActivityItem[];
@@ -44,7 +45,7 @@ function BoardActivityChart({ data, loading }: BoardActivityChartProps) {
         <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1 }}>
           {data.map((item, index) => {
             const percentage = (item.postCount / maxPosts) * 100;
-            const color = COLORS.chart[index % COLORS.chart.length];
+            const color = chartColors.primary[index % chartColors.primary.length];
 
             return (
               <Box

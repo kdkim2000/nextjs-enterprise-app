@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box } from '@mui/material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import DepartmentFormFields, { DepartmentFormData } from '@/components/admin/DepartmentFormFields';
 import DepartmentTreeView from './components/DepartmentTreeView';
 import DepartmentMobileTreeView from './components/DepartmentMobileTreeView';
@@ -211,68 +212,28 @@ export default function DepartmentsPage() {
   );
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder={currentLocale === 'ko' ? '코드 또는 이름으로 검색...' : 'Search by code or name...'}
-      searching={searching}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '부서 관리']}
+          title="부서 관리"
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleQuickSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-      // Hide mobile search header when using mobile tree view (it has its own header)
-      hideMobileSearchHeader={isMobileLayout}
-    >
-      {isMobileLayout ? (
-        // Mobile: Drill-down tree navigation
-        <DepartmentMobileTreeView
-          departments={departments}
-          allUsers={allUsers}
-          locale={currentLocale}
-          loading={searching}
-          onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
-          onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
-          onAdd={gridPermissions.showAddButton ? handleAddWithParent : undefined}
-          onRefresh={handleRefresh}
-          canEdit={gridPermissions.editable}
-          canDelete={gridPermissions.showDeleteButton}
-          canAdd={gridPermissions.showAddButton}
-        />
-      ) : (
-        // Desktop: TreeView
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          <Box sx={{ flex: 1, minHeight: 0 }}>
+        <DataShell>
+          {isMobileLayout ? (
+            <DepartmentMobileTreeView
+              departments={departments}
+              allUsers={allUsers}
+              locale={currentLocale}
+              loading={searching}
+              onEdit={gridPermissions.editable ? handleMobileEdit : undefined}
+              onDelete={gridPermissions.showDeleteButton ? handleMobileDelete : undefined}
+              onAdd={gridPermissions.showAddButton ? handleAddWithParent : undefined}
+              onRefresh={handleRefresh}
+              canEdit={gridPermissions.editable}
+              canDelete={gridPermissions.showDeleteButton}
+              canAdd={gridPermissions.showAddButton}
+            />
+          ) : (
             <DepartmentTreeView
               departments={departments}
               allUsers={allUsers}
@@ -295,9 +256,9 @@ export default function DepartmentsPage() {
               canDelete={gridPermissions.showDeleteButton}
               canAdd={gridPermissions.showAddButton}
             />
-          </Box>
-        </Paper>
-      )}
+          )}
+        </DataShell>
+      </Box>
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -343,6 +304,6 @@ export default function DepartmentsPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

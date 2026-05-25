@@ -13,7 +13,8 @@ import {
   Legend
 } from 'recharts';
 import { SystemPerformanceItem } from '../types';
-import { COLORS, cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { cardStyle, cardContentStyle, chartTooltipStyle } from '../styles';
+import { chartColors } from './charts/themeColors';
 
 interface SystemPerformanceChartProps {
   data: SystemPerformanceItem[];
@@ -65,15 +66,15 @@ function SystemPerformanceChart({ data, loading }: SystemPerformanceChartProps) 
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: COLORS.info }} />
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: chartColors.info }} />
               <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                요청 <strong style={{ color: COLORS.info }}>{totalRequests.toLocaleString()}</strong>
+                요청 <strong style={{ color: chartColors.info }}>{totalRequests.toLocaleString()}</strong>
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: COLORS.secondary }} />
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: chartColors.primary[0] }} />
               <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                응답 <strong style={{ color: COLORS.secondary }}>{avgResponseTime}ms</strong>
+                응답 <strong style={{ color: chartColors.primary[0] }}>{avgResponseTime}ms</strong>
               </Typography>
             </Box>
           </Box>
@@ -83,27 +84,27 @@ function SystemPerformanceChart({ data, loading }: SystemPerformanceChartProps) 
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRequests" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.info} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.info} stopOpacity={0} />
+                  <stop offset="5%" stopColor={chartColors.info} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={chartColors.info} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorErrors" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.error} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.error} stopOpacity={0} />
+                  <stop offset="5%" stopColor={chartColors.danger} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={chartColors.danger} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false} />
+              <CartesianGrid strokeDasharray="0" stroke={chartColors.grid} vertical={false} />
               <XAxis
                 dataKey="hour"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 10, fill: '#94a3b8' }}
+                tick={{ fontSize: 10, fill: chartColors.text }}
                 interval="preserveStartEnd"
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: chartColors.text }}
                 dx={-10}
               />
               <Tooltip
@@ -126,7 +127,7 @@ function SystemPerformanceChart({ data, loading }: SystemPerformanceChartProps) 
                 type="monotone"
                 dataKey="requests"
                 name="요청 수"
-                stroke={COLORS.info}
+                stroke={chartColors.info}
                 strokeWidth={2}
                 fill="url(#colorRequests)"
                 dot={false}
@@ -136,7 +137,7 @@ function SystemPerformanceChart({ data, loading }: SystemPerformanceChartProps) 
                 type="monotone"
                 dataKey="errors"
                 name="에러"
-                stroke={COLORS.error}
+                stroke={chartColors.danger}
                 strokeWidth={2}
                 fill="url(#colorErrors)"
                 dot={false}

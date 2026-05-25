@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Box, Chip, ChipProps, Tooltip } from '@mui/material';
-import { Circle, CheckCircle, Cancel, Warning, Info, RemoveCircle } from '@mui/icons-material';
+import { Tooltip } from '@mui/material';
+import StatusDot from '@/components/common/StatusDot';
 
 export type StatusType = 'active' | 'inactive' | 'pending' | 'success' | 'error' | 'warning' | 'info';
 export type StatusVariant = 'dot' | 'chip' | 'icon';
@@ -16,104 +16,42 @@ export interface StatusProps {
   showIcon?: boolean;
 }
 
-const statusConfig: Record<StatusType, { color: ChipProps['color']; icon: React.ReactNode; label: string }> = {
-  active: {
-    color: 'success',
-    icon: <CheckCircle />,
-    label: 'Active'
-  },
-  inactive: {
-    color: 'default',
-    icon: <RemoveCircle />,
-    label: 'Inactive'
-  },
-  pending: {
-    color: 'warning',
-    icon: <Warning />,
-    label: 'Pending'
-  },
-  success: {
-    color: 'success',
-    icon: <CheckCircle />,
-    label: 'Success'
-  },
-  error: {
-    color: 'error',
-    icon: <Cancel />,
-    label: 'Error'
-  },
-  warning: {
-    color: 'warning',
-    icon: <Warning />,
-    label: 'Warning'
-  },
-  info: {
-    color: 'info',
-    icon: <Info />,
-    label: 'Info'
-  }
+// Map all supported StatusType values to StatusDot's accepted 'active' | 'inactive' | 'pending' | 'suspended'
+const statusDotMap: Record<StatusType, 'active' | 'inactive' | 'pending' | 'suspended'> = {
+  active:   'active',
+  inactive: 'inactive',
+  pending:  'pending',
+  success:  'active',
+  error:    'suspended',
+  warning:  'pending',
+  info:     'active',
+};
+
+// Default display labels per type
+const defaultLabels: Record<StatusType, string> = {
+  active:   'Active',
+  inactive: 'Inactive',
+  pending:  'Pending',
+  success:  'Success',
+  error:    'Error',
+  warning:  'Warning',
+  info:     'Info',
 };
 
 export default function Status({
   type,
   label,
   variant = 'chip',
-  size = 'small',
+  size,
   tooltip,
-  showIcon = true
+  showIcon: _showIcon,
 }: StatusProps) {
-  const config = statusConfig[type];
-  const displayLabel = label || config.label;
+  const dotStatus = statusDotMap[type] ?? 'inactive';
+  const displayLabel = label ?? defaultLabels[type];
 
-  // Dot variant - simple colored circle
-  if (variant === 'dot') {
-    const dotSize = size === 'small' ? 8 : 12;
-    const content = (
-      <Box
-        sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 1
-        }}
-      >
-        <Circle
-          sx={{
-            fontSize: dotSize,
-            color: `${config.color}.main`
-          }}
-        />
-        {label && <Box component="span">{label}</Box>}
-      </Box>
-    );
-
-    return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
-  }
-
-  // Icon variant - just the icon
-  if (variant === 'icon') {
-    const iconElement = React.cloneElement(config.icon as React.ReactElement, {
-      color: config.color,
-      fontSize: size
-    } as any);
-
-    return tooltip ? (
-      <Tooltip title={tooltip || displayLabel}>
-        {iconElement}
-      </Tooltip>
-    ) : (
-      iconElement
-    );
-  }
-
-  // Chip variant (default)
-  const chipElement = (
-    <Chip
-      label={displayLabel}
-      color={config.color}
-      size={size}
-      icon={showIcon ? (config.icon as React.ReactElement) : undefined}
-    />
+  const content = (
+    <StatusDot status={dotStatus} label={displayLabel} />
   );
 
-  return tooltip ? <Tooltip title={tooltip}>{chipElement}</Tooltip> : chipElement;
+  return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
 }

@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
-import SearchFilterFields from '@/components/common/SearchFilterFields';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
 import MessageFormFields from '@/components/admin/MessageFormFields';
 import MessageMobileCard from './components/MessageMobileCard';
@@ -127,85 +127,61 @@ export default function MessagesPage() {
   ), [currentLocale, gridPermissions, handleMobileEdit, handleMobileDelete]);
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search
-      quickSearch={quickSearch}
-      onQuickSearchChange={setQuickSearch}
-      onQuickSearch={handleQuickSearch}
-      onQuickSearchClear={handleQuickSearchClear}
-      quickSearchPlaceholder="Search by code, category, or message..."
-      searching={searching}
-      // Advanced Filter
-      showAdvancedFilter
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={activeFilterCount}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={handleSearchChange}
-          onEnter={handleAdvancedFilterApply}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '메시지 관리']}
+          title="메시지 관리"
+          actions={
+            gridPermissions.showAddButton ? (
+              <Button variant="contained" onClick={handleAdd}>+ Add Message</Button>
+            ) : undefined
+          }
         />
-      }
-      onFilterApply={handleAdvancedFilterApply}
-      onFilterClear={handleQuickSearchClear}
-      onFilterClose={handleAdvancedFilterClose}
-      // Help
-      programId={programId || ''}
-      helpExists={helpExists}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-    >
-      {isMobileLayout ? (
-        // Mobile: Card List
-        <MobileCardList
-          data={messages}
-          loading={searching}
-          renderCard={renderMobileCard}
-          keyExtractor={(message) => message.id}
-          emptyMessage={currentLocale === 'ko' ? '메시지가 없습니다' : 'No messages found'}
-        />
-      ) : (
-        // Desktop: DataGrid
-        <Paper sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-          {messages.length === 0 && !searching ? (
+        <DataShell
+          toolbar={
+            <TextField
+              size="small"
+              placeholder="Search by code, category, or message..."
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleQuickSearch(); }}
+              sx={{ width: 300 }}
+            />
+          }
+        >
+          {isMobileLayout ? (
+            <MobileCardList
+              data={messages}
+              loading={searching}
+              renderCard={renderMobileCard}
+              keyExtractor={(message) => message.id}
+              emptyMessage={currentLocale === 'ko' ? '메시지가 없습니다' : 'No messages found'}
+            />
+          ) : messages.length === 0 && !searching ? (
             <EmptyState
               icon={Search}
               title="No messages found"
               description="Use the search above to find messages"
             />
           ) : (
-            <Box sx={{ flex: 1, minHeight: 0 }}>
-              <ExcelDataGrid
-                rows={messages}
-                columns={columns}
-                onRowsChange={(rows) => setMessages(rows as Message[])}
-                {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
-                {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
-                onRefresh={handleRefresh}
-                checkboxSelection={gridPermissions.checkboxSelection}
-                exportFileName="messages"
-                loading={searching}
-                paginationMode="client"
-                paginationModel={paginationModel}
-                onPaginationModelChange={handlePaginationModelChange}
-              />
-            </Box>
+            <ExcelDataGrid
+              rows={messages}
+              columns={columns}
+              onRowsChange={(rows) => setMessages(rows as Message[])}
+              {...(gridPermissions.showAddButton && { onAdd: handleAdd })}
+              {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteClick })}
+              onRefresh={handleRefresh}
+              checkboxSelection={gridPermissions.checkboxSelection}
+              exportFileName="messages"
+              loading={searching}
+              paginationMode="client"
+              paginationModel={paginationModel}
+              onPaginationModelChange={handlePaginationModelChange}
+            />
           )}
-        </Paper>
-      )}
+        </DataShell>
+      </Box>
 
       {/* Edit Drawer */}
       <EditDrawer
@@ -241,6 +217,6 @@ export default function MessagesPage() {
         onConfirm={handleDeleteConfirm}
         loading={deleteLoading}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }

@@ -131,6 +131,14 @@ modules/
 
 ## 5. Next.js 프론트엔드 아키텍처
 
+### Design System (v2)
+
+- **Token source**: `src/theme/tokens.ts` — single source of truth for all colors, spacing, radius, motion, layout dims
+- **Theme files**: `src/theme/{tokens,palette,typography,components,index}.ts` — MUI theme composed from tokens
+- **Admin page pattern**: every CRUD page uses `<PageHeader> + <DataShell> + <DataGridPremium>` (see `src/components/common/`)
+- **Font strategy**: Pretendard Variable (KR+EN), per-locale stacks via `:lang(ko|en|zh|vi)` CSS selectors in globals.css
+- **New common components**: `PageHeader`, `KpiCard`, `DataShell`, `StatusDot` under `src/components/common/`
+
 ### 5.1 i18n 라우팅
 
 ```

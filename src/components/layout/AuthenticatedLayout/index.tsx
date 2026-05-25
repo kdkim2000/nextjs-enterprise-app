@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentLocale } from '@/lib/i18n/client';
@@ -53,15 +53,11 @@ export default function AuthenticatedLayout({
 
   if (shouldShowLoading) {
     return (
-      <Box
-        sx={{
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <Typography>Loading...</Typography>
+      <Box sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 2 }}>
+        <CircularProgress size={28} thickness={3} />
+        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          loading
+        </Typography>
       </Box>
     );
   }
@@ -96,8 +92,9 @@ export default function AuthenticatedLayout({
                 flex: 1,
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                px: 2,
-                py: 2
+                px: 3,
+                py: 3,
+                bgcolor: 'background.default'
               }}
             >
               {children}

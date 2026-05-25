@@ -290,10 +290,12 @@ export default function SimpleListView<T extends { id: string | number }>({
   stickyHeader = true,
   maxHeight,
   getRowStyle,
-  hoverBgColor = '#f0f7ff',
-  headerBgColor = '#f5f5f5'
+  hoverBgColor = undefined,
+  headerBgColor = undefined
 }: SimpleListViewProps<T>) {
   const theme = useTheme();
+  const resolvedHoverBg = hoverBgColor ?? theme.palette.action.selected;
+  const resolvedHeaderBg = headerBgColor ?? (theme.palette as any).surface?.sunken ?? theme.palette.action.hover;
 
   // Selection handlers
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,7 +362,7 @@ export default function SimpleListView<T extends { id: string | number }>({
             gap: 0.5,
             px: 1,
             py: 0.5,
-            bgcolor: 'primary.50',
+            bgcolor: 'action.selected',
             borderRadius: 1,
             color: 'primary.main',
             fontWeight: 600,
@@ -391,7 +393,7 @@ export default function SimpleListView<T extends { id: string | number }>({
               onClick={onAdd}
               sx={{
                 color: 'primary.main',
-                '&:hover': { bgcolor: 'primary.50' }
+                '&:hover': { bgcolor: 'action.hover' }
               }}
             >
               <Add fontSize="small" />
@@ -406,7 +408,7 @@ export default function SimpleListView<T extends { id: string | number }>({
               onClick={() => onDelete(selectedIds)}
               sx={{
                 color: 'error.main',
-                '&:hover': { bgcolor: 'error.50' }
+                '&:hover': { bgcolor: 'action.hover' }
               }}
             >
               <Delete fontSize="small" />
@@ -443,7 +445,7 @@ export default function SimpleListView<T extends { id: string | number }>({
                   padding="checkbox"
                   sx={{
                     width: 48,
-                    bgcolor: headerBgColor,
+                    bgcolor: resolvedHeaderBg,
                     fontWeight: 600
                   }}
                 >
@@ -458,7 +460,7 @@ export default function SimpleListView<T extends { id: string | number }>({
               {showRowNumber && (
                 <TableCell
                   align="center"
-                  sx={{ width: 60, bgcolor: headerBgColor, fontWeight: 600 }}
+                  sx={{ width: 60, bgcolor: resolvedHeaderBg, fontWeight: 600 }}
                 >
                   {rowNumberHeader}
                 </TableCell>
@@ -470,7 +472,7 @@ export default function SimpleListView<T extends { id: string | number }>({
                   sx={{
                     width: column.width,
                     minWidth: column.minWidth,
-                    bgcolor: headerBgColor,
+                    bgcolor: resolvedHeaderBg,
                     fontWeight: 600
                   }}
                 >
@@ -515,7 +517,7 @@ export default function SimpleListView<T extends { id: string | number }>({
                       cursor: onRowClick ? 'pointer' : 'default',
                       ...rowStyle,
                       '&:hover': {
-                        bgcolor: hoverBgColor
+                        bgcolor: resolvedHoverBg
                       }
                     }}
                   >

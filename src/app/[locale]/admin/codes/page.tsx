@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Paper, Typography, IconButton, Tooltip } from '@mui/material';
-import { Search, ArrowBack } from '@mui/icons-material';
+import { Box, Typography } from '@mui/material';
+import { Search } from '@mui/icons-material';
+import PageHeader from '@/components/common/PageHeader';
+import DataShell from '@/components/common/DataShell';
 import ExcelDataGrid from '@/components/common/DataGrid';
 import SearchFilterFields from '@/components/common/SearchFilterFields';
 import SearchFilterPanel from '@/components/common/SearchFilterPanel';
 import EmptyState from '@/components/common/EmptyState';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import EditDrawer from '@/components/common/EditDrawer';
-import ResponsivePageLayout from '@/components/common/ResponsivePageLayout';
 import QuickSearchBar from '@/components/common/QuickSearchBar';
 import MasterDetailLayout from '@/components/common/MasterDetailLayout';
 import MobileCardList from '@/components/mobile/MobileCardList';
@@ -526,222 +527,161 @@ export default function CodesPage() {
   );
 
   return (
-    <ResponsivePageLayout
-      // Page Header
-      useMenu
-      showBreadcrumb
-      // Messages
-      successMessage={successMessage}
-      errorMessage={errorMessage}
-      // Quick Search (only show in detail view on mobile)
-      quickSearch={isMobileLayout && mobileView === 'detail' ? quickSearch : undefined}
-      onQuickSearchChange={isMobileLayout && mobileView === 'detail' ? setQuickSearch : undefined}
-      onQuickSearch={() => {}}
-      onQuickSearchClear={() => {
-        setQuickSearch('');
-        setSearchCriteria({ codeType: '', code: '', status: '' });
-      }}
-      quickSearchPlaceholder={locale === 'ko' ? '코드 검색...' : 'Search codes...'}
-      searching={loading}
-      // Advanced Filter (only for detail view on mobile)
-      showAdvancedFilter={isMobileLayout && mobileView === 'detail'}
-      advancedFilterOpen={advancedFilterOpen}
-      onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-      activeFilterCount={mobileView === 'detail' ? activeFilterCount : 0}
-      filterTitle={`${t('common.search')} / ${t('common.filter')}`}
-      filterContent={
-        <SearchFilterFields
-          fields={filterFields}
-          values={searchCriteria}
-          onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
-          onEnter={() => setAdvancedFilterOpen(false)}
+    <>
+      <Box sx={{ px: 4, py: 0, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <PageHeader
+          breadcrumb={['Admin', '코드 관리']}
+          title="코드 관리"
         />
-      }
-      onFilterApply={() => setAdvancedFilterOpen(false)}
-      onFilterClear={() => {
-        setQuickSearch('');
-        setSearchCriteria({ codeType: '', code: '', status: '' });
-      }}
-      onFilterClose={() => setAdvancedFilterOpen(false)}
-      // Help
-      programId={programId || ''}
-      helpOpen={helpOpen}
-      onHelpOpenChange={setHelpOpen}
-      isAdmin={isAdmin}
-      helpExists={helpExists}
-      canManageHelp={canManageHelp}
-      onHelpEdit={navigateToHelpEdit}
-      language={language}
-      // Mobile FAB - not needed when using MobileMasterDetail (it has its own FAB support)
-      mobileFab={undefined}
-      // Mobile selection mode - only active in detail view
-      mobileSelectionMode={mobileView === 'detail' ? mobileSelectionMode : false}
-      mobileSelectedCount={mobileSelectedIds.size}
-      mobileTotalCount={filteredCodes.length}
-      onMobileSelectionModeToggle={
-        mobileView === 'detail' && gridPermissions.showDeleteButton
-          ? handleMobileSelectionModeToggle
-          : undefined
-      }
-      onMobileSelectAll={handleMobileSelectAll}
-      onMobileDeselectAll={handleMobileDeselectAll}
-      onMobileDeleteSelected={
-        mobileView === 'detail' && gridPermissions.showDeleteButton
-          ? handleMobileDeleteSelected
-          : undefined
-      }
-      // Hide default mobile header when using MobileMasterDetail
-      mobileCustomHeader={isMobileLayout ? <Box /> : undefined}
-    >
-      {/* Conditional rendering based on device */}
-      {isMobileLayout ? (
-        // Mobile: Master-Detail navigation with slide animation
-        <MobileMasterDetail
-          view={mobileView}
-          onViewChange={setMobileView}
-          masterContent={renderMasterContent()}
-          detailContent={renderDetailContent()}
-          detailHeader={{
-            title: selectedCodeType
-              ? getLocalizedValue(selectedCodeType.name, locale)
-              : '',
-            subtitle: selectedCodeType?.code,
-          }}
-          onBack={handleMobileBackClick}
-          masterFab={
-            gridPermissions.showAddButton
-              ? { onClick: handleAddCodeType, label: t('common.create') }
-              : undefined
-          }
-          detailFab={
-            gridPermissions.showAddButton
-              ? { onClick: handleAddCode, label: t('common.create') }
-              : undefined
-          }
-          detailSelection={
-            gridPermissions.showDeleteButton
-              ? {
-                  active: mobileSelectionMode,
-                  selectedCount: mobileSelectedIds.size,
-                  totalCount: filteredCodes.length,
-                  onToggle: handleMobileSelectionModeToggle,
-                  onSelectAll: handleMobileSelectAll,
-                  onDeselectAll: handleMobileDeselectAll,
-                  onDeleteSelected: handleMobileDeleteSelected,
-                }
-              : undefined
-          }
-          enableSwipeBack
-          detailLoading={loading}
-          hasDetailContent={filteredCodes.length > 0}
-          detailEmptyState={
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                {locale === 'ko' ? '코드가 없습니다' : 'No codes found'}
-              </Typography>
-            </Box>
-          }
-        />
-      ) : (
-        // Desktop: Master-Detail Layout
-        <MasterDetailLayout
-          masterSize={30}
-          detailSize={70}
-          master={
-            <CodeTypeList
-              codeTypes={codeTypes}
-              selectedCodeType={selectedCodeType}
-              onSelectCodeType={setSelectedCodeType}
-              onAddCodeType={handleAddCodeType}
-              onEditCodeType={handleEditCodeType}
-              onDeleteCodeType={handleDeleteCodeType}
-              locale={locale}
-            />
-          }
-          detail={
-            <Paper sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              {!selectedCodeType ? (
-                <EmptyState
-                  icon={Search}
-                  title={locale === 'ko' ? '코드 타입을 선택하세요' : 'Select a Code Type'}
-                  description={
-                    locale === 'ko'
-                      ? '왼쪽 목록에서 코드 타입을 선택하여 코드를 관리하세요'
-                      : 'Select a code type from the list to manage codes'
-                  }
-                />
-              ) : (
-                <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                  {/* Header with Title */}
-                  <Box sx={{ mb: 1 }}>
-                    <Typography variant="h6">
-                      {locale === 'ko'
-                        ? `${getLocalizedValue(selectedCodeType.name, locale)} 코드`
-                        : `${getLocalizedValue(selectedCodeType.name, locale)} Codes`}
-                    </Typography>
-                  </Box>
-
-                  {/* Quick Search Bar */}
-                  <QuickSearchBar
-                    searchValue={quickSearch}
-                    onSearchChange={setQuickSearch}
-                    onSearch={() => {}}
-                    onClear={() => {
-                      setQuickSearch('');
-                      setSearchCriteria({ codeType: '', code: '', status: '' });
-                    }}
-                    onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
-                    placeholder={locale === 'ko' ? '코드 검색...' : 'Search codes...'}
-                    searching={loading}
-                    activeFilterCount={activeFilterCount}
-                    showAdvancedButton={true}
-                  />
-
-                  {/* Advanced Filter Panel */}
-                  {advancedFilterOpen && (
-                    <SearchFilterPanel
-                      activeFilterCount={activeFilterCount}
-                      onApply={() => setAdvancedFilterOpen(false)}
-                      onClear={() => {
-                        setQuickSearch('');
-                        setSearchCriteria({ codeType: '', code: '', status: '' });
-                      }}
-                      onClose={() => setAdvancedFilterOpen(false)}
-                      mode="advanced"
-                      expanded={true}
-                      showHeader={false}
-                    >
-                      <SearchFilterFields
-                        fields={filterFields}
-                        values={searchCriteria}
-                        onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
-                        onEnter={() => setAdvancedFilterOpen(false)}
-                      />
-                    </SearchFilterPanel>
-                  )}
-
-                  {/* Data Grid */}
-                  <Box sx={{ flex: 1, minHeight: 0 }}>
-                    <ExcelDataGrid
-                      rows={filteredCodes}
-                      columns={columns}
-                      onRowsChange={(rows) => setFilteredCodes(rows as Code[])}
-                      {...(gridPermissions.showAddButton && { onAdd: handleAddCode })}
-                      {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteCodes })}
-                      onRefresh={fetchCodes}
-                      checkboxSelection={gridPermissions.checkboxSelection}
-                      editable={gridPermissions.editable}
-                      exportFileName={`codes-${selectedCodeType.code}`}
-                      loading={loading}
-                      paginationMode="client"
-                    />
-                  </Box>
+        <DataShell>
+          {isMobileLayout ? (
+            <MobileMasterDetail
+              view={mobileView}
+              onViewChange={setMobileView}
+              masterContent={renderMasterContent()}
+              detailContent={renderDetailContent()}
+              detailHeader={{
+                title: selectedCodeType
+                  ? getLocalizedValue(selectedCodeType.name, locale)
+                  : '',
+                subtitle: selectedCodeType?.code,
+              }}
+              onBack={handleMobileBackClick}
+              masterFab={
+                gridPermissions.showAddButton
+                  ? { onClick: handleAddCodeType, label: t('common.create') }
+                  : undefined
+              }
+              detailFab={
+                gridPermissions.showAddButton
+                  ? { onClick: handleAddCode, label: t('common.create') }
+                  : undefined
+              }
+              detailSelection={
+                gridPermissions.showDeleteButton
+                  ? {
+                      active: mobileSelectionMode,
+                      selectedCount: mobileSelectedIds.size,
+                      totalCount: filteredCodes.length,
+                      onToggle: handleMobileSelectionModeToggle,
+                      onSelectAll: handleMobileSelectAll,
+                      onDeselectAll: handleMobileDeselectAll,
+                      onDeleteSelected: handleMobileDeleteSelected,
+                    }
+                  : undefined
+              }
+              enableSwipeBack
+              detailLoading={loading}
+              hasDetailContent={filteredCodes.length > 0}
+              detailEmptyState={
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography color="text.secondary">
+                    {locale === 'ko' ? '코드가 없습니다' : 'No codes found'}
+                  </Typography>
                 </Box>
-              )}
-            </Paper>
-          }
-        />
-      )}
+              }
+            />
+          ) : (
+            <MasterDetailLayout
+              masterSize={30}
+              detailSize={70}
+              master={
+                <CodeTypeList
+                  codeTypes={codeTypes}
+                  selectedCodeType={selectedCodeType}
+                  onSelectCodeType={setSelectedCodeType}
+                  onAddCodeType={handleAddCodeType}
+                  onEditCodeType={handleEditCodeType}
+                  onDeleteCodeType={handleDeleteCodeType}
+                  locale={locale}
+                />
+              }
+              detail={
+                <Box sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  {!selectedCodeType ? (
+                    <EmptyState
+                      icon={Search}
+                      title={locale === 'ko' ? '코드 타입을 선택하세요' : 'Select a Code Type'}
+                      description={
+                        locale === 'ko'
+                          ? '왼쪽 목록에서 코드 타입을 선택하여 코드를 관리하세요'
+                          : 'Select a code type from the list to manage codes'
+                      }
+                    />
+                  ) : (
+                    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                      {/* Header with Title */}
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="h6">
+                          {locale === 'ko'
+                            ? `${getLocalizedValue(selectedCodeType.name, locale)} 코드`
+                            : `${getLocalizedValue(selectedCodeType.name, locale)} Codes`}
+                        </Typography>
+                      </Box>
+
+                      {/* Quick Search Bar */}
+                      <QuickSearchBar
+                        searchValue={quickSearch}
+                        onSearchChange={setQuickSearch}
+                        onSearch={() => {}}
+                        onClear={() => {
+                          setQuickSearch('');
+                          setSearchCriteria({ codeType: '', code: '', status: '' });
+                        }}
+                        onAdvancedFilterClick={() => setAdvancedFilterOpen(!advancedFilterOpen)}
+                        placeholder={locale === 'ko' ? '코드 검색...' : 'Search codes...'}
+                        searching={loading}
+                        activeFilterCount={activeFilterCount}
+                        showAdvancedButton={true}
+                      />
+
+                      {/* Advanced Filter Panel */}
+                      {advancedFilterOpen && (
+                        <SearchFilterPanel
+                          activeFilterCount={activeFilterCount}
+                          onApply={() => setAdvancedFilterOpen(false)}
+                          onClear={() => {
+                            setQuickSearch('');
+                            setSearchCriteria({ codeType: '', code: '', status: '' });
+                          }}
+                          onClose={() => setAdvancedFilterOpen(false)}
+                          mode="advanced"
+                          expanded={true}
+                          showHeader={false}
+                        >
+                          <SearchFilterFields
+                            fields={filterFields}
+                            values={searchCriteria}
+                            onChange={(field, value) => setSearchCriteria((prev) => ({ ...prev, [field]: value }))}
+                            onEnter={() => setAdvancedFilterOpen(false)}
+                          />
+                        </SearchFilterPanel>
+                      )}
+
+                      {/* Data Grid */}
+                      <Box sx={{ flex: 1, minHeight: 0 }}>
+                        <ExcelDataGrid
+                          rows={filteredCodes}
+                          columns={columns}
+                          onRowsChange={(rows) => setFilteredCodes(rows as Code[])}
+                          {...(gridPermissions.showAddButton && { onAdd: handleAddCode })}
+                          {...(gridPermissions.showDeleteButton && { onDelete: handleDeleteCodes })}
+                          onRefresh={fetchCodes}
+                          checkboxSelection={gridPermissions.checkboxSelection}
+                          editable={gridPermissions.editable}
+                          exportFileName={`codes-${selectedCodeType.code}`}
+                          loading={loading}
+                          paginationMode="client"
+                        />
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              }
+            />
+          )}
+        </DataShell>
+      </Box>
 
       {/* Code Type Edit Drawer */}
       <EditDrawer
@@ -857,6 +797,6 @@ export default function CodesPage() {
         onConfirm={handleConfirmDeleteCodes}
         loading={false}
       />
-    </ResponsivePageLayout>
+    </>
   );
 }
