@@ -45,8 +45,6 @@ const eslintConfig = defineConfig([
       "@next/next/no-img-element": "warn", // img 태그 사용 경고만 표시
       // App Router uses root layout.tsx for fonts, not pages/_document.js
       "@next/next/no-page-custom-font": "warn",
-      // React Compiler 최적화 실패는 경고로만 처리 (빌드 실패 방지)
-      "react-compiler/react-compiler": "warn",
     },
   },
 ]);
