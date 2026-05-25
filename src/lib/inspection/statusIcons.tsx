@@ -171,7 +171,7 @@ export function getPriorityColor(priority: 'low' | 'normal' | 'high' | 'urgent',
   }
 }
 
-export default {
+const statusIcons = {
   getTemplateStatusIcon,
   getTemplateStatusColor,
   getTemplateStatusConfig,
@@ -182,3 +182,5 @@ export default {
   getPriorityIcon,
   getPriorityColor,
 };
+
+export default statusIcons;

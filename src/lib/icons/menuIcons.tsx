@@ -152,7 +152,7 @@ import {
   CreditCard,
 
   // Media
-  Image,
+  Image as ImageIcon,
   Photo,
   VideoLibrary,
   AudioFile,
@@ -364,7 +364,7 @@ export const iconMap: Record<string, React.ReactElement> = {
   CreditCard: <CreditCard />,
 
   // Media
-  Image: <Image />,
+  Image: <ImageIcon />,
   Photo: <Photo />,
   VideoLibrary: <VideoLibrary />,
   AudioFile: <AudioFile />,
