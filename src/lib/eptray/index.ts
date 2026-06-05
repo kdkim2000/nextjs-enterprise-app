@@ -1,14 +1,4 @@
-// node-forge 타입 선언 (라이브러리가 설치되지 않은 경우를 대비)
-declare const forge: {
-  pki: {
-    privateKeyFromPem: (pem: string) => {
-      decrypt: (data: string, scheme: string) => string;
-    };
-  };
-  util: {
-    decode64: (base64: string) => string;
-  };
-};
+import * as forge from 'node-forge';
 
 /** 
  * EpTray에서 현재 인증된 사용자의 loginid를 읽어옵니다.
@@ -21,7 +11,7 @@ declare const forge: {
 export const getEpTrayLoginId = async (): Promise<string | null> => {
   // 환경 변수에서 설정값 읽기
   const wsUrl = process.env.NEXT_PUBLIC_KNOX_WS_URL || "ws://localhost:29282";
-  const systemId = process.env.NEXT_PUBLIC_KNOX_SYSTEM_ID || "";
+  const systemId = process.env.NEXT_PUBLIC_KNOX_SYSTEM_ID || "KCC60TRAY0089";
   const token = process.env.NEXT_PUBLIC_KNOX_TOKEN || "-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----";
   
   if (!token) {
@@ -87,8 +77,8 @@ export const getEpTrayLoginId = async (): Promise<string | null> => {
       return null;
     }
 
-    console.log("Encrypted userInfo:", userInfo);
-    console.log("Encrypted key:", key);
+    //console.log("Encrypted userInfo:", userInfo);
+    //console.log("Encrypted key:", key);
 
     //AES 키 복호화 (RSA)
     let aesKeyBuffer: ArrayBuffer;
@@ -108,23 +98,17 @@ export const getEpTrayLoginId = async (): Promise<string | null> => {
       return null;
     }
 
-    console.log("Decoded user info:", decodedUserInfo);
-
-    // 가이드에 따르면 EP_LOGINID 형식 (대문자)
-    // 형식: EP_LOGINID=값|EP_COMPID=값|...
-    const loginIdMatch = decodedUserInfo.match(/EP_LOGINID=([^|]+)/i);
-    if (loginIdMatch && loginIdMatch[1]) {
-      return loginIdMatch[1].trim();
+    //console.log("Decoded user info:", decodedUserInfo);
+    let loginId: string | null = null;
+    try {
+      const userInfoObj = JSON.parse(decodedUserInfo);
+      if (userInfoObj && userInfoObj.EP_LOGINID) {
+        loginId = userInfoObj.EP_LOGINID;
+      }
+    } catch (e) {
+      console.error("Failed to parse decoded user info JSON:", e);
     }
-
-    // 소문자 형식도 시도 (하위 호환성)
-    const loginIdMatchLower = decodedUserInfo.match(/loginid=([^|]+)/i);
-    if (loginIdMatchLower && loginIdMatchLower[1]) {
-      return loginIdMatchLower[1].trim();
-    }
-
-    console.error("EP_LOGINID not found in decoded user info. Full content:", decodedUserInfo);
-    return null;
+    return loginId;
   } catch (error) {
     console.error("Error getting EpTray login id:", error);
     return null;
@@ -139,15 +123,6 @@ interface WebSocketRequest {
   token: string;
   data: string;
 }
-
-/**
- * 웹소켓 응답 데이터 인터페이스
- * (현재 사용되지 않지만 향후 확장을 위해 유지)
- */
-// interface WebSocketResponse {
-//   EP_LOGINID: string;
-//   [key: string]: any;
-// }
 
 /**
  * Knox SSO 웹소켓 연결 및 통신을 처리합니다.
@@ -355,4 +330,3 @@ async function decryptUserInfoWithAes(encryptedUserInfo: string, aesKey: ArrayBu
     throw error;
   }
 }
-
